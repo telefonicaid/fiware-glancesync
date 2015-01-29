@@ -18,9 +18,6 @@ from subprocess import Popen, PIPE
 
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
-# TODO: validate with tox
-
-
 class GlanceSync(object):
     _forcesyncs = ()
 
@@ -160,8 +157,8 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     # compose cmdline
     arguments = ['glance', 'add', '--silent-upload', 'disk_format=' + image[
         'Disk format'], 'name=' + image['Name'], 'is_public=' +
-        image['Public'], 'protected='+image['Protected'], 'container_format=' +
-        image['Container format']]
+        image['Public'], 'protected=' + image['Protected'], 'container_format='
+        + image['Container format']]
     arguments.extend(props)
     # run command
     fich = open('/var/lib/glance/images/' + image['Id'], 'r')
@@ -276,8 +273,8 @@ def _prefix(image, comparewith):
         return '#'
     if image_master_region.get('_type', None) != image.get('_type', None):
         return '#'
-    if image_master_region.get('_sdc_aware', None) != image.get('_sdc_aware',
-       None):
+    if image_master_region.get('_sdc_aware', None) != image.get(
+            '_sdc_aware', None):
         return '#'
     return ''
 
@@ -285,7 +282,7 @@ def _prefix(image, comparewith):
 def _printimages(imagesregion, comparewith=None):
     images = list(image for image in imagesregion if image['Public'] == 'Yes'
                   and ('_nid' in image and '_type' in image))
-    images.sort(key=lambda image: image['_type']+image['Name'])
+    images.sort(key=lambda image: image['_type'] + image['Name'])
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
         if line is not None:
@@ -318,181 +315,198 @@ def _printimages(imagesregion, comparewith=None):
 
 
 def _sync_region(
-    master_region_dictimages, region, region_uri, onlyshow=False,
-    whitechecksums=None, forcesync=()):
-   imagesregion = _getimagelist(region, region_uri)
-   # sets to images with different checksums
-   images2replace = set()
-   images2rename = set()
-   # These two dictionaries are used for _kernel_id and _ramdisk_id update
-   dictimages = dict((image['Name'], image) for image in imagesregion)
-   dictimagesbyid = dict((image['Id'], image) for image in imagesregion)
-   regionimageset = set()
-   noactive = list()
-   for image in imagesregion:
-      p = _prefix(image, master_region_dictimages) 
-      image_name = image['Name']
-      ids_need_update = False
-      # Check kernel_id and ramdisk_id if present
-      if '_kernel_id' in image and image_name in master_region_dictimages:
-        kernel_id = image['_kernel_id']
-        ramdisk_id = image['_ramdisk_id']
-        kernel_name = None
-        ramdisk_name = None
-        if kernel_id in dictimagesbyid:
-           kernel_name = dictimagesbyid[kernel_id]['Name']
-        if ramdisk_id in dictimagesbyid:
-           ramdisk_name = dictimagesbyid[ramdisk_id]['Name']
-        if kernel_name == None: 
-           kernel_name_sp =master_region_dictimages[image_name]['_kernel_id']
-           if not kernel_name_sp in dictimages:
-              print 'Warning: image ' + kernel_name_sp +\
-                  ' missing: is the kernel of ' + image_name
-           else:
-              image['_kernel_id'] = dictimages[kernel_name_sp]['Id']
-              ids_need_update=True
-        if ramdisk_name == None:
-           ramdisk_name_sp =master_region_dictimages[image_name]['_ramdisk_id']
-           if not ramdisk_name_sp in dictimages:
-              print 'Warning: image ' + ramdisk_name_sp +\
-                  ' missing: is the ramdisk of ' + image_name
-           else:
-              image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
-              ids_need_update=True
-      if p=='#' or ids_need_update:
-         image_spain = master_region_dictimages[image_name]
-         if '_type' in image_spain:
-            image['_type'] = image_spain['_type']
-         if '_nid' in image_spain:
-            image['_nid'] = image_spain['_nid']
-         if '_sdc_aware' in image_spain:
-            image['_sdc_aware'] = image_spain['_sdc_aware']
-         image['Public'] = image_spain['Public']
-         if not onlyshow:
-            _update_metadata_remote(region, image)
-         else:
-            print 'Image penging to update the metadata ' + image_name
-      if p=='$':
-         print 'Warning! state of image ' + image_name  + ' is not active: ' + image['Status']
-      if p=='!':
-         if image_name == None: image_name='None'
-         c = image['checksum']
-         if not isinstance(c,unicode): c = 'None'
-         image_spain = master_region_dictimages[image_name]
-         if image_spain.get('_sdc_aware',None) != image.get('_sdc_aware',None): 
-            print 'Warning! image ' + image_name +' has different checksum: ' + c + ' and different value of sdc_aware '
-         else:
-            print 'Warning! image ' + image_name +' has different checksum: ' + c
-         
-      if image_name in regionimageset:
-        print 'WARNING!!!!!: the image name ' + image_name + ' is duplicated '
-      regionimageset.add(image_name)
-   # upload images of master region to the region if they are not already present
-   # only is both this two conditions are met:
-   # * image is public
-   # * image has the property type and/or the property nid
-   # as an exception, also sync images in forcesync tuple
-   totalmbs=0
-   # There are two reason to upload first the smaller images:
-   #   *kernel and ramdisk must be updload before AMI images to insert the UUID
-   #   *if there is a problem (e.g. server is full) the error appears before.
-   imgs= master_region_dictimages.values()
-   imgs.sort(key=lambda image: int(image['Size']))
-   for image in imgs:
-         image_name = image['Name']
-         uuid2replace = None
-         uuid2rename = ''
-         if image['Public']=='No' and not image['Id'] in forcesync:
-             continue
-         if image_name in dictimages:
-            if not whitechecksums: continue
+        master_region_dictimages, region, region_uri, onlyshow=False,
+        whitechecksums=None, forcesync=()):
+    imagesregion = _getimagelist(region, region_uri)
+    # sets to images with different checksums
+    images2replace = set()
+    images2rename = set()
+    # These two dictionaries are used for _kernel_id and _ramdisk_id update
+    dictimages = dict((image['Name'], image) for image in imagesregion)
+    dictimagesbyid = dict((image['Id'], image) for image in imagesregion)
+    regionimageset = set()
+    noactive = list()
+    for image in imagesregion:
+        p = _prefix(image, master_region_dictimages)
+        image_name = image['Name']
+        ids_need_update = False
+        # Check kernel_id and ramdisk_id if present
+        if '_kernel_id' in image and image_name in master_region_dictimages:
+            kernel_id = image['_kernel_id']
+            ramdisk_id = image['_ramdisk_id']
+            kernel_name = None
+            ramdisk_name = None
+            if kernel_id in dictimagesbyid:
+                kernel_name = dictimagesbyid[kernel_id]['Name']
+            if ramdisk_id in dictimagesbyid:
+                ramdisk_name = dictimagesbyid[ramdisk_id]['Name']
+            if kernel_name is None:
+                kernel_name_sp = master_region_dictimages[image_name][
+                    '_kernel_id']
+                if kernel_name_sp not in dictimages:
+                    print 'Warning: image ' + kernel_name_sp +\
+                          ' missing: is the kernel of ' + image_name
+                else:
+                    image['_kernel_id'] = dictimages[kernel_name_sp]['Id']
+                    ids_need_update = True
+            if ramdisk_name is None:
+                ramdisk_name_sp = master_region_dictimages[
+                    image_name]['_ramdisk_id']
+                if ramdisk_name_sp not in dictimages:
+                    print 'Warning: image ' + ramdisk_name_sp +\
+                        ' missing: is the ramdisk of ' + image_name
+                else:
+                    image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
+                    ids_need_update = True
+        if p == '#' or ids_need_update:
+            image_spain = master_region_dictimages[image_name]
+            if '_type' in image_spain:
+                image['_type'] = image_spain['_type']
+            if '_nid' in image_spain:
+                image['_nid'] = image_spain['_nid']
+            if '_sdc_aware' in image_spain:
+                image['_sdc_aware'] = image_spain['_sdc_aware']
+            image['Public'] = image_spain['Public']
+            if not onlyshow:
+                _update_metadata_remote(region, image)
+            else:
+                print 'Image penging to update the metadata ' + image_name
+        if p == '$':
+            print 'Warning! state of image ' + image_name + ' is not active: '\
+                  + image['Status']
+        if p == '!':
+            if image_name is None:
+                image_name = 'None'
+            c = image['checksum']
+            if not isinstance(c, unicode):
+                c = 'None'
+            image_spain = master_region_dictimages[image_name]
+            if image_spain.get('_sdc_aware', None) != image.get('_sdc_aware',
+                                                                None):
+                print 'Warning! image ' + image_name + \
+                    ' has different checksum: ' + c + \
+                    ' and different value of sdc_aware '
+            else:
+                print 'Warning! image ' + image_name +\
+                    ' has different checksum: ' + c
+        if image_name in regionimageset:
+            print 'WARNING!!!!!: the image name ' + image_name +\
+                ' is duplicated '
+        regionimageset.add(image_name)
+    # upload images of master region to the region if they are not already
+    # present.
+    # only is both this two conditions are met:
+    # * image is public
+    # * image has the property type and/or the property nid
+    # as an exception, also sync images in forcesync tuple
+    totalmbs = 0
+    # There are two reason to upload first the smaller images:
+    #   *kernel and ramdisk must be updload before AMI images to insert the
+    #    UUID
+    #   *if there is a problem (e.g. server is full) the error appears before.
+    imgs = master_region_dictimages.values()
+    imgs.sort(key=lambda image: int(image['Size']))
+    for image in imgs:
+        image_name = image['Name']
+        uuid2replace = None
+        uuid2rename = ''
+        if image['Public'] == 'No' and not image['Id'] in forcesync:
+            continue
+        if image_name in dictimages:
+            if not whitechecksums:
+                continue
             checksum = dictimages[image_name]['checksum']
-            if image['checksum']== checksum:
-              continue
-            if checksum in whitechecksums['dontupdate'] : continue
+            if image['checksum'] == checksum:
+                continue
+            if checksum in whitechecksums['dontupdate']:
+                continue
             if checksum in whitechecksums['replace']:
-                  uuid2replace= dictimages[image_name]['Id']
-            elif checksum in whitechecksums['rename'] or\
-                 'any' in whitechecksums['rename']:
-                  uuid2rename= dictimages[image_name]['Id']
+                uuid2replace = dictimages[image_name]['Id']
+            elif checksum in whitechecksums['rename'] or 'any' in\
+                    whitechecksums['rename']:
+                uuid2rename = dictimages[image_name]['Id']
             elif 'any' in whitechecksums['replace']:
-                  uuid2replace= dictimages[image_name]['Id']
-            else: continue
-             
-         if not '_type' in image and not '_nid' in image and\
-            not image['Id'] in forcesync: continue
-         sizeimage = int(image['Size'])/1024/1024
-         totalmbs = totalmbs + sizeimage
-         if not onlyshow:
-             print 'Uploading image ' + image_name + ' (' +\
-                    str(sizeimage) + ' MB)'
-             sys.stdout.flush()
-             # Check kernel_id and ramdisk_id if present
-             if '_kernel_id' in image:
+                uuid2replace = dictimages[image_name]['Id']
+            else:
+                continue
+        if '_type' not in image and '_nid' not in image and image[
+                'Id'] not in forcesync:
+            continue
+        sizeimage = int(image['Size']) / 1024 / 1024
+        totalmbs = totalmbs + sizeimage
+        if not onlyshow:
+            print 'Uploading image ' + image_name + ' (' +\
+                str(sizeimage) + ' MB)'
+            sys.stdout.flush()
+            # Check kernel_id and ramdisk_id if present
+            if '_kernel_id' in image:
                 kernel_id = image['_kernel_id']
                 ramdisk_id = image['_ramdisk_id']
-                kernel_name =master_region_dictimages[image_name]['_kernel_id']
-                ramdisk =master_region_dictimages[image_name]['_ramdisk_id']
-                if not kernel_name in dictimages:
-                   print 'Warning: image ' + kernel_name +\
-                         ' missing: is the kernel of ' + image_name
+                kernel_name = master_region_dictimages[image_name][
+                    '_kernel_id']
+                ramdisk = master_region_dictimages[image_name]['_ramdisk_id']
+                if kernel_name not in dictimages:
+                    print 'Warning: image ' + kernel_name +\
+                        ' missing: is the kernel of ' + image_name
                 else:
-                   image['_kernel_id'] = dictimages[kernel_name]['Id']
-                if not ramdisk in dictimages:
-                   print 'Warning: image ' + ramdisk +\
-                         ' missing: is the ramdisk of ' + image_name
+                    image['_kernel_id'] = dictimages[kernel_name]['Id']
+                if ramdisk not in dictimages:
+                    print 'Warning: image ' + ramdisk +\
+                        ' missing: is the ramdisk of ' + image_name
                 else:
-                   image['_ramdisk_id'] = dictimages[ramdisk]['Id']
-             
-             _upload_image_remote(region, image, uuid2replace, uuid2rename)
-             print 'Done.'
-             sys.stdout.flush()
-         else:
-             print 'Pending: ' + image_name + ' (' +\
-                    str(sizeimage) + ' MB)'
-   if totalmbs==0:
+                    image['_ramdisk_id'] = dictimages[ramdisk]['Id']
+            _upload_image_remote(region, image, uuid2replace, uuid2rename)
+            print 'Done.'
+            sys.stdout.flush()
+        else:
+            print 'Pending: ' + image_name + ' (' + str(sizeimage) + ' MB)'
+    if totalmbs == 0:
         print 'Region is synchronized.'
-   else:
-     if onlyshow:
-        print 'MBs pending : ' + str(totalmbs) 
-     else:
-        print 'Total uploaded to region ' + region + ': ' + str(totalmbs) + ' (MB) '
-   sys.stdout.flush()
-   return totalmbs
+    else:
+        if onlyshow:
+            print 'MBs pending : ' + str(totalmbs)
+        else:
+            print 'Total uploaded to region ' + region + ': ' + str(totalmbs)\
+                + ' (MB) '
+    sys.stdout.flush()
+    return totalmbs
 
 
 def _get_regions_uris(region_list):
     regionsuris = dict()
-    kc = KeystoneClient(username=os.environ['OS_USERNAME'], password=os.environ['OS_PASSWORD'], 
-     tenant_name=os.environ['OS_TENANT_NAME'],   auth_url=os.environ['OS_AUTH_URL'] )
+    kc = KeystoneClient(
+        username=os.environ['OS_USERNAME'], password=os.environ['OS_PASSWORD'],
+        tenant_name=os.environ['OS_TENANT_NAME'],
+        auth_url=os.environ['OS_AUTH_URL'])
     for region in region_list:
-        regionsuris[region] = kc.service_catalog.url_for('region', region,
-            'image')
+        regionsuris[region] = kc.service_catalog.url_for(
+            'region', region, 'image')
     return regionsuris
 
 
 def _get_checksums(region, region_uri):
     host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
-    (host,port)=urllib.splitport(host)
+    (host, port) = urllib.splitport(host)
     images = glance.client.get_client(
-         host=host, port=port, region=region).get_images(limit=5000)
+        host=host, port=port, region=region).get_images(limit=5000)
     checksum_region = dict()
     for image in images:
         checksum_region[image['name']] = image['checksum']
     return checksum_region
 
-   
-def _get_master_region_dict(master_region, master_region_uri): 
+
+def _get_master_region_dict(master_region, master_region_uri):
     images = _getimagelist(master_region, master_region_uri)
-    master_region_dictimagesbyid = dict( (image['Id'] , image) for image in images)
-    master_region_dictimages=dict()
+    master_region_dictimagesbyid = dict((image['Id'], image) for image in
+                                        images)
+    master_region_dictimages = dict()
     for image in images:
         if '_kernel_id' in image:
             image['_kernel_id'] = master_region_dictimagesbyid[image[
-                '_kernel_id']]['Name'] 
+                '_kernel_id']]['Name']
         if '_ramdisk_id' in image:
             image['_ramdisk_id'] = master_region_dictimagesbyid[image[
-                '_ramdisk_id']]['Name'] 
+                '_ramdisk_id']]['Name']
         master_region_dictimages[image['Name']] = image
     return master_region_dictimages
 
@@ -509,9 +523,9 @@ def _get_whitechecksum_dict(filename):
             sys.exit(-1)
         key = parts[0].rstrip()
         values = set(parts[1].split(','))
-        if key in ['replace','rename','dontupdate']:
-            checksumdict[key] = values 
+        if key in ['replace', 'rename', 'dontupdate']:
+            checksumdict[key] = values
         else:
-            print >>sys.stderr,'Error parsing file', filename, 'key ', key,\
-                               ' not recognized'
+            print >>sys.stderr, 'Error parsing file', filename, 'key ', key,\
+                ' not recognized'
     return checksumdict
