@@ -107,7 +107,6 @@ class GlanceSync(object):
         return _getimagelist(region, self.regions_uris[region])
 
 
-
 def _update_metadata_remote(region, image):
     # We update only _nid, _type, _kernel_id, _ramdisk_id
     # get as a list all the properties (all of them start with _)
@@ -356,14 +355,14 @@ def _sync_region(
                     image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
                     ids_need_update = True
         if p == '#' or ids_need_update:
-            image_spain = master_region_dictimages[image_name]
-            if '_type' in image_spain:
-                image['_type'] = image_spain['_type']
-            if '_nid' in image_spain:
-                image['_nid'] = image_spain['_nid']
-            if '_sdc_aware' in image_spain:
-                image['_sdc_aware'] = image_spain['_sdc_aware']
-            image['Public'] = image_spain['Public']
+            image_mast_reg = master_region_dictimages[image_name]
+            if '_type' in image_mast_reg:
+                image['_type'] = image_mast_reg['_type']
+            if '_nid' in image_mast_reg:
+                image['_nid'] = image_mast_reg['_nid']
+            if '_sdc_aware' in image_mast_reg:
+                image['_sdc_aware'] = image_mast_reg['_sdc_aware']
+            image['Public'] = image_mast_reg['Public']
             if not onlyshow:
                 _update_metadata_remote(region, image)
             else:
@@ -377,9 +376,9 @@ def _sync_region(
             c = image['checksum']
             if not isinstance(c, unicode):
                 c = 'None'
-            image_spain = master_region_dictimages[image_name]
-            if image_spain.get('_sdc_aware', None) != image.get('_sdc_aware',
-                                                                None):
+            image_mast_reg = master_region_dictimages[image_name]
+            if image_mast_reg.get('_sdc_aware', None) != image.get(
+                    '_sdc_aware', None):
                 print 'Warning! image ' + image_name + \
                     ' has different checksum: ' + c + \
                     ' and different value of sdc_aware '
