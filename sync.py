@@ -4,7 +4,7 @@ import sys
 import os
 import os.path
 from glancesync import GlanceSync
-tryfirst=[ 'Trento', 'Lannion', 'Waterford', 'Berlin', 'Prague' ]
+tryfirst = ['Trento', 'Lannion', 'Waterford', 'Berlin', 'Prague']
 
 if __name__ == '__main__':
     checksumsfile = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     regions.extend(regions_unsorted)
     print regions
     print '======Spain'
-    glancesync.print_images_master_region() 
+    glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     for region in regions:

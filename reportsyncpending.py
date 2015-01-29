@@ -9,7 +9,7 @@ if __name__ == '__main__':
     glancesync = GlanceSync('Spain', checksums_filename)
     regions = glancesync.get_regions()
     print '======Spain'
-    glancesync.print_images_master_region() 
+    glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     for region in regions:

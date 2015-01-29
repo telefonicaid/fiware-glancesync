@@ -12,15 +12,15 @@ if __name__ == '__main__':
         sys.exit(0)
     glancesync = GlanceSync()
     if len(sys.argv) == 3:
-        regions = [ sys.argv[1] ]
+        regions = [sys.argv[1]]
         image_name = sys.argv[2]
-    else:    
+    else:
         regions = glancesync.get_regions()
         image_name = sys.argv[1]
-    for region in regions: 
+    for region in regions:
         print "Region: " + region
         try:
-            images=glancesync.get_images_region(region)
+            images = glancesync.get_images_region(region)
         except Exception:
             print 'Failed'
             continue
