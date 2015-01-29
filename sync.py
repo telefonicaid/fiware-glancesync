@@ -8,7 +8,8 @@ tryfirst = ['Trento', 'Lannion', 'Waterford', 'Berlin', 'Prague']
 
 if __name__ == '__main__':
     checksumsfile = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
-    glancesync = GlanceSync('Spain', checksumsfile)
+    forcesynfile = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
+    glancesync = GlanceSync('Spain', checksumsfile, forcesyncfile)
     regions_unsorted = glancesync.get_regions()
     regions = list()
     print regions_unsorted

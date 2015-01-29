@@ -18,10 +18,13 @@ from subprocess import Popen, PIPE
 
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
+
 class GlanceSync(object):
     _forcesyncs = ()
 
-    def __init__(self, master_region='Spain', white_checksums_file=None):
+    def __init__(
+            self, master_region='Spain', white_checksums_file=None,
+            forcesync_file=None):
         self._master_region = master_region
         self.regions_uris = _get_regions_uris(self.get_regions(False))
         self.master_region_dict = _get_master_region_dict(
@@ -31,6 +34,8 @@ class GlanceSync(object):
                 white_checksums_file)
         else:
             self.whitechecksum_dict = None
+        if forcesync_file is not None:
+            self._forcesyncs = _get_forcesyncset(forcesync_file)
 
     def get_regions(self, omit_master_region=True):
         """returns a list of regions
@@ -101,14 +106,6 @@ class GlanceSync(object):
     def get_images_region(self, region):
         return _getimagelist(region, self.regions_uris[region])
 
-    def set_forcesync(self, forcesync):
-        self._forcesync = forcesync
-
-_force_sync = ('de0223a5-90d4-43cd-aa5b-cd3c6c1790c7',
-               'd93462dc-e7c7-4716-ab64-3cbc109b201f',
-               '933d26bf-2285-4c0e-9c5b-b38165a1acd7',
-               '3471db65-a449-41d5-9090-b8889ee404cb',
-               '0a2119f1-3c6a-49b0-ae22-5e4c12b1c2eb')
 
 
 def _update_metadata_remote(region, image):
@@ -529,3 +526,19 @@ def _get_whitechecksum_dict(filename):
             print >>sys.stderr, 'Error parsing file', filename, 'key ', key,\
                 ' not recognized'
     return checksumdict
+
+
+def _get_forcesyncset(filename):
+    """returns a set of UUIDs that must be synchronized unconditionally
+
+    UUIDs not listed here are only synchronized when are public and has
+    nid and/or type attributes.
+    """
+    uuidset = set()
+    for line in open(filename):
+        line = line.strip()
+        if len(line) == 0 or line[0] == '#':
+            continue
+        else:
+            uuidset.add(line)
+    return uuidset

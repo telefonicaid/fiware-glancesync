@@ -6,7 +6,8 @@ from glancesync import GlanceSync
 
 if __name__ == '__main__':
     checksums_filename = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
-    glancesync = GlanceSync('Spain', checksums_filename)
+    forcesync_filename = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
+    glancesync = GlanceSync('Spain', checksums_filename, forcesync_filename)
     regions = glancesync.get_regions()
     print '======Spain'
     glancesync.print_images_master_region()
