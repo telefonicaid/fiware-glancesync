@@ -2,8 +2,6 @@
 # coding=utf-8
 """Module to synchronize several regions glance server with a master region.
 
-Prerequisites:
-
 """
 
 import sys
@@ -58,11 +56,36 @@ class GlanceSync(object):
         return regions_list
 
     def sync_region(self, region):
+        """sync the specified region with the master region
+        Only the images that check these conditions are synchronized:
+
+        The image is public in master region
+        The image has nid attribute and/or type attribute
+
+        As exeception, images with a UUID included in the forcesync file
+        provided in the constructor are also synchronized.
+
+        *If the image is not present on the remote region, is copied from the
+        master region, including metadata
+        *If the image is present, but has different sdc_aware, type or nid,
+        these values are synchronized, all the others are untouched.
+        *If the image has kernel_id and ramdisk_id, it is checked if the ids
+        are from this region. Otherwise, it they are from the master region,
+        they are updated with the images with the same name on this region.
+
+        It's possible that the image is present in the region, but with
+        different content. This situation is detected comparing the checksums.
+        No image content is overrided, unless the file white_checksum.
+        """
         _sync_region(
             self.master_region_dict, region, self.regions_uris[region], False,
             self.whitechecksum_dict, self._forcesyncs)
 
     def show_sync_region_status(self, region):
+        """print a report about the images pending to sync in this region
+
+        This method is nearly a dry-run of the method sync_region
+        """
         _sync_region(
             self.master_region_dict, region, self.regions_uris[region], True,
             self.whitechecksum_dict, self._forcesyncs)
@@ -71,13 +94,49 @@ class GlanceSync(object):
         _printimages(self.master_region_dict.values())
 
     def print_images(self, region):
+        """print a report about the images present on the specified region
+
+        This method is NOT intended to check the synchronization status
+        (for this is better show_sync_region_status) but to detect anomalies
+        as images present in some regions that are not in master region.
+
+        The images may be prefixed with a symbol indicating something special:
+        +: this image is not on the master glance server
+        $: this image is not active: may be still uploading or in an error
+           status.
+        -: this image is on the master glance server, but as non-public
+        !: this image is on the master glance server, but checksum is different
+        #: this image is on the master glance server, but some of this
+           attributes are different: nid, type, sdc_aware, Public (if true on
+           master and false in region
+        """
         images_region = self.get_images_region(region)
         _printimages(images_region, self.master_region_dict)
 
     def update_metadata_image(self, region, image):
+        """update the metadata of the image in the specified region
+
+        This method takes all the metadata information included in the image
+        and overrides the values of the image with the same name in the region.
+
+        Be careful if you use this method directly instead of using
+        sync_region!!!
+
+        sync_region doesn't overrite all the medatada with the values of
+        master region: it only overrite type, sdc_aware, nid and public and
+        also update if present kernel_id and ramdisk_id with the UUIDs of
+        the region.
+        """
         _update_metadata_remote(region, image)
 
     def delete_image(self, region, uuid, confirm=True):
+        """delete a image on the specified region.
+
+        Be careful, this method is dangerous and for this reason by default
+        it ask for confirmation!
+
+        The sync_region method NEVER invokes this method.
+        """
         os.environ['OS_REGION_NAME'] = region
         if confirm:
             p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
@@ -88,6 +147,10 @@ class GlanceSync(object):
         p.wait()
 
     def backup_glancemetadata(self):
+        """generate a backup of the metadata on each regional glance server
+
+        Of course, this metadata doesn't save metadata of other tenants!!
+        """
         date = datetime.datetime.now().isoformat()
         for region in self.get_regions(False):
             os.environ['OS_REGION_NAME'] = region
@@ -104,11 +167,21 @@ class GlanceSync(object):
                 print 'Failed backup of ' + region
 
     def get_images_region(self, region):
+        """returns a map with all the images of the region owned by the tenant
+
+        This is a dictionary indexed by the name of the image. Each entry
+        is a new dictionary, with the metadata.
+
+        This method provides the same information than glance details, with
+        some changes:
+
+        User defined metadata is prefixed with _ (e.g. _nid, _type...)
+        A checksum field is added.
+        """
         return _getimagelist(region, self.regions_uris[region])
 
 
 def _update_metadata_remote(region, image):
-    # We update only _nid, _type, _kernel_id, _ramdisk_id
     # get as a list all the properties (all of them start with _)
     props = list(x[1:] + '=' + image[x] for x in image if x.startswith('_'))
     # compose cmd line
