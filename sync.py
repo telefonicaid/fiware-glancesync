@@ -7,9 +7,11 @@ from glancesync import GlanceSync
 tryfirst = ['Trento', 'Lannion', 'Waterford', 'Berlin', 'Prague']
 
 if __name__ == '__main__':
-    checksumsfile = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
-    forcesynfile = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
-    glancesync = GlanceSync('Spain', checksumsfile, forcesyncfile)
+    checksums_file = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
+    forcesync_file = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
+    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
+    glancesync = GlanceSync('Spain', checksums_file, forcesync_file,
+                            credentials_file)
     regions_unsorted = glancesync.get_regions()
     regions = list()
     print regions_unsorted

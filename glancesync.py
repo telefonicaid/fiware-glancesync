@@ -2,6 +2,13 @@
 # coding=utf-8
 """Module to synchronize several regions glance server with a master region.
 
+Requirements:
+Glance images directory must be on path /var/lib/glance/images/
+python-keystoneclient and glanceclient must be installed
+
+This module works invoking the glance CLI tool. Only when a functionality is
+not available directly from the CLI tool, it invokes the python library used
+by the CLI tools glance and keystone.
 """
 
 import sys
@@ -9,22 +16,32 @@ import os
 import datetime
 import urllib
 import time
+import base64
 
 import glance.client
-
 from subprocess import Popen, PIPE
-
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
 
 class GlanceSync(object):
-    _forcesyncs = ()
+    regions_uris = dict()
 
     def __init__(
             self, master_region='Spain', white_checksums_file=None,
-            forcesync_file=None):
-        self._master_region = master_region
-        self.regions_uris = _get_regions_uris(self.get_regions(False))
+            forcesync_file=None, credentials_file=None):
+        """Constructor of the object
+
+        Note:
+        The list of images in the master region, and the list of regions
+        are obtained and cached when this constructor is called.
+        """
+        self.master_region = master_region
+        self.credentials = _get_credentials(credentials_file)
+        for credential_name in self.credentials.keys():
+            credential = self.credentials[credential_name]
+            self.regions_uris.update(_get_regions_uris(
+                self.get_regions(False, credential_name), credential))
+        _set_environment(self.credentials['default'])
         self.master_region_dict = _get_master_region_dict(
             master_region, self.regions_uris[master_region])
         if white_checksums_file is not None:
@@ -33,23 +50,32 @@ class GlanceSync(object):
         else:
             self.whitechecksum_dict = None
         if forcesync_file is not None:
-            self._forcesyncs = _get_forcesyncset(forcesync_file)
+            self.forcesyncs = _get_forcesyncset(forcesync_file)
+        else:
+            self.forcesyncs = ()
 
-    def get_regions(self, omit_master_region=True):
+    def get_regions(self, omit_master_region=True, target='default'):
         """returns a list of regions
 
         Keyword arguments:
         omit_master_region -- if true the master region is not included
+        target -- The name of the credential to use to get regions
         """
 
+        # get configuration
+
+        _set_environment(self.credentials[target])
         p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'],
                   stdin=None, stdout=PIPE)
+
         output_cmd = p.stdout
         regions_list = list()
         for line in output_cmd:
             if line.startswith('| region'):
                 name = line.split('|')[2].strip()
-                if omit_master_region and name == self._master_region:
+                if target != 'default':
+                    name = target + ':' + name
+                if omit_master_region and name == self.master_region:
                     continue
                 regions_list.append(name)
         p.wait()
@@ -79,7 +105,7 @@ class GlanceSync(object):
         """
         _sync_region(
             self.master_region_dict, region, self.regions_uris[region], False,
-            self.whitechecksum_dict, self._forcesyncs)
+            self.whitechecksum_dict, self.forcesyncs)
 
     def show_sync_region_status(self, region):
         """print a report about the images pending to sync in this region
@@ -88,9 +114,10 @@ class GlanceSync(object):
         """
         _sync_region(
             self.master_region_dict, region, self.regions_uris[region], True,
-            self.whitechecksum_dict, self._forcesyncs)
+            self.whitechecksum_dict, self.forcesyncs)
 
     def print_images_master_region(self):
+        """print the set of images in master region to be synchronized"""
         _printimages(self.master_region_dict.values())
 
     def print_images(self, region):
@@ -132,27 +159,23 @@ class GlanceSync(object):
     def delete_image(self, region, uuid, confirm=True):
         """delete a image on the specified region.
 
-        Be careful, this method is dangerous and for this reason by default
-        it ask for confirmation!
-
-        The sync_region method NEVER invokes this method.
+        Be careful, this action cannot be reverted and for this reason by
+        default requires confirmation!
         """
-        os.environ['OS_REGION_NAME'] = region
-        if confirm:
-            p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
-                      stdout=None)
-        else:
-            p = Popen(['/usr/bin/glance', 'delete', uuid, '-f'], stdin=None,
-                      stdout=None)
-        p.wait()
+        _delete_image(region, uuid, confirm)
 
-    def backup_glancemetadata(self):
+    def backup_glancemetadata(self, target='default'):
         """generate a backup of the metadata on each regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!
+
+        Keyword arguments:
+        target -- The name of the credential to use to get the list of regions
+
+
         """
         date = datetime.datetime.now().isoformat()
-        for region in self.get_regions(False):
+        for region in self.get_regions(False, target):
             os.environ['OS_REGION_NAME'] = region
             fich = open('backup_glance_' + date + '_' + region + '.txt', 'w')
             try:
@@ -178,6 +201,12 @@ class GlanceSync(object):
         User defined metadata is prefixed with _ (e.g. _nid, _type...)
         A checksum field is added.
         """
+        parts = region.split(':')
+        if len(parts == 2):
+            region = parts[1]
+            credential = self.credentials[parts[0]]
+        else:
+            credential = None
         return _getimagelist(region, self.regions_uris[region])
 
 
@@ -198,6 +227,17 @@ def _update_metadata_remote(region, image):
     p.wait()
     if p.returncode != 0:
         raise Exception('update of ' + image['Name'] + 'failed')
+
+
+def _delete_image(region, uuid, confirm):
+    os.environ['OS_REGION_NAME'] = region
+    if confirm:
+            p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
+                      stdout=None)
+    else:
+            p = Popen(['/usr/bin/glance', 'delete', uuid, '-f'], stdin=None,
+                      stdout=None)
+    p.wait()
 
 
 def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
@@ -253,7 +293,7 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
         newimage['Public'] = 'Yes'
         _update_metadata_remote(region, newimage)
         if replace_uuid:
-            delete_image(region, replace_uuid, confirm=False)
+            _delete_image(region, replace_uuid, confirm=False)
         elif rename_uuid:
             # locate old image
             l = _getimagelist(region)
@@ -309,7 +349,7 @@ def _getimagelist(region, region_uri):
 def _convert2csv(image, fields, allmandatory=False):
     """Extract the fields of the image as a CSV
 
-    Only the fields especified in fields list are listed
+    Only the fields specified in fields list are listed
     If allmandatory, returns None if some of the
     fields are missing.
     """
@@ -541,16 +581,21 @@ def _sync_region(
     return totalmbs
 
 
-def _get_regions_uris(region_list):
-    regionsuris = dict()
+def _get_regions_uris(region_list, credential):
+    regions_uris = dict()
     kc = KeystoneClient(
-        username=os.environ['OS_USERNAME'], password=os.environ['OS_PASSWORD'],
-        tenant_name=os.environ['OS_TENANT_NAME'],
-        auth_url=os.environ['OS_AUTH_URL'])
+        username=credential['user'], password=credential['password'],
+        tenant_name=credential['tenant'],
+        auth_url=credential['keystone_url'])
     for region in region_list:
-        regionsuris[region] = kc.service_catalog.url_for(
-            'region', region, 'image')
-    return regionsuris
+        parts = region.split(':')
+        if len(parts) == 2:
+            region_without_target = parts[1]
+        else:
+            region_without_target = region
+        regions_uris[region] = kc.service_catalog.url_for(
+            'region', region_without_target, 'image')
+    return regions_uris
 
 
 def _get_checksums(region, region_uri):
@@ -614,3 +659,46 @@ def _get_forcesyncset(filename):
         else:
             uuidset.add(line)
     return uuidset
+
+
+def _get_credentials(filename):
+    """returns a dict with the credentials (user, pass, url, tenant)
+
+    Predefined default target is obtained from environment variables if
+    missing in configuration.
+
+    Each line has the form:
+     <credential_name>=<user>,<password>,<url>,<tenant>
+    """
+    credentials = dict()
+    if filename is not None:
+        for line in open(filename):
+            line = line.strip()
+            if len(line) == 0 or line[0] == '#':
+                continue
+            else:
+                (name, definition) = line.split('=')
+                parts = definition.lstrip().split(',')
+                credential = dict()
+                credential['user'] = parts[0]
+                credential['password'] = base64.decodestring(parts[1])
+                credential['keystone_url'] = parts[2]
+                credential['tenant'] = parts[3]
+                credentials[name.rstrip()] = credential
+    if 'default' not in credentials and 'OS_USERNAME' in os.environ:
+        credential = dict()
+        credential['user'] = os.environ['OS_USERNAME']
+        credential['password'] = os.environ['OS_PASSWORD']
+        credential['keystone_url'] = os.environ['OS_AUTH_URL']
+        credential['tenant'] = os.environ['OS_TENANT_NAME']
+        credentials['default'] = credential
+    return credentials
+
+
+def _set_environment(credential, region=None):
+    os.environ['OS_USERNAME'] = credential['user']
+    os.environ['OS_PASSWORD'] = credential['password']
+    os.environ['OS_AUTH_URL'] = credential['keystone_url']
+    os.environ['OS_TENANT_NAME'] = credential['tenant']
+    if region is not None:
+        os.environ['OS_REGION_NAME'] = region
