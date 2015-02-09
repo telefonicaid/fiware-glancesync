@@ -25,13 +25,15 @@
 author = 'jmpr22'
 import sys
 import os
+import logging
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print >>sys.stderr, 'Use ' + sys.argv[0] +
+        msg = 'Use ' + sys.argv[0] +
         ' <region> <oldname> <newname> '
-        sys.exit(0)
+        logging.error(msg)
+        sys.exit(-1)
 
     glancesync = GlanceSync()
     images = glancesync.get_images_region(sys.argv[1])

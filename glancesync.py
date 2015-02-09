@@ -42,6 +42,7 @@ import datetime
 import urllib
 import time
 import base64
+import logging
 
 import glance.client
 from subprocess import Popen, PIPE
@@ -224,15 +225,21 @@ class GlanceSync(object):
             os.environ['OS_REGION_NAME'] = region
             fich = open('backup_glance_' + date + '_' + region + '.txt', 'w')
             try:
-                print 'Backup of region ' + region
+                msg = 'Backup of region ' + region
+                logging.info(msg)
                 p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
                           stdin=None, stdout=fich)
                 code = p.wait()
                 fich.close()
                 if code != 0:
-                    print 'Failed backup of ' + region
+                    msg = 'Failed backup of ' + region + \
+                          ' glance details returned a non-zero code'
+                    logging.error(msg)
+                    raise Exception(msg)
             except Exception:
-                print 'Failed backup of ' + region
+                msg = 'Failed backup of ' + region + ' caused by '
+                logging.failed(msg)
+                raise Exception(msg)
 
     def get_images_region(self, region):
         """It returns a map with all the tenant's images in that region
@@ -343,10 +350,10 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     result = outputcmd.read()
     p.wait()
     if p.returncode != 0:
-        print 'Upload of ' + image['Name'] + " to region " + region +\
+        msg = 'Upload of ' + image['Name'] + " to region " + region +\
             ' Failed.'
-        print result
-        sys.exit(-1)
+        logging.error(msg)
+        raise Exception(msg)
 
     newuuid = result.split(':')[1].strip()
     if rename_uuid or replace_uuid:
@@ -396,10 +403,11 @@ def _getimagelist(region, region_uri):
     # Read first a line; detect if there is an error
     line = outputcmd.readline()
     if line[0] != '=':
-        print line,
+        msg = 'Error retrieving image list. Cause: ' + line
         for line in outputcmd:
-            print line,
-        raise Exception("Error retrieving image list")
+            msg += line
+        logging.error(msg)
+        raise Exception(msg)
 
     checksums = _get_checksums(region, region_uri)
     image = dict()
@@ -575,8 +583,9 @@ def _sync_region(
                 kernel_name_sp = master_region_dictimages[image_name][
                     '_kernel_id']
                 if kernel_name_sp not in dictimages:
-                    print 'Warning: image ' + kernel_name_sp +\
+                    msg = 'image ' + kernel_name_sp +\
                           ' missing: is the kernel of ' + image_name
+                    logging.warning(msg)
                 else:
                     image['_kernel_id'] = dictimages[kernel_name_sp]['Id']
                     ids_need_update = True
@@ -585,8 +594,9 @@ def _sync_region(
                 ramdisk_name_sp = master_region_dictimages[
                     image_name]['_ramdisk_id']
                 if ramdisk_name_sp not in dictimages:
-                    print 'Warning: image ' + ramdisk_name_sp +\
+                    msg = 'image ' + ramdisk_name_sp +\
                         ' missing: is the ramdisk of ' + image_name
+                    logging.warning(msg)
                 else:
                     image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
                     ids_need_update = True
@@ -607,8 +617,9 @@ def _sync_region(
             else:
                 print 'Image penging to update the metadata ' + image_name
         if p == '$':
-            print 'Warning! state of image ' + image_name + ' is not active: '\
+            msg = 'state of image ' + image_name + ' is not active: '\
                   + image['Status']
+            logging.warning(msg)
         if p == '!':
             if image_name is None:
                 image_name = 'None'
@@ -620,15 +631,18 @@ def _sync_region(
             image_mast_reg = master_region_dictimages[image_name]
             if image_mast_reg.get('_sdc_aware', None) != image.get(
                     '_sdc_aware', None):
-                print 'Warning! image ' + image_name + \
+                msg = 'image ' + image_name + \
                     ' has different checksum: ' + c + \
                     ' and different value of sdc_aware '
+                logging.warning(msg)
             else:
-                print 'Warning! image ' + image_name +\
+                msg = 'image ' + image_name +\
                     ' has different checksum: ' + c
+                logging.warning(msg)
         if image_name in regionimageset:
-            print 'WARNING!!!!!: the image name ' + image_name +\
+            msg = 'the image name ' + image_name +\
                 ' is duplicated '
+            logging.waring(msg)
 
         regionimageset.add(image_name)
     # upload images of master region to the region if they are not already
@@ -688,13 +702,15 @@ def _sync_region(
                     '_kernel_id']
                 ramdisk = master_region_dictimages[image_name]['_ramdisk_id']
                 if kernel_name not in dictimages:
-                    print 'Warning: image ' + kernel_name +\
+                    msg = 'image ' + kernel_name +\
                         ' missing: is the kernel of ' + image_name
+                    logging.warning(msg)
                 else:
                     image['_kernel_id'] = dictimages[kernel_name]['Id']
                 if ramdisk not in dictimages:
-                    print 'Warning: image ' + ramdisk +\
+                    msg = 'image ' + ramdisk +\
                         ' missing: is the ramdisk of ' + image_name
+                    logging.warning(msg)
                 else:
                     image['_ramdisk_id'] = dictimages[ramdisk]['Id']
             _upload_image_remote(region, image, uuid2replace, uuid2rename)
@@ -806,16 +822,19 @@ def _get_whitechecksum_dict(filename):
 
         parts = line.split('=')
         if len(parts) != 2:
-            print >>sys.stderr, 'Error parsing file', filename
-            sys.exit(-1)
+            msg = 'Error parsing file', filename
+            logging.error(msg)
+            raise Exception(msg)
 
         key = parts[0].rstrip()
         values = set(parts[1].split(','))
         if key in ['replace', 'rename', 'dontupdate']:
             checksumdict[key] = values
         else:
-            print >>sys.stderr, 'Error parsing file', filename, 'key ', key,\
+            msg = 'Error parsing file', filename, 'key ', key,\
                 ' not recognized'
+            logging.error(msg)
+            raise Exception(msg)
     return checksumdict
 
 

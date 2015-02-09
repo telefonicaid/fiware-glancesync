@@ -25,6 +25,8 @@
 author = 'jmpr22'
 import sys
 import os
+import logging
+
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
@@ -33,7 +35,8 @@ if __name__ == '__main__':
         confirmation = False
 
     if len(sys.argv) != 3 and len(sys.argv) != 2:
-        print >>sys.stderr, 'Use ' + sys.argv[0] + ' [<region>] <imagename> '
+        message = 'Use ' + sys.argv[0] + ' [<region>] <imagename> '
+        logging.error(message)
         sys.exit(0)
 
     glancesync = GlanceSync()
@@ -49,7 +52,7 @@ if __name__ == '__main__':
         try:
             images = glancesync.get_images_region(region)
         except Exception:
-            print 'Failed'
+            # Don't do anything. Message has been already printed
             continue
         for image in images:
             if image['Name'] == image_name:

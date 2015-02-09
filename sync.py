@@ -56,4 +56,6 @@ if __name__ == '__main__':
             sys.stdout.flush()
             glancesync.sync_region(region)
         except Exception:
-            print "Failed"
+            # Don't do anything. Message has been already printed
+            # try next region
+            continue

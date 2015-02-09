@@ -37,5 +37,7 @@ if __name__ == '__main__':
             print "======" + region
             sync_obj.print_images(region)
         except Exception:
-            print "Failed"
+            # Don't do anything. Message has been already printed
+            # try next region.
+            continue
             # raise
