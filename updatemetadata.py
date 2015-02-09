@@ -50,15 +50,18 @@ def update_nids(region):
             (typei, nid, public) = images_with_changes[image['Name']]
             if nid:
                 nid = str(nid)
+
             if public:
                 is_public = 'Yes'
             else:
                 is_public = 'No'
+
             # don't update if values haven't changed.
             if (image.get('_nid', None) == nid and
                     image.get('_type', None) == typei and
                     image.get('Public') == is_public):
                 continue
+
             image['_nid'] = nid
             image['_type'] = typei
             image['Public'] = is_public

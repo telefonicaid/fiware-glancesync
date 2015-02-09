@@ -31,9 +31,11 @@ if __name__ == '__main__':
     confirmation = True
     if os.environ.get('IKNOWWHATIAMDOING', None) == 'Yes!':
         confirmation = False
+
     if len(sys.argv) != 3 and len(sys.argv) != 2:
         print >>sys.stderr, 'Use ' + sys.argv[0] + ' [<region>] <imagename> '
         sys.exit(0)
+
     glancesync = GlanceSync()
     if len(sys.argv) == 3:
         regions = [sys.argv[1]]
@@ -41,6 +43,7 @@ if __name__ == '__main__':
     else:
         regions = glancesync.get_regions()
         image_name = sys.argv[1]
+
     for region in regions:
         print "Region: " + region
         try:

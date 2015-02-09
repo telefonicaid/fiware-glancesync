@@ -32,6 +32,7 @@ if __name__ == '__main__':
         target = sys.argv[1]
     else:
         target = 'default'
+
     credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
     sync_obj = glancesync.GlanceSync(credentials_file=credentials_file)
     regions = sync_obj.get_regions(target=target)

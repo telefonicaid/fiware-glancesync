@@ -42,12 +42,14 @@ if __name__ == '__main__':
         if region in regions_unsorted:
             regions.append(region)
             regions_unsorted.remove(region)
+
     regions.extend(regions_unsorted)
     print regions
     print '======Spain'
     glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
+
     for region in regions:
         try:
             print "======" + region

@@ -32,6 +32,7 @@ if __name__ == '__main__':
         print >>sys.stderr, 'Use ' + sys.argv[0] +
         ' <region> <oldname> <newname> '
         sys.exit(0)
+
     glancesync = GlanceSync()
     images = glancesync.get_images_region(sys.argv[1])
     for image in images:
