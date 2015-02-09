@@ -49,6 +49,14 @@ from keystoneclient.v2_0.client import Client as KeystoneClient
 
 
 class GlanceSync(object):
+    """Class to synchronize glance servers in different regions taking the base
+     of the master region.
+
+    The more common use of this class is to create and instance, invoke the
+    method get_regions and iterate through the list invoking the sync_region
+    method.
+    """
+
     regions_uris = dict()
 
     def __init__(
@@ -238,6 +246,13 @@ class GlanceSync(object):
 
 
 def _update_metadata_remote(region, image):
+    """ update the metadata of the image in the specified region
+    See GlanceSync.update_metadata_image for more details.
+
+    :param region: region where it is the image to update
+    :param image: the image with the metadata to update
+    :return: this function doesn't return anything.
+    """
     # get as a list all the properties (all of them start with _)
     props = list(x[1:] + '=' + image[x] for x in image if x.startswith('_'))
     # compose cmd line
@@ -257,6 +272,12 @@ def _update_metadata_remote(region, image):
 
 
 def _delete_image(region, uuid, confirm):
+    """delete a image on the specified region.
+
+    Be careful, this action cannot be reverted and for this reason by
+    default requires confirmation!
+    """
+
     os.environ['OS_REGION_NAME'] = region
     if confirm:
             p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
@@ -393,6 +414,19 @@ def _convert2csv(image, fields, allmandatory=False):
 
 
 def _prefix(image, comparewith):
+    """It returns a character identifying the image synchronization status
+
+       It returns an empty string when the image is synchronized. In other way:
+       +: this image is not on the master glance server
+       $: this image is not active: may be still uploading or in an error
+           status.
+       -: this image is on the master glance server, but as non-public
+       !: this image is on the master glance server, but checksum is different
+       #: this image is on the master glance server, but some of these
+          attributes are different: nid, type, sdc_aware, Public (if it is
+          true on master and is false in the region
+    """
+
     name = image['Name']
     if name not in comparewith:
         return '+'
@@ -417,6 +451,15 @@ def _prefix(image, comparewith):
 
 
 def _printimages(imagesregion, comparewith=None):
+    """ print a report about the images present on the specified region
+
+    See the documentation of GlanceSync.printimages for more details
+
+    :param imagesregion: the region of print
+    :param comparewith: the master region dictionary, used to compute the
+              image synchronization status.
+    :return: this function doesn't return anything.
+    """
     images = list(image for image in imagesregion if image['Public'] == 'Yes'
                   and ('_nid' in image and '_type' in image))
     images.sort(key=lambda image: image['_type'] + image['Name'])
@@ -454,6 +497,21 @@ def _printimages(imagesregion, comparewith=None):
 def _sync_region(
         master_region_dictimages, region, region_uri, onlyshow=False,
         whitechecksums=None, forcesync=()):
+    """This is the backing method of GlanceSync.sync_region and
+    show_sync_region_status; see these methods documentation for more
+    information.
+
+    :param master_region_dictimages: a dictionary with the images on master
+     region
+    :param region: the region name
+    :param region_uri: the URI of the glance server of this region
+    :param onlyshow: If it is True, don't synchronize: this is dry-run mode.
+    :param whitechecksums: a object to determine when it's secure to override
+      or rename an image with a non-matching checksum.
+    :param forcesync: a set with UUIDs of images to synchronize even if they
+      don't match all the conditions.
+    :return: this method doesn't return anything
+    """
     imagesregion = _getimagelist(region, region_uri)
     # sets to images with different checksums
     images2replace = set()
@@ -610,6 +668,12 @@ def _sync_region(
 
 
 def _get_regions_uris(region_list, credential):
+    """Get a dictionary with the URIs of the glance server in each region.
+
+    :param region_list: a list or regions
+    :param credential: the credential to contact with the keystone server
+    :return: a dictionary or URIs indexed by region name.
+    """
     regions_uris = dict()
     kc = KeystoneClient(
         username=credential['user'], password=credential['password'],
@@ -627,6 +691,15 @@ def _get_regions_uris(region_list, credential):
 
 
 def _get_checksums(region, region_uri):
+    """Provide a dictionary with the checksums of each image in the region.
+
+    Only the images owned by the tenant are considered.
+
+    :param region: the region where the images are
+    :param region_uri: the URL of the glance server
+    :return: a dictionary with checkums, indexed by image name.
+    """
+
     host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
     (host, port) = urllib.splitport(host)
     images = glance.client.get_client(
@@ -638,6 +711,14 @@ def _get_checksums(region, region_uri):
 
 
 def _get_master_region_dict(master_region, master_region_uri):
+    """Gets a dictionary with the information of the images in the master
+    region.
+
+    Only the images owned by the tenant are included.
+    :param master_region: the region name
+    :param master_region_uri: the URL of the glance server
+    :return: a dictionary indexed by
+    """
     images = _getimagelist(master_region, master_region_uri)
     master_region_dictimagesbyid = dict((image['Id'], image) for image in
                                         images)
@@ -654,6 +735,18 @@ def _get_master_region_dict(master_region, master_region_uri):
 
 
 def _get_whitechecksum_dict(filename):
+    """read the configuration about what to do with images with a
+    non-matching checksum.
+
+    By default, if a image is present in a region but with different checksum
+    that the master region image, only a warning is emitted. This method
+    returns a dictionary with three keys:
+    --replace: a list of UUID that may be replaced
+    --rename: a list of UUID that may be replace, but before this the old image
+    must be renamed
+    --dontupdate: both replace and rename may include the word 'any', in this
+    case dontupdate is useful as a blacklist.
+    """
     checksumdict = {'replace': set(), 'rename': set(), 'dontupdate': set()}
     for line in open(filename):
         line = line.strip()
@@ -724,6 +817,14 @@ def _get_credentials(filename):
 
 
 def _set_environment(credential, region=None):
+    """Set the environment with the credential provided.
+
+    CLI tools use environment variables to read the credential.
+
+    :param credential: a dictionary with the credential
+    :param region: the region to set on OS_REGION_NAME
+    :return: this method doesn't return anything.
+    """
     os.environ['OS_USERNAME'] = credential['user']
     os.environ['OS_PASSWORD'] = credential['password']
     os.environ['OS_AUTH_URL'] = credential['keystone_url']
