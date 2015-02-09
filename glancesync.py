@@ -24,15 +24,16 @@
 #
 author = 'jmpr22'
 
-"""Module to synchronize several regions glance server with a master region.
+"""Module to synchronize glance servers in different regions taking the base of
+the master region.
 
 Requirements:
 Glance images directory must be on path /var/lib/glance/images/
 python-keystoneclient and glanceclient must be installed
 
-This module works invoking the glance CLI tool. Only when a functionality is
-not available directly from the CLI tool, it invokes the python library used
-by the CLI tools glance and keystone.
+This module works invoking the glance client through the CLI. Only
+when a functionality is not available directly from the CLI, it invokes
+the python library used by the glance and keystone clients.
 """
 
 import sys
@@ -79,11 +80,12 @@ class GlanceSync(object):
             self.forcesyncs = ()
 
     def get_regions(self, omit_master_region=True, target='default'):
-        """returns a list of regions
+        """It returns the list of regions
 
         Keyword arguments:
-        omit_master_region -- if true the master region is not included
-        target -- The name of the credential to use to get regions
+        omit_master_region -- if it is true the master region is not included
+        target -- The credential name to be used in order to get the regions
+            list
         """
 
         # get configuration
@@ -157,9 +159,9 @@ class GlanceSync(object):
            status.
         -: this image is on the master glance server, but as non-public
         !: this image is on the master glance server, but checksum is different
-        #: this image is on the master glance server, but some of this
-           attributes are different: nid, type, sdc_aware, Public (if true on
-           master and false in region
+        #: this image is on the master glance server, but some of these
+           attributes are different: nid, type, sdc_aware, Public (if it is
+           true on master and is false in the region
         """
         images_region = self.get_images_region(region)
         _printimages(images_region, self.master_region_dict)
@@ -173,10 +175,10 @@ class GlanceSync(object):
         Be careful if you use this method directly instead of using
         sync_region!!!
 
-        sync_region doesn't overrite all the medatada with the values of
-        master region: it only overrite type, sdc_aware, nid and public and
-        also update if present kernel_id and ramdisk_id with the UUIDs of
-        the region.
+        sync_region doesn't overwrite all the medatada with the values of
+        master region: it overwrites only type, sdc_aware, nid and public and
+        also updates, if it is presented, kernel_id and ramdisk_id with the
+        UUIDs of the region.
         """
         _update_metadata_remote(region, image)
 
@@ -194,7 +196,8 @@ class GlanceSync(object):
         Of course, this metadata doesn't save metadata of other tenants!!
 
         Keyword arguments:
-        target -- The name of the credential to use to get the list of regions
+        target -- The credential name to be used in order to get the regions
+                  list
 
 
         """
@@ -214,7 +217,7 @@ class GlanceSync(object):
                 print 'Failed backup of ' + region
 
     def get_images_region(self, region):
-        """returns a map with all the images of the region owned by the tenant
+        """It returns a map with all the tenant's images in that region
 
         This is a dictionary indexed by the name of the image. Each entry
         is a new dictionary, with the metadata.
@@ -268,7 +271,7 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     """Upload the image to the specified region.
 
     Usually, this call is invoked by sync_region()
-    Be careful! if image has properties kernel_id / ramdisk_id, must be
+    Be careful! if the image has kernel_id / ramdisk_id properties, it must be
     updated with the ids of this region
     """
     # set region
@@ -333,11 +336,12 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
 
 
 def _getimagelist(region, region_uri):
-    """returns a list of images from the glance of the specified region
+    """return a image list from the glance of the specified region
 
      Each imagen is a dictionary indexed by name. Extra properties are
      coded as _<name> the other labels are the returned by glance details.
-     List is completed with checksum.
+     List is completed with checksum. Only the images owned by the tenant
+     are included.
     """
     os.environ['OS_REGION_NAME'] = region
     images = list()
@@ -374,7 +378,7 @@ def _convert2csv(image, fields, allmandatory=False):
     """Extract the fields of the image as a CSV
 
     Only the fields specified in fields list are listed
-    If allmandatory, returns None if some of the
+    If allmandatory is True, it returns None if some of the
     fields are missing.
     """
     sub = list()
@@ -670,7 +674,7 @@ def _get_whitechecksum_dict(filename):
 
 
 def _get_forcesyncset(filename):
-    """returns a set of UUIDs that must be synchronized unconditionally
+    """It returns a set of UUIDs that must be synchronized unconditionally
 
     UUIDs not listed here are only synchronized when are public and has
     nid and/or type attributes.
@@ -686,7 +690,7 @@ def _get_forcesyncset(filename):
 
 
 def _get_credentials(filename):
-    """returns a dict with the credentials (user, pass, url, tenant)
+    """It returns a dict with the credentials (user, pass, url, tenant)
 
     Predefined default target is obtained from environment variables if
     missing in configuration.
