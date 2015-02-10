@@ -218,7 +218,7 @@ class GlanceSync(object):
 
         _delete_image(region, uuid, confirm)
 
-    def backup_glancemetadata(self, target='default'):
+    def backup_glancemetadata_region(self, target='default'):
         """generate a backup of the metadata on each regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!

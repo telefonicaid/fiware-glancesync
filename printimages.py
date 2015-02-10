@@ -28,7 +28,8 @@ import os
 import glancesync
 
 if __name__ == '__main__':
-    sync_obj = glancesync.GlanceSync()
+    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
+    sync_obj = glancesync.GlanceSync(credentials_file=credentials_file)
     regions = sync_obj.get_regions()
     print '======Spain'
     sync_obj.print_images_master_region()

@@ -30,7 +30,9 @@ from glancesync import GlanceSync
 if __name__ == '__main__':
     checksums_filename = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
     forcesync_filename = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
-    glancesync = GlanceSync('Spain', checksums_filename, forcesync_filename)
+    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
+    glancesync = GlanceSync('Spain', checksums_filename, forcesync_filename,
+                            credentials_file=credentials_file)
     regions = glancesync.get_regions()
     print '======Spain'
     glancesync.print_images_master_region()

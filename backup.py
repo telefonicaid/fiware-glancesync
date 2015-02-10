@@ -1,4 +1,4 @@
-#!/usr/bin/env python#!/usr/bin/env python
+#!/usr/bin/env python
 # -- encoding: utf-8 --
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
@@ -34,4 +34,6 @@ if __name__ == '__main__':
         target = 'default'
     credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
     glancesync = GlanceSync(credentials_file=credentials_file)
-    glancesync.backup_glancemetadata()
+    regions = sync_obj.get_regions(target)
+    for region in regions:
+        glancesync.backup_glancemetadata_region()
