@@ -38,9 +38,7 @@ the python library used by the glance and keystone clients.
 
 import sys
 import os
-import datetime
 import urllib
-import time
 import base64
 import logging
 
@@ -58,8 +56,6 @@ class GlanceSync(object):
     method.
     """
 
-    regions_uris = dict()
-
     def __init__(
             self, master_region='Spain', white_checksums_file=None,
             forcesync_file=None, credentials_file=None):
@@ -70,6 +66,7 @@ class GlanceSync(object):
         are obtained and cached when this constructor is called.
         """
 
+        self.regions_uris = dict()
         self.master_region = master_region
         self.credentials = _get_credentials(credentials_file)
         for credential_name in self.credentials.keys():
@@ -218,21 +215,25 @@ class GlanceSync(object):
 
         _delete_image(region, uuid, confirm)
 
-    def backup_glancemetadata_region(self, region):
+    def backup_glancemetadata_region(self, region, path=None):
         """generate a backup of the metadata on the regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!
 
-        Keyword arguments:
-        region -- The region whose metadata is preserved in a backup
+        :param region: The region whose metadata is preserved in a backup
+        :param path: Directory when the file is created (the file it is
+             created in current directory by default)
+        :return: Nothing
         """
-
-        date = datetime.datetime.now().isoformat()
         (credential, region) = _targetedregion2cred_region(
             region, self.credentials)
 
         os.environ['OS_REGION_NAME'] = region
-        fich = open('backup_glance_' + date + '_' + region + '.txt', 'w')
+        if path is None:
+            path = 'backup_' + region + '.txt'
+        else:
+            path = os.path.join(path, 'backup_' + region + '.txt')
+        fich = open(path, 'w')
         try:
             msg = 'Backup of region ' + region
             logging.info(msg)

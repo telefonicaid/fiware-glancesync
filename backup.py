@@ -25,19 +25,23 @@
 author = 'jmpr22'
 import sys
 import os
+import datetime
+
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        target = sys.argv[1]
-    else:
-        target = 'default'
     credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
+    now = datetime.datetime.now().isoformat()
     glancesync = GlanceSync(credentials_file=credentials_file)
-    regions = glancesync.get_regions(target)
+    if len(sys.argv) > 1:
+        regions = sys.argv[1:]
+    else:
+        regions = glancesync.get_regions()
+    directory = 'backup_glance_' + now
+    os.mkdir(directory)
     for region in regions:
         try:
-            glancesync.backup_glancemetadata_region(region)
+            glancesync.backup_glancemetadata_region(region, directory)
         except Exception:
             # do nothing. Already logged.
             continue
