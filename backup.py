@@ -34,6 +34,10 @@ if __name__ == '__main__':
         target = 'default'
     credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
     glancesync = GlanceSync(credentials_file=credentials_file)
-    regions = sync_obj.get_regions(target)
+    regions = glancesync.get_regions(target)
     for region in regions:
-        glancesync.backup_glancemetadata_region()
+        try:
+            glancesync.backup_glancemetadata_region(region)
+        except Exception:
+            # do nothing. Already logged.
+            continue

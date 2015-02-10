@@ -218,36 +218,36 @@ class GlanceSync(object):
 
         _delete_image(region, uuid, confirm)
 
-    def backup_glancemetadata_region(self, target='default'):
-        """generate a backup of the metadata on each regional glance server
+    def backup_glancemetadata_region(self, region):
+        """generate a backup of the metadata on the regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!
 
         Keyword arguments:
-        target -- The credential name to be used in order to get the regions
-                  list
-
-
+        region -- The region whose metadata is preserved in a backup
         """
 
         date = datetime.datetime.now().isoformat()
-        for region in self.get_regions(False, target):
-            os.environ['OS_REGION_NAME'] = region
-            fich = open('backup_glance_' + date + '_' + region + '.txt', 'w')
-            try:
-                msg = 'Backup of region ' + region
-                logging.info(msg)
-                p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
-                          stdin=None, stdout=fich)
-                code = p.wait()
-                fich.close()
-                if code != 0:
-                    msg = 'Failed backup of ' + region + \
-                          ' glance details returned a non-zero code'
-                    logging.error(msg)
-                    raise Exception(msg)
-            except Exception:
-                msg = 'Failed backup of ' + region + ' caused by '
+        (credential, region) = _targetedregion2cred_region(
+            region, self.credentials)
+
+        os.environ['OS_REGION_NAME'] = region
+        fich = open('backup_glance_' + date + '_' + region + '.txt', 'w')
+        try:
+            msg = 'Backup of region ' + region
+            logging.info(msg)
+            p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
+                      stdin=None, stdout=fich)
+            code = p.wait()
+            fich.close()
+        except Exception:
+            msg = 'Failed backup of ' + region + ' caused by '
+            logging.error(msg)
+            raise Exception(msg)
+        else:
+            if code != 0:
+                msg = 'Failed backup of ' + region + \
+                      ' glance details returned a non-zero code'
                 logging.error(msg)
                 raise Exception(msg)
 
@@ -264,15 +264,23 @@ class GlanceSync(object):
         A checksum field is added.
         """
 
-        parts = region.split(':')
-        if len(parts) == 2:
-            region = parts[1]
-            credential = self.credentials[parts[0]]
-        else:
-            credential = None
-
         return _getimagelist(region, self.regions_uris[region])
 
+
+def _targetedregion2cred_region(region, credentials):
+    """it converts [target:]region to  a (credential, region) pair.
+
+    :param region: a [target:]region string
+    :param credentials: the dictionary with the credentials
+    :return: a tuple with (credential, region)
+    """
+    parts = region.split(':')
+    if len(parts) == 2:
+            region = parts[1]
+            credential = credentials[parts[0]]
+    else:
+            credential = credentials['default']
+    return credential, region
 
 def _update_metadata_remote(region, image):
     """ update the metadata of the image in the specified region
