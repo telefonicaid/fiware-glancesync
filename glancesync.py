@@ -142,8 +142,13 @@ class GlanceSync(object):
         No image content is overrided, unless the file white_checksum.
         """
 
-        _sync_region(
-            self.master_region_dict, region, self.regions_uris[region], False,
+        imagesregion = _getimagelist(region, self.regions_uris[region])
+        dictimages = dict((image['Name'], image) for image in imagesregion)
+
+        _sync_update_metada_region(
+            self.master_region_dict, region, imagesregion, dictimages, False)
+        _sync_upload_missing_images(
+            self.master_region_dict, region, dictimages, False,
             self.whitechecksum_dict, self.forcesyncs)
 
     def show_sync_region_status(self, region):
@@ -152,8 +157,13 @@ class GlanceSync(object):
         This method is nearly a dry-run of the method sync_region
         """
 
-        _sync_region(
-            self.master_region_dict, region, self.regions_uris[region], True,
+        imagesregion = _getimagelist(region, self.regions_uris[region])
+        dictimages = dict((image['Name'], image) for image in imagesregion)
+
+        _sync_update_metada_region(
+            self.master_region_dict, region, imagesregion, dictimages, True)
+        _sync_upload_missing_images(
+            self.master_region_dict, region, dictimages, True,
             self.whitechecksum_dict, self.forcesyncs)
 
     def print_images_master_region(self):
@@ -238,7 +248,7 @@ class GlanceSync(object):
                     raise Exception(msg)
             except Exception:
                 msg = 'Failed backup of ' + region + ' caused by '
-                logging.failed(msg)
+                logging.error(msg)
                 raise Exception(msg)
 
     def get_images_region(self, region):
@@ -255,7 +265,7 @@ class GlanceSync(object):
         """
 
         parts = region.split(':')
-        if len(parts == 2):
+        if len(parts) == 2:
             region = parts[1]
             credential = self.credentials[parts[0]]
         else:
@@ -288,7 +298,9 @@ def _update_metadata_remote(region, image):
     p = Popen(arguments, stdin=None, stdout=None, stderr=None)
     p.wait()
     if p.returncode != 0:
-        raise Exception('update of ' + image['Name'] + 'failed')
+        msg = 'update of ' + image['Name'] + 'failed'
+        logging(msg)
+        raise Exception(msg)
 
 
 def _delete_image(region, uuid, confirm):
@@ -315,8 +327,13 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     Usually, this call is invoked by sync_region()
     Be careful! if the image has kernel_id / ramdisk_id properties, it must be
     updated with the ids of this region
-    """
 
+    :param region: the region where the image is uploaded
+    :param image: the image to upload
+    :param replace_uuid: if it is not None, this image must be deleted
+    :param rename_uuid: if it is not None, this image must be renamed
+    :return: the UUID of the new image.
+    """
     # set region
     os.environ['OS_REGION_NAME'] = region
     # if replace_uuid, first upload with other name and without nid
@@ -383,6 +400,7 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
 
                     oldimage['Name'] = saved_name + '.old'
                     _update_metadata_remote(region, oldimage)
+    return newuuid
 
 
 def _getimagelist(region, region_uri):
@@ -535,31 +553,130 @@ def _printimages(imagesregion, comparewith=None):
                 print line
 
 
-def _sync_region(
-        master_region_dictimages, region, region_uri, onlyshow=False,
+def _sync_upload_missing_images(
+        master_region_dictimages, region, dictimages, onlyshow=False,
         whitechecksums=None, forcesync=()):
-    """This is the backing method of GlanceSync.sync_region and
-    show_sync_region_status; see these methods documentation for more
-    information.
+    """ upload images of master region to the region if they are not already
+    present.
+
+    only upload when both these two conditions are met:
+     * image is public
+     * image has the property type and/or the property nid
+     as an exception, also sync images in forcesync tuple
 
     :param master_region_dictimages: a dictionary with the images on master
      region
     :param region: the region name
-    :param region_uri: the URI of the glance server of this region
-    :param onlyshow: If it is True, don't synchronize: this is dry-run mode.
+    :param dictimages: a dictionary with the images on the region
     :param whitechecksums: a object to determine when it's secure to override
       or rename an image with a non-matching checksum.
     :param forcesync: a set with UUIDs of images to synchronize even if they
       don't match all the conditions.
-    :return: this method doesn't return anything
+    :return: total mbs uploaded (or to be uploaded, if onlyshow it is True)
+
+    """
+    totalmbs = 0
+
+    # There are two reason to upload first the smaller images:
+    #   *kernel and ramdisk must be updload before AMI images to insert the
+    #    UUID
+    #   *if there is a problem (e.g. server is full) the error appears before.
+    imgs = master_region_dictimages.values()
+    imgs.sort(key=lambda image: int(image['Size']))
+    for image in imgs:
+        image_name = image['Name']
+        uuid2replace = None
+        uuid2rename = ''
+        if image['Public'] == 'No' and not image['Id'] in forcesync:
+            continue
+
+        if image_name in dictimages:
+            if not whitechecksums:
+                continue
+            checksum = dictimages[image_name]['checksum']
+            if image['checksum'] == checksum:
+                continue
+
+            if checksum in whitechecksums['dontupdate']:
+                continue
+
+            if checksum in whitechecksums['replace']:
+                uuid2replace = dictimages[image_name]['Id']
+            elif checksum in whitechecksums['rename'] or 'any' in\
+                    whitechecksums['rename']:
+                uuid2rename = dictimages[image_name]['Id']
+            elif 'any' in whitechecksums['replace']:
+                uuid2replace = dictimages[image_name]['Id']
+            else:
+                continue
+        if '_type' not in image and '_nid' not in image and image[
+                'Id'] not in forcesync:
+            continue
+
+        sizeimage = int(image['Size']) / 1024 / 1024
+        totalmbs = totalmbs + sizeimage
+        if not onlyshow:
+            print 'Uploading image ' + image_name + ' (' +\
+                str(sizeimage) + ' MB)'
+            sys.stdout.flush()
+            # Check kernel_id and ramdisk_id if present
+            if '_kernel_id' in image:
+                kernel_id = image['_kernel_id']
+                ramdisk_id = image['_ramdisk_id']
+                kernel_name = master_region_dictimages[image_name][
+                    '_kernel_id']
+                ramdisk = master_region_dictimages[image_name]['_ramdisk_id']
+                if kernel_name not in dictimages:
+                    msg = 'image ' + kernel_name +\
+                        ' missing: is the kernel of ' + image_name
+                    logging.warning(msg)
+                else:
+                    image['_kernel_id'] = dictimages[kernel_name]['Id']
+                if ramdisk not in dictimages:
+                    msg = 'image ' + ramdisk +\
+                        ' missing: is the ramdisk of ' + image_name
+                    logging.warning(msg)
+                else:
+                    image['_ramdisk_id'] = dictimages[ramdisk]['Id']
+            uuid = _upload_image_remote(region, image, uuid2replace,
+                                        uuid2rename)
+            # we keep the UUID because if could be a kernel_id or ramdisk_id
+            newimage = dict()
+            newimage['Id'] = uuid
+            newimage['Name'] = image_name
+            dictimages[image_name] = newimage
+
+            print 'Done.'
+            sys.stdout.flush()
+        else:
+            print 'Pending: ' + image_name + ' (' + str(sizeimage) + ' MB)'
+    if totalmbs == 0:
+        print 'Region is synchronized.'
+    else:
+        if onlyshow:
+            print 'MBs pending : ' + str(totalmbs)
+        else:
+            print 'Total uploaded to region ' + region + ': ' + str(totalmbs)\
+                + ' (MB) '
+    sys.stdout.flush()
+    return totalmbs
+
+
+def _sync_update_metada_region(
+        master_region_dictimages, region, imagesregion, dictimages,
+        onlyshow=False):
+    """This method synchronizes the metadata of the images that are both in
+    master region and in the specified region, but with different metadata.
+
+    :param master_region_dictimages: a dictionary with the images on master
+     region
+    :param region: the region name
+    :param imagesregion: a list with the images in the region
+    :param dictimages: a dictionary with the images in the region
+    :param onlyshow: If it is True, don't synchronize: this is dry-run mode.
+    :returns Nothing.
     """
 
-    imagesregion = _getimagelist(region, region_uri)
-    # sets to images with different checksums
-    images2replace = set()
-    images2rename = set()
-    # These two dictionaries are used for _kernel_id and _ramdisk_id update
-    dictimages = dict((image['Name'], image) for image in imagesregion)
     dictimagesbyid = dict((image['Id'], image) for image in imagesregion)
     regionimageset = set()
     noactive = list()
@@ -642,92 +759,9 @@ def _sync_region(
         if image_name in regionimageset:
             msg = 'the image name ' + image_name +\
                 ' is duplicated '
-            logging.waring(msg)
+            logging.warning(msg)
 
         regionimageset.add(image_name)
-    # upload images of master region to the region if they are not already
-    # present.
-    # only is both this two conditions are met:
-    # * image is public
-    # * image has the property type and/or the property nid
-    # as an exception, also sync images in forcesync tuple
-    totalmbs = 0
-    # There are two reason to upload first the smaller images:
-    #   *kernel and ramdisk must be updload before AMI images to insert the
-    #    UUID
-    #   *if there is a problem (e.g. server is full) the error appears before.
-    imgs = master_region_dictimages.values()
-    imgs.sort(key=lambda image: int(image['Size']))
-    for image in imgs:
-        image_name = image['Name']
-        uuid2replace = None
-        uuid2rename = ''
-        if image['Public'] == 'No' and not image['Id'] in forcesync:
-            continue
-
-        if image_name in dictimages:
-            if not whitechecksums:
-                continue
-            checksum = dictimages[image_name]['checksum']
-            if image['checksum'] == checksum:
-                continue
-
-            if checksum in whitechecksums['dontupdate']:
-                continue
-
-            if checksum in whitechecksums['replace']:
-                uuid2replace = dictimages[image_name]['Id']
-            elif checksum in whitechecksums['rename'] or 'any' in\
-                    whitechecksums['rename']:
-                uuid2rename = dictimages[image_name]['Id']
-            elif 'any' in whitechecksums['replace']:
-                uuid2replace = dictimages[image_name]['Id']
-            else:
-                continue
-        if '_type' not in image and '_nid' not in image and image[
-                'Id'] not in forcesync:
-            continue
-
-        sizeimage = int(image['Size']) / 1024 / 1024
-        totalmbs = totalmbs + sizeimage
-        if not onlyshow:
-            print 'Uploading image ' + image_name + ' (' +\
-                str(sizeimage) + ' MB)'
-            sys.stdout.flush()
-            # Check kernel_id and ramdisk_id if present
-            if '_kernel_id' in image:
-                kernel_id = image['_kernel_id']
-                ramdisk_id = image['_ramdisk_id']
-                kernel_name = master_region_dictimages[image_name][
-                    '_kernel_id']
-                ramdisk = master_region_dictimages[image_name]['_ramdisk_id']
-                if kernel_name not in dictimages:
-                    msg = 'image ' + kernel_name +\
-                        ' missing: is the kernel of ' + image_name
-                    logging.warning(msg)
-                else:
-                    image['_kernel_id'] = dictimages[kernel_name]['Id']
-                if ramdisk not in dictimages:
-                    msg = 'image ' + ramdisk +\
-                        ' missing: is the ramdisk of ' + image_name
-                    logging.warning(msg)
-                else:
-                    image['_ramdisk_id'] = dictimages[ramdisk]['Id']
-            _upload_image_remote(region, image, uuid2replace, uuid2rename)
-            print 'Done.'
-            sys.stdout.flush()
-        else:
-            print 'Pending: ' + image_name + ' (' + str(sizeimage) + ' MB)'
-    if totalmbs == 0:
-        print 'Region is synchronized.'
-    else:
-        if onlyshow:
-            print 'MBs pending : ' + str(totalmbs)
-        else:
-            print 'Total uploaded to region ' + region + ': ' + str(totalmbs)\
-                + ' (MB) '
-    sys.stdout.flush()
-    return totalmbs
 
 
 def _get_regions_uris(region_list, credential):
