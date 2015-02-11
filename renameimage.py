@@ -34,6 +34,7 @@ if __name__ == '__main__':
         ' <region> <oldname> <newname> '
         logging.error(msg)
         sys.exit(-1)
+
     credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
     glancesync = GlanceSync(credentials_file=credentials_file)
     images = glancesync.get_images_region(sys.argv[1])

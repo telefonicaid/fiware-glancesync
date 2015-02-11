@@ -24,6 +24,16 @@
 #
 author = 'jmpr22'
 
+import sys
+import os
+import urllib
+import base64
+import logging
+
+import glance.client
+from subprocess import Popen, PIPE
+from keystoneclient.v2_0.client import Client as KeystoneClient
+
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
 
@@ -35,18 +45,6 @@ This module works invoking the glance client through the CLI. Only
 when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
-
-import sys
-import os
-import urllib
-import base64
-import logging
-
-import glance.client
-from subprocess import Popen, PIPE
-from keystoneclient.v2_0.client import Client as KeystoneClient
-
-
 class GlanceSync(object):
     """Class to synchronize glance servers in different regions taking the base
      of the master region.
@@ -726,6 +724,7 @@ def _sync_update_metada_region(
                 else:
                     image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
                     ids_need_update = True
+
         if p == '#' or ids_need_update:
             image_mast_reg = master_region_dictimages[image_name]
             if '_type' in image_mast_reg:
@@ -742,10 +741,12 @@ def _sync_update_metada_region(
                 _update_metadata_remote(region, image)
             else:
                 print 'Image penging to update the metadata ' + image_name
+
         if p == '$':
             msg = 'state of image ' + image_name + ' is not active: '\
                   + image['Status']
             logging.warning(msg)
+
         if p == '!':
             if image_name is None:
                 image_name = 'None'
@@ -765,6 +766,7 @@ def _sync_update_metada_region(
                 msg = 'image ' + image_name +\
                     ' has different checksum: ' + c
                 logging.warning(msg)
+
         if image_name in regionimageset:
             msg = 'the image name ' + image_name +\
                 ' is duplicated '
@@ -839,6 +841,7 @@ def _get_master_region_dict(master_region, master_region_uri):
         if '_ramdisk_id' in image:
             image['_ramdisk_id'] = master_region_dictimagesbyid[image[
                 '_ramdisk_id']]['Name']
+
         master_region_dictimages[image['Name']] = image
     return master_region_dictimages
 
@@ -923,6 +926,7 @@ def _get_credentials(filename):
                 credential['keystone_url'] = parts[2]
                 credential['tenant'] = parts[3]
                 credentials[name.rstrip()] = credential
+
     if 'default' not in credentials and 'OS_USERNAME' in os.environ:
         credential = dict()
         credential['user'] = os.environ['OS_USERNAME']
