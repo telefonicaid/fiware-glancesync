@@ -45,6 +45,7 @@ This module works invoking the glance client through the CLI. Only
 when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
+
 class GlanceSync(object):
     """Class to synchronize glance servers in different regions taking the base
      of the master region.
@@ -71,9 +72,11 @@ class GlanceSync(object):
             credential = self.credentials[credential_name]
             self.regions_uris.update(_get_regions_uris(
                 self.get_regions(False, credential_name), credential))
+
         _set_environment(self.credentials['default'])
         self.master_region_dict = _get_master_region_dict(
             master_region, self.regions_uris[master_region])
+        
         if white_checksums_file is not None:
             self.whitechecksum_dict = _get_whitechecksum_dict(
                 white_checksums_file)
@@ -280,6 +283,7 @@ def _targetedregion2cred_region(region, credentials):
     else:
             credential = credentials['default']
     return credential, region
+
 
 def _update_metadata_remote(region, image):
     """ update the metadata of the image in the specified region
