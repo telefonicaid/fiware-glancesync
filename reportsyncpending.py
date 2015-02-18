@@ -28,13 +28,17 @@ import os
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
-    checksums_filename = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
-    forcesync_filename = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    glancesync = GlanceSync('Spain', checksums_filename, forcesync_filename,
-                            credentials_file=credentials_file)
-    regions = glancesync.get_regions()
-    print '======Spain'
+    glancesync = GlanceSync()
+    regions_unsorted = glancesync.get_regions()
+    regions = list()
+    for region in glancesync.preferable_order:
+        if region in regions_unsorted:
+            regions.append(region)
+            regions_unsorted.remove(region)
+
+    regions.extend(regions_unsorted)
+
+    print '======Master (' + glancesync.master_region + ')'
     glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]

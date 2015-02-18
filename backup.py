@@ -30,13 +30,12 @@ import datetime
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
     now = datetime.datetime.now().isoformat()
-    glancesync = GlanceSync(credentials_file=credentials_file)
+    glancesync = GlanceSync()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     else:
-        regions = glancesync.get_regions()
+        regions = glancesync.get_regions(omit_master_region=False)
     directory = 'backup_glance_' + now
     os.mkdir(directory)
     for region in regions:

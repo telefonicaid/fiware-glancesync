@@ -27,25 +27,19 @@ import sys
 import os
 import os.path
 from glancesync import GlanceSync
-tryfirst = ['Trento', 'Lannion', 'Waterford', 'Berlin', 'Prague']
 
 if __name__ == '__main__':
-    checksums_file = os.path.dirname(sys.argv[0]) + '/white_checksums.conf'
-    forcesync_file = os.path.dirname(sys.argv[0]) + '/forcesync.conf'
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    glancesync = GlanceSync('Spain', checksums_file, forcesync_file,
-                            credentials_file)
+    glancesync = GlanceSync()
     regions_unsorted = glancesync.get_regions()
     regions = list()
-    print regions_unsorted
-    for region in tryfirst:
+    for region in glancesync.preferable_order:
         if region in regions_unsorted:
             regions.append(region)
             regions_unsorted.remove(region)
 
     regions.extend(regions_unsorted)
-    print regions
-    print '======Spain'
+
+    print '======Master (' + glancesync.master_region + ')'
     glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]

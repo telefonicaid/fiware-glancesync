@@ -29,16 +29,25 @@ import logging
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        msg = 'Use ' + sys.argv[0] +
-        ' <region> <oldname> <newname> '
+    if len(sys.argv) < 3:
+        msg = 'Use ' + sys.argv[0] + \
+              ' <oldname> <newname> [[<region1>] <region2>...]'
         logging.error(msg)
         sys.exit(-1)
 
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    glancesync = GlanceSync(credentials_file=credentials_file)
-    images = glancesync.get_images_region(sys.argv[1])
-    for image in images:
-        if image['Name'] == sys.argv[2]:
-            image['Name'] = sys.argv[3]
-            glancesync.update_metadata_image(sys.argv[1], image)
+    glancesync = GlanceSync()
+    if len(sys.argv) > 3:
+        regions = sys.argv[3:]
+    else:
+        regions = glancesync.get_regions(False)
+    for region in regions:
+        try:
+            images = glancesync.get_images_region(region)
+            for image in images:
+                if image['Name'] == sys.argv[1]:
+                    image['Name'] = sys.argv[2]
+                    glancesync.update_metadata_image(region, image)
+        except Exception:
+            # Don't do anything. Message has been already printed
+            # try next region
+            continue
