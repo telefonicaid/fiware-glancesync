@@ -527,8 +527,9 @@ def _printimages(imagesregion, comparewith=None):
     :return: this function doesn't return anything.
     """
 
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' in image and '_type' in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' in image and '_type' in image))
     images.sort(key=lambda image: image['_type'] + image['Name'])
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
@@ -538,8 +539,9 @@ def _printimages(imagesregion, comparewith=None):
             else:
                 print line
     print "---"
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' not in image and '_type' in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' not in image and '_type' in image))
     images.sort(key=lambda image: image['_type'] + image['Name'])
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
@@ -549,8 +551,9 @@ def _printimages(imagesregion, comparewith=None):
             else:
                 print line
     print "---"
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' in image and '_type' not in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' in image and '_type' not in image))
     images.sort(key=lambda image: int(image['_nid']))
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
