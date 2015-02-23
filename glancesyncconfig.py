@@ -86,6 +86,7 @@ class GlanceSyncConfig(object):
         self.targets = dict()
         self.master_region = None
         self.preferable_order = None
+        self.max_children = 1
 
         if configuration_path is not None:
             configparser = ConfigParser.SafeConfigParser()
@@ -93,6 +94,8 @@ class GlanceSyncConfig(object):
             self.master_region = configparser.get('main', 'master_region')
             self.preferable_order = configparser.getlist(
                 'main', 'preferable_order')
+            if configparser.has_option('main', 'max_children'):
+                self.max_children = configparser.getint('main', 'max_children')
 
             for section in configparser.sections():
                 if section == 'main' or section == 'DEFAULTS':
