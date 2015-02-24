@@ -144,8 +144,7 @@ class GlanceSync(object):
             self.master_region_dict, regionobj, imagesregion, dictimages,
             False)
         _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, False,
-            target, target['forcesyncs'])
+            self.master_region_dict, regionobj, dictimages, False)
 
     def show_sync_region_status(self, regionstr):
         """print a report about the images pending to sync in this region
@@ -162,8 +161,7 @@ class GlanceSync(object):
         _sync_update_metada_region(
             self.master_region_dict, regionobj, imagesregion, dictimages, True)
         _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, True,
-            target, target['forcesyncs'])
+            self.master_region_dict, regionobj, dictimages, True)
 
     def print_images_master_region(self):
         """print the set of images in master region to be synchronized"""
@@ -217,7 +215,7 @@ class GlanceSync(object):
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         _delete_image(regionobj, uuid, confirm)
 
-    def backup_glancemetadata_region(self, region, path=None):
+    def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!
@@ -309,7 +307,7 @@ def _delete_image(regionobj, uuid, confirm):
     default requires confirmation!
     """
 
-    _set_environment(regionobj, regionobj.region)
+    _set_environment(regionobj.target, regionobj.region)
     if confirm:
             p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
                       stdout=None)
@@ -557,8 +555,7 @@ def _printimages(imagesregion, comparewith=None):
 
 
 def _sync_upload_missing_images(
-        master_region_dictimages, regionobj, dictimages, onlyshow=False,
-        whitechecksums=None, forcesync=()):
+        master_region_dictimages, regionobj, dictimages, onlyshow=False):
     """ upload images of master region to the region if they are not already
     present.
 
@@ -571,14 +568,15 @@ def _sync_upload_missing_images(
      region
     :param regionobj: the region
     :param dictimages: a dictionary with the images on the region
-    :param whitechecksums: a object to determine when it's secure to override
-      or rename an image with a non-matching checksum.
-    :param forcesync: a set with UUIDs of images to synchronize even if they
-      don't match all the conditions.
     :return: total mbs uploaded (or to be uploaded, if onlyshow it is True)
 
     """
     totalmbs = 0
+
+    # a set with UUIDs of images to synchronize even if they don't match all
+    # the conditions.
+    target = regionobj.target
+    forcesync = target['forcesyncs']
 
     # There are two reason to upload first the smaller images:
     #   *kernel and ramdisk must be updload before AMI images to insert the
@@ -594,21 +592,19 @@ def _sync_upload_missing_images(
             continue
 
         if image_name in dictimages:
-            if not whitechecksums:
-                continue
             checksum = dictimages[image_name]['checksum']
             if image['checksum'] == checksum:
                 continue
 
-            if checksum in whitechecksums['dontupdate']:
+            if checksum in target['dontupdate']:
                 continue
 
-            if checksum in whitechecksums['replace']:
+            if checksum in target['replace']:
                 uuid2replace = dictimages[image_name]['Id']
-            elif checksum in whitechecksums['rename'] or 'any' in\
-                    whitechecksums['rename']:
+            elif checksum in target['rename'] or 'any' in\
+                    target['rename']:
                 uuid2rename = dictimages[image_name]['Id']
-            elif 'any' in whitechecksums['replace']:
+            elif 'any' in target['replace']:
                 uuid2replace = dictimages[image_name]['Id']
             else:
                 continue
