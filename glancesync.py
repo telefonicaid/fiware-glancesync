@@ -29,12 +29,13 @@ import os
 import urllib
 import base64
 import logging
+from subprocess import Popen, PIPE
 
 import glance.client
-from subprocess import Popen, PIPE
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
 from glancesyncconfig import GlanceSyncConfig
+from glancesync_region import GlanceSyncRegion
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
@@ -72,6 +73,7 @@ class GlanceSync(object):
         self.master_region = glancesyncconfig.master_region
         self.targets = glancesyncconfig.targets
         self.preferable_order = glancesyncconfig.preferable_order
+        self.max_children = glancesyncconfig.max_children
         for target_name in self.targets.keys():
             target = self.targets[target_name]
             self.regions_uris.update(_get_regions_uris(
@@ -220,10 +222,14 @@ class GlanceSync(object):
              created in current directory by default)
         :return: Nothing
         """
-        (credential, region) = _targetedregion2target_region(
-            region, self.targets)
 
-        os.environ['OS_REGION_NAME'] = region
+        regionobj = GlanceSyncRegion(region, self.targets)
+        # (target, region) = _targetedregion2target_region(
+        #    region, self.targets)
+        target = regionobj.target
+        region = regionobj.region
+        _set_environment(target, region)
+        # os.environ['OS_REGION_NAME'] = region
         if path is None:
             path = 'backup_' + region + '.txt'
         else:

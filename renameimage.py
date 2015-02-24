@@ -60,7 +60,7 @@ if __name__ == '__main__':
                     else:
                         image_to_rename = image
                 if image['Name'] == sys.argv[2]:
-                    # No error yet. Perhaps this image has been already renamed.
+                    # No error yet. Perhaps this image has been already renamed
                     destination_name_exists = True
 
             if image_to_rename is not None:
