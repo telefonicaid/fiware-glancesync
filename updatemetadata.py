@@ -28,14 +28,10 @@ import os
 from glancesync import GlanceSync
 
 images_with_changes = {
-    '2d-ui-r3.3.3': ('fiware:userinterface', 1303, True),
-    '3D-UI-XML3D': ('fiware:userinterface', 1304, True),
-    'cloud-rendering-r3.3.3': ('fiware:userinterface', 1305, True),
-    'VirtualCharacters': ('fiware:userinterface', 1306, True),
-    'interface-designer-r3.3.3': ('fiware:userinterface', 1307, True),
-    '2D3DCapture-3.3.3': ('fiware:userinterface', 1308, True),
-    'GIS-3.3.3': ('fiware:userinterface', 1309, True),
-    'RealVirtualInteractionGE-3.3.3':  ('fiware:userinterface', 1310, True),
+    'webtundra-1.0.0': ('fiware:userinterface', 1308, True),
+    'ramdisk-meqb-image-R2.3': (None, 142, False),
+    'kernel-meqb-image-R2.3': (None, 142, False),
+    'iotDiscovery-pep-r4_1': ('fiware:iot', 23, True),
 }
 
 
@@ -62,8 +58,10 @@ def update_nids(region):
                     image.get('Public') == is_public):
                 continue
 
-            image['_nid'] = nid
-            image['_type'] = typei
+            if nid:
+                image['_nid'] = nid
+            if typei:
+                image['_type'] = typei
             image['Public'] = is_public
             glancesync.update_metadata_image(region, image)
 

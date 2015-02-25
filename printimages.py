@@ -28,11 +28,13 @@ import os
 import glancesync
 
 if __name__ == '__main__':
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    sync_obj = glancesync.GlanceSync(credentials_file=credentials_file)
-    regions = sync_obj.get_regions()
-    print '======Spain'
-    sync_obj.print_images_master_region()
+    sync_obj = glancesync.GlanceSync()
+    if len(sys.argv) > 1:
+        regions = sys.argv[1:]
+    else:
+        regions = sync_obj.get_regions()
+        print '======Master (' + sync_obj.master_region + ')'
+        sync_obj.print_images_master_region()
     for region in regions:
         try:
             print "======" + region
@@ -41,4 +43,3 @@ if __name__ == '__main__':
             # Don't do anything. Message has been already printed
             # try next region.
             continue
-            # raise

@@ -38,13 +38,13 @@ if __name__ == '__main__':
         message = 'Use ' + sys.argv[0] + ' [<region>] <imagename> '
         logging.error(message)
         sys.exit(0)
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    glancesync = GlanceSync(credentials_file=credentials_file)
+    glancesync = GlanceSync()
     if len(sys.argv) == 3:
         regions = [sys.argv[1]]
         image_name = sys.argv[2]
     else:
-        regions = glancesync.get_regions()
+        # Obtains the full list or region, including the master region
+        regions = glancesync.get_regions(omit_master_region=False)
         image_name = sys.argv[1]
 
     for region in regions:

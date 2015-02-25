@@ -29,16 +29,53 @@ import logging
 from glancesync import GlanceSync
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        msg = 'Use ' + sys.argv[0] +
-        ' <region> <oldname> <newname> '
+    if len(sys.argv) < 3:
+        msg = 'Use ' + sys.argv[0] + \
+              ' <oldname> <newname> [[<region1>] <region2>...]'
         logging.error(msg)
         sys.exit(-1)
 
-    credentials_file = os.path.dirname(sys.argv[0]) + '/credentials.conf'
-    glancesync = GlanceSync(credentials_file=credentials_file)
-    images = glancesync.get_images_region(sys.argv[1])
-    for image in images:
-        if image['Name'] == sys.argv[2]:
-            image['Name'] = sys.argv[3]
-            glancesync.update_metadata_image(sys.argv[1], image)
+    glancesync = GlanceSync()
+    if len(sys.argv) > 3:
+        regions = sys.argv[3:]
+    else:
+        regions = glancesync.get_regions(False)
+
+    for region in regions:
+        print region + ' ',
+        try:
+            images = glancesync.get_images_region(region)
+            # only rename if the target name does not exist and the
+            # source name is unique.
+            image_to_rename = None
+            destination_name_exists = False
+            for image in images:
+                if image['Name'] == sys.argv[1]:
+                    if image_to_rename is not None:
+                        print 'Not renamed.'
+                        msg = 'Name {0} is not unique in region {1}'
+                        logging.error(msg.format(image['Name'], region))
+
+                        break
+                    else:
+                        image_to_rename = image
+                if image['Name'] == sys.argv[2]:
+                    # No error yet. Perhaps this image has been already renamed
+                    destination_name_exists = True
+
+            if image_to_rename is not None:
+                if destination_name_exists:
+                    print 'Not renamed.'
+                    msg = 'Destination name {0} already exists in region {1}'
+                    logging.error(msg.format(sys.argv[2], region))
+                else:
+                    image_to_rename['Name'] = sys.argv[2]
+                    glancesync.update_metadata_image(region, image_to_rename)
+                    print 'Renamed'
+            else:
+                print 'Not found.'
+        except Exception:
+            # Don't do anything. Message has been already printed with
+            # logging. Only print status and continue with next region
+            print 'Exception'
+            continue

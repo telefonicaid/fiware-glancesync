@@ -29,10 +29,13 @@ import os
 import urllib
 import base64
 import logging
+from subprocess import Popen, PIPE
 
 import glance.client
-from subprocess import Popen, PIPE
 from keystoneclient.v2_0.client import Client as KeystoneClient
+
+from glancesyncconfig import GlanceSyncConfig
+from glancesync_region import GlanceSyncRegion
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
@@ -56,9 +59,7 @@ class GlanceSync(object):
     method.
     """
 
-    def __init__(
-            self, master_region='Spain', white_checksums_file=None,
-            forcesync_file=None, credentials_file=None):
+    def __init__(self, glancesyncconfig=None):
         """Constructor of the object
 
         Note:
@@ -66,30 +67,23 @@ class GlanceSync(object):
         are obtained and cached when this constructor is called.
         """
 
+        if glancesyncconfig is None:
+            glancesyncconfig = GlanceSyncConfig()
         self.regions_uris = dict()
-        self.master_region = master_region
-        self.credentials = _get_credentials(credentials_file)
-        for credential_name in self.credentials.keys():
-            credential = self.credentials[credential_name]
+        self.master_region = glancesyncconfig.master_region
+        self.targets = glancesyncconfig.targets
+        self.preferable_order = glancesyncconfig.preferable_order
+        self.max_children = glancesyncconfig.max_children
+        for target_name in self.targets.keys():
+            target = self.targets[target_name]
             self.regions_uris.update(_get_regions_uris(
-                self.get_regions(False, credential_name), credential))
-
-        _set_environment(self.credentials['default'])
+                self.get_regions(False, target_name), target))
+        _set_environment(self.targets['master'])
         self.master_region_dict = _get_master_region_dict(
-            master_region, self.regions_uris[master_region])
+            GlanceSyncRegion(self.master_region, self.targets),
+            self.regions_uris[self.master_region])
 
-        if white_checksums_file is not None:
-            self.whitechecksum_dict = _get_whitechecksum_dict(
-                white_checksums_file)
-        else:
-            self.whitechecksum_dict = None
-
-        if forcesync_file is not None:
-            self.forcesyncs = _get_forcesyncset(forcesync_file)
-        else:
-            self.forcesyncs = ()
-
-    def get_regions(self, omit_master_region=True, target='default'):
+    def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
 
         Keyword arguments:
@@ -100,7 +94,7 @@ class GlanceSync(object):
 
         # get configuration
 
-        _set_environment(self.credentials[target])
+        _set_environment(self.targets[target])
         p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'],
                   stdin=None, stdout=PIPE)
 
@@ -109,7 +103,7 @@ class GlanceSync(object):
         for line in output_cmd:
             if line.startswith('| region'):
                 name = line.split('|')[2].strip()
-                if target != 'default':
+                if target != 'master':
                     name = target + ':' + name
 
                 if omit_master_region and name == self.master_region:
@@ -118,7 +112,7 @@ class GlanceSync(object):
         p.wait()
         return regions_list
 
-    def sync_region(self, region):
+    def sync_region(self, regionstr):
         """sync the specified region with the master region
         Only the images that check these conditions are synchronized:
 
@@ -141,36 +135,40 @@ class GlanceSync(object):
         No image content is overrided, unless the file white_checksum.
         """
 
-        imagesregion = _getimagelist(region, self.regions_uris[region])
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        imagesregion = _getimagelist(
+            regionobj, self.regions_uris[regionobj.region])
         dictimages = dict((image['Name'], image) for image in imagesregion)
 
         _sync_update_metada_region(
-            self.master_region_dict, region, imagesregion, dictimages, False)
+            self.master_region_dict, regionobj, imagesregion, dictimages,
+            False)
         _sync_upload_missing_images(
-            self.master_region_dict, region, dictimages, False,
-            self.whitechecksum_dict, self.forcesyncs)
+            self.master_region_dict, regionobj, dictimages, False)
 
-    def show_sync_region_status(self, region):
+    def show_sync_region_status(self, regionstr):
         """print a report about the images pending to sync in this region
 
         This method is nearly a dry-run of the method sync_region
         """
 
-        imagesregion = _getimagelist(region, self.regions_uris[region])
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        target = regionobj.target
+        regionn = regionobj.region
+        imagesregion = _getimagelist(regionobj, self.regions_uris[regionn])
         dictimages = dict((image['Name'], image) for image in imagesregion)
 
         _sync_update_metada_region(
-            self.master_region_dict, region, imagesregion, dictimages, True)
+            self.master_region_dict, regionobj, imagesregion, dictimages, True)
         _sync_upload_missing_images(
-            self.master_region_dict, region, dictimages, True,
-            self.whitechecksum_dict, self.forcesyncs)
+            self.master_region_dict, regionobj, dictimages, True)
 
     def print_images_master_region(self):
         """print the set of images in master region to be synchronized"""
 
         _printimages(self.master_region_dict.values())
 
-    def print_images(self, region):
+    def print_images(self, regionstr):
         """print a report about the images present on the specified region
 
         This method is NOT intended to check the synchronization status
@@ -188,10 +186,10 @@ class GlanceSync(object):
            true on master and is false in the region
         """
 
-        images_region = self.get_images_region(region)
+        images_region = self.get_images_region(regionstr)
         _printimages(images_region, self.master_region_dict)
 
-    def update_metadata_image(self, region, image):
+    def update_metadata_image(self, regionstr, image):
         """update the metadata of the image in the specified region
 
         This method takes all the metadata information included in the image
@@ -205,32 +203,35 @@ class GlanceSync(object):
         also updates, if it is presented, kernel_id and ramdisk_id with the
         UUIDs of the region.
         """
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        _update_metadata_remote(regionobj, image)
 
-        _update_metadata_remote(region, image)
-
-    def delete_image(self, region, uuid, confirm=True):
+    def delete_image(self, regionstr, uuid, confirm=True):
         """delete a image on the specified region.
 
         Be careful, this action cannot be reverted and for this reason by
         default requires confirmation!
         """
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        _delete_image(regionobj, uuid, confirm)
 
-        _delete_image(region, uuid, confirm)
-
-    def backup_glancemetadata_region(self, region, path=None):
+    def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
 
         Of course, this metadata doesn't save metadata of other tenants!!
 
-        :param region: The region whose metadata is preserved in a backup
+        :param regionstr: The region whose metadata is preserved in a backup
         :param path: Directory when the file is created (the file it is
              created in current directory by default)
         :return: Nothing
         """
-        (credential, region) = _targetedregion2cred_region(
-            region, self.credentials)
 
-        os.environ['OS_REGION_NAME'] = region
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        # (target, region) = _targetedregion2target_region(
+        #    region, self.targets)
+        target = regionobj.target
+        region = regionobj.region
+        _set_environment(target, region)
         if path is None:
             path = 'backup_' + region + '.txt'
         else:
@@ -254,7 +255,7 @@ class GlanceSync(object):
                 logging.error(msg)
                 raise Exception(msg)
 
-    def get_images_region(self, region):
+    def get_images_region(self, regionstr):
         """It returns a map with all the tenant's images in that region
 
         This is a dictionary indexed by the name of the image. Each entry
@@ -266,31 +267,15 @@ class GlanceSync(object):
         User defined metadata is prefixed with _ (e.g. _nid, _type...)
         A checksum field is added.
         """
-
-        return _getimagelist(region, self.regions_uris[region])
-
-
-def _targetedregion2cred_region(region, credentials):
-    """it converts [target:]region to  a (credential, region) pair.
-
-    :param region: a [target:]region string
-    :param credentials: the dictionary with the credentials
-    :return: a tuple with (credential, region)
-    """
-    parts = region.split(':')
-    if len(parts) == 2:
-            region = parts[1]
-            credential = credentials[parts[0]]
-    else:
-            credential = credentials['default']
-    return credential, region
+        region = GlanceSyncRegion(regionstr, self.targets)
+        return _getimagelist(region, self.regions_uris[region.region])
 
 
-def _update_metadata_remote(region, image):
+def _update_metadata_remote(regionobj, image):
     """ update the metadata of the image in the specified region
     See GlanceSync.update_metadata_image for more details.
 
-    :param region: region where it is the image to update
+    :param regionobj: region where it is the image to update
     :param image: the image with the metadata to update
     :return: this function doesn't return anything.
     """
@@ -304,8 +289,8 @@ def _update_metadata_remote(region, image):
             'Public'], 'protected=' + image['Protected'], 'container_format=' +
         image['Container format']]
     arguments.extend(props)
-    # set the region
-    os.environ['OS_REGION_NAME'] = region
+    # set credential
+    _set_environment(regionobj.target, regionobj.region)
     # update
     p = Popen(arguments, stdin=None, stdout=None, stderr=None)
     p.wait()
@@ -315,14 +300,14 @@ def _update_metadata_remote(region, image):
         raise Exception(msg)
 
 
-def _delete_image(region, uuid, confirm):
+def _delete_image(regionobj, uuid, confirm):
     """delete a image on the specified region.
 
     Be careful, this action cannot be reverted and for this reason by
     default requires confirmation!
     """
 
-    os.environ['OS_REGION_NAME'] = region
+    _set_environment(regionobj.target, regionobj.region)
     if confirm:
             p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
                       stdout=None)
@@ -333,21 +318,22 @@ def _delete_image(region, uuid, confirm):
     p.wait()
 
 
-def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
+def _upload_image_remote(regionobj, image, replace_uuid=None,
+                         rename_uuid=None):
     """Upload the image to the specified region.
 
     Usually, this call is invoked by sync_region()
     Be careful! if the image has kernel_id / ramdisk_id properties, it must be
     updated with the ids of this region
 
-    :param region: the region where the image is uploaded
+    :param regionobj: the region where the image is uploaded
     :param image: the image to upload
     :param replace_uuid: if it is not None, this image must be deleted
     :param rename_uuid: if it is not None, this image must be renamed
     :return: the UUID of the new image.
     """
-    # set region
-    os.environ['OS_REGION_NAME'] = region
+    # set credential
+    _set_environment(regionobj.target, regionobj.region)
     # if replace_uuid, first upload with other name and without nid
     # nor type
     if replace_uuid or rename_uuid:
@@ -368,8 +354,8 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     # compose cmdline
     arguments = ['glance', 'add', '--silent-upload', 'disk_format=' + image[
         'Disk format'], 'name=' + image['Name'], 'is_public=' +
-        image['Public'], 'protected=' + image['Protected'], 'container_format='
-        + image['Container format']]
+        image['Public'], 'protected=' + image['Protected'],
+        'container_format=' + image['Container format']]
     arguments.extend(props)
     # run command
     fich = open('/var/lib/glance/images/' + image['Id'], 'r')
@@ -379,8 +365,8 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
     result = outputcmd.read()
     p.wait()
     if p.returncode != 0:
-        msg = 'Upload of ' + image['Name'] + " to region " + region +\
-            ' Failed.'
+        msg = 'Upload of ' + image['Name'] + " to region " +\
+              regionobj.region + ' Failed: ' + result
         logging.error(msg)
         raise Exception(msg)
 
@@ -396,12 +382,12 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
 
         newimage['Name'] = saved_name
         newimage['Public'] = 'Yes'
-        _update_metadata_remote(region, newimage)
+        _update_metadata_remote(regionobj, newimage)
         if replace_uuid:
-            _delete_image(region, replace_uuid, confirm=False)
+            _delete_image(regionobj, replace_uuid, confirm=False)
         elif rename_uuid:
             # locate old image
-            l = _getimagelist(region)
+            l = _getimagelist(regionobj)
             oldimage = None
             for i in l:
                 if i['Id'] == rename_uuid:
@@ -411,11 +397,11 @@ def _upload_image_remote(region, image, replace_uuid=None, rename_uuid=None):
                         del(oldimage['_nid'])
 
                     oldimage['Name'] = saved_name + '.old'
-                    _update_metadata_remote(region, oldimage)
+                    _update_metadata_remote(regionobj, oldimage)
     return newuuid
 
 
-def _getimagelist(region, region_uri):
+def _getimagelist(regionobj, region_uri):
     """return a image list from the glance of the specified region
 
      Each imagen is a dictionary indexed by name. Extra properties are
@@ -424,7 +410,7 @@ def _getimagelist(region, region_uri):
      are included.
     """
 
-    os.environ['OS_REGION_NAME'] = region
+    _set_environment(regionobj.target, regionobj.region)
     images = list()
     image = None
     p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
@@ -439,11 +425,11 @@ def _getimagelist(region, region_uri):
         logging.error(msg)
         raise Exception(msg)
 
-    checksums = _get_checksums(region, region_uri)
+    checksums = _get_checksums(regionobj, region_uri)
     image = dict()
     for line in outputcmd:
         if line[0] == '=':
-            if image is not None and image['Name'] is not 'None':
+            if image is not None and image['Name'] != 'None':
                 image['checksum'] = checksums[image['Name']]
                 images.append(image)
             image = dict()
@@ -531,8 +517,9 @@ def _printimages(imagesregion, comparewith=None):
     :return: this function doesn't return anything.
     """
 
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' in image and '_type' in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' in image and '_type' in image))
     images.sort(key=lambda image: image['_type'] + image['Name'])
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
@@ -542,8 +529,9 @@ def _printimages(imagesregion, comparewith=None):
             else:
                 print line
     print "---"
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' not in image and '_type' in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' not in image and '_type' in image))
     images.sort(key=lambda image: image['_type'] + image['Name'])
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
@@ -553,8 +541,9 @@ def _printimages(imagesregion, comparewith=None):
             else:
                 print line
     print "---"
-    images = list(image for image in imagesregion if image['Public'] == 'Yes'
-                  and ('_nid' in image and '_type' not in image))
+    images = list(
+        image for image in imagesregion if image['Public'] == 'Yes' and
+        ('_nid' in image and '_type' not in image))
     images.sort(key=lambda image: int(image['_nid']))
     for image in images:
         line = _convert2csv(image, ('Name', '_type', '_nid'))
@@ -566,8 +555,7 @@ def _printimages(imagesregion, comparewith=None):
 
 
 def _sync_upload_missing_images(
-        master_region_dictimages, region, dictimages, onlyshow=False,
-        whitechecksums=None, forcesync=()):
+        master_region_dictimages, regionobj, dictimages, onlyshow=False):
     """ upload images of master region to the region if they are not already
     present.
 
@@ -578,16 +566,17 @@ def _sync_upload_missing_images(
 
     :param master_region_dictimages: a dictionary with the images on master
      region
-    :param region: the region name
+    :param regionobj: the region
     :param dictimages: a dictionary with the images on the region
-    :param whitechecksums: a object to determine when it's secure to override
-      or rename an image with a non-matching checksum.
-    :param forcesync: a set with UUIDs of images to synchronize even if they
-      don't match all the conditions.
     :return: total mbs uploaded (or to be uploaded, if onlyshow it is True)
 
     """
     totalmbs = 0
+
+    # a set with UUIDs of images to synchronize even if they don't match all
+    # the conditions.
+    target = regionobj.target
+    forcesync = target['forcesyncs']
 
     # There are two reason to upload first the smaller images:
     #   *kernel and ramdisk must be updload before AMI images to insert the
@@ -603,21 +592,19 @@ def _sync_upload_missing_images(
             continue
 
         if image_name in dictimages:
-            if not whitechecksums:
-                continue
             checksum = dictimages[image_name]['checksum']
             if image['checksum'] == checksum:
                 continue
 
-            if checksum in whitechecksums['dontupdate']:
+            if checksum in target['dontupdate']:
                 continue
 
-            if checksum in whitechecksums['replace']:
+            if checksum in target['replace']:
                 uuid2replace = dictimages[image_name]['Id']
-            elif checksum in whitechecksums['rename'] or 'any' in\
-                    whitechecksums['rename']:
+            elif checksum in target['rename'] or 'any' in\
+                    target['rename']:
                 uuid2rename = dictimages[image_name]['Id']
-            elif 'any' in whitechecksums['replace']:
+            elif 'any' in target['replace']:
                 uuid2replace = dictimages[image_name]['Id']
             else:
                 continue
@@ -650,7 +637,7 @@ def _sync_upload_missing_images(
                     logging.warning(msg)
                 else:
                     image['_ramdisk_id'] = dictimages[ramdisk]['Id']
-            uuid = _upload_image_remote(region, image, uuid2replace,
+            uuid = _upload_image_remote(regionobj, image, uuid2replace,
                                         uuid2rename)
             # we keep the UUID because if could be a kernel_id or ramdisk_id
             newimage = dict()
@@ -668,21 +655,21 @@ def _sync_upload_missing_images(
         if onlyshow:
             print 'MBs pending : ' + str(totalmbs)
         else:
-            print 'Total uploaded to region ' + region + ': ' + str(totalmbs)\
-                + ' (MB) '
+            print 'Total uploaded to region ' + regionobj.region + ': ' +\
+                  str(totalmbs) + ' (MB) '
     sys.stdout.flush()
     return totalmbs
 
 
 def _sync_update_metada_region(
-        master_region_dictimages, region, imagesregion, dictimages,
+        master_region_dictimages, regionobj, imagesregion, dictimages,
         onlyshow=False):
     """This method synchronizes the metadata of the images that are both in
     master region and in the specified region, but with different metadata.
 
     :param master_region_dictimages: a dictionary with the images on master
      region
-    :param region: the region name
+    :param regionobj: the region object
     :param imagesregion: a list with the images in the region
     :param dictimages: a dictionary with the images in the region
     :param onlyshow: If it is True, don't synchronize: this is dry-run mode.
@@ -743,7 +730,7 @@ def _sync_update_metada_region(
 
             image['Public'] = image_mast_reg['Public']
             if not onlyshow:
-                _update_metadata_remote(region, image)
+                _update_metadata_remote(regionobj, image)
             else:
                 print 'Image penging to update the metadata ' + image_name
 
@@ -804,27 +791,28 @@ def _get_regions_uris(region_list, credential):
     return regions_uris
 
 
-def _get_checksums(region, region_uri):
+def _get_checksums(regionobj, region_uri):
     """Provide a dictionary with the checksums of each image in the region.
 
     Only the images owned by the tenant are considered.
 
-    :param region: the region where the images are
+    :param regionobj: the region where the images are
     :param region_uri: the URL of the glance server
     :return: a dictionary with checkums, indexed by image name.
     """
-
+    _set_environment(regionobj.target, regionobj.region)
     host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
     (host, port) = urllib.splitport(host)
+
     images = glance.client.get_client(
-        host=host, port=port, region=region).get_images(limit=5000)
+        host=host, port=port, region=regionobj.region).get_images(limit=5000)
     checksum_region = dict()
     for image in images:
         checksum_region[image['name']] = image['checksum']
     return checksum_region
 
 
-def _get_master_region_dict(master_region, master_region_uri):
+def _get_master_region_dict(master_region_obj, master_region_uri):
     """Gets a dictionary with the information of the images in the master
     region.
 
@@ -834,7 +822,7 @@ def _get_master_region_dict(master_region, master_region_uri):
     :return: a dictionary indexed by
     """
 
-    images = _getimagelist(master_region, master_region_uri)
+    images = _getimagelist(master_region_obj, master_region_uri)
     master_region_dictimagesbyid = dict((image['Id'], image) for image in
                                         images)
     master_region_dictimages = dict()
@@ -851,110 +839,19 @@ def _get_master_region_dict(master_region, master_region_uri):
     return master_region_dictimages
 
 
-def _get_whitechecksum_dict(filename):
-    """read the configuration about what to do with images with a
-    non-matching checksum.
-
-    By default, if a image is present in a region but with different checksum
-    that the master region image, only a warning is emitted. This method
-    returns a dictionary with three keys:
-    --replace: a list of UUID that may be replaced
-    --rename: a list of UUID that may be replace, but before this the old image
-    must be renamed
-    --dontupdate: both replace and rename may include the word 'any', in this
-    case dontupdate is useful as a blacklist.
-    """
-
-    checksumdict = {'replace': set(), 'rename': set(), 'dontupdate': set()}
-    for line in open(filename):
-        line = line.strip()
-        if len(line) == 0 or line[0] == '#':
-            continue
-
-        parts = line.split('=')
-        if len(parts) != 2:
-            msg = 'Error parsing file', filename
-            logging.error(msg)
-            raise Exception(msg)
-
-        key = parts[0].rstrip()
-        values = set(parts[1].split(','))
-        if key in ['replace', 'rename', 'dontupdate']:
-            checksumdict[key] = values
-        else:
-            msg = 'Error parsing file', filename, 'key ', key,\
-                ' not recognized'
-            logging.error(msg)
-            raise Exception(msg)
-    return checksumdict
-
-
-def _get_forcesyncset(filename):
-    """It returns a set of UUIDs that must be synchronized unconditionally
-
-    UUIDs not listed here are only synchronized when are public and has
-    nid and/or type attributes.
-    """
-
-    uuidset = set()
-    for line in open(filename):
-        line = line.strip()
-        if len(line) == 0 or line[0] == '#':
-            continue
-        else:
-            uuidset.add(line)
-    return uuidset
-
-
-def _get_credentials(filename):
-    """It returns a dict with the credentials (user, pass, url, tenant)
-
-    Predefined default target is obtained from environment variables if
-    missing in configuration.
-
-    Each line has the form:
-     <credential_name>=<user>,<password>,<url>,<tenant>
-    """
-
-    credentials = dict()
-    if filename is not None:
-        for line in open(filename):
-            line = line.strip()
-            if len(line) == 0 or line[0] == '#':
-                continue
-            else:
-                (name, definition) = line.split('=')
-                parts = definition.lstrip().split(',')
-                credential = dict()
-                credential['user'] = parts[0]
-                credential['password'] = base64.decodestring(parts[1])
-                credential['keystone_url'] = parts[2]
-                credential['tenant'] = parts[3]
-                credentials[name.rstrip()] = credential
-
-    if 'default' not in credentials and 'OS_USERNAME' in os.environ:
-        credential = dict()
-        credential['user'] = os.environ['OS_USERNAME']
-        credential['password'] = os.environ['OS_PASSWORD']
-        credential['keystone_url'] = os.environ['OS_AUTH_URL']
-        credential['tenant'] = os.environ['OS_TENANT_NAME']
-        credentials['default'] = credential
-    return credentials
-
-
-def _set_environment(credential, region=None):
+def _set_environment(target, region=None):
     """Set the environment with the credential provided.
 
     CLI tools use environment variables to read the credential.
 
-    :param credential: a dictionary with the credential
+    :param target: a dictionary with the credential
     :param region: the region to set on OS_REGION_NAME
     :return: this method doesn't return anything.
     """
 
-    os.environ['OS_USERNAME'] = credential['user']
-    os.environ['OS_PASSWORD'] = credential['password']
-    os.environ['OS_AUTH_URL'] = credential['keystone_url']
-    os.environ['OS_TENANT_NAME'] = credential['tenant']
+    os.environ['OS_USERNAME'] = target['user']
+    os.environ['OS_PASSWORD'] = target['password']
+    os.environ['OS_AUTH_URL'] = target['keystone_url']
+    os.environ['OS_TENANT_NAME'] = target['tenant']
     if region is not None:
         os.environ['OS_REGION_NAME'] = region

@@ -23,17 +23,28 @@
 # contact with opensource@tid.es
 #
 author = 'jmpr22'
-import sys
-import os
-import glancesync
 
-if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        target = sys.argv[1]
-    else:
-        target = 'master'
+"""This module includes code supporting the glancesync functionality, but
+users should use instead the GlanceSync class provided in glancesync."""
 
-    sync_obj = glancesync.GlanceSync()
-    regions = sync_obj.get_regions(target=target)
-    regions.sort()
-    print ','.join(regions)
+
+class GlanceSyncRegion(object):
+    """This class supports the concept of region with a target namespace"""
+
+    def __init__(self, region, targets):
+        parts = region.split(':')
+        if len(parts) == 2:
+            region = parts[1]
+            target = targets[parts[0]]
+        else:
+            target = targets['master']
+        self.region = region
+        self.target = target
+        self._uri = None
+
+    # """The URI of the region's glance server"""
+    # @property
+    # def uri(self):
+    #    if self._uri is None:
+    #        pass
+    #    return self._uri
