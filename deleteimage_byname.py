@@ -43,6 +43,7 @@ if __name__ == '__main__':
         regions = [sys.argv[1]]
         image_name = sys.argv[2]
     else:
+        # Obtains the full list or region, including the master region
         regions = glancesync.get_regions(omit_master_region=False)
         image_name = sys.argv[1]
 
