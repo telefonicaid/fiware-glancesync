@@ -98,13 +98,10 @@ Glancesync software distribution includes some extra tools:
 * printimages.py This tool shows for each region its list of images with a prefix indicating some remarkable information. This tool is conceived as a tool to detect anomalies and images that are in some region and not in the master region. These are the special prefixes:
 
   * +: this image is not on the master glance server
-  * $: this image is not active: may be still uploading or in an error
-           status.
+  * $: this image is not active: may be still uploading or in an error status.
   * -: this image is on the master glance server, but as non-public
   * !: this image is on the master glance server, but checksum is different
-  * #: this image is on the master glance server, but some of these
-           attributes are different: nid, type, sdc_aware, Public (if it is
-           true on master and is false in the region
+  * #: this image is on the master glance server, but some of these attributes are different: nid, type, sdc_aware, Public (if it is true on master and is false in the region)
 
 * backup.py do a full backup of the images metadata (not content!!!) located at the specified regions (all regions in the master target if not specified). Of course, only the images which are owned by the tenant or publicly available are consider. This backup correspond with the execution of command 
 * deleteimage_byname.py  Search the image in the region by name and delete it. May also remove the image in all the regions
