@@ -19,19 +19,6 @@ Glancesync has special support for AMI (Amazon Machine Image). Amazon images inc
 
 This tool does not synchronise using UUID but names (i.e. a image has the same name in all regions, but not the same UUID). Using a UUID to synchronise is generally a bad idea, because some problems may arise with the restriction that a UUID must be unique. For example, a user in a region might upload a image with this UUID before the synchronisation, or a previous upload may end with an error but with the UUID created. If something similar to an UUID is required, is better to use a metadata field to simulate it.
 
-Installation
-------------
-
-At the moment, Glancesync is designed to run in the glance server of the master region, because it reads the images content directly from disk. This will be fixed in a feature version.
-
-It's not necessary to install the software, after unzipping the package or running 'git clone' the tool is ready to work.
-
-Glancesync works mainly as a front-end to the glance and keystone python tool, therefore they must be installed (note that in Essex OpenStack release, python-glanceclient was named as glance-client):
-
-.. code::
-
-   $ apt-get install python-glanceclient python-keystoneclient
-
 How to use
 ----------
 
@@ -40,7 +27,7 @@ _________
 First, you need the credentials to authenticate with the keystone server. You can put this credentials in a configuration file or set the following standard OpenStack environment variables: ``OS_USERNAME``, ``OS_PASSWORD``, ``OS_AUTH_URL``, ``OS_TENANT_NAME``, ``OS_REGION_NAME``. The value of ``OS_REGION_NAME`` will be the master region (in FIWARE Lab this region is Spain). 
 
 
-If you prefer a configuration file, edit the file ``/etc/glancesync.conf`` (a different path may be used, if variable ``GLANCESYNC_CONF`` is defined).  In section [main] the parameter 'master region' must be set with the region from which the images are synchronised. In section [master] the parameter 'credential' must include the following in this order: user, password, keystone_url, tenant. A difference in the configuration file, is that password must be encoded with base64. 
+If you prefer a configuration file, edit the file ``/etc/glancesync.conf`` (a different path may be used, if variable ``GLANCESYNC_CONF`` is defined).  In section ``[main]`` the parameter ``master region`` must be set with the region from which the images are synchronised. In section [master] the parameter 'credential' must include the following in this order: user, password, keystone_url, tenant. A difference in the configuration file, is that password must be encoded with base64. 
 
 
 After this, if you simply need to synchronise all the regions with the master region, run ``glancesync/sync.py``. 
@@ -68,7 +55,7 @@ It is possible to add manually, to the synchronisation set, additional images th
 * they are not public or are not owned by the tenant (but not both, because then they are not accessible)
 
 
-Additional images are included appending their UUIDs to forcesyncs parameter at [master] section.
+Additional images are included appending their UUIDs to forcesyncs parameter at ``[master]`` section.
 
 The regions list. Multitarget support
 _____________________________________
@@ -79,7 +66,7 @@ Additionally, Glancesync iterates sequentially with the regional glance servers 
 
 A new feature is to synchronise regions registered at different keystone servers. A group of regions sharing a keystone server (and therefore the same credentials) is a 'target'. The 'master' target is mandatory and is the master region's group. Each target has a section in the configuration file and may have its own parameters (every parameter described in this document about the ``master`` region may be inside any other target section), but the only mandatory is ``credential``. Any parameter filled in the special section ``[DEFAULT]`` acts as a default value for each other section. To overwrite a default value, simple use '=' with a value (e.g ``dontupdate=``)
 
-A region is full specified as target:region, but 'master:' may be omitted.
+A region is full specified as *target:region*, but *master:* may be omitted.
 
 Parallel sync
 _____________
@@ -111,7 +98,7 @@ Glancesync software distribution includes some extra tools:
 Appendix: Example of configuration file
 ---------------------------------------
 
-.. code::
+::
 
  [main]
  
