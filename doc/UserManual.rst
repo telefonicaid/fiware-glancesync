@@ -47,14 +47,14 @@ After this, if you simply need to synchronise all the regions with the master re
 
 The tool first obtains the list of regions, contacts with the master region to obtain its list of images, each one with its metadata, expands this metadata with the checksum of each image and finally prints the set of images to synchronise. Then it iterates through the list of regions. For each region, glancesync obtains the list of images with their metadata and checksums and compare with the results of master region. If an image is present in both regions but with different metadata fields ``nid``, ``type`` or ``sdc_aware``, it updates the image in the region with the values of the images in the master region. After this, it uploads sequentially (ordered by size in ascending order) the missing images to the region. If an operation with a region fails, for example the upload of an image, Glancesync passes to next region, due to if there is a problem uploading an image, there will be also problems uploading another one bigger. 
 
-
 It is possible that an image is present both in the region and in the master region, but with different content (i.e. the checksums are different). The default behaviour of Glancesync is only to print a warning (safety is a big concern with a synchronisation tool: it never should touch content without user knowledge). The user can specify a list of images that it is right to overwrite by setting a list of checksums (the old content ones) using parameter '``replace``' in the section ``[master``] of the configuration file. Another option is the parameter '``rename``'; in this case the old image is not deleted but renamed (and its properties nid and type are renamed also). Both parameters can include the 'any' keyword. In this case the parameter '``dontupdate``' works as a blacklist. The algorithm is:
- 1.  Is the checksum in dontupdate? print a warning only
- 2.  Is the checksum in rename? rename old image and upload the master region's image
- 3. Is the checksum in replace? replace the old image with the master region's image
- 4. Does the parameter 'replace' include the keyword 'any'? rename old image and upload the  master region's image
- 5. Does the parameter 'rename' include the keyword 'any'? replace the old image with the master region's image
- 6. Otherwise: print a warning only
+
+1.  Is the checksum in dontupdate? print a warning only
+2.  Is the checksum in rename? rename old image and upload the master region's image
+3. Is the checksum in replace? replace the old image with the master region's image
+4. Does the parameter 'replace' include the keyword 'any'? rename old image and upload the  master region's image
+5. Does the parameter 'rename' include the keyword 'any'? replace the old image with the master region's image
+6. Otherwise: print a warning only
 
 What images are synchronised?
 _____________________________
@@ -63,8 +63,9 @@ The images to be synchronised from master region are selected by its metadata. E
 The images also must be public and owned by the tenant.
 
 It is possible to add manually, to the synchronisation set, additional images that:
- * do not include the required metadata
- * they are not public or are not owned by the tenant (but not both, because then they are not accessible)
+
+* do not include the required metadata
+* they are not public or are not owned by the tenant (but not both, because then they are not accessible)
 
 
 Additional images are included appending their UUIDs to forcesyncs parameter at [master] section.
@@ -73,7 +74,6 @@ The regions list. Multitarget support
 _____________________________________
 
 By default Glancesync synchronised the images from the master region to all the others regions whose glance server is registered in the same keystone server than the master region. However, another option is to pass the exact list of regions as parameters.
-
 
 Additionally, Glancesync iterates sequentially with the regional glance servers in the same order they are get from the keystone server. If the user prefers a different order, they can modify the parameter ``preferable_order`` of section ``[main]``. The value of this parameter does not need to include all the regions available, nor all of them has to exist at this moment. The algorithm works iterating through the list: if the region exists, it is append to the new ordered list and removed from the original list. At the end, the remaining regions are append to the new ordered list. 
 
@@ -90,11 +90,12 @@ When using parallesync.py, the information about each region is not displayed us
 
 Other tools
 -----------
+
 Glancesync software distribution includes some extra tools:
 
- * getregions.py  Obtains the full list of the regions of the specified target. If not parameter is specified, 'master' region is assumed.
- * reportsyncpending.py This is a "dry-run" version of sync tool. That is, shows what regions and images are pending of synchronisation.
- * printimages.py This tool shows for each region its list of images with a prefix indicating some remarkable information. This tool is conceived as a tool to detect anomalies and images that are in some region and not in the master region. These are the special prefixes:
+* getregions.py  Obtains the full list of the regions of the specified target. If not parameter is specified, 'master' region is assumed.
+* reportsyncpending.py This is a "dry-run" version of sync tool. That is, shows what regions and images are pending of synchronisation.
+* printimages.py This tool shows for each region its list of images with a prefix indicating some remarkable information. This tool is conceived as a tool to detect anomalies and images that are in some region and not in the master region. These are the special prefixes:
 
   * +: this image is not on the master glance server
   * $: this image is not active: may be still uploading or in an error
@@ -105,10 +106,10 @@ Glancesync software distribution includes some extra tools:
            attributes are different: nid, type, sdc_aware, Public (if it is
            true on master and is false in the region
 
- * backup.py do a full backup of the images metadata (not content!!!) located at the specified regions (all regions in the master target if not specified). Of course, only the images which are owned by the tenant or publicly available are consider. This backup correspond with the execution of command 
- * deleteimage_byname.py  Search the image in the region by name and delete it. May also remove the image in all the regions
- * renameimage.py  Rename the image in the specified regions
- * updatemetadata.py  This is an example script to update the metadata (public, nid, type properties) of a set of regions. Image list with their properties are embedded in the source code.
+* backup.py do a full backup of the images metadata (not content!!!) located at the specified regions (all regions in the master target if not specified). Of course, only the images which are owned by the tenant or publicly available are consider. This backup correspond with the execution of command 
+* deleteimage_byname.py  Search the image in the region by name and delete it. May also remove the image in all the regions
+* renameimage.py  Rename the image in the specified regions
+* updatemetadata.py  This is an example script to update the metadata (public, nid, type properties) of a set of regions. Image list with their properties are embedded in the source code.
  
 Appendix: Example of configuration file
 ---------------------------------------
@@ -173,4 +174,3 @@ Appendix: Example of configuration file
  
  [experimental]
  credential = fakeuser2,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://fakeserver2:4730/v2.0,faketenantid2
-
