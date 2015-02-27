@@ -1,7 +1,7 @@
 Installation
 ------------
 
-At the moment, Glancesync is designed to run in the glance server of the master region, because it reads the images content directly from disk. This will be fixed in a feature version.
+At the moment, Glancesync is designed to run in the glance server of the master region, because it reads the images that are stored directly in the filesystem. This will be fixed in a future version.  
 
 It's not necessary to install the software, after unzipping the package or running 'git clone' the tool is ready to work.
 
