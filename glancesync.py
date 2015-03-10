@@ -27,9 +27,11 @@ author = 'jmpr22'
 import sys
 import os
 import logging
+import csv
 
 from glancesyncconfig import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
+from glancesync_image import GlanceSyncImage
 import glancesync_wrapper
 
 """Module to synchronize glance servers in different regions taking the base of
@@ -38,10 +40,6 @@ the master region.
 Requirements:
 Glance images directory must be on path /var/lib/glance/images/
 python-keystoneclient and glanceclient must be installed
-
-This module works invoking the glance client through the CLI. Only
-when a functionality is not available directly from the CLI, it invokes
-the python library used by the glance and keystone clients.
 """
 
 
@@ -56,10 +54,6 @@ class GlanceSync(object):
 
     def __init__(self, glancesyncconfig=None):
         """Constructor of the object
-
-        Note:
-        The list of images in the master region, and the list of regions
-        are obtained and cached when this constructor is called.
         """
 
         if glancesyncconfig is None:
@@ -69,13 +63,8 @@ class GlanceSync(object):
         self.targets = glancesyncconfig.targets
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
-        for target_name in self.targets.keys():
-            target = self.targets[target_name]
-            self.regions_uris.update(glancesync_wrapper.get_regions_uris(
-                self.get_regions(False, target_name), target))
         self.master_region_dict = _get_master_region_dict(
-            GlanceSyncRegion(self.master_region, self.targets),
-            self.regions_uris[self.master_region])
+            GlanceSyncRegion(self.master_region, self.targets))
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -87,10 +76,11 @@ class GlanceSync(object):
         """
 
         if omit_master_region:
-            return glancesync_wrapper.get_regions(self.targets[target])
-        else:
-            glancesync_wrapper.get_regions(self.targets[target],
+            return glancesync_wrapper.get_regions(self.targets[target], target,
                                            self.master_region)
+        else:
+            return glancesync_wrapper.get_regions(self.targets[target], target)
+
 
     def sync_region(self, regionstr):
         """sync the specified region with the master region
@@ -113,11 +103,14 @@ class GlanceSync(object):
         It's possible that the image is present in the region, but with
         different content. This situation is detected comparing the checksums.
         No image content is overrided, unless the file white_checksum.
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :return: Nothing
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        imagesregion = glancesync_wrapper.getimagelist(
-            regionobj, self.regions_uris[regionobj.region])
+        imagesregion = glancesync_wrapper.getimagelist(regionobj)
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
@@ -130,13 +123,16 @@ class GlanceSync(object):
         """print a report about the images pending to sync in this region
 
         This method is nearly a dry-run of the method sync_region
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :return: Nothing
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         target = regionobj.target
         regionn = regionobj.region
-        imagesregion = glancesync_wrapper.getimagelist(
-            regionobj, self.regions_uris[regionn])
+        imagesregion = glancesync_wrapper.getimagelist(regionobj)
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
@@ -145,7 +141,10 @@ class GlanceSync(object):
             self.master_region_dict, regionobj, dictimages, True)
 
     def print_images_master_region(self):
-        """print the set of images in master region to be synchronized"""
+        """print the set of images in master region to be synchronized
+
+        :return: Nothing.
+        """
 
         _printimages(self.master_region_dict.values())
 
@@ -165,6 +164,10 @@ class GlanceSync(object):
         #: this image is on the master glance server, but some of these
            attributes are different: nid, type, sdc_aware, Public (if it is
            true on master and is false in the region
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :return: nothing
         """
 
         images_region = self.get_images_region(regionstr)
@@ -176,13 +179,10 @@ class GlanceSync(object):
         This method takes all the metadata information included in the image
         and overrides the values of the image with the same name in the region.
 
-        Be careful if you use this method directly instead of using
-        sync_region!!!
-
-        sync_region doesn't overwrite all the medatada with the values of
-        master region: it overwrites only type, sdc_aware, nid and public and
-        also updates, if it is presented, kernel_id and ramdisk_id with the
-        UUIDs of the region.
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param image: GlanceSyncImage to update on the regional glance server.
+        :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         glancesync_wrapper.update_metadata(regionobj, image)
@@ -192,6 +192,12 @@ class GlanceSync(object):
 
         Be careful, this action cannot be reverted and for this reason by
         default requires confirmation!
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param uuid: the UUID of the image to delete
+        :param confirm: True to ask for confirmation
+        :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         glancesync_wrapper.delete_image(regionobj, uuid, confirm)
@@ -199,7 +205,7 @@ class GlanceSync(object):
     def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
 
-        Of course, this metadata doesn't save metadata of other tenants!!
+        Of course, only data from the tenant and public images are saved!!
 
         :param regionstr: The region whose metadata is preserved in a backup
         :param path: Directory when the file is created (the file it is
@@ -216,22 +222,24 @@ class GlanceSync(object):
         glancesync_wrapper.backup_metadata(regionobj, outputfile)
         msg = 'Backup of region ' + regionstr
         logging.info(msg)
+        # Backup using csv
+        images = glancesync_wrapper.getimagelist(regionobj)
+        path = os.path.splitext(path)[0] + '.csv'
+        with open(path, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for image in images:
+                writer.writerow(image.to_field_list())
 
     def get_images_region(self, regionstr):
-        """It returns a map with all the tenant's images in that region
+        """It returns a list with all the tenant's images in that region
 
-        This is a dictionary indexed by the name of the image. Each entry
-        is a new dictionary, with the metadata.
-
-        This method provides the same information than glance details, with
-        some changes:
-
-        User defined metadata is prefixed with _ (e.g. _nid, _type...)
-        A checksum field is added.
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :return: a list of GlanceSyncImage objects
         """
+
         region = GlanceSyncRegion(regionstr, self.targets)
-        return glancesync_wrapper.getimagelist(
-            region, self.regions_uris[region.region])
+        return glancesync_wrapper.getimagelist(region)
 
 
 def _upload_image_remote(regionobj, image, replace_uuid=None,
@@ -295,14 +303,20 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
 
 
 def _convert2csv(image, fields):
-    """Extract the fields of the image as a CSV
-
-    Only the fields specified in fields list are listed
     """
+    Extract the fields of the image as a CSV.
 
-    sub = list(image.name)
+    Only the image name and the user property fields specified in fields list
+    are listed
+
+    :param image: The GlanceSyncImage
+    :param fields: the list of fields to extract
+    :return: a string with the name and specified user fields of the image.
+    """
+    sub = list()
+    sub.append(image.name)
     for field in fields:
-        if field in image:
+        if field in image.user_properties:
             sub.append(image.user_properties[field])
         else:
             sub.append('')
@@ -312,7 +326,10 @@ def _convert2csv(image, fields):
 def _prefix(image, comparewith):
     """It returns a character identifying the image synchronization status
 
-       It returns an empty string when the image is synchronized. In other way:
+    :param image: GlanceSyncImage to analyse
+    :param comparewith: a dict with the images of the master region
+    :return: It returns an empty string when the image is synchronized.
+      In other way:
        +: this image is not on the master glance server
        $: this image is not active: may be still uploading or in an error
            status.
@@ -471,7 +488,7 @@ def _sync_upload_missing_images(
                 str(sizeimage) + ' MB)'
             sys.stdout.flush()
             # Check kernel_id and ramdisk_id if present
-            if '_kernel_id' in image:
+            if 'kernel_id' in image.user_properties:
                 kernel_id = image.user_properties['kernel_id']
                 ramdisk_id = image.user_properties['ramdisk_id']
                 im = master_region_dictimages[image_name]
@@ -494,9 +511,7 @@ def _sync_upload_missing_images(
             uuid = _upload_image_remote(regionobj, image, uuid2replace,
                                         uuid2rename)
             # we keep the UUID because if could be a kernel_id or ramdisk_id
-            newimage = dict()
-            newimage.id = uuid
-            newimage.name = image_name
+            newimage = GlanceSyncImage(image_name, uuid, regionobj.fullname)
             dictimages[image_name] = newimage
 
             print 'Done.'
@@ -627,18 +642,16 @@ def _sync_update_metada_region(
         regionimageset.add(image_name)
 
 
-def _get_master_region_dict(master_region_obj, master_region_uri):
+def _get_master_region_dict(master_region_obj):
     """Gets a dictionary with the information of the images in the master
     region.
 
     Only the images owned by the tenant are included.
     :param master_region: the region name
-    :param master_region_uri: the URL of the glance server
-    :return: a dictionary indexed by
+    :return: a dictionary indexed by name
     """
 
-    images = glancesync_wrapper.getimagelist(master_region_obj,
-                                             master_region_uri)
+    images = glancesync_wrapper.getimagelist(master_region_obj)
     master_region_dictimagesbyid = dict((image.id, image) for image in
                                         images)
     master_region_dictimages = dict()
@@ -647,7 +660,7 @@ def _get_master_region_dict(master_region_obj, master_region_uri):
             image.user_properties['kernel_id'] = master_region_dictimagesbyid[
                 image.user_properties['kernel_id']].name
 
-        if 'ramdisk_id' in image:
+        if 'ramdisk_id' in image.user_properties:
             image.user_properties['ramdisk_id'] = master_region_dictimagesbyid[
                 image.user_properties['ramdisk_id']].name
 

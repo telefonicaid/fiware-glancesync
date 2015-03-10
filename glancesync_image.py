@@ -24,9 +24,6 @@
 #
 author = 'jmpr22'
 
-"""This module includes code supporting the glancesync functionality, but
-users should use instead the GlanceSync class provided in glancesync."""
-
 
 class GlanceSyncImage(object):
     """This class represent an image within a regional image server.
@@ -36,8 +33,12 @@ class GlanceSyncImage(object):
     The raw field is for storage the original object; it is an opaque object.
     """
 
-    def __init__(self, name, id, region, is_public=True, checksum=None,
-                 user_properties=None, raw=None, status=None, size=0):
+    def __init__(self, name, id, region, owner=None, is_public=True,
+                 checksum=None, size=0, status=None, user_properties=None,
+                 raw=None):
+        """Constructor of the image object.
+
+        This constructor is usually not invoked by the user"""
         self.name = name
         self.id = id
         self.region = region
@@ -46,7 +47,55 @@ class GlanceSyncImage(object):
         self.raw = raw
         self.size = size
         self.status = status
+        self.owner = owner
         if user_properties is not None:
             self.user_properties = user_properties
         else:
-            self.user_properties = None
+            self.user_properties = dict()
+
+    def __str__(self):
+        """It Returns the string representation of the class"""
+
+        s = 'Region: {0} Name: {1} Id: {2} Status: {3} Size: {4} ' +\
+            'Checksum: {5} Owner {6} Public: {7} Properties: '
+        return s.format(self.region, self.name, self.id, self.status,
+                 self.size, self.checksum, self.owner, self.is_public) +\
+               str(self.user_properties)
+
+    def to_field_list(self, user_properties_list = None):
+        """It returns a list with the fields of the class.
+
+        The last field if the string representation of the dictionary
+        user_properties, unless user_properties_list is provided. If provided,
+        each specified user property is append to the list.
+
+        This method is useful in combination with a csv writer.
+        """
+        output = [self.region, self.name, self.id, self.status, self.size,
+                      self.checksum, self.owner, self.is_public]
+        if user_properties_list:
+            for field in user_properties_list:
+                if field in self.user_properties:
+                    output.append(self.user_properties[field])
+                else:
+                    output.append('')
+        else:
+            output.append(str(self.user_properties))
+        return output
+
+
+    def csv_propertyfields(self, fields):
+        """Extract the fields of the image as a CSV
+
+        Only the image name and the user properties specified in the
+        field list are listed.
+        """
+        sub = list()
+        sub.append(self.name)
+        for field in fields:
+            if field in self.user_properties:
+                sub.append(self.user_properties[field])
+            else:
+                sub.append('')
+        return ','.join(sub)
+

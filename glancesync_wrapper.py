@@ -28,12 +28,23 @@ import os
 import logging
 from subprocess import Popen, PIPE
 import urllib
+import sys
 
 import glance.client
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
 from glancesync_image import GlanceSyncImage
 
+"""This module contains all the code that interacts directly with the glance
+implementation. It isolates the main code from the glance interaction.
+
+Therefore, this module may be changed if the API is upgraded or it is
+invoked in a different way, without affecting the main module.
+
+Current implementation works invoking the glance client through the CLI. Only
+when a functionality is not available directly from the CLI, it invokes
+the python library used by the glance and keystone clients.
+"""
 
 def _set_environment(target, region=None):
     """Set the environment with the credential provided.
@@ -53,18 +64,21 @@ def _set_environment(target, region=None):
         os.environ['OS_REGION_NAME'] = region
 
 
-def getimagelist(regionobj, region_uri):
+def getimagelist(regionobj):
     """return a image list from the glance of the specified region
 
-     Each imagen is a dictionary indexed by name. Extra properties are
-     coded as _<name> the other labels are the returned by glance details.
-     List is completed with checksum. Only the images owned by the tenant
-     are included.
+    :param regionobj: The GlanceSyncRegion object specifying the region to list
+    :return: a list of GlanceSyncImage objects
     """
 
     _set_environment(regionobj.target, regionobj.region)
-    images = list()
-    image = None
+    try:
+        checksums = _get_checksums(regionobj)
+    except Exception, e:
+        msg = 'Error retrieving checksums of images. Cause: ' + str(e)
+        logging.error(msg)
+        raise Exception(msg)
+
     p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
               stdin=None, stdout=PIPE)
     outputcmd = p.stdout
@@ -77,49 +91,50 @@ def getimagelist(regionobj, region_uri):
         logging.error(msg)
         raise Exception(msg)
 
-    checksums = _get_checksums(regionobj, region_uri)
+    image_list = list()
     image = dict()
+    user_properties = dict()
     for line in outputcmd:
         if line[0] == '=':
-            if image is not None and image['Name'] != 'None':
-                image['checksum'] = checksums[image['Name']]
-                images.append(image)
+            if image['Name'] != 'None':
+                image['checksum'] = checksums[image['Id']]
+                if 'Owner' not in image:
+                    image['Owner'] = ''
+                i = GlanceSyncImage(
+                    image['Name'], image['Id'], regionobj.fullname,
+                    image['Owner'], image['Public'], image['checksum'],
+                    image['Size'], image['Status'], user_properties, image)
+                image_list.append(i)
             image = dict()
+            user_properties = dict()
         else:
             (key, value) = line.split(':', 1)
             if key.startswith('Property \''):
-                key = '_' + key[10:-1]
-                if key == '_nic':
-                    continue
-            image[key] = value.strip()
-    # Convert to GlanceSyncImage objects
-    image_list = list()
-    for imagedict in images:
-        user_properties = dict()
-        for key in imagedict.keys():
-            if key.startswith('Property \''):
-                user_properties[key[10:-1]] = imagedict[key]
-
-        image = GlanceSyncImage(
-            imagedict['Name'], imagedict['Id'], regionobj.region,
-            imagedict['Public'], user_properties)
+                key = key[10:-1]
+                user_properties[key] = value.strip()
+            else:
+                image[key] = value.strip()
     return image_list
 
 
-def delete_image(regionobj, id, confirm):
+def delete_image(regionobj, id, confirm = True):
     """delete a image on the specified region.
 
     Be careful, this action cannot be reverted and for this reason by
     default requires confirmation!
+    :param regionobj: the GlanceSyncRegion object
+    :param id: the UUID of the image to delete
+    :param confirm: ask for confirmation
+    :return: Nothing.
     """
 
     _set_environment(regionobj.target, regionobj.region)
     if confirm:
             p = Popen(['/usr/bin/glance', 'delete', id], stdin=None,
-                      stdout=None)
+                      stdout=sys.stdout, stderr=sys.stderr)
     else:
             p = Popen(['/usr/bin/glance', 'delete', id, '-f'], stdin=None,
-                      stdout=None)
+                      stdout=sys.stdout, stderr=sys.stderr)
 
     p.wait()
 
@@ -133,9 +148,9 @@ def update_metadata(regionobj, image):
     :return: this function doesn't return anything.
     """
 
-    # get as a list all the properties (all of them start with _)
-    props = list(x[1] + '=' + image.user_properties[x]
-                 for x in image.user_properties.keys)
+    # get as a list all the properties
+    props = list(x + '=' + image.user_properties[x]
+                 for x in image.user_properties)
 
     # compose cmd line
     arguments = [
@@ -147,7 +162,7 @@ def update_metadata(regionobj, image):
     # set credential
     _set_environment(regionobj.target, regionobj.region)
     # update
-    p = Popen(arguments, stdin=None, stdout=None, stderr=None)
+    p = Popen(arguments, stdin=None, stdout=sys.stdout, stderr=sys.stdout)
     p.wait()
     if p.returncode != 0:
         msg = 'update of ' + image.name + 'failed'
@@ -156,8 +171,15 @@ def update_metadata(regionobj, image):
 
 
 def upload_image(regionobj, image):
-    props = list(x[1] + '=' + image.user_properties[x]
-                 for x in image.user_properties.keys)
+    """Upload the image to the glance server on the specified region.
+
+    :param regionobj: GlanceSyncRegion object; the region where the image is
+      upload.
+    :param image: GlanceSyncImage object; the image to be uploaded.
+    :return: Nothing.
+    """
+    props = list(x + '=' + image.user_properties[x]
+                 for x in image.user_properties)
     # compose cmdline
     arguments = [
         'glance', 'add', '--silent-upload', 'disk_format=' +
@@ -169,7 +191,7 @@ def upload_image(regionobj, image):
     _set_environment(regionobj.target, regionobj.region)
     # run command
     fich = open('/var/lib/glance/images/' + image.id, 'r')
-    p = Popen(arguments, stdin=fich, stdout=PIPE, stderr=None)
+    p = Popen(arguments, stdin=fich, stdout=PIPE, stderr=sys.stdout)
     fich.close()
     outputcmd = p.stdout
     result = outputcmd.read()
@@ -183,16 +205,17 @@ def upload_image(regionobj, image):
     return result.split(':')[1].strip()
 
 
-def _get_checksums(regionobj, region_uri):
+def _get_checksums(regionobj):
     """Provide a dictionary with the checksums of each image in the region.
 
     Only the images owned by the tenant are considered.
 
     :param regionobj: the region where the images are
     :param region_uri: the URL of the glance server
-    :return: a dictionary with checkums, indexed by image name.
+    :return: a dictionary with checkums, indexed by image id.
     """
     _set_environment(regionobj.target, regionobj.region)
+    region_uri = _get_regions_uri(regionobj)
     host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
     (host, port) = urllib.splitport(host)
 
@@ -200,61 +223,70 @@ def _get_checksums(regionobj, region_uri):
         host=host, port=port, region=regionobj.region).get_images(limit=5000)
     checksum_region = dict()
     for image in images:
-        checksum_region[image['name']] = image['checksum']
+        checksum_region[image['id']] = image['checksum']
     return checksum_region
 
 
-def _get_regions_uris(region_list, credential):
-    """Get a dictionary with the URIs of the glance server in each region.
+def _get_regions_uri(region):
+    """Get the URIs of the regional glance server.
 
-    :param region_list: a list or regions
-    :param credential: the credential to contact with the keystone server
-    :return: a dictionary or URIs indexed by region name.
+    :param region; the region to obtain the URI
+    :return: the URI of the regional glance server
     """
 
-    regions_uris = dict()
+    target = region.target
     kc = KeystoneClient(
-        username=credential['user'], password=credential['password'],
-        tenant_name=credential['tenant'],
-        auth_url=credential['keystone_url'])
-    for region in region_list:
-        parts = region.split(':')
-        if len(parts) == 2:
-            region_without_target = parts[1]
-        else:
-            region_without_target = region
-        regions_uris[region] = kc.service_catalog.url_for(
-            'region', region_without_target, 'image')
-    return regions_uris
+        username=target['user'], password=target['password'],
+        tenant_name=target['tenant'],
+        auth_url=target['keystone_url'])
+    return kc.service_catalog.url_for('region', region.region, 'image')
 
 
-def get_regions(target, ignore_region=None):
-    """It returns the list of regions.
+def get_regions(target, target_name, ignore_region=None):
+    """It returns the list of regions on the specified target.
+    :param target: the target object
+    :param target_name: the target name
+    :param ignore_region: if specified this region is not included. This is
+      used to omit the master region. If there is several regions to omit,
+       use the ignored_regions field of the target instead.
+    :return: a list of regions. Each region is a string with the prefix
+      'target:', unless the target is 'master:'.
+    """
+    """
     Keyword arguments:
      ignore_region -- Ignore this region. It is used to omit master region.
      target -- the scope where the region is.
     """
     _set_environment(target)
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
-              stdout=PIPE)
+              stdout=PIPE, stderr=sys.stderr)
 
     output_cmd = p.stdout
     regions_list = list()
     for line in output_cmd:
         if line.startswith('| region'):
             name = line.split('|')[2].strip()
-            if target != 'master':
-                name = target + ':' + name
+            if name in target['ignore_regions']:
+                continue
+
+            if target_name != 'master':
+                name = target_name + ':' + name
 
             if ignore_region and name == ignore_region:
                 continue
+
             regions_list.append(name)
     p.wait()
     return regions_list
 
 
 def backup_metadata(region, outputfile):
-    """save on outputfile a backup of the region's metadata."""
+    """save on outputfile a backup of the region's metadata.
+    :param region: a GlanceSyncRegion object
+    :param outputfile: the output file where the data is stored.
+
+    Also a file with the extension .checksums is created
+    """
 
     _set_environment(region.target, region.region)
     try:
@@ -262,13 +294,23 @@ def backup_metadata(region, outputfile):
                   stdin=None, stdout=outputfile)
         code = p.wait()
         outputfile.close()
-    except Exception:
-        msg = 'Failed backup of ' + region + ' caused by '
+        checksums = _get_checksums(region)
+        name = os.path.splitext(outputfile.name)[0] + '.cheksums'
+        outputfile = open(name, 'w')
+        for id in checksums:
+            if checksums[id] is None:
+                print >>outputfile, id + ','
+            else:
+                print >>outputfile, id + ',' + checksums[id]
+        outputfile.close()
+
+    except Exception, e:
+        msg = 'Failed backup of ' + region.fullname + ' caused by ' + str(e)
         logging.error(msg)
         raise Exception(msg)
     else:
         if code != 0:
-            msg = 'Failed backup of ' + region + \
+            msg = 'Failed backup of ' + region.fullname + \
                   ' glance details returned a non-zero code'
             logging.error(msg)
             raise Exception(msg)

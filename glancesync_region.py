@@ -32,19 +32,24 @@ class GlanceSyncRegion(object):
     """This class supports the concept of region with a target namespace"""
 
     def __init__(self, region, targets):
+        """Create a new region object.
+
+        :param region: It is specified as 'target:region_name'. A target is
+         the set of glance servers with share a keystone server and thus
+         a credential. The default target is master, the keystone where the
+         master glance server is, therefore the prefix 'master:' may be
+         omitted.
+        :param targets: the dictionary with the targets defined in the
+            configuration file.
+        """
         parts = region.split(':')
         if len(parts) == 2:
-            region = parts[1]
+            name = parts[1]
             target = targets[parts[0]]
         else:
             target = targets['master']
-        self.region = region
+            name = region
+        self.region = name
+        self.fullname = region
         self.target = target
         self._uri = None
-
-    # """The URI of the region's glance server"""
-    # @property
-    # def uri(self):
-    #    if self._uri is None:
-    #        pass
-    #    return self._uri
