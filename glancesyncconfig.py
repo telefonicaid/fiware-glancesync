@@ -37,7 +37,7 @@ def _get_set(self, section, key):
         if len(value) == 0:
             return set()
         else:
-            return set(value.split(','))
+            return set(x.strip() for x in value.split(','))
     else:
         return set()
 
@@ -48,7 +48,7 @@ def _get_list(self, section, key):
         if len(value) == 0:
             return list()
         else:
-            return value.split(',')
+            return list(x.strip() for x in value.split(','))
     else:
         return list()
 
@@ -88,6 +88,7 @@ class GlanceSyncConfig(object):
         self.preferable_order = None
         self.max_children = 1
 
+        # Read configuration if it exists
         if configuration_path is not None:
             configparser = ConfigParser.SafeConfigParser()
             configparser.read(configuration_path)
@@ -114,11 +115,16 @@ class GlanceSyncConfig(object):
                 target['rename'] = configparser.getset(section, 'rename')
                 target['dontupdate'] = configparser.getset(
                     section, 'dontupdate')
+                target['ignore_regions'] = configparser.getset(
+                    section, 'ignore_regions')
                 if configparser.has_option(section, 'metadata_condition'):
                     target['metadata_condition'] = compile(
                         configparser.get(section, 'metadata_condition'),
                         'metadata_condition', 'eval')
+                target['metadata_set'] = configparser.getset(
+                    section, 'metadata_set')
 
+        # Default configuration if it is not present
         if self.master_region is None:
             self.master_region = os.environ['OS_REGION_NAME']
         if self.preferable_order is None:
@@ -129,6 +135,8 @@ class GlanceSyncConfig(object):
             self.targets['master']['rename'] = set()
             self.targets['master']['dontupdate'] = set()
             self.targets['master']['forcesyncs'] = list()
+            self.targets['master']['ignore_regions'] = set()
+            self.targets['master']['metadata_set'] = set()
 
         if 'user' not in self.targets['master']:
             self.targets['master']['user'] = os.environ['OS_USERNAME']
@@ -137,14 +145,3 @@ class GlanceSyncConfig(object):
             self.targets['master']['tenant'] = os.environ['OS_TENANT_NAME']
 
 
-if __name__ == '__main__':
-    config_path = os.path.dirname(sys.argv[0]) + '/glancesync.conf'
-    config = GlanceSyncConfig(config_path)
-    print config.master_region, config.preferable_order
-    print config.targets
-    image = dict()
-    target = config.targets['master']
-    image['Public'] = 'Yes'
-    image['_nida'] = '345'
-    image['Owner'] = '00000000000000000000000000001'
-    print eval(config.targets['master']['metadata_condition'])
