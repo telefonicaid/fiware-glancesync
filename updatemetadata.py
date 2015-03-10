@@ -42,8 +42,8 @@ def update_nids(region):
     """
     glancesync = GlanceSync()
     for image in glancesync.get_images_region(region):
-        if image['Name'] in images_with_changes:
-            (typei, nid, public) = images_with_changes[image['Name']]
+        if image.name in images_with_changes:
+            (typei, nid, public) = images_with_changes[image.name]
             if nid:
                 nid = str(nid)
 
@@ -53,16 +53,16 @@ def update_nids(region):
                 is_public = 'No'
 
             # don't update if values haven't changed.
-            if (image.get('_nid', None) == nid and
-                    image.get('_type', None) == typei and
-                    image.get('Public') == is_public):
+            if (image.user_properties.get('nid', None) == nid and
+                    image.user_properties.get('type', None) == typei and
+                    image.is_public == is_public):
                 continue
 
             if nid:
-                image['_nid'] = nid
+                image.user_properties['nid'] = nid
             if typei:
-                image['_type'] = typei
-            image['Public'] = is_public
+                image.user_properties['type'] = typei
+            image.is_public = is_public
             glancesync.update_metadata_image(region, image)
 
 if __name__ == '__main__':
