@@ -32,13 +32,13 @@ If you prefer a configuration file, edit the file ``/etc/glancesync.conf`` (a di
 
 After this, if you simply need to synchronise all the regions with the master region, run ``glancesync/sync.py``. 
 
-The tool first obtains the list of regions, contacts with the master region to obtain its list of images, each one with its metadata, expands this metadata with the checksum of each image and finally prints the set of images to synchronise. Then it iterates through the list of regions. For each region, glancesync obtains the list of images with their metadata and checksums and compare with the results of master region. If an image is present in both regions but with different metadata fields ``nid``, ``type`` or ``sdc_aware``, it updates the image in the region with the values of the images in the master region. After this, it uploads sequentially (ordered by size in ascending order) the missing images to the region. If an operation with a region fails, for example the upload of an image, Glancesync passes to next region, due to if there is a problem uploading an image, there will be also problems uploading another one bigger. 
+The tool first obtains the list of regions, contacts with the master region to obtain its list of images, each one with its metadata, expands this metadata with the checksum of each image and finally prints the set of images to synchronise. Then it iterates through the list of regions. For each region, glancesync obtains the list of images with their metadata and checksums and compare with the results of master region. If there is an image in both regions but with different metadata fields ``nid``, ``type`` or ``sdc_aware``, it updates the image in the region with the values of the images in the master region. After this, it uploads sequentially (ordered by size in ascending order) the missing images to the region. If an operation with a region fails, for example the upload of an image, Glancesync passes to next region, due to if there is a problem uploading an image, there will be also problems uploading another one bigger. 
 
-It is possible that an image is present both in the region and in the master region, but with different content (i.e. the checksums are different). The default behaviour of Glancesync is only to print a warning (safety is a big concern with a synchronisation tool: it never should touch content without user knowledge). The user can specify a list of images that it is right to overwrite by setting a list of checksums (the old content ones) using parameter '``replace``' in the section ``[master``] of the configuration file. Another option is the parameter '``rename``'; in this case the old image is not deleted but renamed (and its properties nid and type are renamed also). Both parameters can include the 'any' keyword. In this case the parameter '``dontupdate``' works as a blacklist. The algorithm is:
+It is possible that an image is present both in the region and in the master region, but with different content (i.e. the checksums are different). The default behaviour of Glancesync is only to print a warning (safety is a big concern with a synchronisation tool: it never should touch content without user knowledge). The user can specify a list of images that it is right to overwrite by setting a list of checksums (the old content ones) using parameter '``replace``' in the section ``[master``] of the configuration file. Another option is the parameter '``rename``'; in this case the old image is not deleted but renamed (and its properties '``nid``' and '``type``' are renamed also). Both parameters can include the 'any' keyword. In this case the parameter '``dontupdate``' works as a blacklist. The algorithm is:
 
-1.  Is the checksum in dontupdate? print a warning only
-2.  Is the checksum in rename? rename old image and upload the master region's image
-3. Is the checksum in replace? replace the old image with the master region's image
+1.  Is the checksum in the dontupdate list? print a warning only
+2.  Is the checksum in the rename list? rename old image and upload the master region's image
+3. Is the checksum in the replace list? replace the old image with the master region's image
 4. Does the parameter 'replace' include the keyword 'any'? rename old image and upload the  master region's image
 5. Does the parameter 'rename' include the keyword 'any'? replace the old image with the master region's image
 6. Otherwise: print a warning only
@@ -107,11 +107,8 @@ Appendix: Example of configuration file
  master_region = Spain
  
  # A sorted list of regions. Regions that are not present are silently
- # ignored. Synchronization is done also to the other regions, but first this
- # list is recurred and then the
- #
- # Regions are prefixed with target:, but this is not required when
- # target is master.
+ # ignored. Synchronization is done also to the other regions, but firstly this
+ # list is recurred and then the other regions are append in order. 
  preferable_order = Trento, Lannion, Waterford, Berlin, Prague
 
  # The maximum number of simultaneous children to use to do the synchronisation.
