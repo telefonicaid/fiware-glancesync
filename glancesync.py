@@ -36,10 +36,6 @@ import glancesync_wrapper
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
-
-Requirements:
-Glance images directory must be on path /var/lib/glance/images/
-python-keystoneclient and glanceclient must be installed
 """
 
 
@@ -76,11 +72,10 @@ class GlanceSync(object):
         """
 
         if omit_master_region:
-            return glancesync_wrapper.get_regions(self.targets[target], target,
-                                           self.master_region)
+            return glancesync_wrapper.get_regions(
+                self.targets[target], target, self.master_region)
         else:
             return glancesync_wrapper.get_regions(self.targets[target], target)
-
 
     def sync_region(self, regionstr):
         """sync the specified region with the master region
@@ -197,10 +192,10 @@ class GlanceSync(object):
          'master:' may be omitted.
         :param uuid: the UUID of the image to delete
         :param confirm: True to ask for confirmation
-        :return: Nothing
+        :return: true if image is deleted, false if canceled
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        glancesync_wrapper.delete_image(regionobj, uuid, confirm)
+        return glancesync_wrapper.delete_image(regionobj, uuid, confirm)
 
     def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
@@ -215,20 +210,29 @@ class GlanceSync(object):
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         if path is None:
-            path = 'backup_' + regionstr + '.txt'
+            path = 'backup_' + regionstr + '.csv'
         else:
-            path = os.path.join(path, 'backup_' + regionstr + '.txt')
-        outputfile = open(path, 'w')
-        glancesync_wrapper.backup_metadata(regionobj, outputfile)
+            path = os.path.join(path, 'backup_' + regionstr + '.csv')
+        # Backup using csv
+        try:
+            images = glancesync_wrapper.getimagelist(regionobj)
+            with open(path, 'w') as csvfile:
+                writer = csv.writer(csvfile)
+                for image in images:
+                    writer.writerow(image.to_field_list())
+        except Exception, e:
+            msg = 'Error retrieving images from region {0} cause {1}'
+            msg = msg.format(regionstr, str(e))
+            logging.error(msg)
+            raise Exception(msg)
+
+        # In legacy mode save also a dump of glance details
+        if glancesync_wrapper.legacy:
+            path = os.path.splitext(path)[0] + '.txt'
+            outputfile = open(path, 'w')
+            glancesync_wrapper.backup_metadata(regionobj, outputfile)
         msg = 'Backup of region ' + regionstr
         logging.info(msg)
-        # Backup using csv
-        images = glancesync_wrapper.getimagelist(regionobj)
-        path = os.path.splitext(path)[0] + '.csv'
-        with open(path, 'w') as csvfile:
-            writer = csv.writer(csvfile)
-            for image in images:
-                writer.writerow(image.to_field_list())
 
     def get_images_region(self, regionstr):
         """It returns a list with all the tenant's images in that region
@@ -256,33 +260,8 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
     :param rename_uuid: if it is not None, this image must be renamed
     :return: the UUID of the new image.
     """
-    # if replace_uuid, first upload with other name and without nid
-    # nor type
-    if replace_uuid or rename_uuid:
-        saved_type = image.user_properties.get('type', None)
-        if saved_type:
-            del(image.user_properties['type'])
-
-        saved_nid = image.user_properties.get('nid', None)
-        if saved_nid:
-            del(image.user_properties['nid'])
-
-        saved_name = image.name
-        image.name += '_tmp'
-        image.is_public = 'No'
     newuuid = glancesync_wrapper.upload_image(regionobj, image)
     if rename_uuid or replace_uuid:
-        newimage = dict(image)
-        newimage.id = newuuid
-        if saved_nid:
-            newimage.user_properties['nid'] = saved_nid
-
-        if saved_type:
-            newimage.user_properties['type'] = saved_type
-
-        newimage.name = saved_name
-        newimage.is_public = 'Yes'
-        glancesync_wrapper.update_metadata(regionobj, newimage)
         if replace_uuid:
             glancesync_wrapper.delete_image(regionobj, replace_uuid,
                                             confirm=False)
@@ -293,34 +272,18 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
             for i in l:
                 if i.id == rename_uuid:
                     oldimage = i
-                    if saved_nid:
-                        oldimage.user_properties['nid.bak'] = saved_nid
+                    if 'nid' in oldimage.user_properties:
+                        oldimage.user_properties['nid.bak'] = \
+                            oldimage.user_properties['nid']
                         del(oldimage.user_properties['nid'])
+                    if 'type' in oldimage.user_properties:
+                        oldimage.user_properties['type.bak'] = \
+                            oldimage.user_properties['type']
+                        del(oldimage.user_properties['type'])
 
-                    oldimage.name = saved_name + '.old'
+                    oldimage.name += '.old'
                     glancesync_wrapper.update_metadata(regionobj, oldimage)
     return newuuid
-
-
-def _convert2csv(image, fields):
-    """
-    Extract the fields of the image as a CSV.
-
-    Only the image name and the user property fields specified in fields list
-    are listed
-
-    :param image: The GlanceSyncImage
-    :param fields: the list of fields to extract
-    :return: a string with the name and specified user fields of the image.
-    """
-    sub = list()
-    sub.append(image.name)
-    for field in fields:
-        if field in image.user_properties:
-            sub.append(image.user_properties[field])
-        else:
-            sub.append('')
-    return ','.join(sub)
 
 
 def _prefix(image, comparewith):
@@ -388,7 +351,7 @@ def _printimages(imagesregion, comparewith=None):
         ('nid' in image.user_properties and 'type' in image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
     for image in images:
-        line = _convert2csv(image, ('type', 'nid'))
+        line = image.csv_userproperties(('type', 'nid'))
         if line is not None:
             if comparewith is not None:
                 print _prefix(image, comparewith) + line
@@ -401,7 +364,7 @@ def _printimages(imagesregion, comparewith=None):
          image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
     for image in images:
-        line = _convert2csv(image, ('type', 'nid'))
+        line = image.csv_userproperties(('type', 'nid'))
         if line is not None:
             if comparewith is not None:
                 print _prefix(image, comparewith) + line
@@ -414,7 +377,7 @@ def _printimages(imagesregion, comparewith=None):
          image.user_properties))
     images.sort(key=lambda image: int(image.user_properties['nid']))
     for image in images:
-        line = _convert2csv(image, ('type', 'nid'))
+        line = image.csv_userproperties(('type', 'nid'))
         if line is not None:
             if comparewith is not None:
                 print _prefix(image, comparewith) + line
@@ -652,8 +615,8 @@ def _get_master_region_dict(master_region_obj):
     """
 
     images = glancesync_wrapper.getimagelist(master_region_obj)
-    master_region_dictimagesbyid = dict((image.id, image) for image in
-                                        images)
+    master_region_dictimagesbyid = dict(
+        (image.id, image) for image in images if image.status == 'active')
     master_region_dictimages = dict()
     for image in images:
         if 'kernel_id' in image.user_properties:

@@ -143,5 +143,3 @@ class GlanceSyncConfig(object):
             self.targets['master']['password'] = os.environ['OS_PASSWORD']
             self.targets['master']['keystone_url'] = os.environ['OS_AUTH_URL']
             self.targets['master']['tenant'] = os.environ['OS_TENANT_NAME']
-
-

@@ -52,4 +52,3 @@ class GlanceSyncRegion(object):
         self.region = name
         self.fullname = region
         self.target = target
-        self._uri = None

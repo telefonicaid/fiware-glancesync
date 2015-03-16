@@ -56,4 +56,7 @@ if __name__ == '__main__':
             continue
         for image in images:
             if image.name == image_name:
-                glancesync.delete_image(region, image.id, confirmation)
+                deleted = glancesync.delete_image(
+                    region, image.id, confirmation)
+                if deleted:
+                    print 'Image deleted from region ' + region

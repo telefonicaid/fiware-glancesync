@@ -26,11 +26,23 @@ author = 'jmpr22'
 
 import os
 import logging
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, call
 import urllib
 import sys
+import re
 
-import glance.client
+try:
+    # Recent versions
+    from keystoneclient.auth.identity import v2 as identity
+    from keystoneclient import session
+    from glanceclient import Client as GlanceClient
+
+    legacy = False
+except:
+    # Old versions (Essex)
+    import glance.client
+    legacy = True
+
 from keystoneclient.v2_0.client import Client as KeystoneClient
 
 from glancesync_image import GlanceSyncImage
@@ -45,6 +57,7 @@ Current implementation works invoking the glance client through the CLI. Only
 when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
+
 
 def _set_environment(target, region=None):
     """Set the environment with the credential provided.
@@ -64,8 +77,11 @@ def _set_environment(target, region=None):
         os.environ['OS_REGION_NAME'] = region
 
 
-def getimagelist(regionobj):
+def _getimagelist_legacy(regionobj):
     """return a image list from the glance of the specified region
+
+    This is the legacy version of the function: if uses glance cmdline utils
+    with an option not available in Juno.
 
     :param regionobj: The GlanceSyncRegion object specifying the region to list
     :return: a list of GlanceSyncImage objects
@@ -117,26 +133,93 @@ def getimagelist(regionobj):
     return image_list
 
 
-def delete_image(regionobj, id, confirm = True):
+def _getimagelist(regionobj):
+    """return a image list from the glance of the specified region
+
+    This is the new version of the function: if uses an API not available
+    on Essex.
+
+    :param regionobj: The GlanceSyncRegion object specifying the region to list
+    :return: a list of GlanceSyncImage objects
+    """
+
+    try:
+        target = regionobj.target
+        auth = identity.Password(
+            auth_url=target['keystone_url'], username=target['user'],
+            password=target['password'], tenant_name=target['tenant'],
+        )
+        sess = session.Session(auth=auth)
+        token = auth.get_token(sess)
+        endpoint = auth.get_endpoint(
+            session, 'image', region_name=regionobj.region)
+        glance_client = GlanceClient('1', endpoint=endpoint, token=token)
+        images = glance_client.images.list()
+        image_list = list()
+        for image in images:
+            if image.is_public:
+                is_public = 'Yes'
+            else:
+                is_public = 'No'
+            i = GlanceSyncImage(
+                image.name, image.id, regionobj.fullname,
+                image.owner, is_public, image.checksum,
+                image.size, image.status, image.properties, image)
+            image_list.append(i)
+    except Exception, e:
+        msg = 'Error retrieving image list. Cause: ' + str(e)
+        logging.error(msg)
+        raise Exception(msg)
+
+    return image_list
+
+
+def getimagelist(regionobj):
+    """return a image list from the glance of the specified region
+
+    :param regionobj: The GlanceSyncRegion object specifying the region to list
+    :return: a list of GlanceSyncImage objects
+    """
+    if legacy:
+        return _getimagelist_legacy(regionobj)
+    else:
+        return _getimagelist(regionobj)
+
+
+def delete_image(regionobj, id, confirm=True):
     """delete a image on the specified region.
 
     Be careful, this action cannot be reverted and for this reason by
     default requires confirmation!
+
     :param regionobj: the GlanceSyncRegion object
     :param id: the UUID of the image to delete
     :param confirm: ask for confirmation
-    :return: Nothing.
+    :return: true if image was deleted, false if it was canceled by user
     """
 
     _set_environment(regionobj.target, regionobj.region)
     if confirm:
-            p = Popen(['/usr/bin/glance', 'delete', id], stdin=None,
-                      stdout=sys.stdout, stderr=sys.stderr)
-    else:
-            p = Popen(['/usr/bin/glance', 'delete', id, '-f'], stdin=None,
-                      stdout=sys.stdout, stderr=sys.stderr)
+        confirm = raw_input('Delete image {0}? [y/N]'.format(id))
+        confirm = confirm.strip()
+        if confirm != 'y' and confirm != 'Y':
+            print 'Not deleting image ' + id
+            return False
 
-    p.wait()
+    if legacy:
+        p = Popen(['/usr/bin/glance', 'delete', id, '-f'], stdin=None,
+                  stdout=sys.stdout, stderr=sys.stderr)
+    else:
+        p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None,
+                  stdout=sys.stdout, stderr=sys.stderr)
+
+    code = p.wait()
+    if code == 0:
+        return True
+    else:
+        msg = 'Failed the deletion of image ' + id
+        logging.error(msg)
+        raise
 
 
 def update_metadata(regionobj, image):
@@ -153,18 +236,30 @@ def update_metadata(regionobj, image):
                  for x in image.user_properties)
 
     # compose cmd line
-    arguments = [
-        'glance', 'update', image.id, 'disk_format=' + image.raw[
-            'Disk format'], 'name=' + image.name, 'is_public=' +
-        image.is_public, 'protected=' + image.raw['Protected'],
-        'container_format=' + image.raw['Container format']]
-    arguments.extend(props)
+    if legacy:
+        arguments = [
+            'glance', 'update', image.id, 'disk_format=' + image.raw[
+                'Disk format'], 'name=' + image.name, 'is_public=' +
+            image.is_public, 'protected=' + image.raw['Protected'],
+            'container_format=' + image.raw['Container format']]
+        arguments.extend(props)
+    else:
+        arguments = [
+            '/usr/bin/glance', 'image-update', image.id, '--disk-format',
+            image.raw.disk_format, '--name', image.name, '--is-public',
+            str(image.raw.is_public), '--is-protected',
+            str(image.raw.protected), '--container-format',
+            image.raw.container_format]
+        for user_property in props:
+            arguments.append('--property')
+            arguments.append(user_property)
+
     # set credential
     _set_environment(regionobj.target, regionobj.region)
     # update
-    p = Popen(arguments, stdin=None, stdout=sys.stdout, stderr=sys.stdout)
-    p.wait()
-    if p.returncode != 0:
+    devnull = open('/dev/null', 'w')
+    returncode = call(arguments, stdin=None, stdout=devnull, stderr=None)
+    if returncode != 0:
         msg = 'update of ' + image.name + 'failed'
         logging(msg)
         raise Exception(msg)
@@ -181,12 +276,25 @@ def upload_image(regionobj, image):
     props = list(x + '=' + image.user_properties[x]
                  for x in image.user_properties)
     # compose cmdline
-    arguments = [
-        'glance', 'add', '--silent-upload', 'disk_format=' +
-        image.raw['Disk format'], 'name=' + image.name, 'is_public=' +
-        image.is_public, 'protected=' + image.raw['Protected'],
-        'container_format=' + image.raw['Container format']]
-    arguments.extend(props)
+    if legacy:
+        arguments = [
+            'glance', 'add', '--silent-upload', 'disk_format=' +
+            image.raw['Disk format'], 'name=' + image.name, 'is_public=' +
+            image.is_public, 'protected=' + image.raw['Protected'],
+            'container_format=' + image.raw['Container format']]
+        arguments.extend(props)
+    else:
+        arguments = [
+            'glance', 'image-create', '--disk-format', image.raw.disk_format,
+            '--name', image.name, '--is-public', str(image.raw.is_public),
+            '--is-protected', str(image.raw.protected),
+            '--container-format', image.raw.container_format,
+            '--min-ram', str(image.raw.min_ram), '--min-disk',
+            str(image.raw.min_disk)]
+        for user_property in props:
+            arguments.append('--property')
+            arguments.append(user_property)
+
     # set credential
     _set_environment(regionobj.target, regionobj.region)
     # run command
@@ -201,8 +309,13 @@ def upload_image(regionobj, image):
               regionobj.region + ' Failed: ' + result
         logging.error(msg)
         raise Exception(msg)
-
-    return result.split(':')[1].strip()
+    if legacy:
+        return result.split(':')[1].strip()
+    else:
+        matcher = re.compile('\|\s+id\s')
+        for line in result.splitlines():
+            if matcher.match(line):
+                return line.split('|')[2]
 
 
 def _get_checksums(regionobj):
@@ -210,18 +323,23 @@ def _get_checksums(regionobj):
 
     Only the images owned by the tenant are considered.
 
+    This is legacy code only for old OpenStack version. The new version
+    obtains directly the checksum.
+
     :param regionobj: the region where the images are
     :param region_uri: the URL of the glance server
     :return: a dictionary with checkums, indexed by image id.
     """
+
+    checksum_region = dict()
     _set_environment(regionobj.target, regionobj.region)
     region_uri = _get_regions_uri(regionobj)
     host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
     (host, port) = urllib.splitport(host)
 
     images = glance.client.get_client(
-        host=host, port=port, region=regionobj.region).get_images(limit=5000)
-    checksum_region = dict()
+        host=host, port=port, region=regionobj.region).get_images(
+        limit=5000)
     for image in images:
         checksum_region[image['id']] = image['checksum']
     return checksum_region
@@ -252,19 +370,16 @@ def get_regions(target, target_name, ignore_region=None):
     :return: a list of regions. Each region is a string with the prefix
       'target:', unless the target is 'master:'.
     """
-    """
-    Keyword arguments:
-     ignore_region -- Ignore this region. It is used to omit master region.
-     target -- the scope where the region is.
-    """
+
     _set_environment(target)
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
               stdout=PIPE, stderr=sys.stderr)
 
     output_cmd = p.stdout
     regions_list = list()
+    matcher = re.compile('\|\s+region')
     for line in output_cmd:
-        if line.startswith('| region'):
+        if matcher.match(line):
             name = line.split('|')[2].strip()
             if name in target['ignore_regions']:
                 continue
@@ -285,9 +400,13 @@ def backup_metadata(region, outputfile):
     :param region: a GlanceSyncRegion object
     :param outputfile: the output file where the data is stored.
 
+    This method is only for legacy. New code only exports a csv file.
+
     Also a file with the extension .checksums is created
     """
 
+    if not legacy:
+        return
     _set_environment(region.target, region.region)
     try:
         p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
