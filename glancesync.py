@@ -286,55 +286,6 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
     return newuuid
 
 
-def _prefix(image, comparewith):
-    """It returns a character identifying the image synchronization status
-
-    :param image: GlanceSyncImage to analyse
-    :param comparewith: a dict with the images of the master region
-    :return: It returns an empty string when the image is synchronized.
-      In other way:
-       +: this image is not on the master glance server
-       $: this image is not active: may be still uploading or in an error
-           status.
-       -: this image is on the master glance server, but as non-public
-       !: this image is on the master glance server, but checksum is different
-       #: this image is on the master glance server, but some of these
-          attributes are different: nid, type, sdc_aware, Public (if it is
-          true on master and is false in the region
-    """
-
-    name = image.name
-    if name not in comparewith:
-        return '+'
-
-    if image.status != 'active':
-        return '$'
-
-    image_master_region = comparewith[name]
-    if image_master_region.checksum != image.checksum:
-        return '!'
-
-    if image_master_region.is_public != image.is_public:
-        if image_master_region.is_public == 'No':
-            return '-'
-        else:
-            return '#'
-
-    if image_master_region.user_properties.get('nid', None) !=\
-            image.user_properties.get('nid', None):
-        return '#'
-
-    if image_master_region.user_properties.get('type', None) !=\
-            image.user_properties.get('type', None):
-        return '#'
-
-    if image_master_region.user_properties.get('sdc_aware', None) !=\
-            image.user_properties.get('sdc_aware', None):
-        return '#'
-
-    return ''
-
-
 def _printimages(imagesregion, comparewith=None):
     """ print a report about the images present on the specified region
 
@@ -350,11 +301,13 @@ def _printimages(imagesregion, comparewith=None):
         image for image in imagesregion if image.is_public == 'Yes' and
         ('nid' in image.user_properties and 'type' in image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
+    properties = ('type', 'nid')
     for image in images:
-        line = image.csv_userproperties(('type', 'nid'))
+        line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print _prefix(image, comparewith) + line
+                print image.compare_with_masterregion(
+                    comparewith, properties) + line
             else:
                 print line
     print "---"
@@ -364,10 +317,11 @@ def _printimages(imagesregion, comparewith=None):
          image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
     for image in images:
-        line = image.csv_userproperties(('type', 'nid'))
+        line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print _prefix(image, comparewith) + line
+                print image.compare_with_masterregion(
+                    comparewith, properties) + line
             else:
                 print line
     print "---"
@@ -377,10 +331,11 @@ def _printimages(imagesregion, comparewith=None):
          image.user_properties))
     images.sort(key=lambda image: int(image.user_properties['nid']))
     for image in images:
-        line = image.csv_userproperties(('type', 'nid'))
+        line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print _prefix(image, comparewith) + line
+                print image.compare_with_masterregion(
+                    comparewith, properties) + line
             else:
                 print line
 
@@ -421,6 +376,10 @@ def _sync_upload_missing_images(
         uuid2rename = ''
         if image.is_public == 'No' and image.id not in forcesync:
             continue
+        if 'type' not in image.user_properties and\
+                'nid' not in image.user_properties\
+                and image.id not in forcesync:
+            continue
 
         if image_name in dictimages:
             region_image = dictimages[image_name]
@@ -443,10 +402,6 @@ def _sync_upload_missing_images(
                     uuid2replace = region_image.id
                 else:
                     continue
-        if 'type' not in image.user_properties and\
-                'nid' not in image.user_properties\
-                and image.id not in forcesync:
-            continue
 
         sizeimage = int(image.size) / 1024 / 1024
         totalmbs = totalmbs + sizeimage
@@ -516,12 +471,32 @@ def _sync_update_metada_region(
     regionimageset = set()
     noactive = list()
     for image in imagesregion:
-        p = _prefix(image, master_region_dictimages)
+        p = image.compare_with_masterregion(
+            master_region_dictimages, regionobj.target['metadata_set'])
         image_name = image.name
+        if image_name not in master_region_dictimages:
+            continue
+
+        if p == '$':
+            msg = 'state of image ' + image_name + ' is not active: '\
+                  + image.status
+            logging.warning(msg)
+            continue
+
+        image_mast_reg = master_region_dictimages[image_name]
         ids_need_update = False
-        # Check kernel_id and ramdisk_id if present
-        if 'kernel_id' in image.user_properties and\
-                image_name in master_region_dictimages:
+        # Check kernel_id and ramdisk_id
+        if 'kernel_id' in image_mast_reg.user_properties and \
+                'kernel_id' not in image.user_properties:
+            image.user_properties['kernel_id'] = \
+                image_mast_reg.user_properties['kernel_id']
+
+        if 'ramdisk_id' in image_mast_reg.user_properties and \
+                'ramdisk_id' not in image.user_properties:
+            image.user_properties['ramdisk_id'] = \
+                image_mast_reg.user_properties['ramdisk_id']
+
+        if 'kernel_id' in image.user_properties:
             kernel_id = image.user_properties['kernel_id']
             ramdisk_id = image.user_properties['ramdisk_id']
             kernel_name = None
@@ -556,30 +531,25 @@ def _sync_update_metada_region(
                         dictimages[ramdisk_name_sp].id
                     ids_need_update = True
 
-        if p == '#' or ids_need_update:
-            image_mast_reg = master_region_dictimages[image_name]
-            if 'type' in image_mast_reg.user_properties:
-                image.user_properties['type'] =\
-                    image_mast_reg.user_properties['type']
+        if p == '#' or p == '_' or ids_need_update:
+            metadata_set = regionobj.target['metadata_set']
+            if metadata_set:
+                for prop in metadata_set:
+                    if prop in image_mast_reg.user_properties:
+                        # This is a special case: values usually are different
+                        if prop == 'kernel_id' or prop == 'ramdisk_id':
+                            continue
 
-            if 'nid' in image_mast_reg.user_properties:
-                image.user_properties['nid'] =\
-                    image_mast_reg.user_properties['nid']
-
-            if 'sdc_aware' in image_mast_reg.user_properties:
-                image.user_properties['sdc_aware'] = \
-                    image_mast_reg.user_properties['sdc_aware']
-
+                        image.user_properties[prop] = \
+                            image_mast_reg.user_properties[prop]
+                    else:
+                        if prop in image.user_properties:
+                            del image.user_properties[prop]
             image.is_public = image_mast_reg.is_public
             if not onlyshow:
                 glancesync_wrapper.update_metadata(regionobj, image)
             else:
                 print 'Image penging to update the metadata ' + image_name
-
-        if p == '$':
-            msg = 'state of image ' + image_name + ' is not active: '\
-                  + image.status
-            logging.warning(msg)
 
         if p == '!':
             if image_name is None:
@@ -590,16 +560,9 @@ def _sync_update_metada_region(
                 c = 'None'
 
             image_mast_reg = master_region_dictimages[image_name]
-            if image_mast_reg.user_properties.get('sdc_aware', None) !=\
-                    image.user_properties.get('sdc_aware', None):
-                msg = 'image ' + image_name + \
-                    ' has different checksum: ' + c + \
-                    ' and different value of sdc_aware '
-                logging.warning(msg)
-            else:
-                msg = 'image ' + image_name +\
-                    ' has different checksum: ' + c
-                logging.warning(msg)
+            msg = 'image ' + image_name +\
+                  ' has different checksum: ' + c
+            logging.warning(msg)
 
         if image_name in regionimageset:
             msg = 'the image name ' + image_name +\
