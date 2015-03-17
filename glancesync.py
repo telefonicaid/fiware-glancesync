@@ -423,22 +423,26 @@ def _sync_upload_missing_images(
             continue
 
         if image_name in dictimages:
-            checksum = dictimages[image_name].checksum
-            if image.checksum == checksum:
-                continue
+            region_image = dictimages[image_name]
+            # If there is already an image, first check the status and then
+            # the checksum
+            if region_image.status == 'active' or target['ignoreimagestatus']:
+                checksum = region_image.checksum
+                if image.checksum == checksum:
+                    continue
 
-            if checksum in target['dontupdate']:
-                continue
+                if checksum in target['dontupdate']:
+                    continue
 
-            if checksum in target['replace']:
-                uuid2replace = dictimages[image_name].id
-            elif checksum in target['rename'] or 'any' in\
-                    target['rename']:
-                uuid2rename = dictimages[image_name].id
-            elif 'any' in target['replace']:
-                uuid2replace = dictimages[image_name].id
-            else:
-                continue
+                if checksum in target['replace']:
+                    uuid2replace = region_image.id
+                elif checksum in target['rename'] or 'any' in\
+                        target['rename']:
+                    uuid2rename = region_image.id
+                elif 'any' in target['replace']:
+                    uuid2replace = region_image.id
+                else:
+                    continue
         if 'type' not in image.user_properties and\
                 'nid' not in image.user_properties\
                 and image.id not in forcesync:
