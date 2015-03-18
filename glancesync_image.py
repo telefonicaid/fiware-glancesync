@@ -124,10 +124,11 @@ class GlanceSyncImage(object):
         $: this image is not active: may be still uploading or in an error
            status.
         -: this image is on the master glance server, but as non-public
+        _: this image is on the master glance server, but there is public and
+           here it is not.
         !: this image is on the master glance server, but checksum is different
-        #: this image is on the master glance server, but some of these
-          attributes are different: nid, type, sdc_aware, Public (if it is
-          true on master and is false in the region
+        #: this image is on the master glance server, but some of the
+           user properties are different
         """
 
         if self.name not in master_region_images:
@@ -144,10 +145,13 @@ class GlanceSyncImage(object):
             if image_master.is_public == 'No':
                 return '-'
             else:
-                return '#'
+                return '_'
 
-        if user_properties:
+        if user_properties and len(user_properties) > 0:
             for prop in user_properties:
+                # This is a special case: values usually are different
+                if prop == 'kernel_id' or prop == 'ramdisk_id':
+                    continue
                 val_m = image_master.user_properties.get(prop, None)
                 val_l = self.user_properties.get(prop, None)
 
@@ -157,6 +161,9 @@ class GlanceSyncImage(object):
             if len(self.user_properties) != len(image_master.user_properties):
                 return '#'
             for prop in self.user_properties:
+                # This is a special case: values usually are different
+                if prop == 'kernel_id' or prop == 'ramdisk_id':
+                    continue
                 val_m = image_master.user_properties.get(prop, None)
                 val_l = self.user_properties.get(prop, None)
 
@@ -164,3 +171,40 @@ class GlanceSyncImage(object):
                     return '#'
 
         return ''
+
+    def is_synchronisable(
+            self, metadata_set, forcesync, metadata_condition=None):
+        """Determines if the image is synchronisable according to this
+        algorith:
+           if image id is in forcesync list, it is synchronisable
+           if metadata_condition is provided, evaluate it and return the result
+           if image is not public, it is not synchronisable
+           if metadata_set is empty, it is synchronisable
+
+        :param metadata_set: list of user properties to consider
+        :param forcesync: a list with UUID of images that are always sync.
+        :param metadata_condition: expresion to evaluate if the image is sync.
+        :return:
+        """
+        if self.id in forcesync:
+            return True
+
+        if metadata_condition:
+            image = self
+            globals_dict = dict()
+            globals_dict['image'] = self
+            globals_dict['metadata_set'] = metadata_set
+            return eval(metadata_condition, globals_dict)
+
+        if self.is_public == 'No':
+            return False
+
+        if not metadata_set:
+            return True
+
+        some_property_in = False
+        for prop in metadata_set:
+            if prop in self.user_properties:
+                some_property_in = True
+                break
+        return some_property_in

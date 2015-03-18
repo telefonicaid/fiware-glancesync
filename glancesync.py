@@ -79,13 +79,7 @@ class GlanceSync(object):
 
     def sync_region(self, regionstr):
         """sync the specified region with the master region
-        Only the images that check these conditions are synchronized:
-
-        The image is public in master region
-        The image has nid attribute and/or type attribute
-
-        As exeception, images with a UUID included in the forcesync file
-        provided in the constructor are also synchronized.
+        Only the images that check the configured condition are synchronised.
 
         *If the image is not present on the remote region, is copied from the
         master region, including metadata
@@ -348,7 +342,7 @@ def _sync_upload_missing_images(
     only upload when both these two conditions are met:
      * image is public
      * image has the property type and/or the property nid
-     as an exception, also sync images in forcesync tuple
+     as an exception, also sync images in forcesyncs tuple
 
     :param master_region_dictimages: a dictionary with the images on master
      region
@@ -362,7 +356,6 @@ def _sync_upload_missing_images(
     # a set with UUIDs of images to synchronize even if they don't match all
     # the conditions.
     target = regionobj.target
-    forcesync = target['forcesyncs']
 
     # There are two reason to upload first the smaller images:
     #   *kernel and ramdisk must be updload before AMI images to insert the
@@ -370,15 +363,17 @@ def _sync_upload_missing_images(
     #   *if there is a problem (e.g. server is full) the error appears before.
     imgs = master_region_dictimages.values()
     imgs.sort(key=lambda image: int(image.size))
+    if 'metadata_condition' in target:
+        cond = target['metadata_condition']
+    else:
+        cond = None
+
     for image in imgs:
         image_name = image.name
         uuid2replace = None
         uuid2rename = ''
-        if image.is_public == 'No' and image.id not in forcesync:
-            continue
-        if 'type' not in image.user_properties and\
-                'nid' not in image.user_properties\
-                and image.id not in forcesync:
+        if not image.is_synchronisable(target['metadata_set'],
+                                       target['forcesyncs'], cond):
             continue
 
         if image_name in dictimages:
@@ -470,13 +465,21 @@ def _sync_update_metada_region(
     dictimagesbyid = dict((image.id, image) for image in imagesregion)
     regionimageset = set()
     noactive = list()
+    target = regionobj.target
+    if 'metadata_condition' in target:
+        cond = target['metadata_condition']
+    else:
+        cond = None
+
     for image in imagesregion:
-        p = image.compare_with_masterregion(
-            master_region_dictimages, regionobj.target['metadata_set'])
         image_name = image.name
         if image_name not in master_region_dictimages:
             continue
-
+        if not image.is_synchronisable(target['metadata_set'],
+                                       target['forcesyncs'], cond):
+            continue
+        p = image.compare_with_masterregion(
+            master_region_dictimages, regionobj.target['metadata_set'])
         if p == '$':
             msg = 'state of image ' + image_name + ' is not active: '\
                   + image.status
@@ -498,14 +501,9 @@ def _sync_update_metada_region(
 
         if 'kernel_id' in image.user_properties:
             kernel_id = image.user_properties['kernel_id']
-            ramdisk_id = image.user_properties['ramdisk_id']
             kernel_name = None
-            ramdisk_name = None
             if kernel_id in dictimagesbyid:
                 kernel_name = dictimagesbyid[kernel_id].name
-
-            if ramdisk_id in dictimagesbyid:
-                ramdisk_name = dictimagesbyid[ramdisk_id].name
 
             if kernel_name is None:
                 im = master_region_dictimages[image_name]
@@ -518,6 +516,11 @@ def _sync_update_metada_region(
                     image.user_properties['kernel_id'] =\
                         dictimages[kernel_name_sp].id
                     ids_need_update = True
+        if 'ramdisk_id' in image.user_properties:
+            ramdisk_id = image.user_properties['ramdisk_id']
+            ramdisk_name = None
+            if ramdisk_id in dictimagesbyid:
+                ramdisk_name = dictimagesbyid[ramdisk_id].name
 
             if ramdisk_name is None:
                 ramdisk_name_sp = master_region_dictimages[
