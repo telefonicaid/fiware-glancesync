@@ -99,7 +99,7 @@ class GlanceSync(object):
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        imagesregion = glancesync_wrapper.getimagelist(regionobj)
+        imagesregion = self.get_images_region(regionstr, True)
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
@@ -121,13 +121,39 @@ class GlanceSync(object):
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         target = regionobj.target
         regionn = regionobj.region
-        imagesregion = glancesync_wrapper.getimagelist(regionobj)
+        imagesregion = self.get_images_region(regionstr, True)
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
             self.master_region_dict, regionobj, imagesregion, dictimages, True)
         _sync_upload_missing_images(
             self.master_region_dict, regionobj, dictimages, True)
+
+    def save_sync_region_status(self, regionstr):
+        """export a csv report about the images pending to sync in this region
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :return: Nothing
+        """
+        regionobj = GlanceSyncRegion(regionstr, self.targets)
+        path = 'syncstatus_' + regionstr + '.csv'
+        try:
+            tuples = regionobj.image_list_to_sync(self.master_region_dict)
+            with open(path, 'w') as csvfile:
+                writer = csv.writer(csvfile)
+                for tuple in tuples:
+                    (status, image) = tuple
+                    l = list()
+                    l.append(status)
+                    l.append(regionstr)
+                    l.append(image.name)
+                    writer.writerow(l)
+        except Exception, e:
+                msg = 'Error retrieving images from region {0} cause {1}'
+                msg = msg.format(regionstr, str(e))
+                logging.error(msg)
+                raise Exception(msg)
 
     def print_images_master_region(self):
         """print the set of images in master region to be synchronized
@@ -228,16 +254,24 @@ class GlanceSync(object):
         msg = 'Backup of region ' + regionstr
         logging.info(msg)
 
-    def get_images_region(self, regionstr):
+    def get_images_region(self, regionstr, only_owned_images=False):
         """It returns a list with all the tenant's images in that region
 
         :param regionstr: A region specified as 'target:region'. The prefix
          'master:' may be omitted.
+        :param only_owned_images: If true, only include the images owned by
+        the tenant or without owner.
         :return: a list of GlanceSyncImage objects
         """
 
         region = GlanceSyncRegion(regionstr, self.targets)
-        return glancesync_wrapper.getimagelist(region)
+        if only_owned_images:
+            return list(
+                image for image in glancesync_wrapper.getimagelist(region) if
+                image.owner.zfill(32) == region.target['tenant'].zfill(32)
+                or image.owner == '')
+        else:
+            return glancesync_wrapper.getimagelist(region)
 
 
 def _upload_image_remote(regionobj, image, replace_uuid=None,
@@ -380,7 +414,7 @@ def _sync_upload_missing_images(
             region_image = dictimages[image_name]
             # If there is already an image, first check the status and then
             # the checksum
-            if region_image.status == 'active' or target['ignoreimagestatus']:
+            if region_image.status == 'active':
                 checksum = region_image.checksum
                 if image.checksum == checksum:
                     continue

@@ -123,11 +123,6 @@ class GlanceSyncConfig(object):
                         'metadata_condition', 'eval')
                 target['metadata_set'] = configparser.getset(
                     section, 'metadata_set')
-                if configparser.has_option(section, 'ignoreimagestatus'):
-                    target['ignoreimagestatus'] = configparser.getboolean(
-                        section, 'ignoreimagestatus')
-                else:
-                    target['ignoreimagestatus'] = False
 
         # Default configuration if it is not present
         if self.master_region is None:
@@ -142,7 +137,6 @@ class GlanceSyncConfig(object):
             self.targets['master']['forcesyncs'] = list()
             self.targets['master']['ignore_regions'] = set()
             self.targets['master']['metadata_set'] = set()
-            self.targets['master']['ignoreimagestatus'] = False
 
         if 'user' not in self.targets['master']:
             self.targets['master']['user'] = os.environ['OS_USERNAME']
