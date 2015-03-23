@@ -101,8 +101,7 @@ class GlanceSyncImage(object):
                 sub.append('')
         return ','.join(sub)
 
-    def compare_with_masterregion(self, master_region_images,
-                                  user_properties=None):
+    def compare_with_masterregion(self, master_region_images, user_properties):
         """
         It compares this image with its homonyms on master region and
         returns a character identifying the image synchronization status.
@@ -116,7 +115,7 @@ class GlanceSyncImage(object):
         :param master_region_images: a dictionary with the master region's
          images.
         :param user_properties: a list with the user properties to compare;
-           other properties are considered local. If None, all metadata is
+           other properties are considered local. If empty, all metadata is
            compared.
         :return: It returns an empty string when the image is synchronized.
         In other way:
@@ -124,7 +123,7 @@ class GlanceSyncImage(object):
         $: this image is not active: may be still uploading or in an error
            status.
         -: this image is on the master glance server, but as non-public
-        _: this image is on the master glance server, but there is public and
+        _: this image is on the master glance server, but is public there and
            here it is not.
         !: this image is on the master glance server, but checksum is different
         #: this image is on the master glance server, but some of the
