@@ -307,16 +307,8 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
             for i in l:
                 if i.id == rename_uuid:
                     oldimage = i
-                    if 'nid' in oldimage.user_properties:
-                        oldimage.user_properties['nid.bak'] = \
-                            oldimage.user_properties['nid']
-                        del(oldimage.user_properties['nid'])
-                    if 'type' in oldimage.user_properties:
-                        oldimage.user_properties['type.bak'] = \
-                            oldimage.user_properties['type']
-                        del(oldimage.user_properties['type'])
-
                     oldimage.name += '.old'
+                    oldimage.is_public = 'No'
                     glancesync_wrapper.update_metadata(regionobj, oldimage)
     return newuuid
 
