@@ -162,39 +162,6 @@ class GlanceSync(object):
                 logging.error(msg)
                 raise Exception(msg)
 
-    def print_images_master_region(self):
-        """print the set of images in master region to be synchronized
-
-        :return: Nothing.
-        """
-
-        _printimages(self.master_region_dict.values())
-
-    def print_images(self, regionstr):
-        """print a report about the images present on the specified region
-
-        This method is NOT intended to check the synchronization status
-        (for this is better show_sync_region_status) but to detect anomalies
-        as images present in some regions that are not in master region.
-
-        The images may be prefixed with a symbol indicating something special:
-        +: this image is not on the master glance server
-        $: this image is not active: may be still uploading or in an error
-           status.
-        -: this image is on the master glance server, but as non-public
-        !: this image is on the master glance server, but checksum is different
-        #: this image is on the master glance server, but some of these
-           attributes are different: nid, type, sdc_aware, Public (if it is
-           true on master and is false in the region
-
-        :param regionstr: A region specified as 'target:region'. The prefix
-         'master:' may be omitted.
-        :return: nothing
-        """
-
-        images_region = self.get_images_region(regionstr)
-        _printimages(images_region, self.master_region_dict)
-
     def update_metadata_image(self, regionstr, image):
         """update the metadata of the image in the specified region
 
@@ -311,60 +278,6 @@ def _upload_image_remote(regionobj, image, replace_uuid=None,
                     oldimage.is_public = 'No'
                     glancesync_wrapper.update_metadata(regionobj, oldimage)
     return newuuid
-
-
-def _printimages(imagesregion, comparewith=None):
-    """ print a report about the images present on the specified region
-
-    See the documentation of GlanceSync.printimages for more details
-
-    :param imagesregion: the region of print
-    :param comparewith: the master region dictionary, used to compute the
-              image synchronization status.
-    :return: this function doesn't return anything.
-    """
-
-    images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
-        ('nid' in image.user_properties and 'type' in image.user_properties))
-    images.sort(key=lambda image: image.user_properties['type'] + image.name)
-    properties = ('type', 'nid')
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
-            else:
-                print line
-    print "---"
-    images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
-        ('nid' not in image.user_properties and 'type' in
-         image.user_properties))
-    images.sort(key=lambda image: image.user_properties['type'] + image.name)
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
-            else:
-                print line
-    print "---"
-    images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
-        ('nid' in image.user_properties and 'type' not in
-         image.user_properties))
-    images.sort(key=lambda image: int(image.user_properties['nid']))
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
-            else:
-                print line
 
 
 def _sync_upload_missing_images(
