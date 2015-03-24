@@ -244,10 +244,14 @@ def update_metadata(regionobj, image):
             'container_format=' + image.raw['Container format']]
         arguments.extend(props)
     else:
+        if image.is_public == 'Yes':
+            is_public = True
+        else:
+            is_public = False
         arguments = [
             '/usr/bin/glance', 'image-update', image.id, '--disk-format',
             image.raw.disk_format, '--name', image.name, '--is-public',
-            str(image.raw.is_public), '--is-protected',
+            str(is_public), '--is-protected',
             str(image.raw.protected), '--container-format',
             image.raw.container_format]
         for user_property in props:
