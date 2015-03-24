@@ -34,6 +34,8 @@ images_with_changes = {
     'eidas-sbc-img': ('fiware:iot', 696, True, None),
     'eidas-vmlinuz': (None, 696, True, None),
     'eidas-ramdisk': (None, 696, True, None),
+    'iotDiscovery-pep-r4_1': ('fiware:iot', 635, True, None),
+    'EspR4FastData': ('fiware:iot', 198, True, None),
     'MiWi-POI server': ('fiware:userinterface', 1170, True, None),
     'augmented-reality-img': ('fiware:userinterface', 1176, True, None),
     'kernel_ub1204_3.2.0-29-amd64': (None, 1176, True, None),
@@ -43,9 +45,13 @@ images_with_changes = {
     'cloud-rendering-r3.3.3': ('fiware:userinterface', 1286, True, None),
     'VirtualCharacters-3.3.3': ('fiware:userinterface', 1188, True, None),
     'interface-designer-r3.3.3': ('fiware:userinterface', 1292, True, None),
-    '2D3DCapture-3.3.3': ('fiware:userinterface' ,1257, True, None),
+    '2D3DCapture-3.3.3': ('fiware:userinterface', 1257, True, None),
     'GIS-3.3.3': ('fiware:userinterface', 1215, True, '3.3.3', None),
-    'RealVirtualInteractionGE-3.3.3': ('fiware:userinterface', 1249, True, None),
+    'RealVirtualInteractionGE-3.3.3': ('fiware:userinterface', 1249, True,
+                                       None),
+    'synchronization-3.3.3': ('fiware:userinterface', 1182, True, None),
+    'webtundra-1.0.0': ('fiware:userinterface', 1164, True, None),
+    'privacy-3-3-3': ('fiware:security', 122, False, None),
 }
 
 
@@ -69,7 +75,9 @@ def update_nids(region, glancesync):
             # don't update if values haven't changed.
             if (image.user_properties.get('nid', None) == nid and
                     image.user_properties.get('type', None) == typei and
-                    image.is_public == is_public):
+                    image.is_public == is_public and
+                    image.user_properties.get('nid_version', None)
+                    == nid_version):
                 continue
 
             if nid:
@@ -78,7 +86,7 @@ def update_nids(region, glancesync):
                 image.user_properties['type'] = typei
 
             if nid_version:
-                image.user_properties['nid_version'] = nid
+                image.user_properties['nid_version'] = nid_version
 
             image.is_public = is_public
             glancesync.update_metadata_image(region, image)
