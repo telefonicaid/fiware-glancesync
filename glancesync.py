@@ -99,7 +99,8 @@ class GlanceSync(object):
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        imagesregion = self.get_images_region(regionstr, True)
+        only_tenant_images = regionobj.target['only_tenant_images']
+        imagesregion = self.get_images_region(regionstr, only_tenant_images)
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
@@ -121,7 +122,9 @@ class GlanceSync(object):
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         target = regionobj.target
         regionn = regionobj.region
-        imagesregion = self.get_images_region(regionstr, True)
+        only_tenant_images = regionobj.target['only_tenant_images']
+        imagesregion = self.get_images_region(regionstr, only_tenant_images)
+
         dictimages = dict((image.name, image) for image in imagesregion)
 
         _sync_update_metada_region(
@@ -137,9 +140,11 @@ class GlanceSync(object):
         :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
+        imagesregion = self.get_images_region(regionstr)
         path = 'syncstatus_' + regionstr + '.csv'
         try:
-            tuples = regionobj.image_list_to_sync(self.master_region_dict)
+            tuples = regionobj.image_list_to_sync(self.master_region_dict,
+                                                  imagesregion)
             with open(path, 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 for tuple in tuples:
@@ -254,18 +259,18 @@ class GlanceSync(object):
         msg = 'Backup of region ' + regionstr
         logging.info(msg)
 
-    def get_images_region(self, regionstr, only_owned_images=False):
+    def get_images_region(self, regionstr, only_tenant_images=False):
         """It returns a list with all the tenant's images in that region
 
         :param regionstr: A region specified as 'target:region'. The prefix
          'master:' may be omitted.
-        :param only_owned_images: If true, only include the images owned by
+        :param only_tenant_images: If true, only include the images owned by
         the tenant or without owner.
         :return: a list of GlanceSyncImage objects
         """
 
         region = GlanceSyncRegion(regionstr, self.targets)
-        if only_owned_images:
+        if only_tenant_images:
             return list(
                 image for image in glancesync_wrapper.getimagelist(region) if
                 image.owner.zfill(32) == region.target['tenant'].zfill(32)
@@ -486,6 +491,9 @@ def _sync_update_metada_region(
         onlyshow=False):
     """This method synchronizes the metadata of the images that are both in
     master region and in the specified region, but with different metadata.
+
+    A special treatment is applied to kernel_id and ramdisk_id, because the
+    image may be updated but these value be outdated.
 
     :param master_region_dictimages: a dictionary with the images on master
      region
