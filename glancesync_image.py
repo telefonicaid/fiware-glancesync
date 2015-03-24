@@ -112,6 +112,9 @@ class GlanceSyncImage(object):
         master region. This last information is only for reporting, because the
         synchronisation way is always from master region to the other regions.
 
+        An anomaly this method does not detect is that ramdisk_id o kernel_id
+        point to a non-existent image.
+
         :param master_region_images: a dictionary with the master region's
          images.
         :param user_properties: a list with the user properties to compare;
@@ -156,6 +159,15 @@ class GlanceSyncImage(object):
 
                 if val_m != val_l:
                     return '#'
+            # always check ramdisk_id and kernel id is present/omitted in both
+            # images.
+            kernelid_in_region = 'kernel_id' in self.user_properties
+            kernelid_in_master = 'kernel_id' in image_master.user_properties
+            ramdiskid_in_region = 'ramdisk_id' in self.user_properties
+            ramdiskid_in_master = 'ramdisk_id' in image_master.user_properties
+            if kernelid_in_region != kernelid_in_master or \
+                    ramdiskid_in_region != ramdiskid_in_master:
+                return '#'
         else:
             if len(self.user_properties) != len(image_master.user_properties):
                 return '#'
@@ -182,7 +194,7 @@ class GlanceSyncImage(object):
 
         :param metadata_set: list of user properties to consider
         :param forcesync: a list with UUID of images that are always sync.
-        :param metadata_condition: expresion to evaluate if the image is sync.
+        :param metadata_condition: expression to evaluate if the image is sync.
         :return:
         """
         if self.id in forcesync:
