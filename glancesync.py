@@ -100,14 +100,16 @@ class GlanceSync(object):
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         only_tenant_images = regionobj.target['only_tenant_images']
+        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
-        dictimages = dict((image.name, image) for image in imagesregion)
+        dictimages = regionobj.local_images_filtered(master_images,
+                                                     imagesregion)
+        imagesregion = dictimages.values()
 
         _sync_update_metada_region(
-            self.master_region_dict, regionobj, imagesregion, dictimages,
-            False)
+            master_images, regionobj, imagesregion, dictimages, False)
         _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, False)
+            master_images, regionobj, dictimages, False)
 
     def show_sync_region_status(self, regionstr):
         """print a report about the images pending to sync in this region
@@ -120,17 +122,17 @@ class GlanceSync(object):
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        target = regionobj.target
-        regionn = regionobj.region
         only_tenant_images = regionobj.target['only_tenant_images']
+        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
-
-        dictimages = dict((image.name, image) for image in imagesregion)
+        dictimages = regionobj.local_images_filtered(master_images,
+                                                     imagesregion)
+        imagesregion = dictimages.values()
 
         _sync_update_metada_region(
-            self.master_region_dict, regionobj, imagesregion, dictimages, True)
+            master_images, regionobj, imagesregion, dictimages, True)
         _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, True)
+            master_images, regionobj, dictimages, True)
 
     def save_sync_region_status(self, regionstr):
         """export a csv report about the images pending to sync in this region
@@ -273,8 +275,8 @@ class GlanceSync(object):
         if only_tenant_images:
             return list(
                 image for image in glancesync_wrapper.getimagelist(region) if
-                image.owner.zfill(32) == region.target['tenant'].zfill(32)
-                or image.owner == '')
+                not image.owner or image.owner.zfill(32) ==
+                region.target['tenant'].zfill(32) or image.owner == '')
         else:
             return glancesync_wrapper.getimagelist(region)
 
@@ -515,18 +517,8 @@ def _sync_update_metada_region(
 
     for image in imagesregion:
         image_name = image.name
-        if image_name not in master_region_dictimages:
-            continue
-        if not image.is_synchronisable(target['metadata_set'],
-                                       target['forcesyncs'], cond):
-            continue
         p = image.compare_with_masterregion(
             master_region_dictimages, regionobj.target['metadata_set'])
-        if p == '$':
-            msg = 'state of image ' + image_name + ' is not active: '\
-                  + image.status
-            logging.warning(msg)
-            continue
 
         image_mast_reg = master_region_dictimages[image_name]
         ids_need_update = False
@@ -607,11 +599,6 @@ def _sync_update_metada_region(
             image_mast_reg = master_region_dictimages[image_name]
             msg = 'image ' + image_name +\
                   ' has different checksum: ' + c
-            logging.warning(msg)
-
-        if image_name in regionimageset:
-            msg = 'the image name ' + image_name +\
-                ' is duplicated '
             logging.warning(msg)
 
         regionimageset.add(image_name)
