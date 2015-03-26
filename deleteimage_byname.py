@@ -35,13 +35,13 @@ if __name__ == '__main__':
         confirmation = False
 
     if len(sys.argv) != 3 and len(sys.argv) != 2:
-        message = 'Use ' + sys.argv[0] + ' [<region>] <imagename> '
+        message = 'Use ' + sys.argv[0] + '<imagename> [<reg1> [<reg2> ...]]'
         logging.error(message)
         sys.exit(0)
     glancesync = GlanceSync()
     if len(sys.argv) == 3:
-        regions = [sys.argv[1]]
-        image_name = sys.argv[2]
+        regions = sys.argv[2:]
+        image_name = sys.argv[1]
     else:
         # Obtains the full list or region, including the master region
         regions = glancesync.get_regions(omit_master_region=False)
@@ -55,5 +55,8 @@ if __name__ == '__main__':
             # Don't do anything. Message has been already printed
             continue
         for image in images:
-            if image['Name'] == image_name:
-                glancesync.delete_image(region, image['Id'], confirmation)
+            if image.name == image_name:
+                deleted = glancesync.delete_image(
+                    region, image.id, confirmation)
+                if deleted:
+                    print 'Image deleted from region ' + region

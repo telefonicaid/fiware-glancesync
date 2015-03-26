@@ -25,7 +25,7 @@
 author = 'jmpr22'
 import sys
 import os
-from glancesync import GlanceSync
+from glancesync_fi import GlanceSyncFi as GlanceSync
 
 if __name__ == '__main__':
     glancesync = GlanceSync()
