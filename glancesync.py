@@ -513,7 +513,6 @@ def _get_master_region_dict(master_region_obj):
     """Gets a dictionary with the information of the images in the master
     region.
 
-    Only the images owned by the tenant are included.
     :param master_region: the region name
     :return: a dictionary indexed by name
     """
