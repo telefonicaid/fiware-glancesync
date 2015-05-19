@@ -120,6 +120,3 @@ def _printimages(imagesregion, comparewith=None):
                     comparewith, properties) + line
             else:
                 print line
-
-
-
