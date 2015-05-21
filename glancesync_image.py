@@ -42,7 +42,8 @@ class GlanceSyncImage(object):
                  raw=None):
         """Constructor of the image object.
 
-        This constructor is usually not invoked by the user"""
+        This constructor is usually not invoked by the user
+        user_properties dictionary is cloned."""
         self.name = name
         self.id = id
         self.region = region

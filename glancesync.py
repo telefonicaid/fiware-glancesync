@@ -32,7 +32,7 @@ import csv
 from glancesyncconfig import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
-import glancesync_wrapper
+import glancesync_wrapper_mock as glancesync_wrapper
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.

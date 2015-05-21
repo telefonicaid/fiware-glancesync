@@ -275,7 +275,7 @@ def upload_image(regionobj, image):
     :param regionobj: GlanceSyncRegion object; the region where the image is
       upload.
     :param image: GlanceSyncImage object; the image to be uploaded.
-    :return: Nothing.
+    :return: The UUID of the new image.
     """
     props = list(x + '=' + image.user_properties[x]
                  for x in image.user_properties)
@@ -376,6 +376,12 @@ def get_regions(target, target_name, ignore_region=None):
     """
 
     _set_environment(target)
+    if not legacy:
+        kc = KeystoneClient(
+            username=target['user'], password=target['password'],
+            tenant_name=target['tenant'], auth_url=target['keystone_url'])
+
+
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
               stdout=PIPE, stderr=sys.stderr)
 

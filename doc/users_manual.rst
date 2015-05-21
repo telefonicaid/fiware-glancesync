@@ -37,7 +37,7 @@ The tool first obtains the list of regions, contacts with the master region to o
 It is possible that an image is present both in the region and in the master region, but with different content (i.e. the checksums are different). The default behaviour of Glancesync is only to print a warning (safety is a big concern with a synchronisation tool: it never should touch content without user knowledge). The user can specify a list of images that it is right to overwrite by setting a list of checksums (the old content ones) using parameter '``replace``' in the section ``[master``] of the configuration file. Another option is the parameter '``rename``'; in this case the old image is not deleted but renamed (and its properties '``nid``' and '``type``' are renamed also). Both parameters can include the 'any' keyword. In this case the parameter '``dontupdate``' works as a blacklist. The algorithm is:
 
 1.  Is the checksum in the dontupdate list? print a warning only
-2.  Is the checksum in the rename list? rename old image and upload the master region's image
+2.  Is the checksum in the rename list? rename old image, change it to private, and upload the master region's image
 3. Is the checksum in the replace list? replace the old image with the master region's image
 4. Does the parameter 'replace' include the keyword 'any'? rename old image and upload the  master region's image
 5. Does the parameter 'rename' include the keyword 'any'? replace the old image with the master region's image
