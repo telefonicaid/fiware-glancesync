@@ -24,6 +24,8 @@
 #
 author = 'jmpr22'
 
+import copy
+
 
 class GlanceSyncImage(object):
     """This class represent an image within a regional image server.
@@ -51,9 +53,30 @@ class GlanceSyncImage(object):
         self.status = status
         self.owner = owner
         if user_properties is not None:
-            self.user_properties = user_properties
+            self.user_properties = copy.copy(user_properties)
         else:
             self.user_properties = dict()
+
+    @staticmethod
+    def from_field_list(fieldlist):
+        """Build an object using the list returned by to_field_list.
+        This method is useful for testing.
+
+        :param fieldlist: a list returned by to_field_list
+        :return: a new GlanceSyncImage object
+        """
+
+        region = fieldlist[0]
+        name = fieldlist[1]
+        id = fieldlist[2]
+        status = fieldlist[3]
+        size = fieldlist[4]
+        checksum = fieldlist[5]
+        owner = fieldlist[6]
+        public = fieldlist[7]
+        user_properties = eval("dict(" + fieldlist[8] + ")")
+        return GlanceSyncImage(name, id, region, owner, public, checksum,
+                               size, status, user_properties)
 
     def __str__(self):
         """It Returns the string representation of the class"""
@@ -85,6 +108,7 @@ class GlanceSyncImage(object):
         else:
             output.append(str(self.user_properties))
         return output
+
 
     def csv_userproperties(self, fields):
         """Extract the fields of the image as a CSV
