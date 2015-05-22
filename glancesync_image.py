@@ -83,7 +83,7 @@ class GlanceSyncImage(object):
         """It Returns the string representation of the class"""
 
         s = 'Region: {0} Name: {1} Id: {2} Status: {3} Size: {4} ' +\
-            'Checksum: {5} Owner {6} Public: {7} Properties: {8}'
+            'Checksum: {5} Owner: {6} Public: {7} Properties: {8}'
         return s.format(
             self.region, self.name, self.id, self.status, self.size,
             self.checksum, self.owner, self.is_public,
@@ -128,7 +128,7 @@ class GlanceSyncImage(object):
 
     def compare_with_masterregion(self, master_region_images, user_properties):
         """
-        It compares this image with its homonyms on master region and
+        It compares this image with its homonym on master region and
         returns a character identifying the image synchronization status.
 
         It detects anomalies: the image is present but with different metadata
