@@ -89,6 +89,29 @@ class GlanceSyncImage(object):
             self.checksum, self.owner, self.is_public,
             str(self.user_properties))
 
+    def __eq__(self, other):
+        """ The images are equals if all the attributes are equals,
+        that is, copy.deepcopy(obj) == obj.
+
+        This implies that for equality state and not only identity is
+        evaluated.
+        :param other: object to compare
+        :return: True if both images has the same attributes
+        """
+        if self.id != other.id or self.name != other.name:
+            return False
+        if self.region != other.region or self.status != other.status:
+            return False
+        if self.owner != other.owner or self.is_public != other.is_public:
+            return False
+        if self.size != other.size or self.raw != other.raw:
+            return False
+        if self.user_properties != other.user_properties:
+            return False
+        if self.checksum != other.checksum:
+            return False
+        return True
+
     def to_field_list(self, user_properties_list=None):
         """It returns a list with the fields of the class.
 
@@ -212,7 +235,7 @@ class GlanceSyncImage(object):
             self, metadata_set, forcesync, metadata_condition=None):
         """Determines if the image is synchronisable according to this
         algorith:
-           if image id is in forcesync list, it is synchronisable
+           if image id is in forcesync, it is synchronisable
            if metadata_condition is provided, evaluate it and return the result
            if image is not public, it is not synchronisable
            if metadata_set is empty, it is synchronisable
