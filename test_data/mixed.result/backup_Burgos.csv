@@ -1,0 +1,12 @@
+Burgos,image01,101,active,1073741824,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1,Yes,"{'type': 'ngimages', 'nid': 1}"
+Burgos,image02,1$image02,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1,Yes,{'type': 'baseimage'}
+Burgos,image05,1$image05,active,1073741864,28a5c2818590ee3c4d5d93a448190f3397144303,tenant1,Yes,"{'type': 'ngimages', 'nid': 3}"
+Burgos,image06,106,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant1,Yes,{'type': 'baseimage'}
+Burgos,image09,1$image09,active,1073741904,4b581cdce6283495fd4934ce574ac47e92881c64,tenant1,Yes,"{'type': 'ngimages', 'nid': 5}"
+Burgos,image10,1$image10,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1,Yes,{'type': 'baseimage'}
+Burgos,image11,111,active,1073741924,17ba0791499db908433b80f37c5fbc89b870084b,tenant1,No,"{'type': 'ngimages', 'nid': 6}"
+Burgos,image13,1$image13,active,1073741944,bd307a3ec329e10a2cff8fb87480823da114f8f4,tenant1,Yes,"{'type': 'ngimages', 'nid': 7}"
+Burgos,image14,1$image14,active,1073741954,fa35e192121eabf3dabf9f5ea6abdbcbc107ac3b,tenant1,Yes,{'type': 'baseimage'}
+Burgos,image16,116,active,1073741974,1574bddb75c78a6fd2251d61e2993b5146201319,tenant1,Yes,{}
+Burgos,image17,117,active,1073741984,0716d9708d321ffb6a00818614779e779925365c,tenant1,Yes,"{'type': 'ngimages', 'nid': 9}"
+Burgos,image18,1$image18,active,1073741994,9e6a55b6b4563e652a23be9d623ca5055c356940,tenant1,Yes,{'type': 'baseimage'}

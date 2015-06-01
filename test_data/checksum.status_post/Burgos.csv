@@ -1,0 +1,5 @@
+ok_stalled_checksum,Burgos,image01
+ok,Burgos,image02
+ok,Burgos,image03
+ok,Burgos,image04
+error_checksum,Burgos,image05

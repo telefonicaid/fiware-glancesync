@@ -1,0 +1,6 @@
+Burgos,image01,101,active,1073741824,ch1,tenant1,Yes,"{'type': 'ngimages', 'nid': 1}"
+Burgos,image02.old,102,active,1073741834,ch2,tenant1,No,{'type': 'baseimage'}
+Burgos,image02,1$image02,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1,Yes,{'type': 'baseimage'}
+Burgos,image03,103,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1,No,"{'type': 'ngimages', 'nid': 2}"
+Burgos,image04,1$image04,active,1073741854,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1,Yes,"{'type': 'other'}"
+Burgos,image05,105,active,1073741855,ch5,tenant1,Yes,"{'type': 'other'}"

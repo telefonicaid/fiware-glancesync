@@ -1,0 +1,20 @@
+Valladolid,image01,001,active,1073741824,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1,Yes,"{'type': 'ngimages', 'nid': 1}"
+Valladolid,image02,002,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1,Yes,{'type': 'baseimage'}
+Valladolid,image03,003,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1,No,"{'type': 'ngimages', 'nid': 2}"
+Valladolid,image04,004,active,1073741854,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1,Yes,{}
+Valladolid,image05,005,active,1073741864,28a5c2818590ee3c4d5d93a448190f3397144303,tenant1,Yes,"{'type': 'ngimages', 'nid': 3}"
+Valladolid,image06,006,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant1,Yes,{'type': 'baseimage'}
+Valladolid,image07,007,active,1073741884,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant1,No,"{'type': 'ngimages', 'nid': 4}"
+Valladolid,image08,008,active,1073741894,1ea51bf32497d1b3708522b430b288a129f65307,tenant1,Yes,{}
+Valladolid,image09,009,active,1073741904,4b581cdce6283495fd4934ce574ac47e92881c64,tenant1,Yes,"{'type': 'ngimages', 'nid': 5}"
+Valladolid,image10,010,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1,Yes,{'type': 'baseimage'}
+Valladolid,image11,011,active,1073741924,17ba0791499db908433b80f37c5fbc89b870084b,tenant1,No,"{'type': 'ngimages', 'nid': 6}"
+Valladolid,image12,012,active,1073741934,7b52009b64fd0a2a49e6d8a939753077792b0554,tenant1,Yes,{}
+Valladolid,image13,013,active,1073741944,bd307a3ec329e10a2cff8fb87480823da114f8f4,tenant1,Yes,"{'type': 'ngimages', 'nid': 7}"
+Valladolid,image14,014,active,1073741954,fa35e192121eabf3dabf9f5ea6abdbcbc107ac3b,tenant1,Yes,{'type': 'baseimage'}
+Valladolid,image15,015,active,1073741964,f1abd670358e036c31296e66b3b66c382ac00812,tenant1,No,"{'type': 'ngimages', 'nid': 8}"
+Valladolid,image16,016,active,1073741974,1574bddb75c78a6fd2251d61e2993b5146201319,tenant1,Yes,{}
+Valladolid,image17,017,active,1073741984,0716d9708d321ffb6a00818614779e779925365c,tenant1,Yes,"{'type': 'ngimages', 'nid': 9}"
+Valladolid,image18,018,active,1073741994,9e6a55b6b4563e652a23be9d623ca5055c356940,tenant1,Yes,{'type': 'baseimage'}
+Valladolid,image19,019,active,1073742004,b3f0c7f6bb763af1be91d9e74eabfeb199dc1f1f,tenant1,No,"{'type': 'ngimages', 'nid': 10}"
+Valladolid,image20,020,active,1073742014,91032ad7bbcb6cf72875e8e8207dcfba80173f7c,tenant1,Yes,{}

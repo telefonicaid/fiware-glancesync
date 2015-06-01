@@ -1,0 +1,8 @@
+other:Madrid,image02,202,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant2,Yes,{'type': 'baseimage'}
+other:Madrid,image06,1$image06,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant2,Yes,{'type': 'baseimage'}
+other:Madrid,image07,207,active,1073741884,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant2,No,"{'type': 'ngimages', 'nid': 4}"
+other:Madrid,image12,212,active,1073741934,7b52009b64fd0a2a49e6d8a939753077792b0554,tenant2,Yes,{}
+other:Madrid,image13,213,active,1073741944,bd307a3ec329e10a2cff8fb87480823da114f8f4,tenant2,Yes,"{'type': 'ngimages', 'nid': 7}"
+other:Madrid,image10,1$image10,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant2,Yes,{'type': 'baseimage'}
+other:Madrid,image14,1$image14,active,1073741954,fa35e192121eabf3dabf9f5ea6abdbcbc107ac3b,tenant2,Yes,{'type': 'baseimage'}
+other:Madrid,image18,218,active,1073741994,9e6a55b6b4563e652a23be9d623ca5055c356940,tenant2,Yes,{'type': 'baseimage'}

@@ -1,0 +1,8 @@
+[main]
+master_region = Valladolid
+
+[master]
+credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
+  http://server:4730/v2.0,tenant1
+metadata_set = nid, type
+#forcesyncs = 003
