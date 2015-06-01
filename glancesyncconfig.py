@@ -22,10 +22,13 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+author = 'chema'
+
 import ConfigParser
 import os
 import base64
+import logging
+
 import sys
 
 
@@ -56,6 +59,8 @@ def _get_list(self, section, key):
 ConfigParser.SafeConfigParser.getset = _get_set
 ConfigParser.SafeConfigParser.getlist = _get_list
 
+default_configuration_file = '/etc/glancesync.conf'
+
 
 class GlanceSyncConfig(object):
     """Class to read glancesync configuration.
@@ -76,40 +81,76 @@ class GlanceSyncConfig(object):
     OS_REGION_NAME
     """
 
-    def __init__(self, configuration_path=None):
-        if 'GLANCESYNC_CONFIG' in os.environ:
-            configuration_path = os.environ['GLANCESYNC_CONFIG']
+    def __init__(self, configuration_path=None, stream=None):
+        """
+        Init a a instance of the configuration. It can be created from a stream
+        (e.g. a file or a StringIO) or from a configuration file whose path.
+        The resolution order is:
+        *if stream parameter is provided, use the stream
+        *if GLANCESYNC_CONFIG is defined, use it to locate the file
+        *if configuration_path is not None, it is the path of the file
+        *if /etc/glancesync.conf exists, use it
+        *otherwise, create a default configuration using environment variables
+        OS_REGION_NAME, OS_USERNAME, OS_PASSWORD, OS_TENANT_NAME, OS_AUTH_URL
 
-        if configuration_path is None:
-            if os.path.exists('/etc/glancesync.conf'):
-                configuration_path = '/etc/glancesync.conf'
+        Please, be aware that stream priority is over GLANCESYNC_CONFIG, but
+        file is not.
+
+        :param configuration_path: the path of the configuration file
+        :param stream: a stream object with the configuration file
+        :return: nothing
+        """
+
+        logger = logging.getLogger('glancesync')
+        if not stream:
+            if 'GLANCESYNC_CONFIG' in os.environ:
+                configuration_path = os.environ['GLANCESYNC_CONFIG']
+            if configuration_path is None:
+                if os.path.exists(default_configuration_file):
+                    configuration_path = default_configuration_file
         self.targets = dict()
         self.master_region = None
         self.preferable_order = None
         self.max_children = 1
 
         # Read configuration if it exists
-        if configuration_path is not None:
+        if configuration_path is not None or stream is not None:
             configparser = ConfigParser.SafeConfigParser()
-            configparser.read(configuration_path)
-            self.master_region = configparser.get('main', 'master_region')
-            self.preferable_order = configparser.getlist(
-                'main', 'preferable_order')
+            if stream:
+                configparser.readfp(stream)
+            else:
+                configparser.read(configuration_path)
+
+            if configparser.has_option('main', 'master_region'):
+                self.master_region = configparser.get('main', 'master_region')
+
+            if configparser.has_option('main', 'preferable_order'):
+                self.preferable_order = configparser.getlist(
+                    'main', 'preferable_order')
+
             if configparser.has_option('main', 'max_children'):
-                self.max_children = configparser.getint('main', 'max_children')
+                    self.max_children = configparser.getint('main',
+                                                            'max_children')
 
             for section in configparser.sections():
                 if section == 'main' or section == 'DEFAULTS':
                     continue
                 target = dict()
                 self.targets[section] = target
-                credential = configparser.get(section, 'credential').strip()
-                parts = credential.split(',')
-                target['user'] = parts[0]
-                target['password'] = base64.decodestring(parts[1])
-                target['keystone_url'] = parts[2]
-                target['tenant'] = parts[3]
-                target['forcesyncs'] = configparser.getlist(
+                if configparser.has_option(section, 'credential'):
+                    cred = configparser.get(section, 'credential').strip()
+                    parts = cred.split(',')
+                    target['user'] = parts[0].strip()
+                    target['password'] = base64.decodestring(parts[1].strip())
+                    target['keystone_url'] = parts[2].strip()
+                    target['tenant'] = parts[3].strip()
+                else:
+                    if section != 'master':
+                        msg = 'A credential parameter is mandatory for each '\
+                            'target'
+                        logger.error(msg)
+                        raise Exception(msg)
+                target['forcesyncs'] = configparser.getset(
                     section, 'forcesyncs')
                 target['replace'] = configparser.getset(section, 'replace')
                 target['rename'] = configparser.getset(section, 'rename')
@@ -118,9 +159,10 @@ class GlanceSyncConfig(object):
                 target['ignore_regions'] = configparser.getset(
                     section, 'ignore_regions')
                 if configparser.has_option(section, 'metadata_condition'):
-                    target['metadata_condition'] = compile(
-                        configparser.get(section, 'metadata_condition'),
-                        'metadata_condition', 'eval')
+                    cond = configparser.get(section, 'metadata_condition')
+                    if len(cond.strip()):
+                        target['metadata_condition'] = compile(
+                            cond, 'metadata_condition', 'eval')
                 target['metadata_set'] = configparser.getset(
                     section, 'metadata_set')
                 if configparser.has_option(section, 'only_tenant_images'):
@@ -131,21 +173,60 @@ class GlanceSyncConfig(object):
 
         # Default configuration if it is not present
         if self.master_region is None:
-            self.master_region = os.environ['OS_REGION_NAME']
+            if 'OS_REGION_NAME' in os.environ:
+                self.master_region = os.environ['OS_REGION_NAME']
+            else:
+                msg = 'A master region must be set in the '\
+                    'configuration or OS_REGION_NAME must be defined'
+                self.logger.error(msg)
+
+
         if self.preferable_order is None:
-            self['preferable_order'] = list()
+            self.preferable_order = list()
         if 'master' not in self.targets:
             self.targets['master'] = dict()
             self.targets['master']['replace'] = set()
             self.targets['master']['rename'] = set()
             self.targets['master']['dontupdate'] = set()
-            self.targets['master']['forcesyncs'] = list()
+            self.targets['master']['forcesyncs'] = set()
             self.targets['master']['ignore_regions'] = set()
             self.targets['master']['metadata_set'] = set()
             self.targets['master']['only_tenant_images'] = True
 
         if 'user' not in self.targets['master']:
-            self.targets['master']['user'] = os.environ['OS_USERNAME']
-            self.targets['master']['password'] = os.environ['OS_PASSWORD']
-            self.targets['master']['keystone_url'] = os.environ['OS_AUTH_URL']
-            self.targets['master']['tenant'] = os.environ['OS_TENANT_NAME']
+            if 'OS_USERNAME' in os.environ:
+                self.targets['master']['user'] = os.environ['OS_USERNAME']
+            else:
+                msg = 'A username for master target must be provided in '\
+                    'configuration or OS_USERNAME must be defined'
+                self.logger.error(msg)
+                raise Exception(msg)
+
+        if 'password' not in self.targets['master']:
+            if 'OS_PASSWORD' in os.environ:
+                self.targets['master']['password'] = os.environ['OS_PASSWORD']
+            else:
+                 msg = 'A password for master target must be provided in '\
+                    'configuration or OS_PASSWORD must be defined. In the '\
+                    'configuration file, passwords must be encoded with base64'
+                 self.logger.error(msg)
+                 raise Exception(msg)
+
+        if 'keystone_url' not in self.targets['master']:
+            if 'OS_AUTH_URL' in os.environ:
+                self.targets['master']['keystone_url'] =\
+                    os.environ['OS_AUTH_URL']
+            else:
+                 msg = 'A keystone url for master target must be provided in '\
+                    'configuration or OS_AUTH_URL must be defined.'
+                 self.logger.error(msg)
+                 raise Exception(msg)
+
+        if 'tenant' not in self.targets['master']:
+            if 'OS_TENANT_NAME' in os.environ:
+                self.targets['master']['tenant'] = os.environ['OS_TENANT_NAME']
+            else:
+                msg = 'A tenant name for master target must be provided in '\
+                    'configuration or OS_TENANT_NAME must be defined.'
+                self.logger.error(msg)
+                raise Exception(msg)
