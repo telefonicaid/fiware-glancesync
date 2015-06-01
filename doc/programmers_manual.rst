@@ -24,7 +24,7 @@ A typical case is to get a list of regions first and the operate over each regio
 
 A region is namespaced with a 'target' (e.g. ``development:Spain``). The default target is 'master' and therefore the suffix 'master:' is optional.
 
-The call glancesync.get_regions() returns a list of the regions in the master target. To obtain the regions in other targets, invoke glancesync.get_regions(target).
+The call glancesync.get_regions() returns a list of the regions in the master target. To obtain the regions in other targets, invoke glancesync.get_regions(target=<target>).
 
 
 Methods of GlanceSync
@@ -55,9 +55,11 @@ ___________
 
 ::
 
- def sync_region(self, region) 
+ def sync_region(self, region, dry_run = False)
 
 It synchronises the glance server of the specified region with the contents of the master region.
+
+When dry_run is True, it does not synchronise, only show the images to be synchronised.
 
 show_sync_region_status
 _______________________
@@ -66,8 +68,7 @@ _______________________
 
  def show_sync_region_status(self, region) 
 
-This is a dry-run version of the *sync* method. Don't synchronise, only show the images to be synchronised.
-
+This is a dry-run version of the *sync* method.
 print_images_master_region
 __________________________
 
@@ -95,7 +96,7 @@ ____________
 
 Print a report about the images present on the specified region
 
-This method is NOT intended to check the synchronization status (for this is better *show_sync_region_status*) but to detect anomalies as images present in some regions that are not in master region.
+This method is NOT intended to check the synchronization status (for this is better *sync_region* with parameter dry_run=True) but to detect anomalies as images present in some regions that are not in master region.
 
 The images may be prefixed with a symbol indicating something special:
 
