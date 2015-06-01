@@ -39,6 +39,7 @@ if __name__ == '__main__':
         logging.error(message)
         sys.exit(0)
     glancesync = GlanceSync()
+    glancesync.init_logs()
     if len(sys.argv) == 3:
         regions = sys.argv[2:]
         image_name = sys.argv[1]

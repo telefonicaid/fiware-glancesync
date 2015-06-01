@@ -47,6 +47,7 @@ def _wait_child(children):
 
 if __name__ == '__main__':
     glancesync = GlanceSync()
+    glancesync.init_logs()
     max_children = glancesync.max_children
     now = datetime.datetime.now()
     datestr = str(now.year) + str(now.month).zfill(2) + str(now.day).zfill(2)\

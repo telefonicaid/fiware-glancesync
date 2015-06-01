@@ -36,6 +36,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     glancesync = GlanceSync()
+    glancesync.init_logs()
     if len(sys.argv) > 3:
         regions = sys.argv[3:]
     else:
