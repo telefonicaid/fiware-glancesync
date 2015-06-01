@@ -31,6 +31,8 @@ import urllib
 import sys
 import re
 
+logger = logging.getLogger('glancesync')
+
 try:
     # Recent versions
     from keystoneclient.auth.identity import v2 as identity
@@ -92,7 +94,7 @@ def _getimagelist_legacy(regionobj):
         checksums = _get_checksums(regionobj)
     except Exception, e:
         msg = 'Error retrieving checksums of images. Cause: ' + str(e)
-        logging.error(msg)
+        logger.error(msg)
         raise Exception(msg)
 
     p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
@@ -104,7 +106,7 @@ def _getimagelist_legacy(regionobj):
         msg = 'Error retrieving image list. Cause: ' + line
         for line in outputcmd:
             msg += line
-        logging.error(msg)
+        logger.error(msg)
         raise Exception(msg)
 
     image_list = list()
@@ -168,7 +170,7 @@ def _getimagelist(regionobj):
             image_list.append(i)
     except Exception, e:
         msg = 'Error retrieving image list. Cause: ' + str(e)
-        logging.error(msg)
+        logger.error(msg)
         raise Exception(msg)
 
     return image_list
@@ -218,7 +220,7 @@ def delete_image(regionobj, id, confirm=True):
         return True
     else:
         msg = 'Failed the deletion of image ' + id
-        logging.error(msg)
+        logger.error(msg)
         raise
 
 
@@ -265,7 +267,7 @@ def update_metadata(regionobj, image):
     returncode = call(arguments, stdin=None, stdout=devnull, stderr=None)
     if returncode != 0:
         msg = 'update of ' + image.name + 'failed'
-        logging(msg)
+        logger.error(msg)
         raise Exception(msg)
 
 
@@ -311,7 +313,7 @@ def upload_image(regionobj, image):
     if p.returncode != 0:
         msg = 'Upload of ' + image.name + " to region " +\
               regionobj.region + ' Failed: ' + result
-        logging.error(msg)
+        logger.error(msg)
         raise Exception(msg)
     if legacy:
         return result.split(':')[1].strip()
@@ -435,11 +437,11 @@ def backup_metadata(region, outputfile):
 
     except Exception, e:
         msg = 'Failed backup of ' + region.fullname + ' caused by ' + str(e)
-        logging.error(msg)
+        logger.error(msg)
         raise Exception(msg)
     else:
         if code != 0:
             msg = 'Failed backup of ' + region.fullname + \
                   ' glance details returned a non-zero code'
-            logging.error(msg)
+            logger.error(msg)
             raise Exception(msg)
