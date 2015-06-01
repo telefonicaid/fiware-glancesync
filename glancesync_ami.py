@@ -39,6 +39,8 @@ ramdisk_id.
 """
 
 
+_logger = logging.getLogger('glancesync')
+
 def get_master_region_dict(image_list):
     """Convert the image list to a dictionary indexed by name and also
     replace at parameters kernel_id and ramdisk_id the UUID with the name of
@@ -64,38 +66,35 @@ def get_master_region_dict(image_list):
     return master_region_dictimages
 
 
-def update_kernelramdisk_id(image, master_images, region_images,
-                            pending_kernel, pending_ramdisk):
+def update_kernelramdisk_id(image, master_image, region_images):
     """Modify the kernel_id and ramdisk_id if required of an AMI image.
 
     This function modify the object in memory, but not in the glance server.
     The function returns True if the object has been modified and need to be
     updated.
 
-    Dictionaries pending_kernel and pending_ramdisk are updated if any kernel
-    or ramdisk image is missing. The key is the name of the image and the
-    value the UUID of the image whose ramdisk_id/kernel_id property must be
-    updated.
+    If the kernel or ramdisk image is not found, a warning is emitted, the
+    image is marked as private and the kernel_id/ramdisk_id is filled with the
+    name of the missing image with the prefix __
+
+    if the ramdisk_id/kernel_id is present in image but not in master image,
+    the missing property is deleted from the image.
 
     :param image: the image to modify
-    :param master_images: the master image with the same name. In this image
-    kernel_id and ramdisk_id have a name instead of an UUID, while kernel_id
-     and ramdisk_id are the UUID of the images in the same region than image.
+    :param master_image: the master image with the same name that image. In
+    that image kernel_id and ramdisk_id have the name instead of an UUID.
     :param region_images: a dictionary with the images of the region, indexed
       by name.
     :return: True if the image was modified, False otherwise.
     """
 
-    result_
-    if not _update_auximg_id('kernel_id', image, master_images, region_images):
-        return False
-    if not _update_auximg_id('ramddisk_id', image, master_images,
-                             region_images):
-        return False
-    return True
 
+    r1 = _update_auximg_id('kernel_id', image, master_image, region_images)
+    r2 = _update_auximg_id('ramdisk_id', image, master_image, region_images)
+    return r1 or r2
 
-def _update_auximg_id(property_id, image, master_image, images_region):
+def _update_auximg_id(property_id, image, master_image, images_region,
+                      dry_run=False):
     """
     Utility function that modify, if required, a property in the image
     pointing to the id of other image. For example, it is used with kernel_id
@@ -104,7 +103,8 @@ def _update_auximg_id(property_id, image, master_image, images_region):
     param property_id: the name of the property (e.g. kernel_id, ramdisk_id)
     :param image: the image to modify
     :param master_image: the master image
-    :param images_region:
+    :param images_region: a dictionary indexed by name with the region's images
+    :param dry_run: if true, don't modify the image, only check it is required
     :return:
     """
     if property_id not in master_image.user_properties:
@@ -113,13 +113,15 @@ def _update_auximg_id(property_id, image, master_image, images_region):
             return False
         else:
             # remove property
-            del image.user_properties[property_id]
+            if not dry_run:
+                del image.user_properties[property_id]
             return True
 
     # Get the name of the kernel/ramdisk image
     aux_image_name = master_image.user_properties[property_id]
-
     if aux_image_name not in images_region:
+        if dry_run:
+            return True
         # It is very unusual that an image exists and not its kernel or
         # ramdisk, because little images are upload first, but it is
         # possible (e.g. if the image is removed manually or it is
@@ -127,17 +129,99 @@ def _update_auximg_id(property_id, image, master_image, images_region):
         # In this case, print a warning and mark the image as private
         image.is_public = 'No'
         msg = 'Not found {0} on region {1}. It should be {2} of image {3}'
-        logging.warning(msg.format(aux_image_name, image.region,
+        _logger.warning(msg.format(aux_image_name, image.region,
                                    property_id, image.name))
         # Put the aux image name; this provides information to the caller
-        # about the missing image
-        image.user_properites[property_id] = aux_image_name
+        # about the missing image. Put '__' as prefix.
+        image.user_properties[property_id] = '__' + aux_image_name
         return True
 
     aux_image = images_region[aux_image_name]
     if property_id in image.user_properties and\
             aux_image.id == image.user_properties[property_id]:
         return False
-
-    image.user_properties[property_id] = aux_image.id
+    if not dry_run:
+        image.user_properties[property_id] = aux_image.id
     return True
+
+def check_ami(image, master_image, region_images, pending_images):
+    """Check if kernel_id and/or ramdisk_id modification is required.
+
+    These are the possible states:
+    *ready: image does not have kernel_id/ramdisk_id or the values have been
+        already updated
+    *update: kernel_id/ramdisk_id values will be updated now if calling to
+    update_kernelramdisk_id
+    *pending kernel_id/ramdisk_id values must be updated, but the images are
+      pending to upload and therefore the UUIDs cannot be updated yet.
+    *missing: kernel_id/ramdisk_id is missing and there are not information
+      to obtain it. This typically occurs when the kernel or ramdisk image are
+      not included in the set of images to be synchronised.
+
+    Typically, images with state 'ready' can be ignored; images with state
+    'update' can be updated before uploading the pending images. Images with
+    'missing' state must be updated after the uploading of pending images.
+    Finally, images with 'missing' state are broken.
+
+    :param image: the image to check
+    :param master_image: the master image with the same name that image. In
+    that image kernel_id and ramdisk_id have the name instead of an UUID.
+    :param region_images: a dictionary with the images of the region, indexed
+      by name.
+    :param pending_images: a set with the name of each image pending to upload.
+    :return: True if the image needs to be modified, False otherwise.
+    """
+
+    status1 = _check_auximg_id('kernel_id', image, master_image, region_images,
+                              pending_images)
+    status2 = _check_auximg_id('ramdisk_id', image, master_image,
+                               region_images, pending_images)
+    if status1 == status2:
+        return status1
+
+    if status1 == 'missing' or status2 == 'missing':
+        return 'missing'
+
+    if status1 == 'pending' or status2 == 'pending':
+        return 'pending'
+    else:
+        return 'update'
+
+def _check_auximg_id(property_id, image, master_image, images_region,
+                      pending_images):
+    """
+    Utility function that modify, if required, a property in the image
+    pointing to the id of other image. For example, it is used with kernel_id
+    and ramdisk_id of AMI images.
+
+    param property_id: the name of the property (e.g. kernel_id, ramdisk_id)
+    :param image: the image to modify
+    :param master_image: the master image
+    :param images_region: a dictionary indexed by name with the region's images
+    :param dry_run: if true, don't modify the image, only check it is required
+    :return:
+    """
+    if property_id not in master_image.user_properties:
+        if property_id not in image.user_properties:
+            # Nothing to do
+            return 'ready'
+        else:
+            return 'update'
+
+    # Get the name of the kernel/ramdisk image
+    aux_image_name = master_image.user_properties[property_id]
+
+    # Check if the aux_image exists
+    if aux_image_name not in images_region:
+        if aux_image_name in pending_images:
+            return 'pending'
+        else:
+            return 'missing'
+
+    # Found image, Check it is OK or must be updated
+    aux_image = images_region[aux_image_name]
+    if property_id in image.user_properties and\
+            aux_image.id == image.user_properties[property_id]:
+        return 'ready'
+    else:
+        return 'update'
