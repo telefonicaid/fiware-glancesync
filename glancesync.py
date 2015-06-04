@@ -47,7 +47,6 @@ if 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
 elif 'GLANCESYNC_USE_MOCK' in os.environ:
     import glancesync_wrapper_mock as glancesync_wrapper
 else:
-    print os.environ.keys()
     import glancesync_wrapper
 
 logger = logging.getLogger('glancesync')
@@ -129,10 +128,12 @@ class GlanceSync(object):
         # that refers them. They are smaller.
         tuples = regionobj.image_list_to_sync(master_images, imagesregion)
         totalmbs = 0
+        was_synchronised = True
 
         # First, update metadata
         for tuple in tuples:
             if tuple[0] == 'pending_metadata':
+                was_synchronised = False
                 if dry_run:
                     self.log.info(regionobj.fullname +
                                   ': Image pending to update the metadata ' +
@@ -169,14 +170,16 @@ class GlanceSync(object):
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 if not dry_run:
-                    self.log.info(regionobj.fullname + ': Renaming and replacing image '
-                                  + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+                    self.log.info(
+                        regionobj.fullname + ': Renaming and replacing image '
+                        + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     region_image.name += '.old'
                     region_image.is_public = 'No'
                     glancesync_wrapper.update_metadata(regionobj, region_image)
 
             if uploaded:
+                was_synchronised = False
                 totalmbs += sizeimage
                 if dry_run:
                     self.log.info(regionobj.fullname + ': Pending: ' +
@@ -190,7 +193,7 @@ class GlanceSync(object):
             if tuple[0] == 'pending_ami':
                 self.__update_meta(tuple[1], dictimages, regionobj)
 
-        if totalmbs == 0:
+        if was_synchronised:
             self.log.info(regionobj.fullname + ': Region is synchronized.')
         else:
             if dry_run:
@@ -352,8 +355,13 @@ class GlanceSync(object):
         tools to avoid the warning about missing Handlers in logger:
            No handlers could be found for logger "glancesync"
 
+        Another reason is because the front-end shows as progress the INFO
+        messages, and showing the INFO messages of other components may be
+        to verbose. 
+
         This class do not register a handler by default because in a library
-        typically this is a decision of the caller.
+        typically this is a decision of the caller. Use this function at your
+        own convenience.
 
         :param include_date: If true, include date in the logs
         :return:
@@ -361,11 +369,10 @@ class GlanceSync(object):
 
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(levelname)s:%(message)s'))
-        #logger = logging.getLogger('glancesync')
-        logger = logging.getLogger()
+        logger = logging.getLogger('glancesync')
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
-        logging.info('prueba')
+        logger.propagate = 0
 
     def __upload_image(self, master_image, images_dict, regionobj):
         new_image = copy.deepcopy(master_image)
