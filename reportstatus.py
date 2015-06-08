@@ -25,6 +25,8 @@
 author = 'jmpr22'
 import sys
 import os
+import StringIO
+
 from glancesync_fi import GlanceSyncFi as GlanceSync
 
 if __name__ == '__main__':
@@ -38,16 +40,15 @@ if __name__ == '__main__':
             regions_unsorted.remove(region)
 
     regions.extend(regions_unsorted)
-
-    print '======Master (' + glancesync.master_region + ')'
-    glancesync.print_images_master_region()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     for region in regions:
         try:
-            print "======" + region
-            glancesync.sync_region(region, dry_run=True)
+            stream = StringIO.StringIO()
+            glancesync.export_sync_region_status(region, stream)
+            print stream.getvalue()
         except Exception:
             # Don't do anything. Message has been already printed
             # try next region
             continue
+
