@@ -57,13 +57,13 @@ class ServersFacade(object):
         self.target = target
         self.images_dir = '/var/lib/glance/images'
 
-    def get_regions(self, target):
+    def get_regions(self):
         """It returns the list of regions on the specified target.
         :return: a list of region names.
         """
         return get_regions(self.target)
 
-    def getimagelist(self, regionobj):
+    def get_imagelist(self, regionobj):
         """return a image list from the glance of the specified region
 
         :param regionobj: The GlanceSyncRegion object of the region to list
@@ -120,7 +120,6 @@ def _set_environment(target, region=None):
     os.environ['OS_TENANT_NAME'] = target['tenant']
     if region is not None:
         os.environ['OS_REGION_NAME'] = region
-
 
 
 def getimagelist(regionobj):
@@ -272,7 +271,7 @@ def upload_image(regionobj, image, images_dir):
         matcher = re.compile('\|\s+id\s')
         for line in result.splitlines():
             if matcher.match(line):
-                return line.split('|')[2]
+                return line.split('|')[2].strip()
 
 def get_regions(target):
     """It returns the list of regions on the specified target.
@@ -281,13 +280,21 @@ def get_regions(target):
     """
 
     _set_environment(target)
+    """
     kc = KeystoneClient(
         username=target['user'], password=target['password'],
         tenant_name=target['tenant'], auth_url=target['keystone_url'])
-
+    """
+    value_to_restore=None
+    if 'OS_REGION_NAME' in os.environ:
+        value_to_restore = os.environ['OS_REGION_NAME']
+        del(os.environ['OS_REGION_NAME'])
 
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
               stdout=PIPE, stderr=sys.stderr)
+
+    if value_to_restore:
+        os.environ['OS_REGION_NAME'] = value_to_restore
 
     output_cmd = p.stdout
     regions_list = list()
