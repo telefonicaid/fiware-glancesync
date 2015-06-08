@@ -261,7 +261,7 @@ class GlanceSync(object):
                 l.append(image.name)
                 writer.writerow(l)
         except Exception, e:
-                msg = 'Error retrieving images from region {0} cause {1}'
+                msg = '{0}: Error retrieving images from region. Cause {1}'
                 msg = msg.format(regionstr, str(e))
                 self.log.error(msg)
                 raise Exception(msg)
@@ -322,7 +322,7 @@ class GlanceSync(object):
                 for image in images:
                     writer.writerow(image.to_field_list())
         except Exception, e:
-            msg = 'Error retrieving images from region {0} cause {1}'
+            msg = '{0}:Error retrieving images from region. Cause {1}'
             msg = msg.format(regionstr, str(e))
             self.log.error(msg)
             raise Exception(msg)

@@ -128,7 +128,7 @@ def _update_auximg_id(property_id, image, master_image, images_region,
         # replaced by a more recent one)
         # In this case, print a warning and mark the image as private
         image.is_public = 'No'
-        msg = 'Not found {0} on region {1}. It should be {2} of image {3}'
+        msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
         _logger.warning(msg.format(aux_image_name, image.region,
                                    property_id, image.name))
         # Put the aux image name; this provides information to the caller

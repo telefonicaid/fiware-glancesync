@@ -97,23 +97,26 @@ class GlanceSyncRegion(object):
 
             if image.owner and image.owner != '' and\
                     image.owner.zfill(32) != self.target['tenant'].zfill(32):
-                msg = 'image {0} (UUID {1}) is owned by other tenant: {2}'
-                self.log.warning(msg.format(image.name, image.id, image.owner))
+                msg = '{3}: image {0} (UUID {1}) is owned by other tenant: {2}'
+                self.log.warning(msg.format(image.name, image.id, image.owner,
+                                            self.fullname))
                 if self.target['only_tenant_images']:
                     continue
 
             if image.status != 'active':
                 # print warning
-                msg = 'state of image ' + image.name + ' with UUID ' +\
-                      image.id + '  is not active: ' + image.status
+                msg = self.fullname + ': state of image ' + image.name +\
+                      ' with UUID ' + image.id + '  is not active: ' +\
+                      image.status
                 self.log.warning(msg)
                 continue
 
             if image.name in filtered_images_region:
                 # print warning (duplicate)
-                msg = 'image with name {0} and UUID {1} is duplicated: {2}'
-                msg = msg.format(image.name, image.id,
-                                 filtered_images_region[image.name].id)
+                msg = '{3}: image name {0} is duplicated. UUIDs: {1} {2}'
+                msg = msg.format(
+                    image.name, image.id, filtered_images_region[image.name].id
+                    , self.fullname)
                 self.log.warning(msg)
                 continue
 
