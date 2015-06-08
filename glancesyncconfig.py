@@ -112,6 +112,7 @@ class GlanceSyncConfig(object):
         self.master_region = None
         self.preferable_order = None
         self.max_children = 1
+        self.images_dir = '/var/lib/glance/images'
 
         # Read configuration if it exists
         if configuration_path is not None or stream is not None:
@@ -131,6 +132,8 @@ class GlanceSyncConfig(object):
             if configparser.has_option('main', 'max_children'):
                     self.max_children = configparser.getint('main',
                                                             'max_children')
+            if configparser.has_option('main', 'images_dir'):
+                    self.images_dir = configparser.get('main', 'images_dir')
 
             for section in configparser.sections():
                 if section == 'main' or section == 'DEFAULTS':
@@ -184,6 +187,7 @@ class GlanceSyncConfig(object):
 
         if self.preferable_order is None:
             self.preferable_order = list()
+
         if 'master' not in self.targets:
             self.targets['master'] = dict()
             self.targets['master']['target_name'] = 'master'

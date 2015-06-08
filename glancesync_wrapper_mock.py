@@ -183,12 +183,13 @@ def update_metadata(regionobj, image):
         images[image.id] = updatedimage
 
 
-def upload_image(regionobj, image):
+def upload_image(regionobj, image, image_dir):
     """Upload the image to the glance server on the specified region.
 
     :param regionobj: GlanceSyncRegion object; the region where the image is
       upload.
     :param image: GlanceSyncImage object; the image to be uploaded.
+    :param image_dir: Path of the image files
     :return: the UUID of the new image
     """
     global _images

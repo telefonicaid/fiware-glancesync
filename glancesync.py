@@ -69,6 +69,7 @@ class GlanceSync(object):
             glancesyncconfig = GlanceSyncConfig()
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
+        self.images_dir = glancesyncconfig.images_dir
         self.targets = glancesyncconfig.targets
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
@@ -399,7 +400,8 @@ class GlanceSync(object):
                 del new_image.user_properties[p]
 
         # upload
-        uuid = glancesync_wrapper.upload_image(regionobj, new_image)
+        uuid = glancesync_wrapper.upload_image(
+            regionobj, new_image, self.images_dir)
 
         # update images_dict with the new image (needed for pending_ami images)
         images_dict[new_image.name] = GlanceSyncImage(

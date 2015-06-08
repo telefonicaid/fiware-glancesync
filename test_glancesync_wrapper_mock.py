@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+author = 'chema'
 
 import unittest
 
@@ -113,7 +113,7 @@ class TestGlanceWrapperMock(unittest.TestCase):
 
     def test_upload_image(self):
         image = mock.getimagelist(self.region1)[0]
-        id = mock.upload_image(self.region2, image)
+        id = mock.upload_image(self.region2, image, None)
         found = False
         for i in mock.getimagelist(self.region2):
             if i.id == id:
@@ -191,7 +191,7 @@ class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
         self.assertEquals(before - 1, after)
         image = mock.getimagelist(self.region1)[0]
         before = len(mock.getimagelist(self.region2))
-        id = mock.upload_image(self.region2, image)
+        id = mock.upload_image(self.region2, image, None)
         mock.init_persistence(self.dir_persist)
         after = len(mock.getimagelist(self.region2))
         self.assertEquals(before + 1, after)

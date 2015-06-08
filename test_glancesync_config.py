@@ -364,6 +364,7 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
     def test_content_empty(self):
         config = GlanceSyncConfig(stream=StringIO.StringIO(
             configuration_incomplete))
+        self.assertEquals(config.images_dir, '/var/lib/glance/images')
         self.assertEquals(config.master_region, 'Spain2')
         self.assertEquals(config.max_children, 1)
         self.assertEquals(config.preferable_order, list())
