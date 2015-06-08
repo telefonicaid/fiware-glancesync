@@ -52,9 +52,13 @@ class TestGlanceWrapperMock(unittest.TestCase):
         mock.add_emptyregion_to_mock('Burgos')
         mock.add_emptyregion_to_mock('other:Madrid')
 
-        target = dict()
-        target['tenant'] = '00000000000000000000000000000001'
-        self.targets = {'master': target, 'other': target}
+        target_master = dict()
+        target_other = dict()
+        target_master['tenant'] = '00000000000000000000000000000001'
+        target_other['tenant'] = '00000000000000000000000000000001'
+        target_master['target_name'] = 'master'
+        target_other['target_name'] = 'other'
+        self.targets = {'master': target_master, 'other': target_other}
         self.region1 = GlanceSyncRegion('Valladolid', self.targets)
         self.region2 = GlanceSyncRegion('Burgos', self.targets)
         self.region3 = GlanceSyncRegion('other:Madrid', self.targets)
@@ -121,18 +125,20 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.assertTrue(found)
 
     def test_get_regions(self):
-        master_regions = mock.get_regions(None, 'master')
+        master_regions = mock.get_regions(self.targets['master'])
         self.assertEquals(len(master_regions), 2)
         self.assertIn('Valladolid', master_regions)
         self.assertIn('Burgos', master_regions)
-        other_regions = mock.get_regions(None, 'other')
+        target = dict()
+        target['target_name'] = 'other'
+        other_regions = mock.get_regions(target)
         self.assertEquals(len(other_regions), 1)
-        self.assertIn('other:Madrid', other_regions)
+        self.assertIn('Madrid', other_regions)
 
     def test_add_images_from_csv_to_mock(self):
         mock.add_images_from_csv_to_mock('test_data/basictest/')
         region = GlanceSyncRegion('other:Santander', self.targets)
-        self.assertIn('other:Santander', mock.get_regions(None, 'other'))
+        self.assertIn('Santander', mock.get_regions(self.targets['other']))
         images = mock.getimagelist(region)
         self.assertEquals(len(images), 2)
 
@@ -158,8 +164,13 @@ class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
             "{u'type': u'fiware:data', u'nid': u'300'}"])
         mock.add_emptyregion_to_mock('Burgos')
         mock.add_emptyregion_to_mock('other:Madrid')
-        target = {'tenant': '00000000000000000000000000000001'}
-        self.targets = {'master': target, 'other': target}
+        target_master = dict()
+        target_other = dict()
+        target_master['tenant'] = '00000000000000000000000000000001'
+        target_other['tenant'] = '00000000000000000000000000000001'
+        target_master['target_name'] = 'master'
+        target_other['target_name'] = 'other'
+        self.targets = {'master': target_master, 'other': target_other}
         self.region1 = GlanceSyncRegion('Valladolid', self.targets)
         self.region2 = GlanceSyncRegion('Burgos', self.targets)
         self.region3 = GlanceSyncRegion('other:Madrid', self.targets)

@@ -219,9 +219,9 @@ def delete_image(regionobj, id, confirm=True):
     if code == 0:
         return True
     else:
-        msg = 'Failed the deletion of image ' + id
+        msg = regionobj.fullname + ': Failed the deletion of image ' + id
         logger.error(msg)
-        raise
+        raise Exception(msg)
 
 
 def update_metadata(regionobj, image):
@@ -366,22 +366,16 @@ def _get_regions_uri(region):
     return kc.service_catalog.url_for('region', region.region, 'image')
 
 
-def get_regions(target, target_name, ignore_region=None):
+def get_regions(target):
     """It returns the list of regions on the specified target.
     :param target: the target object
-    :param target_name: the target name
-    :param ignore_region: if specified this region is not included. This is
-      used to omit the master region. If there is several regions to omit,
-       use the ignored_regions field of the target instead.
-    :return: a list of regions. Each region is a string with the prefix
-      'target:', unless the target is 'master:'.
+    :return: a list of region names.
     """
 
     _set_environment(target)
-    if not legacy:
-        kc = KeystoneClient(
-            username=target['user'], password=target['password'],
-            tenant_name=target['tenant'], auth_url=target['keystone_url'])
+    kc = KeystoneClient(
+        username=target['user'], password=target['password'],
+        tenant_name=target['tenant'], auth_url=target['keystone_url'])
 
 
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
@@ -393,15 +387,6 @@ def get_regions(target, target_name, ignore_region=None):
     for line in output_cmd:
         if matcher.match(line):
             name = line.split('|')[2].strip()
-            if name in target['ignore_regions']:
-                continue
-
-            if target_name != 'master':
-                name = target_name + ':' + name
-
-            if ignore_region and name == ignore_region:
-                continue
-
             regions_list.append(name)
     p.wait()
     return regions_list

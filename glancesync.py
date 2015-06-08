@@ -86,11 +86,23 @@ class GlanceSync(object):
             list
         """
 
-        if omit_master_region:
-            return glancesync_wrapper.get_regions(
-                self.targets[target], target, self.master_region)
-        else:
-            return glancesync_wrapper.get_regions(self.targets[target], target)
+        self.targets[target]['target_name'] = target
+        regions = glancesync_wrapper.get_regions(self.targets[target])
+        regions_filtered = list()
+        if target != 'master':
+            omit_master_region = False
+
+        for region in regions:
+            if omit_master_region and region == self.master_region:
+                continue
+            if region in self.targets[target]['ignore_regions']:
+                continue
+            if target == 'master':
+                regions_filtered.append(region)
+            else:
+                regions_filtered.append(target + ':' + region)
+
+        return regions_filtered
 
     def sync_region(self, regionstr, dry_run=False):
         """sync the specified region with the master region

@@ -207,32 +207,27 @@ def upload_image(regionobj, image):
     _images[regionobj.fullname][imageid] = new_image
     return imageid
 
-def get_regions(target, target_name, ignore_region=None):
+def get_regions(target):
     """It returns the list of regions on the specified target.
     :param target: the target object
-    :param target_name: the target name
-    :param ignore_region: if specified this region is not included. This is
-      used to omit the master region. If there is several regions to omit,
-       use the ignored_regions field of the target instead.
-    :return: a list of regions. Each region is a string with the prefix
-      'target:', unless the target is 'master:'.
+    :return: a list of regions.
     """
     global _images
     all_regions = _images.keys()
+    target_name = target['target_name']
     regions_list = list()
     for region in all_regions:
         parts = region.split(':')
         if target_name == 'master':
             if len(parts) != 1:
                 continue
-            if ignore_region and region == ignore_region:
-                continue
+            regions_list.append(region)
         else:
             if len(parts) != 2:
                 continue
             if parts[0] != target_name:
                 continue
-        regions_list.append(region)
+            regions_list.append(parts[1])
     return regions_list
 
 if __name__ == '__main__':
