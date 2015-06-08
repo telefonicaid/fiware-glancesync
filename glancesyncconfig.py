@@ -136,6 +136,7 @@ class GlanceSyncConfig(object):
                 if section == 'main' or section == 'DEFAULTS':
                     continue
                 target = dict()
+                target['target_name'] = section
                 self.targets[section] = target
                 if configparser.has_option(section, 'credential'):
                     cred = configparser.get(section, 'credential').strip()
@@ -185,6 +186,7 @@ class GlanceSyncConfig(object):
             self.preferable_order = list()
         if 'master' not in self.targets:
             self.targets['master'] = dict()
+            self.targets['master']['target_name'] = 'master'
             self.targets['master']['replace'] = set()
             self.targets['master']['rename'] = set()
             self.targets['master']['dontupdate'] = set()
