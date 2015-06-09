@@ -117,7 +117,12 @@ Appendix: Example of configuration file
  # The default value, max_children = 1, implies that synchronisation is fully
  # sequential.
  max_children = 1
- 
+
+ # Path where images are located. The default location is
+ # /var/lib/glance/images, tha path where a glance server using the default
+ # backend store the images.
+ images_dir = /var/lib/glance/images
+
  [DEFAULT]
  
  # Values in this section are default values for the other sections.
