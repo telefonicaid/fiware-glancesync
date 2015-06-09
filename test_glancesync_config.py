@@ -85,9 +85,9 @@ forcesyncs = d93462dc-e7c7-4716-ab64-3cbc109b201f,\
 # condition to evaluate if the image is synchronised.
 # image is defined, as well as metadata_set (see next parameter).
 # Default condition is:
-#  image.is_public == 'Yes' and (not metadata_set or \
+#  image.is_public  and (not metadata_set or \
 #     metadata_set.intersection(image.user_properties))
-metadata_condition = image.is_public == 'Yes' and \
+metadata_condition = image.is_public and \
   ('nid' in image.user_properties or 'type' in image.user_properties)
 
 # the list of userproperties to synchronise. If this variable is undefined, all
@@ -152,7 +152,7 @@ class TestGlanceSyncStream(unittest.TestCase):
 
     def test_fields(self):
         """check all the other fields"""
-        condition = "image.is_public == 'Yes'  and ('nid' in "\
+        condition = "image.is_public and ('nid' in "\
             " image.user_properties or 'type' in image.user_properties)"
 
         config = GlanceSyncConfig(stream=self.stream)

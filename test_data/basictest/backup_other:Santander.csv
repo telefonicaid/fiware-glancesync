@@ -1,2 +1,2 @@
-other:Santander,image1,f61adbf7-c44c-43e2-be84-d45328d8ffed,active,3769171968,69d70bc7af583010feaed130ab25efee,00000000000000000000000000000001,Yes,"{u'type': u'fiware:iot', u'nid': u'199'}"
-other:Santander,image2,517b3d05-5b94-456b-bdf9-94c73a88b2c5,active,447610880,820f9023cb4755ff79f856e8be957257,00000000000000000000000000000001,Yes,{u'type': u'baseimages'}
+other:Santander,image1,f61adbf7-c44c-43e2-be84-d45328d8ffed,active,3769171968,69d70bc7af583010feaed130ab25efee,00000000000000000000000000000001,True,"{u'type': u'fiware:iot', u'nid': u'199'}"
+other:Santander,image2,517b3d05-5b94-456b-bdf9-94c73a88b2c5,active,447610880,820f9023cb4755ff79f856e8be957257,00000000000000000000000000000001,True,{u'type': u'baseimages'}

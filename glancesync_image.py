@@ -74,7 +74,10 @@ class GlanceSyncImage(object):
         size = int(fieldlist[4])
         checksum = fieldlist[5]
         owner = fieldlist[6]
-        public = fieldlist[7]
+        if isinstance(fieldlist[7], bool):
+            public = fieldlist[7]
+        else:
+            public = fieldlist[7].strip() == 'True'
         user_properties = eval("dict(" + fieldlist[8] + ")")
         return GlanceSyncImage(name, id, region, owner, public, checksum,
                                size, status, user_properties)
@@ -196,7 +199,7 @@ class GlanceSyncImage(object):
             return '!'
 
         if image_master.is_public != self.is_public:
-            if image_master.is_public == 'No':
+            if not image_master.is_public:
                 return '-'
             else:
                 return '_'
@@ -259,7 +262,7 @@ class GlanceSyncImage(object):
             globals_dict['metadata_set'] = metadata_set
             return eval(metadata_condition, globals_dict)
 
-        if self.is_public == 'No':
+        if not self.is_public:
             return False
 
         if not metadata_set:

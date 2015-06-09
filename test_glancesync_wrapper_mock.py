@@ -47,12 +47,12 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.mock_master.add_image_to_mock([
             'Valladolid', 'image1', self.id_image1,
             'active', '4984864768', 'c8982de656c0ca2c8b9fb7fdb0922bf4',
-            '00000000000000000000000000000001', 'Yes',
+            '00000000000000000000000000000001', True,
             "{u'type': u'fiware:data', u'nid': u'855'}"])
         self.mock_master.add_image_to_mock([
             'Valladolid', 'image2', self.id_image2,
             'active', '1', 'd9879de656c0ca2c8b9fb7fdb003bf5',
-            '00000000000000000000000000000001', 'Yes',
+            '00000000000000000000000000000001', True,
             "{u'type': u'fiware:data', u'nid': u'300'}"])
         self.mock_master.add_emptyregion_to_mock('Burgos')
         self.mock_other.add_emptyregion_to_mock('other:Madrid')
@@ -162,12 +162,12 @@ class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
         self.mock_master.add_image_to_mock([
             'Valladolid', 'image1', self.id_image1,
             'active', '4984864768', 'c8982de656c0ca2c8b9fb7fdb0922bf4',
-            '00000000000000000000000000000001', 'Yes',
+            '00000000000000000000000000000001', True,
             "{u'type': u'fiware:data', u'nid': u'855'}"])
         self.mock_master.add_image_to_mock([
             'Valladolid', 'image2', self.id_image2,
             'active', '1', 'd9879de656c0ca2c8b9fb7fdb003bf5',
-            '00000000000000000000000000000001', 'Yes',
+            '00000000000000000000000000000001', True,
             "{u'type': u'fiware:data', u'nid': u'300'}"])
         self.mock_master.add_emptyregion_to_mock('Burgos')
         self.mock_other.add_emptyregion_to_mock('other:Madrid')

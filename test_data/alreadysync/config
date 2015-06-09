@@ -10,6 +10,6 @@ credential = user2,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server2:4730/v2.0,tenant2
 ignore_region = Region2
 metadata_set = type
-metadata_condition = image.is_public == 'Yes' and\
+metadata_condition = image.is_public and\
  'type' in image.user_properties and image.user_properties['type']\
   == 'baseimage'

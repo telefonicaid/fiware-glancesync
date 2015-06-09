@@ -136,7 +136,7 @@ def _update_auximg_id(property_id, image, master_image, images_region,
         # possible (e.g. if the image is removed manually or it is
         # replaced by a more recent one)
         # In this case, print a warning and mark the image as private
-        image.is_public = 'No'
+        image.is_public = False
         msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
         _logger.warning(msg.format(aux_image_name, image.region,
                                    property_id, image.name))

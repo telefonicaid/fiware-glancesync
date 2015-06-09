@@ -1,5 +1,5 @@
-other:Madrid,image02,202,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant2id,Yes,{'type': 'baseimage'}
-other:Madrid,image07,207,active,1073741884,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant2id,No,"{'type': 'ngimages', 'nid': 4}"
-other:Madrid,image12,212,active,1073741934,7b52009b64fd0a2a49e6d8a939753077792b0554,tenant2id,Yes,{}
-other:Madrid,image13,213,active,1073741944,bd307a3ec329e10a2cff8fb87480823da114f8f4,tenant2id,Yes,"{'type': 'ngimages', 'nid': 7}"
-other:Madrid,image18,218,active,1073741994,9e6a55b6b4563e652a23be9d623ca5055c356940,tenant2id,Yes,{'type': 'baseimage'}
+other:Madrid,image02,202,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant2id,True,{'type': 'baseimage'}
+other:Madrid,image07,207,active,1073741884,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant2id,False,"{'type': 'ngimages', 'nid': 4}"
+other:Madrid,image12,212,active,1073741934,7b52009b64fd0a2a49e6d8a939753077792b0554,tenant2id,True,{}
+other:Madrid,image13,213,active,1073741944,bd307a3ec329e10a2cff8fb87480823da114f8f4,tenant2id,True,"{'type': 'ngimages', 'nid': 7}"
+other:Madrid,image18,218,active,1073741994,9e6a55b6b4563e652a23be9d623ca5055c356940,tenant2id,True,{'type': 'baseimage'}

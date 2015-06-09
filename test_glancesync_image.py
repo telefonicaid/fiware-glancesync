@@ -37,7 +37,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.id = id = '0001'
         self.region = region = 'Valladolid'
         self.owner = owner = '00000001'
-        self.is_public = is_public = 'Yes'
+        self.is_public = is_public = True
         self.checksum = checksum = 'cheksum00001'
         self.size = size = 1500000
         self.status = status = 'active'
@@ -61,7 +61,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.checksum4 = checksum = 'checksum0004'
         self.size4 = size = 100000
         self.image4 = GlanceSyncImage(
-            name, id, region, owner, 'No', checksum, size, status, props)
+            name, id, region, owner, False, checksum, size, status, props)
 
     def test_contstructor(self):
         self.assertEquals(self.image1.name, self.name)
@@ -164,7 +164,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
     def test_is_synchronisable_metadata_function(self):
         m = set(['p3'])
         force = set()
-        func = "image.is_public == 'Yes' and metadata_set.intersection("\
+        func = "image.is_public and metadata_set.intersection("\
                "image.user_properties.keys())"
         self.assertTrue(self.image1.is_synchronisable(m, force, func))
         self.assertFalse(self.image2.is_synchronisable(m, force, func))
@@ -181,12 +181,12 @@ class TestGlanceSyncImageCompare(unittest.TestCase):
         self.props1 = p = {'nid': 5043, 'type': 6043, 'localprop': 8888}
         self.master_images = dict()
         self.master_images[name] = GlanceSyncImage(
-            name, id, 'Valladolid', owner, 'Yes', checksum, size, 'active', p)
+            name, id, 'Valladolid', owner, True, checksum, size, 'active', p)
         self.owner2 = owner = 'owner2'
         self.id2 = id = '000A'
         self.props1 = p = {'nid': 5043, 'type': 6043, 'localprop': 8889}
         self.image = GlanceSyncImage(
-            name, id, 'Burgos', owner, 'Yes', checksum, size, 'active', p)
+            name, id, 'Burgos', owner, True, checksum, size, 'active', p)
 
     def test_compare_with_props(self):
         # if one image has kernel_uuid/ramdisk_uuid, the other must have it
@@ -216,12 +216,12 @@ class TestGlanceSyncImageCompare(unittest.TestCase):
         self.assertEquals(r, '+')
 
     def test_compare_private_region(self):
-        self.image.is_public = 'No'
+        self.image.is_public = False
         r = self.image.compare_with_masterregion(self.master_images, None)
         self.assertEquals(r, '_')
 
     def test_compare_private_master(self):
-        self.master_images[self.name].is_public = 'No'
+        self.master_images[self.name].is_public = False
         r = self.image.compare_with_masterregion(self.master_images, None)
         self.assertEquals(r, '-')
 

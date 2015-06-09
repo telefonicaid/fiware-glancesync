@@ -1,10 +1,10 @@
-Burgos,image01,101,active,1000,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1id,Yes,{'type': 'kernel'}
-Burgos,image02,102,active,1000,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1id,Yes,{'type': 'ramdisk'}
-Burgos,image03,103,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1id,Yes,"{'type': 'image', 'kernel_id': '101', 'ramdisk_id': '102'}"
-Burgos,image04,1$image04,active,1000,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1id,Yes,{'type': 'kernel'}
-Burgos,image05,105,active,1000,28a5c2818590ee3c4d5d93a448190f3397144303,tenant1id,Yes,{'type': 'ramdisk'}
-Burgos,image06,106,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant1id,Yes,"{'type': 'image', 'kernel_id': '1$image04', 'ramdisk_id': '105'}"
-Burgos,image07,107,active,1000,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant1id,Yes,{'type': 'kernel'}
-Burgos,image08,108,active,1000,1ea51bf32497d1b3708522b430b288a129f65307,tenant1id,Yes,{'type': 'ramdisk'}
-Burgos,image09,109,active,1073741904,4b581cdce6283495fd4934ce574ac47e92881c64,tenant1id,Yes,"{'type': 'image', 'kernel_id': '107', 'ramdisk_id': '108'}"
-Burgos,image10,110,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,Yes,"{'kernel_id': '111', 'ramdisk_id': '112'}"
+Burgos,image01,101,active,1000,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1id,True,{'type': 'kernel'}
+Burgos,image02,102,active,1000,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1id,True,{'type': 'ramdisk'}
+Burgos,image03,103,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1id,True,"{'type': 'image', 'kernel_id': '101', 'ramdisk_id': '102'}"
+Burgos,image04,1$image04,active,1000,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1id,True,{'type': 'kernel'}
+Burgos,image05,105,active,1000,28a5c2818590ee3c4d5d93a448190f3397144303,tenant1id,True,{'type': 'ramdisk'}
+Burgos,image06,106,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant1id,True,"{'type': 'image', 'kernel_id': '1$image04', 'ramdisk_id': '105'}"
+Burgos,image07,107,active,1000,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant1id,True,{'type': 'kernel'}
+Burgos,image08,108,active,1000,1ea51bf32497d1b3708522b430b288a129f65307,tenant1id,True,{'type': 'ramdisk'}
+Burgos,image09,109,active,1073741904,4b581cdce6283495fd4934ce574ac47e92881c64,tenant1id,True,"{'type': 'image', 'kernel_id': '107', 'ramdisk_id': '108'}"
+Burgos,image10,110,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,True,"{'kernel_id': '111', 'ramdisk_id': '112'}"

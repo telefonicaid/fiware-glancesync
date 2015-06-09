@@ -203,7 +203,7 @@ class GlanceSync(object):
                         + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     region_image.name += '.old'
-                    region_image.is_public = 'No'
+                    region_image.is_public = False
                     facade.update_metadata(regionobj, region_image)
 
             if uploaded:

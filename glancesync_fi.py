@@ -80,7 +80,7 @@ def _printimages(imagesregion, comparewith=None):
     """
 
     images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
+        image for image in imagesregion if image.is_public and
         ('nid' in image.user_properties and 'type' in image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
     properties = ('type', 'nid')
@@ -94,7 +94,7 @@ def _printimages(imagesregion, comparewith=None):
                 print line
     print "---"
     images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
+        image for image in imagesregion if image.is_public and
         ('nid' not in image.user_properties and 'type' in
          image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
@@ -108,7 +108,7 @@ def _printimages(imagesregion, comparewith=None):
                 print line
     print "---"
     images = list(
-        image for image in imagesregion if image.is_public == 'Yes' and
+        image for image in imagesregion if image.is_public and
         ('nid' in image.user_properties and 'type' not in
          image.user_properties))
     images.sort(key=lambda image: int(image.user_properties['nid']))

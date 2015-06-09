@@ -69,7 +69,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
         """Helper function for creating a sequence or regions"""
         count = str(count).zfill(2)
         return GlanceSyncImage(
-            'image' + count, prefix + count, region, 'tenantid', 'Yes',
+            'image' + count, prefix + count, region, 'tenantid', True,
             'checksum', 1000, 'active', dict())
 
     def dup_image(self, image, region, count, prefix):
@@ -102,7 +102,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
             master_region_dict[image1.name] = image1
 
         # Make particular cases in the images
-        master_region_dict['image00'].is_public = 'No'
+        master_region_dict['image00'].is_public = False
         master_region_dict['image00'].user_properties['okhronisable'] = True
 
         master_region_dict['image01'].user_properties['okhronisable'] = True
@@ -123,7 +123,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
         master_region_dict['image05'].user_properties['zone'] = 'acl4'
 
         master_region_dict['image06'].user_properties['p1'] = 30
-        master_region_dict['image06'].is_public = 'No'
+        master_region_dict['image06'].is_public = False
 
         master_region_dict['image07'].size = 100000
         master_region_dict['image07'].user_properties['okhronisable'] = True
@@ -134,7 +134,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
         master_region_dict['image09'].user_properties['okhronisable'] = True
 
-        master_region_dict['image10'].is_public = 'No'
+        master_region_dict['image10'].is_public = False
 
         # Now, build the region dict using the same values
         self.region_dict = region_dict = dict()
@@ -408,10 +408,10 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
     def test_image_list_to_sync_private(self):
         """Check image is_public differences between master and region"""
-        self.master_region_dict['image00'].is_public = 'No'
-        self.region_dict['image00'].is_public = 'Yes'
-        self.master_region_dict['image01'].is_public = 'Yes'
-        self.region_dict['image01'].is_public = 'No'
+        self.master_region_dict['image00'].is_public = False
+        self.region_dict['image00'].is_public = True
+        self.master_region_dict['image01'].is_public = False
+        self.region_dict['image01'].is_public = True
         result = self.region.image_list_to_sync(self.master_region_dict,
                                                 self.region_dict.values())
         expected = [

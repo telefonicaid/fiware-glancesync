@@ -51,7 +51,7 @@ def create_images(region, count, prefix, tenant):
     for i in range(1, count + 1):
         image_id = str(i).zfill(2)
         user_properties = dict()
-        public = 'Yes'
+        public = True
         if seq == 0:
             user_properties['type'] = 'ngimages'
             user_properties['nid'] = nid
@@ -65,7 +65,7 @@ def create_images(region, count, prefix, tenant):
             user_properties['nid'] = nid
             nid += 1
             seq += 1
-            public = 'No'
+            public = False
         else:
             seq = 0
         image = (GlanceSyncImage(
@@ -105,7 +105,7 @@ credential = user2,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server2:4730/v2.0,tenant2
 ignore_region = Region2
 metadata_set = type
-metadata_condition = image.is_public == 'Yes' and\
+metadata_condition = image.is_public and\
  'type' in image.user_properties and image.user_properties['type']\
   == 'baseimage'
 """

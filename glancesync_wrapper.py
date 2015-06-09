@@ -164,13 +164,9 @@ def getimagelist(regionobj):
         images = glance_client.images.list()
         image_list = list()
         for image in images:
-            if image.is_public:
-                is_public = 'Yes'
-            else:
-                is_public = 'No'
             i = GlanceSyncImage(
                 image.name, image.id, regionobj.fullname,
-                image.owner, is_public, image.checksum,
+                image.owner, image.is_public, image.checksum,
                 image.size, image.status, image.properties, image)
             image_list.append(i)
 
@@ -229,14 +225,10 @@ def update_metadata(regionobj, image):
                  for x in image.user_properties)
 
     # compose cmd line
-    if image.is_public == 'Yes':
-        is_public = True
-    else:
-        is_public = False
     arguments = [
         '/usr/bin/glance', 'image-update', image.id, '--disk-format',
         image.raw.disk_format, '--name', image.name, '--is-public',
-        str(is_public), '--is-protected',
+        str(image.is_public), '--is-protected',
         str(image.raw.protected), '--container-format',
         image.raw.container_format]
     for user_property in props:

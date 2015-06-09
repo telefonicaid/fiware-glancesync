@@ -36,13 +36,13 @@ import glancesync_ami as ami
 class TestGlanceSyncAMI(unittest.TestCase):
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
-            'kernel1', '0001', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'kernel1', '0001', 'Valladolid', 'own0', True, '00', 10000,
             'active', {})
         self.img_ramdisk = GlanceSyncImage(
-            'ramdisk1', '0002', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'ramdisk1', '0002', 'Valladolid', 'own0', True, '00', 10000,
             'active', {})
         self.img1 = GlanceSyncImage(
-            'img1', '0003', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'img1', '0003', 'Valladolid', 'own0', True, '00', 10000,
             'active', {'kernel_id': '0001', 'ramdisk_id': '0002',
                        'type': 'base'})
         self.list = [self.img_kernel, self.img_ramdisk, self.img1]
@@ -61,17 +61,17 @@ class TestGlanceSyncAMI(unittest.TestCase):
 class TestGlanceSyncAMI_update(unittest.TestCase):
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
-            'kernel1', '000A', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'kernel1', '000A', 'Valladolid', 'own0', True, '00', 10000,
             'active', {})
         self.img_ramdisk = GlanceSyncImage(
-            'ramdisk1', '000B', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'ramdisk1', '000B', 'Valladolid', 'own0', True, '00', 10000,
             'active', {})
         self.reg_image = GlanceSyncImage(
-            'img1', '000C', 'Burgos', 'own0', 'Yes', '00', 10000,
+            'img1', '000C', 'Burgos', 'own0', True, '00', 10000,
             'active', {'kernel_id': '001', 'ramdisk_id': '002',
                        'type': 'base'})
         self.master_image = GlanceSyncImage(
-            'img1', '0003', 'Valladolid', 'own0', 'Yes', '00', 10000,
+            'img1', '0003', 'Valladolid', 'own0', True, '00', 10000,
             'active', {'kernel_id': 'kernel1', 'ramdisk_id': 'ramdisk1',
                        'type': 'base'})
 
