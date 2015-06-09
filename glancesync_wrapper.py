@@ -32,6 +32,8 @@ import re
 
 logger = logging.getLogger('glancesync')
 
+from keystoneclient.auth.identity import v2, v3
+
 from keystoneclient.auth.identity import v2 as identity
 from keystoneclient import session
 from glanceclient import Client as GlanceClient
@@ -51,11 +53,21 @@ when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
 
-
 class ServersFacade(object):
     def __init__(self, target):
         self.target = target
         self.images_dir = '/var/lib/glance/images'
+        if target.get('use_keystone_v3'):
+            auth = v3.Password(
+                auth_url=target['keystone_url'], username=target['user'],
+                password=target['password'], project_name=target['tenant'],
+                project_domain_name='default', user_domain_name='default')
+            self.session = session.Session(auth=auth)
+        else:
+            auth = v2.Password(
+                auth_url=target['keystone_url'], username=target['user'],
+                password=target['password'], tenant_name=target['tenant'])
+            self.session = session.Session(auth=auth)
 
     def get_regions(self):
         """It returns the list of regions on the specified target.
@@ -103,6 +115,15 @@ class ServersFacade(object):
         :return: true if image was deleted, false if it was canceled by user
         """
         return delete_image(regionobj, id, confirm)
+
+    def get_tenant_id(self):
+        """It returns the tenant id corresponding to the target. It is
+        necessary to use the tenant_id instead of the tenant_name because the
+        first is used as the owner of the images.
+
+        :return: the tenant id
+        """
+        return self.session.get_project_id()
 
 def _set_environment(target, region=None):
     """Set the environment with the credential provided.
@@ -285,7 +306,7 @@ def get_regions(target):
         username=target['user'], password=target['password'],
         tenant_name=target['tenant'], auth_url=target['keystone_url'])
     """
-    value_to_restore=None
+    value_to_restore = None
     if 'OS_REGION_NAME' in os.environ:
         value_to_restore = os.environ['OS_REGION_NAME']
         del(os.environ['OS_REGION_NAME'])

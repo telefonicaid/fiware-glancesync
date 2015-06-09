@@ -39,6 +39,7 @@ os.environ['GLANCESYNC_USE_MOCK'] = 'True'
 from glancesync import GlanceSync
 
 import glancesync_wrapper_mock as mock
+from glancesync_wrapper_mock import ServersFacade
 
 def create_images(region, count, prefix, tenant):
     """Helper function for creating a sequence or regions. The images are
@@ -95,7 +96,6 @@ def dup_images(images, region, prefix, tenant):
 config1 = """
 [main]
 master_region = Valladolid
-
 [master]
 credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server:4730/v2.0,tenant1
@@ -322,7 +322,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
     def setUp(self):
         self.config()
-        mock.add_images_from_csv_to_mock(self.path_test)
+        self.facade = ServersFacade(dict())
+        self.facade.add_images_from_csv_to_mock(self.path_test)
         if os.path.exists(self.path_test + '/config'):
             handler = open(self.path_test + '/config')
         else:
@@ -331,7 +332,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
         self.glancesync = GlanceSync(self.config)
 
     def tearDown(self):
-        mock.clear_mock()
+        self.facade.clear_mock()
 
     def test_check_status_pre(self):
         path_status = self.path_test + '.status_pre'
@@ -354,10 +355,10 @@ class TestGlanceSync_Sync(unittest.TestCase):
         for region in self.regions:
             self.glancesync.sync_region(region)
 
-        result = copy.deepcopy(mock._images)
-        mock.clear_mock()
-        mock.add_images_from_csv_to_mock(self.path_test + '.result')
-        expected = mock._images
+        result = copy.deepcopy(self.facade._images)
+        self.facade.clear_mock()
+        self.facade.add_images_from_csv_to_mock(self.path_test + '.result')
+        expected = self.facade._images
 
         # All the following code is equivalent to:
         # self.assertEquals(expected[key]), result[key]))

@@ -34,20 +34,13 @@ from glancesyncconfig import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
 import glancesync_ami
+from glancesync_wrapper import ServersFacade
+from glancesync_wrapper_mock import ServersFacade as ServersFacadeMock
+
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
 """
-
-
-if 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
-    import glancesync_wrapper_mock as glancesync_wrapper
-    glancesync_wrapper.init_persistence(
-        os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
-elif 'GLANCESYNC_USE_MOCK' in os.environ:
-    import glancesync_wrapper_mock as glancesync_wrapper
-else:
-    import glancesync_wrapper
 
 logger = logging.getLogger('glancesync')
 
@@ -71,10 +64,28 @@ class GlanceSync(object):
         self.master_region = glancesyncconfig.master_region
         self.images_dir = glancesyncconfig.images_dir
         self.targets = glancesyncconfig.targets
+        count = 0
+        for target in self.targets.values():
+            if 'facade_module' in target:
+                import_code = 'from ' + target['facade_module'] +\
+                             'import ServersFacade as Facade' + str(count)
+                instance_code = 'Facade' + str(count) + '(target)'
+                exec import_code
+                target['facade'] = eval(instance_code)
+            else:
+                if 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
+                    target['facade'] = ServersFacadeMock(target)
+                    target['facade'].init_persistence(
+                        os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
+                elif 'GLANCESYNC_USE_MOCK' in os.environ:
+                    target['facade'] = ServersFacadeMock(target)
+                else:
+                    target['facade'] = ServersFacade(target)
+
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
         master_region = GlanceSyncRegion(self.master_region, self.targets)
-        images = glancesync_wrapper.getimagelist(master_region)
+        images = master_region.target['facade'].get_imagelist(master_region)
         self.master_region_dict = glancesync_ami.get_master_region_dict(images)
 
 
@@ -87,8 +98,9 @@ class GlanceSync(object):
             list
         """
 
-        self.targets[target]['target_name'] = target
-        regions = glancesync_wrapper.get_regions(self.targets[target])
+        target_obj = self.targets[target]
+        target_obj['target_name'] = target
+        regions = target_obj['facade'].get_regions()
         regions_filtered = list()
         if target != 'master':
             omit_master_region = False
@@ -128,6 +140,7 @@ class GlanceSync(object):
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
+        facade = regionobj.target['facade']
         only_tenant_images = regionobj.target['only_tenant_images']
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
@@ -177,7 +190,7 @@ class GlanceSync(object):
                                   tuple[1].name + ' (' + str(sizeimage) +
                                   ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
-                    glancesync_wrapper.delete_image(regionobj, region_image.id,
+                    facade.delete_image(regionobj, region_image.id,
                                                 confirm=False)
             elif tuple[0] == 'pending_rename_n_replace':
                 uploaded = True
@@ -189,7 +202,7 @@ class GlanceSync(object):
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     region_image.name += '.old'
                     region_image.is_public = 'No'
-                    glancesync_wrapper.update_metadata(regionobj, region_image)
+                    facade.update_metadata(regionobj, region_image)
 
             if uploaded:
                 was_synchronised = False
@@ -294,7 +307,8 @@ class GlanceSync(object):
         :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        glancesync_wrapper.update_metadata(regionobj, image)
+        facade = regionobj.target['facade']
+        facade.update_metadata(regionobj, image)
 
     def delete_image(self, regionstr, uuid, confirm=True):
         """delete a image on the specified region.
@@ -309,7 +323,8 @@ class GlanceSync(object):
         :return: true if image is deleted, false if canceled
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        return glancesync_wrapper.delete_image(regionobj, uuid, confirm)
+        facade = regionobj.target['facade']
+        return facade.delete_image(regionobj, uuid, confirm)
 
     def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
@@ -329,7 +344,7 @@ class GlanceSync(object):
             path = os.path.join(path, 'backup_' + regionobj.fullname + '.csv')
         # Backup using csv
         try:
-            images = glancesync_wrapper.getimagelist(regionobj)
+            images = regionobj.target['facade'].get_imagelist(regionobj)
             with open(path, 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 for image in images:
@@ -354,13 +369,14 @@ class GlanceSync(object):
         """
 
         region = GlanceSyncRegion(regionstr, self.targets)
+        facade = region.target['facade']
         if only_tenant_images:
             return list(
-                image for image in glancesync_wrapper.getimagelist(region) if
+                image for image in facade.get_imagelist(region) if
                 not image.owner or image.owner.zfill(32) ==
                 region.target['tenant'].zfill(32) or image.owner == '')
         else:
-            return glancesync_wrapper.getimagelist(region)
+            return facade.get_imagelist(region)
 
     def init_logs(self, include_date=False):
         """
@@ -400,8 +416,8 @@ class GlanceSync(object):
                 del new_image.user_properties[p]
 
         # upload
-        uuid = glancesync_wrapper.upload_image(
-            regionobj, new_image, self.images_dir)
+        uuid = regionobj.target['facade'].upload_image(
+            regionobj, new_image)
 
         # update images_dict with the new image (needed for pending_ami images)
         images_dict[new_image.name] = GlanceSyncImage(
@@ -424,4 +440,4 @@ class GlanceSync(object):
                     if prop in image.user_properties:
                         del image.user_properties[prop]
         image.is_public = master_image.is_public
-        glancesync_wrapper.update_metadata(regionobj, image)
+        regionobj.target['facade'].update_metadata(regionobj, image)

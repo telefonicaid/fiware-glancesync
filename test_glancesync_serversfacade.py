@@ -28,6 +28,9 @@ from os import environ as env
 import os
 import tempfile
 import unittest
+import copy
+
+from keystoneclient.auth.identity import v2, v3
 
 from glancesync_wrapper import ServersFacade
 
@@ -117,6 +120,19 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.assertTrue(
             self.facade.delete_image(self.region_obj, self.created, False))
         self.created = None
+
+    def test_keystone_v2(self):
+        self.assertIsNotNone(self.facade.session)
+        self.assertIsInstance(self.facade.session.auth, v2.Password)
+
+    def test_keystone_v3(self):
+        target = copy.deepcopy(self.facade.target)
+        target['use_keystone_v3'] = True
+        facade = ServersFacade(target)
+        self.assertIsInstance(facade.session.auth, v3.Password)
+
+    def test_get_tenant_id(self):
+        self.assertIsNotNone(self.facade.get_tenant_id())
 
 if __name__ == '__main__':
         unittest.main()

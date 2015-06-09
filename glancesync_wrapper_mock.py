@@ -52,6 +52,112 @@ _images = dict()
 use_persistence = False
 dir_persist = './.glancesync_persist'
 
+class ServersFacade(object):
+    def __init__(self, target):
+        self.target = target
+        self._images = _images
+        self.images_dir = '/var/lib/glance/images'
+
+    def get_regions(self):
+        """It returns the list of regions on the specified target.
+        :return: a list of region names.
+        """
+        return get_regions(self.target)
+
+    def get_imagelist(self, regionobj):
+        """return a image list from the glance of the specified region
+
+        :param regionobj: The GlanceSyncRegion object of the region to list
+        :return: a list of GlanceSyncImage objects
+        """
+        return getimagelist(regionobj)
+
+    def update_metadata(self, regionobj, image):
+        """ update the metadata of the image in the specified region
+        See GlanceSync.update_metadata_image for more details.
+
+        :param regionobj: region where it is the image to update
+        :param image: the image with the metadata to update
+        :return: this function doesn't return anything.
+        """
+        update_metadata(regionobj, image)
+
+    def upload_image(self, regionobj, image):
+        """Upload the image to the glance server on the specified region.
+
+        :param regionobj: GlanceSyncRegion object; the region where the image
+          will be upload.
+        :param image: GlanceSyncImage object; the image to be uploaded.
+        :return: The UUID of the new image.
+        """
+        return upload_image(regionobj, image, self.images_dir)
+
+    def delete_image(self, regionobj, id, confirm=True):
+        """delete a image on the specified region.
+
+        Be careful, this action cannot be reverted and for this reason by
+        default requires confirmation!
+
+        :param regionobj: the GlanceSyncRegion object
+        :param id: the UUID of the image to delete
+        :param confirm: ask for confirmation
+        :return: true if image was deleted, false if it was canceled by user
+        """
+        return delete_image(regionobj, id, confirm)
+
+    def get_tenant_id(self):
+        """It returns the tenant id corresponding to the target. It is
+        necessary to use the tenant_id instead of the tenant_name because the
+        first is used as the owner of the images.
+
+        :return: the tenant id
+        """
+        if 'tenant_id' in self.target:
+            return self.target['tenant_id']
+        else:
+            return self.target['tenant']
+
+    @staticmethod
+    def init_persistence(dir=None, clean=False):
+        """Function to start using persistence: load the data from the lass
+        session if it exists
+        :param dir: path of the directory where the persistence files go. Default
+         dir is ./.glancesync_persist
+        :param clean: if path exists, discard all existing content
+        :return:
+        """
+        init_persistence(dir, clean)
+
+    @staticmethod
+    def add_image_to_mock(image):
+        """Add the image to the mock
+        :param image: The image to add. If can be a GlanceSyncImage or a list
+        :return: This method does not return nothing.
+        """
+        add_image_to_mock(image)
+
+    @staticmethod
+    def add_emptyregion_to_mock(region):
+        """Add empty region to mock
+        :param image: The image region (e.g. other:Madrid)
+        :return: This method does not return nothing.
+        """
+        add_emptyregion_to_mock(region)
+
+    @staticmethod
+    def clear_mock():
+        """clear all the non-persistent content of the mock"""
+        clear_mock()
+
+    @staticmethod
+    def add_images_from_csv_to_mock(path):
+        """Add images to the mock, reading the csv files saved by the backup tool
+        :param path: The directory where the csv files are.
+        :return: This method does not return nothing.
+        Each file in path has this pattern: backup_<regionname>.csv.
+        """
+        add_images_from_csv_to_mock(path)
+
 def init_persistence(dir=None, clean=False):
     """Function to start using persistence: load the data from the lass
     session if it exists
@@ -127,6 +233,7 @@ def add_images_from_csv_to_mock(path):
                  _images[region_name][image.id] = image
 
 def clear_mock():
+    """clear all the non-persistent content of the mock"""
     global _images
     _images = dict()
     # if using persintence, deleting _persist_ file is responsability of the
@@ -261,10 +368,11 @@ if __name__ == '__main__':
         meta.path = os.path.normpath(os.path.expanduser(meta.path))
         m = 'The directory "%s" is not empty. If you are sure, pass --confirm'
         if os.path.exists(meta.path) and not meta.confirm:
-            if len(glob.glob(meta.path + '/*')) != 0:
+            if len(glob.glob(meta.path + '/_persist_*')) != 0:
                 print >>sys.stderr, m % meta.path
                 sys.exit(-1)
 
-    init_persistence(meta.path, True)
-    add_images_from_csv_to_mock(meta.initial_load)
-    print 'GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path
+    facade = ServersFacade(dict())
+    facade.init_persistence(meta.path, True)
+    facade.add_images_from_csv_to_mock(meta.initial_load)
+    print 'export GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path
