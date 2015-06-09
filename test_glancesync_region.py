@@ -45,6 +45,7 @@ class TestGlanceSyncRegionBasic(unittest.TestCase):
         target['dontupdate'] = set()
         target['replace'] = set()
         target['rename'] = set()
+        target['tenant_id'] = 'tenantid'
 
         # clone
         target2 = dict(target)
@@ -68,7 +69,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
         """Helper function for creating a sequence or regions"""
         count = str(count).zfill(2)
         return GlanceSyncImage(
-            'image' + count, prefix + count, region, 'tenant', 'Yes',
+            'image' + count, prefix + count, region, 'tenantid', 'Yes',
             'checksum', 1000, 'active', dict())
 
     def dup_image(self, image, region, count, prefix):
@@ -161,7 +162,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
         'zone'])) and image.size < 10000"
         target['metadata_condition'] = compile(cond, '', 'eval')
         target['only_tenant_images'] = False
-        target['tenant'] = 'tenant'
+        target['tenant_id'] = 'tenantid'
         target['dontupdate'] = set()
         target['replace'] = set()
         target['rename'] = set()
@@ -216,7 +217,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
     def test_local_images_filtered_owner(self):
         """Don't accept image if owner is not the tenant"""
-        self.region_dict['image00'].owner = 'othertenant'
+        self.region_dict['image00'].owner = 'othertenantid'
         self.region.target['only_tenant_images'] = True
         region_filtered = self.region.local_images_filtered(
             self.expected_images_to_sync_dict, self.region_dict.values())
@@ -226,7 +227,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
     def test_local_images_filtered_owner_warning(self):
         """Accept image owned by another tenant, but check warning"""
-        self.region_dict['image00'].owner = 'othertenant'
+        self.region_dict['image00'].owner = 'othertenantid'
         region_filtered = self.region.local_images_filtered(
             self.expected_images_to_sync_dict, self.region_dict.values())
         expected = set(['image00', 'image01', 'image02', 'image03', 'image09'])

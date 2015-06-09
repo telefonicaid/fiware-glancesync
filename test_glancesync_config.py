@@ -31,8 +31,8 @@ import os
 import os.path
 import StringIO
 
-import glancesyncconfig
-from glancesyncconfig import GlanceSyncConfig
+import glancesync_config
+from glancesync_config import GlanceSyncConfig
 
 configuration_content = """
 [main]
@@ -235,14 +235,14 @@ class TestGlanceSyncConfigOrder(unittest.TestCase):
         self.tempfile3.close()
 
         os.environ['GLANCESYNC_CONFIG'] = self.tempfile.name
-        self.preserve = glancesyncconfig.default_configuration_file
-        glancesyncconfig.default_configuration_file = self.tempfile3.name
+        self.preserve = glancesync_config.default_configuration_file
+        glancesync_config.default_configuration_file = self.tempfile3.name
 
     def tearDown(self):
         os.unlink(self.tempfile.name)
         os.unlink(self.tempfile2.name)
         os.unlink(self.tempfile3.name)
-        glancesyncconfig.default_configuration_file = self.preserve
+        glancesync_config.default_configuration_file = self.preserve
 
     def test_order1(self):
         config = GlanceSyncConfig(self.tempfile.name, self.stream)
@@ -274,8 +274,8 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
         # Avoid reading the default configuration file
-        self.preserve = glancesyncconfig.default_configuration_file
-        glancesyncconfig.default_configuration_file = '/__noexistingfile'
+        self.preserve = glancesync_config.default_configuration_file
+        glancesync_config.default_configuration_file = '/__noexistingfile'
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -285,7 +285,7 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
         os.environ['OS_AUTH_URL'] = 'url'
 
     def tearDown(self):
-        glancesyncconfig.default_configuration_file = self.preserve
+        glancesync_config.default_configuration_file = self.preserve
 
     def test_constructor(self):
         config = GlanceSyncConfig()
@@ -313,8 +313,8 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
         # Avoid reading the default configuration file
-        self.preserve = glancesyncconfig.default_configuration_file
-        glancesyncconfig.default_configuration_file = '/__noexistingfile'
+        self.preserve = glancesync_config.default_configuration_file
+        glancesync_config.default_configuration_file = '/__noexistingfile'
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -325,7 +325,7 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
         self.stream_empty = StringIO.StringIO(configuration_incomplete)
 
     def tearDown(self):
-        glancesyncconfig.default_configuration_file = self.preserve
+        glancesync_config.default_configuration_file = self.preserve
 
     def test_constructor(self):
         config = GlanceSyncConfig()
@@ -353,8 +353,8 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
         # Avoid reading the default configuration file
-        self.preserve = glancesyncconfig.default_configuration_file
-        glancesyncconfig.default_configuration_file = '/__noexistingfile'
+        self.preserve = glancesync_config.default_configuration_file
+        glancesync_config.default_configuration_file = '/__noexistingfile'
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -364,7 +364,7 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
         os.environ['OS_AUTH_URL'] = 'url'
 
     def tearDown(self):
-        glancesyncconfig.default_configuration_file = self.preserve
+        glancesync_config.default_configuration_file = self.preserve
 
     def test_content_empty(self):
         config = GlanceSyncConfig(stream=StringIO.StringIO(

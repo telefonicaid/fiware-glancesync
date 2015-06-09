@@ -33,7 +33,7 @@ import os
 import glob
 import tempfile
 
-from glancesyncconfig import GlanceSyncConfig
+from glancesync_config import GlanceSyncConfig
 from glancesync_image import GlanceSyncImage
 os.environ['GLANCESYNC_USE_MOCK'] = 'True'
 from glancesync import GlanceSync
@@ -119,9 +119,9 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         mock.add_emptyregion_to_mock('other:Region2')
         self.images_master = create_images('Valladolid', 20, '0', 'tenant1')
         self.images_Burgos = dup_images(self.images_master, 'Burgos', '1',
-                                        'tenant1')
+                                        'tenant1id')
         self.images_Madrid = dup_images(self.images_master, 'other:Madrid',
-                                        '2', 'tenant2')
+                                        '2', 'tenant2id')
         self.tmpdir = None
 
     def tearDown(self):

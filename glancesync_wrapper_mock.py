@@ -115,7 +115,7 @@ class ServersFacade(object):
         if 'tenant_id' in self.target:
             return self.target['tenant_id']
         else:
-            return self.target['tenant']
+            return self.target['tenant'] + 'id'
 
     @staticmethod
     def init_persistence(dir=None, clean=False):
@@ -307,7 +307,7 @@ def upload_image(regionobj, image, image_dir):
     while imageid in _images[regionobj.fullname]:
         count += 1
         imageid = str(count) + '$' + image.name
-    owner = regionobj.target['tenant']
+    owner = regionobj.target['tenant'] + 'id'
     new_image = GlanceSyncImage(
         image.name, imageid, regionobj.fullname, owner, image.is_public,
         image.checksum, image.size, image.status, dict(image.user_properties))

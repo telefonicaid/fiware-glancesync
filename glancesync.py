@@ -30,7 +30,7 @@ import logging
 import csv
 import copy
 
-from glancesyncconfig import GlanceSyncConfig
+from glancesync_config import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
 import glancesync_ami
@@ -73,12 +73,12 @@ class GlanceSync(object):
                 exec import_code
                 target['facade'] = eval(instance_code)
             else:
-                if 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
+                if 'GLANCESYNC_USE_MOCK' in os.environ:
+                    target['facade'] = ServersFacadeMock(target)
+                elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
                     target['facade'] = ServersFacadeMock(target)
                     target['facade'].init_persistence(
                         os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
-                elif 'GLANCESYNC_USE_MOCK' in os.environ:
-                    target['facade'] = ServersFacadeMock(target)
                 else:
                     target['facade'] = ServersFacade(target)
 
@@ -141,7 +141,9 @@ class GlanceSync(object):
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         facade = regionobj.target['facade']
-        only_tenant_images = regionobj.target['only_tenant_images']
+        target = regionobj.target
+        only_tenant_images = target['only_tenant_images']
+        target['tenant_id'] = target['facade'].get_tenant_id()
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
         dictimages = regionobj.local_images_filtered(master_images,
@@ -272,6 +274,8 @@ class GlanceSync(object):
         :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
+        target = regionobj.target
+        target['tenant_id'] = target['facade'].get_tenant_id()
         imagesregion = self.get_images_region(regionstr)
         path = 'syncstatus_' + regionobj.fullname + '.csv'
         try:
@@ -370,11 +374,12 @@ class GlanceSync(object):
 
         region = GlanceSyncRegion(regionstr, self.targets)
         facade = region.target['facade']
+        region.target['tenant_id'] = facade.get_tenant_id()
         if only_tenant_images:
             return list(
                 image for image in facade.get_imagelist(region) if
                 not image.owner or image.owner.zfill(32) ==
-                region.target['tenant'].zfill(32) or image.owner == '')
+                region.target['tenant_id'].zfill(32) or image.owner == '')
         else:
             return facade.get_imagelist(region)
 

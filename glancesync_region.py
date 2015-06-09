@@ -95,8 +95,8 @@ class GlanceSyncRegion(object):
             if image.name not in filtered_master_dict:
                 continue
 
-            if image.owner and image.owner != '' and\
-                    image.owner.zfill(32) != self.target['tenant'].zfill(32):
+            if image.owner and image.owner != '' and image.owner.zfill(32) !=\
+                    self.target['tenant_id'].zfill(32):
                 msg = '{3}: image {0} (UUID {1}) is owned by other tenant: {2}'
                 self.log.warning(msg.format(image.name, image.id, image.owner,
                                             self.fullname))

@@ -173,6 +173,7 @@ def getimagelist(regionobj):
                 image.owner, is_public, image.checksum,
                 image.size, image.status, image.properties, image)
             image_list.append(i)
+
     except Exception, e:
         msg = regionobj.fullname + \
             ': Error retrieving image list. Cause: ' + str(e)

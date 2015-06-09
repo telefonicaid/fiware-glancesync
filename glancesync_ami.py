@@ -55,12 +55,21 @@ def get_master_region_dict(image_list):
     master_region_dictimages = dict()
     for image in image_list:
         if 'kernel_id' in image.user_properties:
-            image.user_properties['kernel_id'] = master_region_dictimagesbyid[
-                image.user_properties['kernel_id']].name
+            # Prevent curious bug, images with empty values
+            if not image.user_properties['kernel_id']:
+                del image.user_properties['kernel_id']
+            else:
+                image.user_properties['kernel_id'] = \
+                    master_region_dictimagesbyid[
+                        image.user_properties['kernel_id']].name
 
         if 'ramdisk_id' in image.user_properties:
-            image.user_properties['ramdisk_id'] = master_region_dictimagesbyid[
-                image.user_properties['ramdisk_id']].name
+            if not image.user_properties['ramdisk_id']:
+                del image.user_properties['ramdisk_id']
+            else:
+                image.user_properties['ramdisk_id'] = \
+                    master_region_dictimagesbyid[image.user_properties[
+                        'ramdisk_id']].name
 
         master_region_dictimages[image.name] = image
     return master_region_dictimages
