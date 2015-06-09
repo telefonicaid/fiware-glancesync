@@ -141,7 +141,18 @@ class GlanceSyncConfig(object):
                 target = dict()
                 target['target_name'] = section
                 self.targets[section] = target
-                if configparser.has_option(section, 'credential'):
+                if configparser.has_option(section, 'user') and\
+                   configparser.has_option(section, 'password') and\
+                   configparser.has_option(section, 'keystone_url') and\
+                   configparser.has_option(section, 'tenant'):
+                    target['user'] = configparser.get(section, 'user').strip()
+                    target['tenant'] = configparser.get(
+                        section, 'tenant').strip()
+                    target['password'] = configparser.get(
+                        section, 'password').strip()
+                    target['keystone_url'] = configparser.get(
+                        section, 'keystone_url').strip()
+                elif configparser.has_option(section, 'credential'):
                     cred = configparser.get(section, 'credential').strip()
                     parts = cred.split(',')
                     target['user'] = parts[0].strip()
@@ -151,7 +162,8 @@ class GlanceSyncConfig(object):
                 else:
                     if section != 'master':
                         msg = 'A credential parameter is mandatory for each '\
-                            'target'
+                            'target (or the set: user, password, tenant, '\
+                            'keystone_url)'
                         logger.error(msg)
                         raise Exception(msg)
                 target['forcesyncs'] = configparser.getset(

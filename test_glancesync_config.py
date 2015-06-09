@@ -100,15 +100,20 @@ metadata_set = nid , type, sdc_aware, nid_version
 only_tenant_images = True
 
 [master]
-credential = user1,\
- ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
- http://server:4730/v2.0,tenantid1
+user= user1
+password = fakepassword,ofcourse
+tenant = tenant1
+keystone_url = http://server:4730/v2.0
+
+#credential = user1,\
+# ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
+# http://server:4730/v2.0,tenant1
 only_tenant_images = False
 
 [experimental]
 credential = user2,\
   ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
-  http://server2:4730/v2.0,tenantid2
+  http://server2:4730/v2.0,tenant2
 ignore_regions = Spain
 metadata_condition=
 
@@ -130,7 +135,7 @@ master_region = {0}
 
 [master]
 credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
-  http://server:4730/v2.0,tenantid1
+  http://server:4730/v2.0,tenant1
 """
 
 class TestGlanceSyncStream(unittest.TestCase):
@@ -170,7 +175,7 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertEquals(master['user'], 'user1')
         self.assertEquals(master['password'], 'fakepassword,ofcourse')
         self.assertEquals(master['keystone_url'], 'http://server:4730/v2.0')
-        self.assertEquals(master['tenant'], 'tenantid1')
+        self.assertEquals(master['tenant'], 'tenant1')
         self.assertFalse(master['only_tenant_images'])
         self.assertEquals(master['ignore_regions'], set())
         self.assertEquals(experimental['replace'], set())
@@ -183,7 +188,7 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertEquals(experimental['password'], 'fakepassword,ofcourse')
         self.assertEquals(experimental['keystone_url'],
                           'http://server2:4730/v2.0')
-        self.assertEquals(experimental['tenant'], 'tenantid2')
+        self.assertEquals(experimental['tenant'], 'tenant2')
         self.assertTrue(experimental['only_tenant_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
 
