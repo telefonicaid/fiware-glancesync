@@ -37,9 +37,9 @@ ___________
 
 ::
 
- def __init__(self, glancesyncconfig=None)
+ def __init__(self, config_parameters=None)
 
-The constructor of GlanceSync may be invoked without parameters. It read then the configuration file from ``/etc/glancesync.conf`` or from the path specified in ``GLANCESYNC_CONFIG`` environment variable.  It is also possible to pass to the constructor a GlanceSyncConfig parameter with the configuration.
+The constructor of GlanceSync may be invoked without parameters. It read then the configuration file from ``/etc/glancesync.conf`` or from the path specified in ``GLANCESYNC_CONFIG`` environment variable.  It is also possible to pass to the constructor a stream object (e.g. a file handler) with the configuration.
 
 get_regions
 ___________

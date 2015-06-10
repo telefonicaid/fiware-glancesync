@@ -54,12 +54,14 @@ class GlanceSync(object):
     method.
     """
 
-    def __init__(self, glancesyncconfig=None):
+    def __init__(self, config_stream=None):
         """Constructor of the object
         """
         self.log = logging.getLogger('glancesync')
-        if glancesyncconfig is None:
+        if config_stream is None:
             glancesyncconfig = GlanceSyncConfig()
+        else:
+            glancesyncconfig = GlanceSyncConfig(stream=config_stream)
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
         self.images_dir = glancesyncconfig.images_dir

@@ -116,7 +116,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
     """Class to test basic operations (i.e. all operations except
     the synchronisation ones"""
     def setUp(self):
-        self.config = GlanceSyncConfig(stream=StringIO.StringIO(config1))
+        self.config = StringIO.StringIO(config1)
         # populate mock with 4 regions, one of them is empty.
         ServersFacade.add_emptyregion_to_mock('other:Region2')
         self.images_master = create_images('Valladolid', 20, '0', 'tenant1')
@@ -330,8 +330,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
             handler = open(self.path_test + '/config')
         else:
             handler = StringIO.StringIO(config1)
-        self.config = GlanceSyncConfig(stream=handler)
-        self.glancesync = GlanceSync(self.config)
+        #self.config = GlanceSyncConfig(stream=handler)
+        self.glancesync = GlanceSync(handler)
 
     def tearDown(self):
         ServersFacade.clear_mock()
