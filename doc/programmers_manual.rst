@@ -61,14 +61,6 @@ It synchronises the glance server of the specified region with the contents of t
 
 When dry_run is True, it does not synchronise, only show the images to be synchronised.
 
-show_sync_region_status
-_______________________
-
-::
-
- def show_sync_region_status(self, region) 
-
-This is a dry-run version of the *sync* method.
 print_images_master_region
 __________________________
 

@@ -122,7 +122,8 @@ class ServersFacade(object):
         owner = regionobj.target['tenant'] + 'id'
         new_image = GlanceSyncImage(
             image.name, imageid, regionobj.fullname, owner, image.is_public,
-            image.checksum, image.size, image.status, dict(image.user_properties))
+            image.checksum, image.size, image.status,
+            dict(image.user_properties))
 
         ServersFacade.images[regionobj.fullname][imageid] = new_image
         return imageid

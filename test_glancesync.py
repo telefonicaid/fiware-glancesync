@@ -330,7 +330,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
             handler = open(self.path_test + '/config')
         else:
             handler = StringIO.StringIO(config1)
-        #self.config = GlanceSyncConfig(stream=handler)
+        # self.config = GlanceSyncConfig(stream=handler)
         self.glancesync = GlanceSync(handler)
 
     def tearDown(self):

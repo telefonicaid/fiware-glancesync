@@ -233,17 +233,6 @@ class GlanceSync(object):
                               + regionobj.region +
                               ': ' + str(int(totalmbs)) + ' (MB) ')
 
-    def show_sync_region_status(self, regionstr):
-        """print a report about the images pending to sync in this region
-
-        This method is nearly a dry-run of the method sync_region
-
-        :param regionstr: A region specified as 'target:region'. The prefix
-         'master:' may be omitted.
-        :return: Nothing
-        """
-        return self.sync_region(regionstr, True)
-
     def export_sync_region_status(self, regionstr, stream):
         """export a csv report about the images pending to sync in this region
         The report follow this pattern:
