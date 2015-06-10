@@ -74,7 +74,7 @@ class ServersFacade(object):
         """It returns the list of regions on the specified target.
         :return: a list of region names.
         """
-        return get_regions(self.target)
+        return _get_regions(self.target)
 
     def get_imagelist(self, regionobj):
         """return a image list from the glance of the specified region
@@ -82,7 +82,7 @@ class ServersFacade(object):
         :param regionobj: The GlanceSyncRegion object of the region to list
         :return: a list of GlanceSyncImage objects
         """
-        return getimagelist(regionobj)
+        return _getimagelist(regionobj)
 
     def update_metadata(self, regionobj, image):
         """ update the metadata of the image in the specified region
@@ -92,7 +92,7 @@ class ServersFacade(object):
         :param image: the image with the metadata to update
         :return: this function doesn't return anything.
         """
-        update_metadata(regionobj, image)
+        _update_metadata(regionobj, image)
 
     def upload_image(self, regionobj, image):
         """Upload the image to the glance server on the specified region.
@@ -102,7 +102,7 @@ class ServersFacade(object):
         :param image: GlanceSyncImage object; the image to be uploaded.
         :return: The UUID of the new image.
         """
-        return upload_image(regionobj, image, self.images_dir)
+        return _upload_image(regionobj, image, self.images_dir)
 
     def delete_image(self, regionobj, id, confirm=True):
         """delete a image on the specified region.
@@ -115,7 +115,7 @@ class ServersFacade(object):
         :param confirm: ask for confirmation
         :return: true if image was deleted, false if it was canceled by user
         """
-        return delete_image(regionobj, id, confirm)
+        return _delete_image(regionobj, id, confirm)
 
     def get_tenant_id(self):
         """It returns the tenant id corresponding to the target. It is
@@ -145,7 +145,7 @@ def _set_environment(target, region=None):
         os.environ['OS_REGION_NAME'] = region
 
 
-def getimagelist(regionobj):
+def _getimagelist(regionobj):
     """return a image list from the glance of the specified region
 
     :param regionobj: The GlanceSyncRegion object specifying the region to list
@@ -181,7 +181,7 @@ def getimagelist(regionobj):
     return image_list
 
 
-def delete_image(regionobj, id, confirm=True):
+def _delete_image(regionobj, id, confirm=True):
     """delete a image on the specified region.
 
     Be careful, this action cannot be reverted and for this reason by
@@ -213,7 +213,7 @@ def delete_image(regionobj, id, confirm=True):
         raise Exception(msg)
 
 
-def update_metadata(regionobj, image):
+def _update_metadata(regionobj, image):
     """ update the metadata of the image in the specified region
     See GlanceSync.update_metadata_image for more details.
 
@@ -248,7 +248,7 @@ def update_metadata(regionobj, image):
         raise Exception(msg)
 
 
-def upload_image(regionobj, image, images_dir):
+def _upload_image(regionobj, image, images_dir):
     """Upload the image to the glance server on the specified region.
 
     :param regionobj: GlanceSyncRegion object; the region where the image is
@@ -290,7 +290,7 @@ def upload_image(regionobj, image, images_dir):
                 return line.split('|')[2].strip()
 
 
-def get_regions(target):
+def _get_regions(target):
     """It returns the list of regions on the specified target.
     :param target: the target object
     :return: a list of region names.

@@ -38,7 +38,6 @@ from glancesync_image import GlanceSyncImage
 os.environ['GLANCESYNC_USE_MOCK'] = 'True'
 from glancesync import GlanceSync
 
-import glancesync_wrapper_mock as mock
 from glancesync_wrapper_mock import ServersFacade
 
 
@@ -76,7 +75,7 @@ def create_images(region, count, prefix, tenant):
         # order of uploading is ascending size.
         size += 10
         images.append(image)
-        mock.add_image_to_mock(image)
+        ServersFacade.add_image_to_mock(image)
     return images
 
 
@@ -91,7 +90,7 @@ def dup_images(images, region, prefix, tenant):
         new_image.id = prefix + str(count).zfill(2)
         new_image.tenant = tenant
         new_images.append(new_image)
-        mock.add_image_to_mock(new_image)
+        ServersFacade.add_image_to_mock(new_image)
         count += 1
     return new_images
 
@@ -119,7 +118,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
     def setUp(self):
         self.config = GlanceSyncConfig(stream=StringIO.StringIO(config1))
         # populate mock with 4 regions, one of them is empty.
-        mock.add_emptyregion_to_mock('other:Region2')
+        ServersFacade.add_emptyregion_to_mock('other:Region2')
         self.images_master = create_images('Valladolid', 20, '0', 'tenant1')
         self.images_Burgos = dup_images(self.images_master, 'Burgos', '1',
                                         'tenant1id')
@@ -128,7 +127,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.tmpdir = None
 
     def tearDown(self):
-        mock.clear_mock()
+        ServersFacade.clear_mock()
         if self.tmpdir:
             for filename in glob.glob(self.tmpdir + '/*.csv'):
                 os.unlink(filename)
@@ -183,37 +182,37 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_delete(self):
-        before = mock._images['Valladolid']
+        before = ServersFacade.images['Valladolid']
         self.assertIn('001', before.keys())
         glancesync = GlanceSync(self.config)
         self.assertTrue(glancesync.delete_image('Valladolid', '001'))
-        self.assertNotIn('001', mock._images['Valladolid'].keys())
+        self.assertNotIn('001', ServersFacade.images['Valladolid'].keys())
 
     def test_delete_master(self):
-        before = mock._images['Valladolid']
+        before = ServersFacade.images['Valladolid']
         self.assertIn('001', before.keys())
         glancesync = GlanceSync(self.config)
         self.assertTrue(glancesync.delete_image('master:Valladolid', '001'))
-        self.assertNotIn('001', mock._images['Valladolid'].keys())
+        self.assertNotIn('001', ServersFacade.images['Valladolid'].keys())
 
     def test_delete_other(self):
-        before = mock._images['other:Madrid']
+        before = ServersFacade.images['other:Madrid']
         self.assertIn('201', before.keys())
         glancesync = GlanceSync(self.config)
         self.assertTrue(glancesync.delete_image('other:Madrid', '201'))
-        self.assertNotIn('201', mock._images['other:Madrid'].keys())
+        self.assertNotIn('201', ServersFacade.images['other:Madrid'].keys())
 
     def test_delete_noexists(self):
-        before = mock._images['Valladolid']
+        before = ServersFacade.images['Valladolid']
         self.assertNotIn('021', before.keys())
         glancesync = GlanceSync(self.config)
         self.assertFalse(glancesync.delete_image('Valladolid', '021'))
-        self.assertNotIn('021', mock._images['Valladolid'].keys())
+        self.assertNotIn('021', ServersFacade.images['Valladolid'].keys())
 
     def test_update_metadata_image(self):
         glancesync = GlanceSync(self.config)
         found = False
-        mock_i = mock._images
+        mock_i = ServersFacade.images
         for image in self.images_master:
             if image.id == '001':
                 found = True
@@ -232,7 +231,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
     def test_update_metadata_image_explicit_master(self):
         glancesync = GlanceSync(self.config)
         found = False
-        mock_i = mock._images
+        mock_i = ServersFacade.images
         for image in self.images_master:
             if image.id == '001':
                 found = True
@@ -251,7 +250,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
     def test_update_metadata_image_other_target(self):
         glancesync = GlanceSync(self.config)
         found = False
-        mock_i = mock._images
+        mock_i = ServersFacade.images
         for image in self.images_Madrid:
             if image.id == '201':
                 found = True
@@ -312,10 +311,10 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertItemsEqual(expected_names, found_names)
 
         # load csv files to mock and check it is the same
-        old = copy.deepcopy(mock._images)
-        mock.clear_mock()
-        mock.add_images_from_csv_to_mock(self.tmpdir)
-        self.assertEquals(old, mock._images)
+        old = copy.deepcopy(ServersFacade.images)
+        ServersFacade.clear_mock()
+        ServersFacade.add_images_from_csv_to_mock(self.tmpdir)
+        self.assertEquals(old, ServersFacade.images)
 
 
 class TestGlanceSync_Sync(unittest.TestCase):
@@ -326,7 +325,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
     def setUp(self):
         self.config()
         self.facade = ServersFacade(dict())
-        self.facade.add_images_from_csv_to_mock(self.path_test)
+        ServersFacade.add_images_from_csv_to_mock(self.path_test)
         if os.path.exists(self.path_test + '/config'):
             handler = open(self.path_test + '/config')
         else:
@@ -335,7 +334,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
         self.glancesync = GlanceSync(self.config)
 
     def tearDown(self):
-        self.facade.clear_mock()
+        ServersFacade.clear_mock()
 
     def test_check_status_pre(self):
         path_status = self.path_test + '.status_pre'
@@ -357,10 +356,10 @@ class TestGlanceSync_Sync(unittest.TestCase):
         for region in self.regions:
             self.glancesync.sync_region(region)
 
-        result = copy.deepcopy(self.facade._images)
-        self.facade.clear_mock()
-        self.facade.add_images_from_csv_to_mock(self.path_test + '.result')
-        expected = self.facade._images
+        result = copy.deepcopy(ServersFacade.images)
+        ServersFacade.clear_mock()
+        ServersFacade.add_images_from_csv_to_mock(self.path_test + '.result')
+        expected = ServersFacade.images
 
         # All the following code is equivalent to:
         # self.assertEquals(expected[key]), result[key]))
@@ -377,7 +376,6 @@ class TestGlanceSync_Sync(unittest.TestCase):
             for image_key in expected[key].keys():
                 self.assertEquals(str(expected[key][image_key]),
                                   str(result[key][image_key]))
-            #
 
     def test_check_status_post(self):
         for region in self.regions:

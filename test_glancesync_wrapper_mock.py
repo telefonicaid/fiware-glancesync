@@ -41,8 +41,7 @@ class TestGlanceWrapperMock(unittest.TestCase):
         target_other = dict()
         self.mock_master = ServersFacade(target_master)
         self.mock_other = ServersFacade(target_other)
-        self.mock_master.use_persistence = False
-        self.mock_other.use_persistence = False
+        ServersFacade.use_persistence = False
         self.id_image1 = '0$image1'
         self.id_image2 = '0$image2'
         self.mock_master.add_image_to_mock([
@@ -139,7 +138,7 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.assertIn('Madrid', other_regions)
 
     def test_add_images_from_csv_to_mock(self):
-        self.mock_other.add_images_from_csv_to_mock('test_data/basictest/')
+        ServersFacade.add_images_from_csv_to_mock('test_data/basictest/')
         region = GlanceSyncRegion('other:Santander', self.targets)
         self.assertIn('Santander', self.mock_other.get_regions())
         images = self.mock_other.get_imagelist(region)
