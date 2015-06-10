@@ -43,6 +43,8 @@ using a real server.
 Don't activate this test unless you know what are you doing"""
 
 testingFacadeReal = False
+
+
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceWrapperMock(unittest.TestCase):
     def setUp(self):
@@ -84,7 +86,6 @@ class TestGlanceWrapperMock(unittest.TestCase):
         image.raw.container_format = 'bare'
         image.raw.min_ram = '0'
         image.raw.min_disk = '0'
-
 
         self.created = self.facade.upload_image(self.region_obj, image)
         self.assertIsNotNone(self.created)

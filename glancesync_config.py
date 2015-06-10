@@ -196,7 +196,6 @@ class GlanceSyncConfig(object):
                     'configuration or OS_REGION_NAME must be defined'
                 self.logger.error(msg)
 
-
         if self.preferable_order is None:
             self.preferable_order = list()
 
@@ -224,21 +223,21 @@ class GlanceSyncConfig(object):
             if 'OS_PASSWORD' in os.environ:
                 self.targets['master']['password'] = os.environ['OS_PASSWORD']
             else:
-                 msg = 'A password for master target must be provided in '\
+                msg = 'A password for master target must be provided in '\
                     'configuration or OS_PASSWORD must be defined. In the '\
                     'configuration file, passwords must be encoded with base64'
-                 self.logger.error(msg)
-                 raise Exception(msg)
+                self.logger.error(msg)
+                raise Exception(msg)
 
         if 'keystone_url' not in self.targets['master']:
             if 'OS_AUTH_URL' in os.environ:
                 self.targets['master']['keystone_url'] =\
                     os.environ['OS_AUTH_URL']
             else:
-                 msg = 'A keystone url for master target must be provided in '\
+                msg = 'A keystone url for master target must be provided in '\
                     'configuration or OS_AUTH_URL must be defined.'
-                 self.logger.error(msg)
-                 raise Exception(msg)
+                self.logger.error(msg)
+                raise Exception(msg)
 
         if 'tenant' not in self.targets['master']:
             if 'OS_TENANT_NAME' in os.environ:

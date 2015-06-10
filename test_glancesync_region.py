@@ -33,6 +33,7 @@ import logging
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
 
+
 class TestGlanceSyncRegionBasic(unittest.TestCase):
     def setUp(self):
         self.targets = dict()
@@ -63,6 +64,7 @@ class TestGlanceSyncRegionBasic(unittest.TestCase):
         self.assertEquals(region.target, self.targets['other'])
         self.assertEquals(region.region, 'Madrid')
         self.assertEquals(region.fullname, 'other:Madrid')
+
 
 class TestGlanceSyncRegion(unittest.TestCase):
     def create_image(self, region, count, prefix):

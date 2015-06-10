@@ -34,6 +34,7 @@ import tempfile
 from glancesync_wrapper_mock import ServersFacade
 from glancesync_region import GlanceSyncRegion
 
+
 class TestGlanceWrapperMock(unittest.TestCase):
     def setUp(self):
         target_master = dict()
@@ -143,6 +144,7 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.assertIn('Santander', self.mock_other.get_regions())
         images = self.mock_other.get_imagelist(region)
         self.assertEquals(len(images), 2)
+
 
 class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
     """This class do the same tests than TestGlanceWrapperMock, but

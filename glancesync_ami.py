@@ -41,6 +41,7 @@ ramdisk_id.
 
 _logger = logging.getLogger('glancesync')
 
+
 def get_master_region_dict(image_list):
     """Convert the image list to a dictionary indexed by name and also
     replace at parameters kernel_id and ramdisk_id the UUID with the name of
@@ -97,10 +98,10 @@ def update_kernelramdisk_id(image, master_image, region_images):
     :return: True if the image was modified, False otherwise.
     """
 
-
     r1 = _update_auximg_id('kernel_id', image, master_image, region_images)
     r2 = _update_auximg_id('ramdisk_id', image, master_image, region_images)
     return r1 or r2
+
 
 def _update_auximg_id(property_id, image, master_image, images_region,
                       dry_run=False):
@@ -153,6 +154,7 @@ def _update_auximg_id(property_id, image, master_image, images_region,
         image.user_properties[property_id] = aux_image.id
     return True
 
+
 def check_ami(image, master_image, region_images, pending_images):
     """Check if kernel_id and/or ramdisk_id modification is required.
 
@@ -182,7 +184,7 @@ def check_ami(image, master_image, region_images, pending_images):
     """
 
     status1 = _check_auximg_id('kernel_id', image, master_image, region_images,
-                              pending_images)
+                               pending_images)
     status2 = _check_auximg_id('ramdisk_id', image, master_image,
                                region_images, pending_images)
     if status1 == status2:
@@ -196,8 +198,9 @@ def check_ami(image, master_image, region_images, pending_images):
     else:
         return 'update'
 
+
 def _check_auximg_id(property_id, image, master_image, images_region,
-                      pending_images):
+                     pending_images):
     """
     Utility function that modify, if required, a property in the image
     pointing to the id of other image. For example, it is used with kernel_id

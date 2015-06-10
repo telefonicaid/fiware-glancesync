@@ -33,6 +33,7 @@ import StringIO
 from glancesync_image import GlanceSyncImage
 import glancesync_ami as ami
 
+
 class TestGlanceSyncAMI(unittest.TestCase):
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
@@ -146,7 +147,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         del self.dict_reg[self.img_kernel.name]
         del self.dict_reg[self.img_ramdisk.name]
         r = ami.check_ami(self.reg_image, self.master_image,
-                                       self.dict_reg, set())
+                          self.dict_reg, set())
         self.assertEquals(r, 'missing')
 
     def test_check_kernelramdisk_id_pending(self):
@@ -155,7 +156,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         del self.dict_reg[self.img_ramdisk.name]
         pending = set([self.img_ramdisk.name, self.img_kernel.name])
         r = ami.check_ami(self.reg_image, self.master_image,
-                                       self.dict_reg, pending)
+                          self.dict_reg, pending)
         self.assertEquals(r, 'pending')
 
     def test_update_kernelid_missing(self):
@@ -179,7 +180,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         del self.dict_reg[self.img_ramdisk.name]
         pending = set([self.img_ramdisk.name, self.img_kernel.name])
         r = ami.check_ami(self.reg_image, self.master_image,
-                                       self.dict_reg, pending)
+                          self.dict_reg, pending)
         self.assertEquals(r, 'pending')
 
     def test_update_ramdiskid_missing(self):

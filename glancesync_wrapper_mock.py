@@ -52,6 +52,7 @@ _images = dict()
 use_persistence = False
 dir_persist = './.glancesync_persist'
 
+
 class ServersFacade(object):
     def __init__(self, target):
         self.target = target
@@ -121,8 +122,8 @@ class ServersFacade(object):
     def init_persistence(dir=None, clean=False):
         """Function to start using persistence: load the data from the lass
         session if it exists
-        :param dir: path of the directory where the persistence files go. Default
-         dir is ./.glancesync_persist
+        :param dir: path of the directory where the persistence files go.
+        Default dir is ./.glancesync_persist
         :param clean: if path exists, discard all existing content
         :return:
         """
@@ -158,6 +159,7 @@ class ServersFacade(object):
         """
         add_images_from_csv_to_mock(path)
 
+
 def init_persistence(dir=None, clean=False):
     """Function to start using persistence: load the data from the lass
     session if it exists
@@ -172,14 +174,15 @@ def init_persistence(dir=None, clean=False):
     use_persistence = True
     _images = dict()
     if os.path.exists(dir):
-       for name in glob.glob(dir + '/_persist_*'):
-           if clean:
-               os.unlink(name)
-           else:
-               region = os.path.basename(name)[9:]
-               _images[region] = shelve.open(name)
+        for name in glob.glob(dir + '/_persist_*'):
+            if clean:
+                os.unlink(name)
+            else:
+                region = os.path.basename(name)[9:]
+                _images[region] = shelve.open(name)
     else:
-       os.mkdir(dir_persist)
+        os.mkdir(dir_persist)
+
 
 def add_image_to_mock(image):
     """Add the image to the mock
@@ -201,6 +204,7 @@ def add_image_to_mock(image):
             _images[image.region] = dict()
     _images[image.region][image.id] = image
 
+
 def add_emptyregion_to_mock(region):
     """Add empty region to mock
     :param image: The image region (e.g. other:Madrid)
@@ -210,6 +214,7 @@ def add_emptyregion_to_mock(region):
         _images[region] = shelve.open(dir_persist + '/_persist_' + region)
     else:
         _images[region] = dict()
+
 
 def add_images_from_csv_to_mock(path):
     """Add images to the mock, reading the csv files saved by the backup tool
@@ -228,9 +233,10 @@ def add_images_from_csv_to_mock(path):
             else:
                 _images[region_name] = dict()
         with open(file) as f:
-             for row in csv.reader(f):
-                 image = GlanceSyncImage.from_field_list(row)
-                 _images[region_name][image.id] = image
+            for row in csv.reader(f):
+                image = GlanceSyncImage.from_field_list(row)
+                _images[region_name][image.id] = image
+
 
 def clear_mock():
     """clear all the non-persistent content of the mock"""
@@ -238,6 +244,7 @@ def clear_mock():
     _images = dict()
     # if using persintence, deleting _persist_ file is responsability of the
     # caller.
+
 
 def getimagelist(regionobj):
     """return a image list from the glance of the specified region
@@ -271,6 +278,7 @@ def delete_image(regionobj, id, confirm=True):
     del images[id]
     return True
 
+
 def update_metadata(regionobj, image):
     """ update the metadata of the image in the specified region
     See GlanceSync.update_metadata_image for more details.
@@ -284,7 +292,7 @@ def update_metadata(regionobj, image):
     updatedimage = images[image.id]
     updatedimage.is_public = image.is_public
     updatedimage.name = image.name
-    #updatedimage.owner = image.owner
+    # updatedimage.owner = image.owner
     updatedimage.user_properties = dict(image.user_properties)
     if use_persistence:
         images[image.id] = updatedimage
@@ -314,6 +322,7 @@ def upload_image(regionobj, image, image_dir):
 
     _images[regionobj.fullname][imageid] = new_image
     return imageid
+
 
 def get_regions(target):
     """It returns the list of regions on the specified target.

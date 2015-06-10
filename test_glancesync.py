@@ -41,6 +41,7 @@ from glancesync import GlanceSync
 import glancesync_wrapper_mock as mock
 from glancesync_wrapper_mock import ServersFacade
 
+
 def create_images(region, count, prefix, tenant):
     """Helper function for creating a sequence or regions. The images are
     also added to mock."""
@@ -78,6 +79,7 @@ def create_images(region, count, prefix, tenant):
         mock.add_image_to_mock(image)
     return images
 
+
 def dup_images(images, region, prefix, tenant):
     """Helper function to create a list of images from another one of a
     different region. The images are also added to mock"""
@@ -90,7 +92,7 @@ def dup_images(images, region, prefix, tenant):
         new_image.tenant = tenant
         new_images.append(new_image)
         mock.add_image_to_mock(new_image)
-        count +=1
+        count += 1
     return new_images
 
 config1 = """
@@ -109,6 +111,7 @@ metadata_condition = image.is_public and\
  'type' in image.user_properties and image.user_properties['type']\
   == 'baseimage'
 """
+
 
 class TestGlanceSyncBasicOperation(unittest.TestCase):
     """Class to test basic operations (i.e. all operations except
@@ -164,7 +167,6 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         expected = ['Burgos', 'Valladolid']
         expected.sort()
         self.assertEquals(result, expected)
-
 
     def test_get_regions_other_target(self):
         glancesync = GlanceSync(self.config)
@@ -261,7 +263,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
                 glancesync.update_metadata_image('other:Madrid', image)
                 self.assertEquals(image.user_properties,
                                   mock_i['other:Madrid']['201'].user_properties
-                )
+                                  )
                 self.assertFalse(image.user_properties is
                                  mock_i['other:Madrid']['201'])
         self.assertTrue(found)
@@ -301,8 +303,9 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         glancesync.backup_glancemetadata_region('other:Madrid', self.tmpdir)
         glancesync.backup_glancemetadata_region('other:Region2', self.tmpdir)
 
-        expected_names = set(['backup_Valladolid.csv', 'backup_Burgos.csv',
-                     'backup_other:Madrid.csv', 'backup_other:Region2.csv'])
+        expected_names = set(
+            ['backup_Valladolid.csv', 'backup_Burgos.csv',
+             'backup_other:Madrid.csv', 'backup_other:Region2.csv'])
         found_names = set()
         for name in glob.glob(self.tmpdir + '/*.csv'):
             found_names.add(os.path.basename(name))
@@ -350,7 +353,6 @@ class TestGlanceSync_Sync(unittest.TestCase):
             else:
                 print stream.getvalue()
 
-
     def test_sync(self):
         for region in self.regions:
             self.glancesync.sync_region(region)
@@ -366,7 +368,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
         self.assertEquals(len(expected.keys()), len(result.keys()))
         for key in expected.keys():
             self.assertIn(key, result)
-            if len(result[key].keys())==9:
+            if len(result[key].keys()) == 9:
                 print result[key].keys()
 
             self.assertEquals(len(expected[key]), len(result[key]))
@@ -397,26 +399,29 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 print stream.getvalue()
 
 
-
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
     def config(self):
         self.path_test = 'test_data/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
+
 
 class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     def config(self):
         self.path_test = 'test_data/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
+
 class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     def config(self):
         self.path_test = 'test_data/metadata'
         self.regions = ['master:Burgos']
 
+
 class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     def config(self):
         self.path_test = 'test_data/checksum'
         self.regions = ['master:Burgos']
+
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     def config(self):

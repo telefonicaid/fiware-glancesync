@@ -53,6 +53,7 @@ when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
 
+
 class ServersFacade(object):
     def __init__(self, target):
         self.target = target
@@ -124,6 +125,7 @@ class ServersFacade(object):
         :return: the tenant id
         """
         return self.session.get_project_id()
+
 
 def _set_environment(target, region=None):
     """Set the environment with the credential provided.
@@ -200,7 +202,7 @@ def delete_image(regionobj, id, confirm=True):
             return False
 
     p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None,
-                  stdout=sys.stdout, stderr=sys.stderr)
+              stdout=sys.stdout, stderr=sys.stderr)
 
     code = p.wait()
     if code == 0:
@@ -286,6 +288,7 @@ def upload_image(regionobj, image, images_dir):
         for line in result.splitlines():
             if matcher.match(line):
                 return line.split('|')[2].strip()
+
 
 def get_regions(target):
     """It returns the list of regions on the specified target.

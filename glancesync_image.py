@@ -140,7 +140,6 @@ class GlanceSyncImage(object):
             output.append(str(self.user_properties))
         return output
 
-
     def csv_userproperties(self, fields):
         """Extract the fields of the image as a CSV
 

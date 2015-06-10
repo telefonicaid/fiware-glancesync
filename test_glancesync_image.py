@@ -30,6 +30,7 @@ import copy
 
 from glancesync_image import GlanceSyncImage
 
+
 class TestGlanceSyncImageRegion(unittest.TestCase):
 
     def setUp(self):
@@ -170,6 +171,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.assertFalse(self.image2.is_synchronisable(m, force, func))
         self.assertFalse(self.image3.is_synchronisable(m, force, func))
         self.assertFalse(self.image4.is_synchronisable(m, force, func))
+
 
 class TestGlanceSyncImageCompare(unittest.TestCase):
     def setUp(self):

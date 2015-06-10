@@ -51,4 +51,3 @@ if __name__ == '__main__':
             # Don't do anything. Message has been already printed
             # try next region
             continue
-

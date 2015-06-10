@@ -36,6 +36,7 @@ module."""
 
 import glancesync_ami
 
+
 class GlanceSyncRegion(object):
     """This class supports the concept of region with a target namespace"""
 
@@ -106,8 +107,8 @@ class GlanceSyncRegion(object):
             if image.status != 'active':
                 # print warning
                 msg = self.fullname + ': state of image ' + image.name +\
-                      ' with UUID ' + image.id + '  is not active: ' +\
-                      image.status
+                    ' with UUID ' + image.id + '  is not active: ' +\
+                    image.status
                 self.log.warning(msg)
                 continue
 
@@ -115,8 +116,8 @@ class GlanceSyncRegion(object):
                 # print warning (duplicate)
                 msg = '{3}: image name {0} is duplicated. UUIDs: {1} {2}'
                 msg = msg.format(
-                    image.name, image.id, filtered_images_region[image.name].id
-                    , self.fullname)
+                    image.name, image.id,
+                    filtered_images_region[image.name].id, self.fullname)
                 self.log.warning(msg)
                 continue
 

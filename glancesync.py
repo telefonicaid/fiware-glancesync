@@ -68,7 +68,7 @@ class GlanceSync(object):
         for target in self.targets.values():
             if 'facade_module' in target:
                 import_code = 'from ' + target['facade_module'] +\
-                             'import ServersFacade as Facade' + str(count)
+                              'import ServersFacade as Facade' + str(count)
                 instance_code = 'Facade' + str(count) + '(target)'
                 exec import_code
                 target['facade'] = eval(instance_code)
@@ -87,7 +87,6 @@ class GlanceSync(object):
         master_region = GlanceSyncRegion(self.master_region, self.targets)
         images = master_region.target['facade'].get_imagelist(master_region)
         self.master_region_dict = glancesync_ami.get_master_region_dict(images)
-
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -172,7 +171,6 @@ class GlanceSync(object):
                                   tuple[1].name)
                     self.__update_meta(tuple[1], dictimages, regionobj)
 
-
         # Then, upload, replace, and rename_n_replace
         for tuple in tuples:
             uploaded = False
@@ -181,7 +179,8 @@ class GlanceSync(object):
                 uploaded = True
                 if not dry_run:
                     self.log.info(regionobj.fullname + ': Uploading image ' +
-                             tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+                                  tuple[1].name + ' (' + str(sizeimage) +
+                                  ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
 
             elif tuple[0] == 'pending_replace':
@@ -193,7 +192,7 @@ class GlanceSync(object):
                                   ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     facade.delete_image(regionobj, region_image.id,
-                                                confirm=False)
+                                        confirm=False)
             elif tuple[0] == 'pending_rename_n_replace':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
@@ -391,7 +390,7 @@ class GlanceSync(object):
 
         Another reason is because the front-end shows as progress the INFO
         messages, and showing the INFO messages of other components may be
-        to verbose. 
+        to verbose.
 
         This class do not register a handler by default because in a library
         typically this is a decision of the caller. Use this function at your

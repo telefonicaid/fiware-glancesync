@@ -138,6 +138,7 @@ credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server:4730/v2.0,tenant1
 """
 
+
 class TestGlanceSyncStream(unittest.TestCase):
     def setUp(self):
         self.stream = StringIO.StringIO(configuration_content)
@@ -193,7 +194,6 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
 
 
-
 class TestGlanceSyncConfigFile(unittest.TestCase):
     def setUp(self):
         self.tempfile = tempfile.NamedTemporaryFile(mode='w+', suffix='.conf',
@@ -215,6 +215,14 @@ class TestGlanceSyncConfigFile(unittest.TestCase):
 
 
 class TestGlanceSyncConfigOrder(unittest.TestCase):
+    """This class is to test that the different methods to provide a
+    configuration are evaluated in the correct order:
+    Priority in descending order:
+        stream parameter
+        GLANCESYNC_CONFIG environment variable
+        file parameter
+        /etc/glancesync.conf
+    """
     def setUp(self):
         self.stream = StringIO.StringIO(configuration_minimal_param.format(
             'region_stream'))
@@ -270,6 +278,7 @@ class TestGlanceSyncConfigOrder(unittest.TestCase):
         config = GlanceSyncConfig()
         self.assertEquals(config.master_region, 'region_etcfile')
 
+
 class TestGlanceSyncNoConfig(unittest.TestCase):
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
@@ -308,6 +317,7 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
         self.assertEquals(config.targets['master']['ignore_regions'], set())
         self.assertEquals(config.targets['master']['metadata_set'], set())
         self.assertEquals(config.targets['master']['only_tenant_images'], True)
+
 
 class TestGlanceSyncEmptyConfig(unittest.TestCase):
     def setUp(self):
@@ -348,6 +358,7 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
         self.assertEquals(config.targets['master']['ignore_regions'], set())
         self.assertEquals(config.targets['master']['metadata_set'], set())
         self.assertTrue(config.targets['master']['only_tenant_images'])
+
 
 class TestGlanceSyncIncompleteConfig(unittest.TestCase):
     def setUp(self):
