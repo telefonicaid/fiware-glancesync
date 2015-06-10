@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+author = 'chema'
 
 import sys
 import os
@@ -34,8 +34,8 @@ from glancesync_config import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
 import glancesync_ami
-from glancesync_wrapper import ServersFacade
-from glancesync_wrapper_mock import ServersFacade as ServersFacadeMock
+from glancesync_serversfacade import ServersFacade
+from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
 
 
 """Module to synchronize glance servers in different regions taking the base of

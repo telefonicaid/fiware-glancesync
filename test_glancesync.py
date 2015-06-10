@@ -38,7 +38,7 @@ from glancesync_image import GlanceSyncImage
 os.environ['GLANCESYNC_USE_MOCK'] = 'True'
 from glancesync import GlanceSync
 
-from glancesync_wrapper_mock import ServersFacade
+from glancesync_serverfacade_mock import ServersFacade
 
 
 def create_images(region, count, prefix, tenant):

@@ -31,11 +31,11 @@ import os
 import glob
 import tempfile
 
-from glancesync_wrapper_mock import ServersFacade
+from glancesync_serverfacade_mock import ServersFacade
 from glancesync_region import GlanceSyncRegion
 
 
-class TestGlanceWrapperMock(unittest.TestCase):
+class TestGlanceServersFacadeMock(unittest.TestCase):
     def setUp(self):
         target_master = dict()
         target_other = dict()
@@ -145,8 +145,8 @@ class TestGlanceWrapperMock(unittest.TestCase):
         self.assertEquals(len(images), 2)
 
 
-class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
-    """This class do the same tests than TestGlanceWrapperMock, but
+class TestGlanceServersFacadeMockPersist(TestGlanceServersFacadeMock):
+    """This class do the same tests than TestGlanceServerFacadeMock, but
     use the persistence option. Both groups of test should be equivalent,
     because after each test, the tearDown method destroy the persistence
     files"""
@@ -182,7 +182,7 @@ class TestGlanceWrapperMockPersist(TestGlanceWrapperMock):
         self.region3 = GlanceSyncRegion('other:Madrid', self.targets)
 
     def tearDown(self):
-        super(TestGlanceWrapperMockPersist, self).tearDown()
+        super(TestGlanceServersFacadeMockPersist, self).tearDown()
         for filename in glob.glob(self.dir_persist + '/_persist_*'):
             os.remove(filename)
         os.rmdir(self.dir_persist)

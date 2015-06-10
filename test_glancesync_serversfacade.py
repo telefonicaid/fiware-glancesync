@@ -32,7 +32,7 @@ import copy
 
 from keystoneclient.auth.identity import v2, v3
 
-from glancesync_wrapper import ServersFacade
+from glancesync_serversfacade import ServersFacade
 
 from glancesync_image import GlanceSyncImage
 from glancesync_region import GlanceSyncRegion
@@ -46,7 +46,7 @@ testingFacadeReal = False
 
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
-class TestGlanceWrapperMock(unittest.TestCase):
+class TestGlanceServersFacade(unittest.TestCase):
     def setUp(self):
         target = dict()
         target['target_name'] = 'master'
