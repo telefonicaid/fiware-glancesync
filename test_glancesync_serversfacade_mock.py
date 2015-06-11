@@ -71,6 +71,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.mock_other.clear_mock()
 
     def test_get_imagelist(self):
+        """Test method get_imagelist"""
         images_r1 = self.mock_master.get_imagelist(self.region1)
         r1dict = dict((i.id, i) for i in images_r1)
         images_r2 = self.mock_master.get_imagelist(self.region2)
@@ -82,6 +83,10 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.assertEquals(len(images_r3), 0)
 
     def test_get_imagelist_inmutable(self):
+        """Test method get_imagelist, but this time also check that the
+        returned list obtained calling two times the function are not
+        references to the same object. Otherwise modify the returned
+        list will affect subsequent calls"""
         images1 = self.mock_master.get_imagelist(self.region1)
         images2 = self.mock_master.get_imagelist(self.region1)
         r2dict = dict((i.id, i) for i in images2)
@@ -96,6 +101,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
                                  id(image2.user_properties))
 
     def test_deleteimage(self):
+        """Test method deleteimage"""
         images_before = self.mock_master.get_imagelist(self.region1)
         before_dict = dict((i.id, i) for i in images_before)
         self.mock_master.delete_image(self.region1, self.id_image1)
@@ -107,6 +113,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.assertIn(self.id_image2, after_dict)
 
     def test_update_metadata(self):
+        """Test method update_metadata"""
         image = self.mock_master.get_imagelist(self.region1)[0]
         image_copy = copy.deepcopy(image)
         image.user_properties['test'] = 1
@@ -116,6 +123,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.assertEquals(image, image_updated)
 
     def test_upload_image(self):
+        """Test method upload image"""
         image = self.mock_master.get_imagelist(self.region1)[0]
         id = self.mock_master.upload_image(self.region2, image)
         found = False
@@ -129,6 +137,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.assertTrue(found)
 
     def test_get_regions(self):
+        """Test method get_regions"""
         master_regions = self.mock_master.get_regions()
         self.assertEquals(len(master_regions), 2)
         self.assertIn('Valladolid', master_regions)
@@ -138,6 +147,8 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
         self.assertIn('Madrid', other_regions)
 
     def test_add_images_from_csv_to_mock(self):
+        """test method add_images_from_cvs_to_mock. Check regions and images
+        present"""
         ServersFacade.add_images_from_csv_to_mock('test_data/basictest/')
         region = GlanceSyncRegion('other:Santander', self.targets)
         self.assertIn('Santander', self.mock_other.get_regions())

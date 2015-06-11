@@ -33,7 +33,6 @@ import os
 import glob
 import tempfile
 
-from glancesync_config import GlanceSyncConfig
 from glancesync_image import GlanceSyncImage
 os.environ['GLANCESYNC_USE_MOCK'] = 'True'
 from glancesync import GlanceSync
@@ -134,10 +133,12 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
             os.rmdir(self.tmpdir)
 
     def test_constructor(self):
+        """test the object is correctly built"""
         glancesync = GlanceSync(self.config)
         self.assertEquals(glancesync.master_region, 'Valladolid')
 
     def test_get_regions(self):
+        """test get_regions method"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_regions()
         result.sort()
@@ -146,6 +147,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_get_regions_include_master(self):
+        """test get_regions with the paremeter to include master"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_regions(omit_master_region=False)
         result.sort()
@@ -154,6 +156,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_get_regions_explicit_master(self):
+        """test get_regions with the paremeter target='master'"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_regions(target='master')
         result.sort()
@@ -168,6 +171,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_get_regions_other_target(self):
+        """test get_regions with the paremeter target='other'"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_regions(target='other')
         result.sort()
@@ -182,6 +186,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_delete(self):
+        """test delete method"""
         before = ServersFacade.images['Valladolid']
         self.assertIn('001', before.keys())
         glancesync = GlanceSync(self.config)
@@ -189,6 +194,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertNotIn('001', ServersFacade.images['Valladolid'].keys())
 
     def test_delete_master(self):
+        """test delete including 'master:' prefix explicitly"""
         before = ServersFacade.images['Valladolid']
         self.assertIn('001', before.keys())
         glancesync = GlanceSync(self.config)
@@ -196,6 +202,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertNotIn('001', ServersFacade.images['Valladolid'].keys())
 
     def test_delete_other(self):
+        """test delete with image on other target"""
         before = ServersFacade.images['other:Madrid']
         self.assertIn('201', before.keys())
         glancesync = GlanceSync(self.config)
@@ -203,6 +210,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertNotIn('201', ServersFacade.images['other:Madrid'].keys())
 
     def test_delete_noexists(self):
+        """test delete when the image does not exists"""
         before = ServersFacade.images['Valladolid']
         self.assertNotIn('021', before.keys())
         glancesync = GlanceSync(self.config)
@@ -210,6 +218,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertNotIn('021', ServersFacade.images['Valladolid'].keys())
 
     def test_update_metadata_image(self):
+        """test update master image, without 'master' prefix"""
         glancesync = GlanceSync(self.config)
         found = False
         mock_i = ServersFacade.images
@@ -229,6 +238,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertTrue(found)
 
     def test_update_metadata_image_explicit_master(self):
+        """test update master image, with 'master' prefix"""
         glancesync = GlanceSync(self.config)
         found = False
         mock_i = ServersFacade.images
@@ -248,6 +258,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertTrue(found)
 
     def test_update_metadata_image_other_target(self):
+        """test update other target image,"""
         glancesync = GlanceSync(self.config)
         found = False
         mock_i = ServersFacade.images
@@ -268,6 +279,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertTrue(found)
 
     def test_get_images_region(self):
+        """test get_images_region with a master region"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_images_region('Valladolid')
         result.sort(key=lambda image: int(image.id))
@@ -277,6 +289,8 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_get_images_region_master(self):
+        """test get_images_region with a master region, with 'master:' prefix
+        """
         glancesync = GlanceSync(self.config)
         result = glancesync.get_images_region('master:Burgos')
         result.sort(key=lambda image: int(image.id))
@@ -286,6 +300,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_get_images_region_other(self):
+        """test get_images_region with a region on other target"""
         glancesync = GlanceSync(self.config)
         result = glancesync.get_images_region('other:Madrid')
         result.sort(key=lambda image: int(image.id))
@@ -295,6 +310,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, expected)
 
     def test_backup(self):
+        """test method get_backup"""
         glancesync = GlanceSync(self.config)
         self.tmpdir = tempfile.mkdtemp()
         glancesync.backup_glancemetadata_region('master:Burgos', self.tmpdir)
@@ -318,6 +334,18 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
 
 
 class TestGlanceSync_Sync(unittest.TestCase):
+    """Basic test: the images are already synchronised.
+
+    This is also the base class for the following test set.
+
+    It read a directory with the initial state with .csv files and
+    the same directory with '_result' suffix with the state after
+    the update. Also there are directories .status_pre and .status_post
+    with the results of export_sync_region_status before/after the
+    synchronisation. In self.path_test optionally is also a configuration
+    file with name 'config'
+    """
+
     def config(self):
         self.path_test = 'test_data/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
@@ -337,6 +365,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
         ServersFacade.clear_mock()
 
     def test_check_status_pre(self):
+        """test call export_sync_region_status before invoking sync"""
         path_status = self.path_test + '.status_pre'
         for region in self.regions:
             stream = StringIO.StringIO()
@@ -353,6 +382,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 print stream.getvalue()
 
     def test_sync(self):
+        """test sync_region call and compare the expected results"""
         for region in self.regions:
             self.glancesync.sync_region(region)
 
@@ -378,6 +408,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
                                   str(result[key][image_key]))
 
     def test_check_status_post(self):
+        """run sync_region and then export_sync_region_status. Finally, check
+         these last results"""
         for region in self.regions:
             self.glancesync.sync_region(region)
 
@@ -398,30 +430,38 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
 
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
+    """Test a environment where the destination region has no images"""
     def config(self):
         self.path_test = 'test_data/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
 class TestGlanceSync_Mixed(TestGlanceSync_Sync):
+    """Test a environment where the destination region has some of the images
+    """
     def config(self):
         self.path_test = 'test_data/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
 class TestGlanceSync_Metadata(TestGlanceSync_Sync):
+    """Test a environment where some images at the destination region has
+    metadata different than the images on the master region"""
     def config(self):
         self.path_test = 'test_data/metadata'
         self.regions = ['master:Burgos']
 
 
 class TestGlanceSync_Checksum(TestGlanceSync_Sync):
+    """Test a environment where some regional images has a checksum different
+    than the master images"""
     def config(self):
         self.path_test = 'test_data/checksum'
         self.regions = ['master:Burgos']
 
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
+    """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
         self.path_test = 'test_data/ami'
         self.regions = ['master:Burgos']

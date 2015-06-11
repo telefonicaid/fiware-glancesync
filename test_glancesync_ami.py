@@ -35,6 +35,7 @@ import glancesync_ami as ami
 
 
 class TestGlanceSyncAMI(unittest.TestCase):
+    """class to test only the get_master_region_dict method"""
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
             'kernel1', '0001', 'Valladolid', 'own0', True, '00', 10000,
@@ -55,11 +56,13 @@ class TestGlanceSyncAMI(unittest.TestCase):
                             'img1': self.img_mod}
 
     def test_get_master_region_dict(self):
+        """test gest_master_region_dict"""
         master_dict = ami.get_master_region_dict(self.list)
         self.assertEquals(master_dict, self.dict_master)
 
 
 class TestGlanceSyncAMI_update(unittest.TestCase):
+    """class to check the methods update_kernelramdisk_id and check_ami"""
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
             'kernel1', '000A', 'Valladolid', 'own0', True, '00', 10000,
@@ -84,6 +87,8 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         logging.getLogger('glancesync').addHandler(handler)
 
     def test_update_kernelramdisk_id(self):
+        """test update_kernelramdisk_id. Case: the image need to be updated.
+        check again after the update"""
         r = ami.update_kernelramdisk_id(self.reg_image, self.master_image,
                                         self.dict_reg)
         self.assertTrue(r)
@@ -97,6 +102,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
                           self.img_kernel.id)
 
     def test_check_kernelramdisk_id(self):
+        """test check_ami. Case: the image need to be updated"""
         r = ami.check_ami(self.reg_image, self.master_image, self.dict_reg,
                           set())
         self.assertEquals(r, 'update')

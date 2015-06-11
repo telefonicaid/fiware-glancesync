@@ -75,6 +75,8 @@ class TestGlanceServersFacade(unittest.TestCase):
                 pass
 
     def create_image(self):
+        """function to create_image, used by several tests; check that UUID
+         is returned"""
         class Raw(object):
             pass
 
@@ -91,18 +93,23 @@ class TestGlanceServersFacade(unittest.TestCase):
         self.assertIsNotNone(self.created)
 
     def test_getregions(self):
+        """test get_regions method"""
         regions = self.facade.get_regions()
         self.assertTrue(len(regions) > 1)
         self.assertIn(self.region, regions)
 
     def test_getimagelist(self):
+        """test get_imagelist method"""
         images = self.facade.get_imagelist(self.region_obj)
         self.assertGreater(len(images), 0)
 
     def test_uploadimage(self):
+        """test that the image is created (a UUID is obtained)"""
         self.create_image()
 
     def test_updatemetadata(self):
+        """test update_metadata method. It compares the results of
+        get_imagelist() before/after the call"""
         found = False
         self.create_image()
         for image in self.facade.get_imagelist(self.region_obj):
@@ -117,22 +124,28 @@ class TestGlanceServersFacade(unittest.TestCase):
         self.assertTrue(found)
 
     def test_deleteimage(self):
+        """test delete_image. It checks only that method returns true"""
         self.create_image()
         self.assertTrue(
             self.facade.delete_image(self.region_obj, self.created, False))
         self.created = None
 
     def test_keystone_v2(self):
+        """check that session object is created by default with V2 API,
+        comparing the type of session.auth"""
         self.assertIsNotNone(self.facade.session)
         self.assertIsInstance(self.facade.session.auth, v2.Password)
 
     def test_keystone_v3(self):
+        """check that session object is V3 when the option use_keystone_v3 is
+        set. It checks the type of session.auth"""
         target = copy.deepcopy(self.facade.target)
         target['use_keystone_v3'] = True
         facade = ServersFacade(target)
         self.assertIsInstance(facade.session.auth, v3.Password)
 
     def test_get_tenant_id(self):
+        """check get_tenant_id method. Only check that a value is obtained"""
         self.assertIsNotNone(self.facade.get_tenant_id())
 
 if __name__ == '__main__':

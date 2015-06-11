@@ -56,6 +56,8 @@ class TestGlanceSyncRegionBasic(unittest.TestCase):
         self.region = GlanceSyncRegion('other:Madrid', self.targets)
 
     def test_contstructor(self):
+        """check that object is constructed without errors and the value of
+        fields are ok"""
         master = self.master_region
         region = self.region
         self.assertEquals(master.target, self.targets['master'])
@@ -88,6 +90,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
         self.assertEquals(len(self.buffer_log.getvalue()), 0)
 
     def assertNumberWarnings(self, number):
+        """Check that the number of warnings generated is the expected one"""
         self.assertEquals(len(self.buffer_log.getvalue().splitlines()), number)
 
     def setUp(self):
@@ -183,6 +186,8 @@ class TestGlanceSyncRegion(unittest.TestCase):
         }
 
     def test_images_to_sync_dict_default(self):
+        """test method images_to_sync_dict, without metadata_set nor
+        metadata_condition"""
         self.targets['master']['metadata_set'] = set()
         self.targets['master']['metadata_condition'] = None
         new_dict = self.region.images_to_sync_dict(self.master_region_dict)
@@ -197,6 +202,8 @@ class TestGlanceSyncRegion(unittest.TestCase):
         self.assertNoWarnings()
 
     def test_images_to_sync_dict_metadata(self):
+        """test method images_to_sync_dict, without metadata_condition but
+        with medata_set"""
         self.targets['master']['metadata_set'] = set(['p1'])
         self.targets['master']['metadata_condition'] = None
         new_dict = self.region.images_to_sync_dict(self.master_region_dict)
@@ -205,12 +212,14 @@ class TestGlanceSyncRegion(unittest.TestCase):
         self.assertNoWarnings()
 
     def test_images_to_sync_dict_func(self):
+        """test method images_to_sync, with metadata_condition (see setUp)"""
         new_dict = self.region.images_to_sync_dict(self.master_region_dict)
         expected = set(['image00', 'image01', 'image02', 'image03', 'image09'])
         self.assertEquals(expected, set(new_dict.keys()))
         self.assertNoWarnings()
 
     def test_local_images_filtered(self):
+        """test method region_filtered"""
         region_filtered = self.region.local_images_filtered(
             self.expected_images_to_sync_dict, self.region_dict.values())
         expected = set(['image00', 'image01', 'image02', 'image03', 'image09'])

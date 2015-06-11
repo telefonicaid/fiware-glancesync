@@ -140,10 +140,15 @@ credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
 
 
 class TestGlanceSyncStream(unittest.TestCase):
+    """Test the class using the more easy method to pass the configuration
+    in a test: the stream parameter. This stream has top priority over other
+    methods of passing the configuration (a filepath, environment,
+     /etc/glancesync.conf..."""
     def setUp(self):
         self.stream = StringIO.StringIO(configuration_content)
 
     def test_constructor(self):
+        """ Basic test that constructor is working"""
         config = GlanceSyncConfig(stream=self.stream)
         forcesyncs = set(['d93462dc-e7c7-4716-ab64-3cbc109b201f',
                           '3471db65-a449-41d5-9090-b8889ee404cb'])
@@ -195,6 +200,8 @@ class TestGlanceSyncStream(unittest.TestCase):
 
 
 class TestGlanceSyncConfigFile(unittest.TestCase):
+    """Class to test that is possible to provide the configuration using a
+    file path"""
     def setUp(self):
         self.tempfile = tempfile.NamedTemporaryFile(mode='w+', suffix='.conf',
                                                     delete=False)
@@ -253,33 +260,50 @@ class TestGlanceSyncConfigOrder(unittest.TestCase):
         glancesync_config.default_configuration_file = self.preserve
 
     def test_order1(self):
+        """Test to pass the configuration using a stream and a file. Also
+        the environment is set and exists the default configuration file
+        The stream must have the top priority"""
         config = GlanceSyncConfig(self.tempfile.name, self.stream)
         self.assertEquals(config.master_region, 'region_stream')
 
     def test_order1b(self):
+        """Test to pass the configuration passing only a stream. The
+        environment is set and the default file exists. The stream
+        must have the top priority"""
         config = GlanceSyncConfig(stream=self.stream)
         self.assertEquals(config.master_region, 'region_stream')
 
     def test_order2(self):
+        """Test to pass the configuration passing only a file. Also the
+        environment is set and exists the default configuration file.
+        The environment must have more priority than the file"""
         config = GlanceSyncConfig(self.tempfile2.name)
         self.assertEquals(config.master_region, 'region_environment')
 
     def test_order2b(self):
+        """Test without passing nothing. The environment must have more
+        priority than the default file"""
         config = GlanceSyncConfig()
         self.assertEquals(config.master_region, 'region_environment')
 
     def test_order3(self):
+        """Test passing the file parameter, without environment. The specified
+        path must have more priority than the default path"""
         del os.environ['GLANCESYNC_CONFIG']
         config = GlanceSyncConfig(self.tempfile2.name)
         self.assertEquals(config.master_region, 'region_file')
 
     def test_order4(self):
+        """Test without parameters and without environemnt. The default file
+        must be readed"""
         del os.environ['GLANCESYNC_CONFIG']
         config = GlanceSyncConfig()
         self.assertEquals(config.master_region, 'region_etcfile')
 
 
 class TestGlanceSyncNoConfig(unittest.TestCase):
+    """Test to verify configuration when there are no configuration file:
+    no stream, no file, no environment, no default file"""
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
         # Avoid reading the default configuration file
@@ -297,10 +321,12 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
         glancesync_config.default_configuration_file = self.preserve
 
     def test_constructor(self):
+        """test constructor"""
         config = GlanceSyncConfig()
         self.assertTrue(config)
 
     def test_content(self):
+        """test the default valuees"""
         config = GlanceSyncConfig()
         self.assertEquals(config.master_region, 'Valladolid')
         self.assertEquals(config.max_children, 1)
@@ -320,6 +346,9 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
 
 
 class TestGlanceSyncEmptyConfig(unittest.TestCase):
+    """Test defaults values when there is a configuration but some important
+    values are missing. It works when it is possible to get credential from
+    the clasic OpenStack environment variables"""
     def setUp(self):
         assert(not os.path.exists('/__noexistingfile'))
         # Avoid reading the default configuration file
