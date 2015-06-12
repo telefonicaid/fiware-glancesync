@@ -44,6 +44,8 @@ invoked in a different way, without affecting the main module.
 This is a mock implementation, used for testing.
 """
 
+import logging
+
 
 class ServersFacade(object):
     images_dir = '/var/lib/glance/images'
@@ -263,9 +265,8 @@ if __name__ == '__main__':
     meta = parser.parse_args()
     meta.initial_load = os.path.normpath(os.path.expanduser(meta.initial_load))
     if not os.path.exists(meta.initial_load):
-        print >>sys.stderr,\
-            'The directory "%s" with the initial load must exist' %\
-            meta.initial_load
+        logging.error('The directory "%s" with the initial load must exist' %
+                      meta.initial_load)
         sys.exit(-1)
 
     if meta.random:
@@ -275,7 +276,7 @@ if __name__ == '__main__':
         m = 'The directory "%s" is not empty. If you are sure, pass --confirm'
         if os.path.exists(meta.path) and not meta.confirm:
             if len(glob.glob(meta.path + '/_persist_*')) != 0:
-                print >>sys.stderr, m % meta.path
+                logging.error(m % meta.path)
                 sys.exit(-1)
 
     facade = ServersFacade(dict())
