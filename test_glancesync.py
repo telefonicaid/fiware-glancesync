@@ -373,13 +373,11 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 export_sync_region_status(region, stream)
             if region.startswith('master:'):
                 region = region[7:]
-            if os.path.exists(path_status):
-                f = open(path_status + '/' + region + '.csv', 'rU')
-                expected = f.read().replace('\n', '\r\n')
-                result = stream.getvalue()
-                self.assertEquals(expected, result)
-            else:
-                print stream.getvalue()
+            self.assertTrue(os.path.exists(path_status))
+            f = open(path_status + '/' + region + '.csv', 'rU')
+            expected = f.read().replace('\n', '\r\n')
+            result = stream.getvalue()
+            self.assertEquals(expected, result)
 
     def test_sync(self):
         """test sync_region call and compare the expected results"""
@@ -397,9 +395,6 @@ class TestGlanceSync_Sync(unittest.TestCase):
         self.assertEquals(len(expected.keys()), len(result.keys()))
         for key in expected.keys():
             self.assertIn(key, result)
-            if len(result[key].keys()) == 9:
-                print result[key].keys()
-
             self.assertEquals(len(expected[key]), len(result[key]))
             self.assertEquals(set(expected[key].keys()),
                               set(result[key].keys()))
@@ -420,13 +415,11 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 export_sync_region_status(region, stream)
             if region.startswith('master:'):
                 region = region[7:]
-            if os.path.exists(path_status):
-                f = open(path_status + '/' + region + '.csv', 'rU')
-                expected = f.read().replace('\n', '\r\n')
-                result = stream.getvalue()
-                self.assertEquals(expected, result)
-            else:
-                print stream.getvalue()
+            self.assertTrue(os.path.exists(path_status))
+            f = open(path_status + '/' + region + '.csv', 'rU')
+            expected = f.read().replace('\n', '\r\n')
+            result = stream.getvalue()
+            self.assertEquals(expected, result)
 
 
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
