@@ -97,7 +97,6 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
 
         self.assertEquals(self.image1.to_field_list(None), result)
 
-
     def test_to_field_list_filtered(self):
         """test method to_field_lst, with filter"""
         props = ['p1', 'p2']
@@ -106,7 +105,6 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
             self.checksum, self.owner, self.is_public, self.props['p1'],
             self.props['p2']]
         self.assertEquals(self.image1.to_field_list(props), result)
-
 
     def test_from_field_list(self):
         """test method from_field_list"""
