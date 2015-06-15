@@ -67,15 +67,10 @@ def update_nids(region, glancesync):
             if nid:
                 nid = str(nid)
 
-            if public:
-                is_public = 'Yes'
-            else:
-                is_public = 'No'
-
             # don't update if values haven't changed.
             if (image.user_properties.get('nid', None) == nid and
                     image.user_properties.get('type', None) == typei and
-                    image.is_public == is_public and
+                    image.is_public == public and
                     image.user_properties.get('nid_version', None)
                     == nid_version):
                 continue
@@ -88,7 +83,7 @@ def update_nids(region, glancesync):
             if nid_version:
                 image.user_properties['nid_version'] = nid_version
 
-            image.is_public = is_public
+            image.is_public = public
             glancesync.update_metadata_image(region, image)
 
 if __name__ == '__main__':

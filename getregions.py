@@ -34,6 +34,7 @@ if __name__ == '__main__':
         target = 'master'
 
     sync_obj = glancesync.GlanceSync()
+    sync_obj.init_logs()
     regions = sync_obj.get_regions(target=target)
     regions.sort()
     print ','.join(regions)

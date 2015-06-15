@@ -32,6 +32,7 @@ from glancesync import GlanceSync
 if __name__ == '__main__':
     now = datetime.datetime.now().isoformat()
     glancesync = GlanceSync()
+    glancesync.init_logs()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     else:

@@ -30,6 +30,7 @@ from glancesync_fi import GlanceSyncFi as GlanceSync
 
 if __name__ == '__main__':
     glancesync = GlanceSync()
+    glancesync.init_logs()
     regions_unsorted = glancesync.get_regions()
     regions = list()
     for region in glancesync.preferable_order:

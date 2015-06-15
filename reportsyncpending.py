@@ -29,6 +29,7 @@ from glancesync_fi import GlanceSyncFi as GlanceSync
 
 if __name__ == '__main__':
     glancesync = GlanceSync()
+    glancesync.init_logs()
     regions_unsorted = glancesync.get_regions()
     regions = list()
     for region in glancesync.preferable_order:
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     for region in regions:
         try:
             print "======" + region
-            glancesync.show_sync_region_status(region)
+            glancesync.sync_region(region, dry_run=True)
         except Exception:
             # Don't do anything. Message has been already printed
             # try next region

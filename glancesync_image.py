@@ -24,6 +24,8 @@
 #
 author = 'jmpr22'
 
+import copy
+
 
 class GlanceSyncImage(object):
     """This class represent an image within a regional image server.
@@ -40,30 +42,82 @@ class GlanceSyncImage(object):
                  raw=None):
         """Constructor of the image object.
 
-        This constructor is usually not invoked by the user"""
+        This constructor is usually not invoked by the user
+        user_properties dictionary is cloned."""
         self.name = name
         self.id = id
         self.region = region
         self.is_public = is_public
         self.checksum = checksum
         self.raw = raw
-        self.size = size
+        self.size = int(size)
         self.status = status
         self.owner = owner
         if user_properties is not None:
-            self.user_properties = user_properties
+            self.user_properties = copy.copy(user_properties)
         else:
             self.user_properties = dict()
+
+    @staticmethod
+    def from_field_list(fieldlist):
+        """Build an object using the list returned by to_field_list.
+        This method is useful for testing.
+
+        :param fieldlist: a list returned by to_field_list
+        :return: a new GlanceSyncImage object
+        """
+
+        region = fieldlist[0]
+        name = fieldlist[1]
+        id = fieldlist[2]
+        status = fieldlist[3]
+        size = int(fieldlist[4])
+        checksum = fieldlist[5]
+        owner = fieldlist[6]
+        if isinstance(fieldlist[7], bool):
+            public = fieldlist[7]
+        else:
+            public = fieldlist[7].strip() == 'True'
+        user_properties = eval("dict(" + fieldlist[8] + ")")
+        return GlanceSyncImage(name, id, region, owner, public, checksum,
+                               size, status, user_properties)
 
     def __str__(self):
         """It Returns the string representation of the class"""
 
         s = 'Region: {0} Name: {1} Id: {2} Status: {3} Size: {4} ' +\
-            'Checksum: {5} Owner {6} Public: {7} Properties: {8}'
+            'Checksum: {5} Owner: {6} Public: {7} Properties: {8}'
         return s.format(
             self.region, self.name, self.id, self.status, self.size,
             self.checksum, self.owner, self.is_public,
             str(self.user_properties))
+
+    def __eq__(self, other):
+        """ The images are equals if all the attributes are equals,
+        that is, copy.deepcopy(obj) == obj.
+
+        This implies that for equality state and not only identity is
+        evaluated.
+        :param other: object to compare
+        :return: True if both images has the same attributes
+        """
+        if self.id != other.id or self.name != other.name:
+            return False
+        if self.region != other.region or self.status != other.status:
+            return False
+        if self.owner != other.owner or self.is_public != other.is_public:
+            return False
+        if int(self.size) != int(other.size) or self.raw != other.raw:
+            return False
+        if self.user_properties != other.user_properties:
+            return False
+        if self.checksum != other.checksum:
+            return False
+        return True
+
+    def __ne__(self, other):
+        """Se __eq__"""
+        return not self.__eq__(other)
 
     def to_field_list(self, user_properties_list=None):
         """It returns a list with the fields of the class.
@@ -96,14 +150,14 @@ class GlanceSyncImage(object):
         sub.append(self.name)
         for field in fields:
             if field in self.user_properties:
-                sub.append(self.user_properties[field])
+                sub.append(str(self.user_properties[field]))
             else:
                 sub.append('')
         return ','.join(sub)
 
     def compare_with_masterregion(self, master_region_images, user_properties):
         """
-        It compares this image with its homonyms on master region and
+        It compares this image with its homonym on master region and
         returns a character identifying the image synchronization status.
 
         It detects anomalies: the image is present but with different metadata
@@ -112,14 +166,14 @@ class GlanceSyncImage(object):
         master region. This last information is only for reporting, because the
         synchronisation way is always from master region to the other regions.
 
-        An anomaly this method does not detect is that ramdisk_id o kernel_id
-        point to a non-existent image.
+        This method does not check ramdisk_id/kernel_id: this is checked by
+         glancesync_ami.check_kernelramdisk_id
 
         :param master_region_images: a dictionary with the master region's
-         images.
+         images, indexed by name.
         :param user_properties: a list with the user properties to compare;
-           other properties are considered local. If empty, all metadata is
-           compared.
+           other properties are considered local. If empty or None, all
+           metadata is compared.
         :return: It returns an empty string when the image is synchronized.
         In other way:
         +: this image is not on the master glance server
@@ -144,7 +198,7 @@ class GlanceSyncImage(object):
             return '!'
 
         if image_master.is_public != self.is_public:
-            if image_master.is_public == 'No':
+            if not image_master.is_public:
                 return '-'
             else:
                 return '_'
@@ -186,8 +240,8 @@ class GlanceSyncImage(object):
     def is_synchronisable(
             self, metadata_set, forcesync, metadata_condition=None):
         """Determines if the image is synchronisable according to this
-        algorith:
-           if image id is in forcesync list, it is synchronisable
+        algorithm:
+           if image id is in forcesync, it is synchronisable
            if metadata_condition is provided, evaluate it and return the result
            if image is not public, it is not synchronisable
            if metadata_set is empty, it is synchronisable
@@ -207,7 +261,7 @@ class GlanceSyncImage(object):
             globals_dict['metadata_set'] = metadata_set
             return eval(metadata_condition, globals_dict)
 
-        if self.is_public == 'No':
+        if not self.is_public:
             return False
 
         if not metadata_set:
