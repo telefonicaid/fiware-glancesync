@@ -1,0 +1,38 @@
+{
+  "environment": "experimentation",
+  "credentials": [
+    {
+      "federation_name": "Federation1",
+      "region_name": "Valladolid",
+      "keystone_url": "",
+      "tenant_id": "",
+      "tenant_name": "admin",
+      "user_domain_name": "default",
+      "user": "admin",
+      "password": "",
+      "host_name": "",
+      "host_user": "glancesync",
+      "host_password": "",
+      "host_key": "./fiware_cloud_rsa"
+    },
+    {
+      "federation_name": "Federation1",
+      "region_name": "Burgos",
+      "keystone_url": "",
+      "tenant_id": "",
+      "tenant_name": "admin",
+      "user_domain_name": "default",
+      "user": "admin",
+      "password": "",
+      "host_name": "",
+      "host_user": "glancesync",
+      "host_password": "",
+      "host_key": "./fiware_cloud_rsa"
+    }
+  ],
+  "glancesync":{
+      "master_region_name": "Valladolid",
+      "bin_path": "/opt/fiware/glancesync",
+      "config_file": "/etc/glancesync.conf"
+  }
+}

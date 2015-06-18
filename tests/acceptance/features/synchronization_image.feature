@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+
+Feature: Image sync between regions using GlanceSync in the same federation.
+
+  @happy_path
+  Scenario: Simple image synchronization between regions
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  the image "qatesting01" is synchronized
+    And   the image "qatesting01" is present in all nodes with the expected data
+
+
+  Scenario: Synchronization of more than one images
+    Given the following images created in the Glance of master node with name:
+          | image_name  |
+          | qatesting01 |
+          | qatesting02 |
+          | qatesting03 |
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  all images are synchronized
+    And   all synchronized images are present in all nodes with the expected data
+
+
+  Scenario: Image synchronization when master node has not got images in Glance
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  no images are synchronized
+
+
+  Scenario: Already synchronized images are not sync again
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    And   an already synchronized images
+    When  I sync images
+    Then  the image "qatesting01" is not synchronized again
+    And   the image "qatesting01" is present in all nodes with the expected data
+
+
+  Scenario: Sync some images when they have already been synchronized
+    Given the following images created in the Glance of master node with name:
+          | image_name  |
+          | qatesting01 |
+          | qatesting02 |
+    And   GlanceSync configured to sync images without specifying any condition
+    And   an already synchronized images
+    When  I sync images
+    Then  no images are synchronized
+    And   the image "qatesting01" is not synchronized again
+    And   the image "qatesting02" is not synchronized again
+    And   all synchronized images are present in all nodes with the expected data
+
+
+  Scenario: Sync some new images when other ones have already been synchronized
+    Given the following images created in the Glance of master node with name:
+          | image_name  |
+          | qatesting01 |
+          | qatesting02 |
+    And   GlanceSync configured to sync images without specifying any condition
+    And   an already synchronized images
+    And   other new image created in the Glance of master node with name "qatesting03"
+    When  I sync images
+    Then  the image "qatesting03" is synchronized
+    And   the image "qatesting01" is not synchronized again
+    And   the image "qatesting02" is not synchronized again
+    And   all synchronized images are present in all nodes with the expected data
+
+
+  @happy_path
+  Scenario: Non-Public images are not synchronized by default
+    Given a new image created in the Glance of master node with name "qatesting01" and this properties
+            | param_name      | param_value         |
+            | is_public       | False               |
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    And   the image "qatesting01" is not synchronized
+    And   the image "qatesting01" is not present in target nodes
