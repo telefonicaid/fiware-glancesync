@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 Feature: Image sync between regions using GlanceSync in the same federation.
+  As a sys-admin of FIWARE federation
+  I want to sync images from master node to other nodes in the federation
+  So that I can use the same base images in all nodes and keep them updated
 
   @happy_path
   Scenario: Simple image synchronization between regions
@@ -76,3 +79,38 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     When  I sync images
     And   the image "qatesting01" is not synchronized
     And   the image "qatesting01" is not present in target nodes
+
+
+  Scenario: Images with the same name are not sync again by default
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    And   an already synchronized images
+    And   other new image created in the Glance of master node with name "qatesting01"
+    When  I sync images
+    Then  no images are synchronized
+    And   the image "qatesting01" is present in all nodes with the expected data
+
+
+  @skip @bug @CLAUDIA-5188
+  Scenario: Sync two images with the same name uploaded to master node
+    Given the following images created in the Glance of master node with name:
+          | image_name  |
+          | qatesting01 |
+          | qatesting01 |
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  the image "qatesting01" is synchronized
+    And   a warning message is shown informing about images with the same name "qatesting01"
+    And   the image "qatesting01" is present in all nodes with the expected data
+
+
+  @skip @bug @CLAUDIA-5189
+  Scenario: Sync an image with the same name that have changed its content (differente checksum)
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    And   an already synchronized images
+    And   the image "qatesting01" is deleted from the Glance of master node
+    And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
+    When  I sync images
+    And   a warning message is shown informing about checksum conflict with "qatesting01"
+    Then  no images are synchronized

@@ -49,6 +49,7 @@ class GlanceOperations():
 
         # Initialize session trying to get auth token; on success, continue with initialization
         self.auth_token = self.__init_auth__(auth_username, auth_password, auth_tenant_id, auth_url)
+        self.region_name = region_name
         if self.auth_token:
 
             # Load Glance URL (public) from Keystone
@@ -113,7 +114,7 @@ class GlanceOperations():
         :return (string): Image id.
         """
 
-        __logger__.debug("Creating new image '%s'", image_glance_name)
+        __logger__.debug("Creating new image '%s' in '%s'", image_glance_name, self.region_name)
         image = self.glance_client.images.create(name=image_glance_name,
                                                  container_format=container_format, disk_format=disk_format)
         __logger__.debug("Image created: %s", str(image))
@@ -137,7 +138,7 @@ class GlanceOperations():
         :return: None
         """
 
-        __logger__.debug("Deleting image '%s'", image_id)
+        __logger__.debug("Deleting image '%s' from '%s'", image_id, self.region_name)
         self.glance_client.images.delete(image_id)
 
     def remove_all_images_by_name(self, image_name):
@@ -158,7 +159,7 @@ class GlanceOperations():
         :return (list): List of images
         """
 
-        __logger__.debug("Getting image '%s'", image_name)
+        __logger__.debug("Getting image '%s' from '%s'", image_name, self.region_name)
         return list(self.glance_client.images.list(filters={"name": image_name}))
 
     def get_data_as_string(self, image_id):
