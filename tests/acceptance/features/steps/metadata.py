@@ -32,19 +32,27 @@ behave.use_step_matcher("re")
 __dataset_utils__ = DatasetUtils()
 
 def __compare_dict__(dictA, dictB):
-    ''' We need to check that all the second keys and values are equal to the first values of key and values dict
+    """ We need to check that all the second keys and values are equal to the first values
+        of key and values dict
     :param dictA: A base dict to compare keys and values
     :param dictB: The target dict to check the keys and values
-    :return:
-    '''
-    diff = {}
+    :return: a list with the difference that we found except in the case that the key is u''
+             in which we return a simple dict without any value.
+    """
 
     # Check all keys in first dict
     for key in dictB.keys():
-        if (not dictA.has_key(key)) and key is not '':
+        if key is u'':
+            # if there is no key
+            diff = {}
+        elif (not dictA.has_key(key)):
+            # we cannot found the key in the first dictionary
             diff[key] = (key, "Key not found {}: {}".format(key, dictB[key]))
         elif (dictA[key] != dictB[key]):
+            # they are different keys
             diff[key] = (key, "Values are different {}:{} != {}:{}".format(dictB[key], dictA[key]))
+        else:
+            diff = {}
 
     return diff
 
@@ -67,9 +75,11 @@ def step_impl_check_metadata_values(context, image_name):
         assert_that(properties, equal_to(sync_properties), "GlanceSync has NOT synchronized the images with"
                                                            " the metadata values.")
 
-@given(u'with is_public:"(?P<is_public>\w*)", sdc_aware:"(?P<sdc_aware>\w*)", type:"(?P<type>\w*)" and nid:"(?P<nid>\w*)" properties')
+@given(u'with is_public:"(?P<is_public>\w*)", sdc_aware:"(?P<sdc_aware>\w*)", type:"(?P<type>\w*)" '
+       u'and nid:"(?P<nid>\w*)" properties')
 def step_impl_a_new_image_created_in_glance_of_master_with_dinamic_values(context, is_public, sdc_aware, type, nid):
-    raise NotImplementedError(u'STEP: Given with is_public:"True", sdc_aware:"fake", type:"fake" and nid:"45555" properties')
+    raise NotImplementedError(u'STEP: Given with is_public:"True", sdc_aware:"fake", type:"fake" '
+                              u'and nid:"45555" properties')
 
 @then(u'this error message:"<(?P<message>\w*)" is shown to the user')
 def step_impl_error_message(context, message):
@@ -84,11 +94,10 @@ def step_impl_check_metadata_some_values(context, image_name):
             if 'param_name' in row.headings:
                 properties.update({row['param_name']: row['param_value']})
 
-    # We have to delete the master region from the list due to it has a wrong number of parameters to compare, due to
-    # some of the parameters are not synchronized for configuration parameters
-
+    # We have to delete the master region from the list due to it has a wrong number of
+    # parameters to compare, due to some of the parameters are not synchronized based in
+    # the information that we have in the configuration file.
     list_regions = context.glance_manager_list.copy()
-
     del(list_regions[context.master_region_name])
 
     for region in list_regions:
