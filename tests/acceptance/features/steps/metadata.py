@@ -56,7 +56,7 @@ def __compare_dict__(dictA, dictB):
 
     return diff
 
-@step(u'the metadata values of the image "(?P<image_name>\w*)" are the following')
+@step(u'the properties values of the image "(?P<image_name>\w*)" in all nodes are the following')
 def step_impl_check_metadata_values(context, image_name):
     properties = dict()
 
@@ -75,17 +75,11 @@ def step_impl_check_metadata_values(context, image_name):
         assert_that(properties, equal_to(sync_properties), "GlanceSync has NOT synchronized the images with"
                                                            " the metadata values.")
 
-@given(u'with is_public:"(?P<is_public>\w*)", sdc_aware:"(?P<sdc_aware>\w*)", type:"(?P<type>\w*)" '
-       u'and nid:"(?P<nid>\w*)" properties')
-def step_impl_a_new_image_created_in_glance_of_master_with_dinamic_values(context, is_public, sdc_aware, type, nid):
-    raise NotImplementedError(u'STEP: Given with is_public:"True", sdc_aware:"fake", type:"fake" '
-                              u'and nid:"45555" properties')
-
 @then(u'this error message:"<(?P<message>\w*)" is shown to the user')
 def step_impl_error_message(context, message):
     raise NotImplementedError(u'STEP: Then this error message:"<message>" is shown to the user')
 
-@step(u'the metadata values of the image "(?P<image_name>\w*)" are only the following')
+@step(u'the properties values of the image "(?P<image_name>\w*)" are only the following')
 def step_impl_check_metadata_some_values(context, image_name):
     properties = dict()
 

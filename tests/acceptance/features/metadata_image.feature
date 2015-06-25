@@ -3,6 +3,10 @@
 Feature: Image sync between regions using GlanceSync in the same federation but
   taking into account the metadata value to be synchronized.
 
+  As a sys-admin user,
+  I want to check the synchronisation of the metadata of the images in the FIWARE Lab federation
+  So that the list of synchronized images has the same metadata values after the operation.
+
   @happy_path
     Scenario: 01: Sync a public image with correct metadata value
      Given a new image created in the Glance of master node with name "qatesting01" and this properties
@@ -18,7 +22,7 @@ Feature: Image sync between regions using GlanceSync in the same federation but
      When  I sync the image
      Then  all images are synchronized
      And   the image "qatesting01" is present in all nodes with the expected data
-     And   the metadata values of the image "qatesting01" are the following
+     And   the properties values of the image "qatesting01" in all nodes are the following
              | param_name      | param_value         |
              | sdc_aware       | NULL                |
              | type            | fiware:apps         |
@@ -27,8 +31,9 @@ Feature: Image sync between regions using GlanceSync in the same federation but
 
    @skip
     Scenario Outline: 02: Sync public images with incorrect metadata value
-     Given a new image created in the Glance of master node with name "qatesting01"
-     And   with is_public:"<is_public>", sdc_aware:"<sdc_aware>", type:"<type>" and nid:"<nid>" properties
+     Given a new image created in the Glance of master node with name "qatesting01" and this properties
+            | is_public    | sdc_aware    | type    | nid    |
+            | <is_public>  | <sdc_aware>  | <type>  | <nid>  |
      And   GlanceSync configured to sync images using this configuration parameters:
             | config_section  | config_key          | config_value           |
             | DEFAULT         | metadata_condition  | image.is_public        |
@@ -81,7 +86,7 @@ Feature: Image sync between regions using GlanceSync in the same federation but
      When  I sync the image
      Then  all images are synchronized
      And   the image "qatesting01" is present in all nodes with the expected data
-     And   the metadata values of the image "qatesting01" are only the following
+     And   the properties values of the image "qatesting01" are only the following
             | param_name      | param_value         |
             | <param_name>    | <param_value>       |
 
@@ -107,7 +112,7 @@ Feature: Image sync between regions using GlanceSync in the same federation but
      When  I sync the image
      Then  all images are synchronized
      And   the image "qatesting01" is present in all nodes with the expected data
-     And   the metadata values of the image "qatesting01" are only the following
+     And   the properties values of the image "qatesting01" are only the following
             | param_name      | param_value       |
             | <param_name_1>  | <param_value_1>   |
             | <param_name_2>  | <param_value_2>   |
