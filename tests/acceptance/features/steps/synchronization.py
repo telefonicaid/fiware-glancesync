@@ -31,12 +31,16 @@ from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
+from qautils.function_string_utils import FunctionStringUtils
 from glancesync.output_constants import *
+import re
 
 # Use regular expressions for step param definition (Behave).
 behave.use_step_matcher("re")
 
+REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()
+__function_string_utils__ = FunctionStringUtils()
 
 
 def __create_new_image__(context, image_name, image_filename=None):
@@ -68,14 +72,19 @@ def __create_new_image__(context, image_name, image_filename=None):
     context.created_images_list.append(image_name)
 
 
-def __image_is_present_in_nodes__(context, region, image_name, filename_content=None):
+def __image_is_present_in_nodes__(context, region, image_name, filename_content=None, check_master=True):
     """
     HELPER: Check if an image is present in the Glance of the given node (region)
     :param context (Behave Context): Behave context
     :param image_name (string): Name of the image
     :param filename_content (string): Filename to be used as image.
+    :param check_master (bool): If True, check the image in the Glance of Master node.
     :return: None
     """
+
+    # If region is Master and check_master is False, DO NOT CHECK the presence of the image
+    if region == context.master_region_name and check_master is False:
+        return
 
     glance_ops = context.glance_manager_list[region]
     images_list = glance_ops.get_images(image_name)
@@ -108,6 +117,29 @@ def __image_is_present_in_nodes__(context, region, image_name, filename_content=
                 "The image content for '{}' in '{}' is not the expected content".format(image_name, region))
 
 
+def __get_real_value__(context, value_patter):
+    """
+    HELPER. This function returns the attribute value of the given image (master node).
+    :param value_patter (string): Att to get from the stored image. For instance: checksum(image_name):
+        - It will return the value of the attribute 'checksum' of the given image 'image_name' (Glance of Master node)
+    :return string: Real att value of the image
+    """
+
+    att_real_value = None
+    pattern = re.compile(REPLACE_CONFIG_VALUE_PATTER)
+    re_match = pattern.match(value_patter)
+    if re_match:
+        att_name = re_match.group(1)  # attribute of the immage
+        image_name = re_match.group(2)  # image name
+
+        glance_ops = context.glance_manager_list[context.master_region_name]
+        image = glance_ops.get_images(image_name)[0]  # Get the first image found with that name
+
+        att_real_value = getattr(image, att_name)
+
+    return att_real_value
+
+
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)"')
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)" and this properties')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)"')
@@ -116,8 +148,10 @@ def a_new_image_created_in_glance_of_master(context, image_name):
     __create_new_image__(context, image_name)
 
 
+@step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)", '
+      u'file "(?P<file>\w*)" and these properties')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
-def a_new_image_created_in_glance_of_master(context, image_name, file):
+def other_new_image_created_in_glance_of_master(context, image_name, file):
 
     __create_new_image__(context, image_name, file)
 
@@ -133,9 +167,24 @@ def following_images_created_in_glance_of_master(context):
 def glancesync_configured_to_sync_images_default(context):
 
     for row in __dataset_utils__.prepare_data(context.table):
+
+        value = row['config_value']
+        if row['config_key'] in ("replace", "rename", "dontupdate"):
+            # row['config_key'] could be:
+            #       any
+            #       checksum(image_name)
+            #       'checksum(image_name1), checksum(image_name2)'
+
+            # Remove simple '' if exist and split by whitespace for processing (get real values).
+            config_value_list = row['config_value'].replace('\'', ' ').split(",")
+            for config_value in config_value_list:
+                config_value = config_value.strip()  # Trimming string
+                real_config_value = __get_real_value__(context, config_value)
+                value = value.replace(config_value, real_config_value) if real_config_value is not None else value
+
         result = context.glancesync_client.change_configuration_file(section=row['config_section'],
                                                                      key=row['config_key'],
-                                                                     value=row['config_value'])
+                                                                     value=value)
         assert_that(result, is_not(None),
                     "GlanceSyn has NOT been configured due to some problem executing command")
 
@@ -213,7 +262,16 @@ def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
         __image_is_present_in_nodes__(context, region, image_name, filename_content=file_name)
 
 
-@step(u'the image "(?P<image_name>\w*)" is not present in target nodes')
+@step(u'the image "(?P<image_name>[\w\.]*)" is present in '
+      u'all target nodes with the content of file "(?P<file_name>\w*)"')
+def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
+
+    # Get Glance Manager for each region
+    for region in context.glance_manager_list:
+        __image_is_present_in_nodes__(context, region, image_name, filename_content=file_name, check_master=False)
+
+
+@step(u'the image "(?P<image_name>[\w\.]*)" is not present in target nodes')
 def image_is_not_present_in_nodes(context, image_name):
 
     for region in context.glance_manager_list:

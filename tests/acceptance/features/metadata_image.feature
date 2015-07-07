@@ -128,5 +128,3 @@ Feature: Image sync between regions using GlanceSync in the same federation but
             | 'type, fake'           | type         | fiware:apps   |              |               |
             | 'fake, nid'            |              |               | nid          | 453           |
             | 'fake, fake'           |              |               |              |               |
-
-

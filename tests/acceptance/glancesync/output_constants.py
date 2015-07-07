@@ -28,6 +28,8 @@ __license__ = " Apache License, Version 2.0"
 
 GLANCESYNC_OUTPUT_UPLOADING = "{region_name}: Uploading image {image_name}"
 GLANCESYNC_OUTPUT_IMAGE_UPLOADED = "{region_name}: Image uploaded"
+GLANCESYNC_OUTPUT_IMAGE_REPLACING = "{region_name}: Replacing image {image_name}"
 GLANCESYNC_OUTPUT_REGION_SYNC = "{region_name}: Region is synchronized"
 GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME = "WARNING: More than one images with name {image_name} have been found"
 GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT = "WARNING: Checksum conflict with {image_name}"
+GLANCESYNC_OUTPUT_RENAMING = "{region_name}: Renaming and replacing image {image_name}"
