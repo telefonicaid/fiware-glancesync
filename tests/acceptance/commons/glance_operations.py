@@ -131,6 +131,30 @@ class GlanceOperations():
             image.update(properties=custom_properties)
         return image.id
 
+    def update_image_properties(self, image_id, custom_properties):
+        """
+        Update the image properties of the given image_id
+        :param image_id: Image ID
+        :param custom_properties (dict): User properties to be added in the image metadata
+        :return: None
+        """
+
+        __logger__.debug("Updating image with custom properties: '%s'", custom_properties)
+        self.glance_client.images.update(image_id, properties=custom_properties)
+
+    def update_image_properties_by_name(self, image_name, custom_properties):
+        """
+        Update properties of all images found by the given name
+        :param image_name: Name of the image to update (data)
+        :param custom_properties (dict): User properties to be added in the image metadata
+        :return:
+        """
+
+        __logger__.debug("Updating properties of all images, by name '%s' and properties '%s'", image_name,
+                         custom_properties)
+        for image in self.get_images(image_name):
+            self.update_image_properties(image.id, custom_properties)
+
     def remove_image(self, image_id):
         """
         Remove the given image id from Glance

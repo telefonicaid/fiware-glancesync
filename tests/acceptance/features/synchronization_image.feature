@@ -112,5 +112,5 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync images
-    And   a warning message is shown informing about checksum conflict with "qatesting01"
     Then  no images are synchronized
+    And   a warning message is shown informing about checksum conflict with "qatesting01"

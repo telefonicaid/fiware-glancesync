@@ -135,6 +135,7 @@ def after_scenario(context, scenario):
         __logger__.debug("Deleting images in %s", region)
         for image_name in context.created_images_list:
             context.glance_manager_list[region].remove_all_images_by_name(image_name)
+            context.glance_manager_list[region].remove_all_images_by_name(image_name + ".old")
 
 
 def after_all(context):
