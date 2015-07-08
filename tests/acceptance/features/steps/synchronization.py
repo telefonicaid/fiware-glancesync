@@ -31,7 +31,9 @@ from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import *
+from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+    GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
+    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT
 import re
 
 # Use regular expressions for step param definition (Behave).

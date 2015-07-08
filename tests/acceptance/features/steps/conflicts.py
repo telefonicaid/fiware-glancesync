@@ -30,7 +30,8 @@ import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import *
+from glancesync.output_constants import GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+    GLANCESYNC_OUTPUT_RENAMING
 
 # Use regular expressions for step param definition (Behave).
 behave.use_step_matcher("re")
