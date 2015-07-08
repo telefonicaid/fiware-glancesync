@@ -51,20 +51,21 @@ def before_all(context):
     context.master_region_name = context.config[PROPERTIES_CONFIG_GLANCESYNC] \
         [PROPERTIES_CONFIG_GLANCESYNC_MASTER_REGION_NAME]
 
-    # Init Glance operation managers
+    # Init Glance operation managers. Only 'base' managers relative to "CREDENTIAL_TYPE_BASE_ADMIN" credential type
     # Format: {Spain: GlanceOperations, Trento: GlanceOperations}
     __logger__.info("Initiating Glance managers for testing")
     context.glance_manager_list = dict()
     for cred in context.config[PROPERTIES_CONFIG_CRED]:
-        region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
-        username = cred[PROPERTIES_CONFIG_CRED_USER]
-        password = cred[PROPERTIES_CONFIG_CRED_PASS]
-        tenant_id = cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
-        auth_url = cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
+        if CREDENTIAL_TYPE_BASE_ADMIN in cred[PORPERTIES_CONFIG_CRED_TYPE]:
+            region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
+            username = cred[PROPERTIES_CONFIG_CRED_USER]
+            password = cred[PROPERTIES_CONFIG_CRED_PASS]
+            tenant_id = cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
+            auth_url = cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
 
-        # Init GlanceOperation
-        glance_ops = GlanceOperations(username, password, tenant_id, auth_url, region_name)
-        context.glance_manager_list.update({region_name: glance_ops})
+            # Init GlanceOperation
+            glance_ops = GlanceOperations(username, password, tenant_id, auth_url, region_name)
+            context.glance_manager_list.update({region_name: glance_ops})
 
     __logger__.debug("Glance operation managers list: %s", context.glance_manager_list)
 
@@ -136,7 +137,6 @@ def after_scenario(context, scenario):
         for image_name in context.created_images_list:
             context.glance_manager_list[region].remove_all_images_by_name(image_name)
             context.glance_manager_list[region].remove_all_images_by_name(image_name + ".old")
-
 
 def after_all(context):
     """

@@ -29,9 +29,8 @@ __license__ = " Apache License, Version 2.0"
 import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
-from commons.constants import IMAGES_DIR
+from commons.constants import *
 from qautils.dataset_utils import DatasetUtils
-from qautils.function_string_utils import FunctionStringUtils
 from glancesync.output_constants import *
 import re
 
@@ -40,7 +39,6 @@ behave.use_step_matcher("re")
 
 REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()
-__function_string_utils__ = FunctionStringUtils()
 
 
 def __create_new_image__(context, image_name, image_filename=None):
@@ -198,7 +196,7 @@ def glancesync_configured_to_sync_images_default(context):
                                                                      key=row['config_key'],
                                                                      value=row['config_value'])
         assert_that(result, is_not(None),
-                    "GlanceSyn has NOT been configured due to some problem executing command")
+                    "GlanceSync has NOT been configured due to some problem executing command")
 
 
 @step(u'I sync the image')

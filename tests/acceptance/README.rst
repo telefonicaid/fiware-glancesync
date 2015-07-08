@@ -102,6 +102,27 @@ experimentation environment, you will have to configured the file `resources/set
 - For multi-target testing, you will have to configure two nodes in the same federation and another one in other federation.
 
 
-
 You will need a valid private key (*host_key*) to connect to master node by SSH (remote GlanceSync execution)
 and a valid OpenStack credentials for E2E validation against Glance servers on each node.
+
+
+Configuration parameters (settings):
+
+- **credential_type**: Type of the credential (base_admin, host, secondary_admin):
+
+  - base_admin: Credentials relative to the GlanceSync user on each Glance server (the same as the configured in glancesync.conf)
+  - host: This credentials defines host information for SSH connections.
+  - secondary_admin: Secondary admin user to be used in some test cases. Different of configures GlanceSync user
+
+- **federation_name**: Name of the federation (nodes under the same keystone). To group credentials.
+- **region_name**: Name of the region
+- **keystone_url**: Keystone URL
+- **tenant_id**: Tenant ID
+- **tenant_name**: Tenant Name
+- **user_domain_name**: Domain Name for the user (Keystone v3)
+- **user**: Username
+- **password**: User password
+- **host_name**: Name of the host (ssh connections)
+- **host_user**: User name of the host
+- **host_password**: Password for the previous user
+- **host_key**: RSA key for ssh connections instead of previous user/password. If protected, _host_password_ should be set with the correct value to decrypt

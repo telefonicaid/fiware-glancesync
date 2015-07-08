@@ -2,6 +2,7 @@
   "environment": "experimentation",
   "credentials": [
     {
+      "credential_type": "base_admin|host",
       "federation_name": "Federation1",
       "region_name": "Valladolid",
       "keystone_url": "",
@@ -16,6 +17,7 @@
       "host_key": "./fiware_cloud_rsa"
     },
     {
+      "credential_type": "base_admin",
       "federation_name": "Federation1",
       "region_name": "Burgos",
       "keystone_url": "",
@@ -28,6 +30,17 @@
       "host_user": "glancesync",
       "host_password": "",
       "host_key": "./fiware_cloud_rsa"
+    },
+    {
+      "credential_type": "secondary_admin",
+      "federation_name": "Federation1",
+      "region_name": "Burgos",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "",
+      "tenant_name": "tenant-qa",
+      "user_domain_name": "default",
+      "user": "qa",
+      "password": ""
     }
   ],
   "glancesync":{
