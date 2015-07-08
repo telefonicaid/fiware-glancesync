@@ -108,11 +108,11 @@ and a valid OpenStack credentials for E2E validation against Glance servers on e
 
 Configuration parameters (settings):
 
-- **credential_type**: Type of the credential (base_admin, host, secondary_admin):
+- **credential_type**: Type of the credentials configured in the section (base_admin, host, secondary_admin):
 
-  - base_admin: Credentials relative to the GlanceSync user on each Glance server (the same as the configured in glancesync.conf)
-  - host: This credentials defines host information for SSH connections.
-  - secondary_admin: Secondary admin user to be used in some test cases. Different of configures GlanceSync user
+  - base_admin: The credentials defined in the section are relative to the GlanceSync user on each Glance server (the same as the configured in glancesync.conf)
+  - host: The credentials defined in the section have got host information for SSH connections.
+  - secondary_admin: The credentials defined in the section are relative to a secondary admin user to be used in some test cases. Different from configured GlanceSync user
 
 - **federation_name**: Name of the federation (nodes under the same keystone). To group credentials.
 - **region_name**: Name of the region
@@ -122,7 +122,7 @@ Configuration parameters (settings):
 - **user_domain_name**: Domain Name for the user (Keystone v3)
 - **user**: Username
 - **password**: User password
-- **host_name**: Name of the host (ssh connections)
+- **host_name**: Name of the host (to be used as part as a ssh connection)
 - **host_user**: User name of the host
 - **host_password**: Password for the previous user
 - **host_key**: RSA key for ssh connections instead of previous user/password. If protected, _host_password_ should be set with the correct value to decrypt

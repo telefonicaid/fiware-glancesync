@@ -7,7 +7,7 @@ Feature: Image sync between regions using GlanceSync in the same federation and 
 
 
   @happy_path
-  Scenario: Image synchronization when exists a image with the same name, content and tenant (base tenant credentials). Only tenant images.
+  Scenario: Image synchronization when exists an image with the same name, content and tenant (base tenant credentials). Only tenant images.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of any target node with name "qatesting01", file "qatesting01" and using a credential type "base_admin"
     And   GlanceSync configured to sync images using this configuration parameters:
@@ -19,7 +19,7 @@ Feature: Image sync between regions using GlanceSync in the same federation and 
     Then  no images are synchronized
 
 
-  Scenario: Image synchronization when exists a image with the same name and content but different tenant. Only tenant images.
+  Scenario: Image synchronization when exists an image with the same name and content but different tenant. Only tenant images.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of any target node with name "qatesting01", file "qatesting01" and using a credential type "secondary_admin"
     And   GlanceSync configured to sync images using this configuration parameters:
@@ -31,7 +31,7 @@ Feature: Image sync between regions using GlanceSync in the same federation and 
     Then  the image "qatesting01" is synchronized
 
 
-  Scenario: Image synchronization when exists a image with the same name but different content and tenant in a target node. NOT only tenant images.
+  Scenario: Image synchronization when exists an image with the same name but different content and tenant in a target node. NOT only tenant images.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of any target node with name "qatesting01", file "qatesting01b" and using a credential type "secondary_admin"
     And   GlanceSync configured to sync images using this configuration parameters:
@@ -44,7 +44,7 @@ Feature: Image sync between regions using GlanceSync in the same federation and 
     And   a warning message is shown informing about different owner for image "qatesting01"
 
 
-  Scenario: Image synchronization when exists a image with the same name but different content and tenant in a target node. NOT only tenant images. Does NOT match metadata condition.
+  Scenario: Image synchronization when exists an image with the same name but different content and tenant in a target node. NOT only tenant images. Does NOT match metadata condition.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of any target node with name "qatesting01", file "qatesting01b" and using a credential type "secondary_admin"
     And   GlanceSync configured to sync images using this configuration parameters:
@@ -58,7 +58,7 @@ Feature: Image sync between regions using GlanceSync in the same federation and 
 
 
   @happy_path
-  Scenario: Image synchronization when exists a image with the same name but different content and tenant in a target node. NOT only tenant images. Replace.
+  Scenario: Image synchronization when exists an image with the same name but different content and tenant in a target node. NOT only tenant images. Replace.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of any target node with name "qatesting01", file "qatesting01b" and using a credential type "secondary_admin"
     And   GlanceSync configured to sync images using this configuration parameters:

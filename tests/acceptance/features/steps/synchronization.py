@@ -29,7 +29,7 @@ __license__ = " Apache License, Version 2.0"
 import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
-from commons.constants import *
+from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import *
 import re
