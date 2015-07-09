@@ -29,7 +29,7 @@ __license__ = " Apache License, Version 2.0"
 import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
-from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CONFIG_CRED, PORPERTIES_CONFIG_CRED_TYPE, \
+from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_TYPE, \
     PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, \
     PROPERTIES_CONFIG_CRED_KEYSTONE_URL
 from qautils.dataset_utils import DatasetUtils
@@ -49,7 +49,7 @@ def create_new_image_in_glance_of_target_node_and_credential(context, image_name
     # Get the first credential found with the given type in NOT MASTER node
     glance_ops = None
     for cred in context.config[PROPERTIES_CONFIG_CRED]:
-        if cred_type in cred[PORPERTIES_CONFIG_CRED_TYPE] \
+        if cred_type in cred[PROPERTIES_CONFIG_CRED_TYPE] \
                 and context.master_region_name != cred[PROPERTIES_CONFIG_CRED_REGION_NAME]:
             region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
             username = cred[PROPERTIES_CONFIG_CRED_USER]
