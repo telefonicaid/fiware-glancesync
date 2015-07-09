@@ -56,7 +56,7 @@ def before_all(context):
     __logger__.info("Initiating Glance managers for testing")
     context.glance_manager_list = dict()
     for cred in context.config[PROPERTIES_CONFIG_CRED]:
-        if CREDENTIAL_TYPE_BASE_ADMIN in cred[PORPERTIES_CONFIG_CRED_TYPE]:
+        if CREDENTIAL_TYPE_BASE_ADMIN in cred[PROPERTIES_CONFIG_CRED_TYPE]:
             region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
             username = cred[PROPERTIES_CONFIG_CRED_USER]
             password = cred[PROPERTIES_CONFIG_CRED_PASS]
