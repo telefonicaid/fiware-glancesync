@@ -26,7 +26,7 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-from commons.constants import *
+from commons.constants import PROPERTIES_FILE
 from qautils.logger_utils import get_logger
 import json
 

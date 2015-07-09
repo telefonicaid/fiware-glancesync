@@ -31,8 +31,9 @@ from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
-from qautils.function_string_utils import FunctionStringUtils
-from glancesync.output_constants import *
+from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+    GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
+    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT
 import re
 
 # Use regular expressions for step param definition (Behave).
@@ -40,7 +41,6 @@ behave.use_step_matcher("re")
 
 REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()
-__function_string_utils__ = FunctionStringUtils()
 
 
 def __create_new_image__(context, image_name, image_filename=None):
@@ -198,7 +198,7 @@ def glancesync_configured_to_sync_images_default(context):
                                                                      key=row['config_key'],
                                                                      value=row['config_value'])
         assert_that(result, is_not(None),
-                    "GlanceSyn has NOT been configured due to some problem executing command")
+                    "GlanceSync has NOT been configured due to some problem executing command")
 
 
 @step(u'I sync the image')
