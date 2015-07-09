@@ -26,7 +26,8 @@ __author__ = 'fla'
 import behave
 from behave import step, then
 from qautils.dataset_utils import DatasetUtils
-from hamcrest import assert_that, equal_to
+from hamcrest import assert_that, equal_to, contains_string, is_not
+from glancesync.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
 
 behave.use_step_matcher("re")
 
@@ -143,3 +144,38 @@ def step_impl_check_metadata_some_values(context, image_name):
 
         assert_that(message, equal_to({}), "GlanceSync has NOT synchronized the images with"
                                                            " the metadata values.")
+
+
+@step(u'the user properties of the image "(?P<image_name>\w*)" are updated in the Glance of master node')
+def update_user_prop_image_master_node(context, image_name):
+    properties = dict()
+
+    # Process table data
+    if context.table is not None:
+        for row in __dataset_utils__.prepare_data(context.table):
+            if 'param_name' in row.headings:
+                properties.update({row['param_name']: row['param_value']})
+
+    # Get the Glance manager of Master region
+    glance_ops = context.glance_manager_list[context.master_region_name]
+    glance_ops.update_image_properties_by_name(image_name, custom_properties=properties)
+
+
+@step(u'metadata of the image "(?P<image_name>\w*)" are updated')
+def metadata_image_are_updated(context, image_name):
+
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            assert_that(context.glancesync_result,
+                        contains_string(GLANCESYNC_OUTPUT_METADATA_UPDATING.format(region_name=region,
+                                                                                   image_name=image_name)),
+                        "Metadata of the image '{}' are not 'updating' them to region '{}'".format(image_name, region))
+
+
+@step(u'metadata of all images are updated')
+def metadata_all_images_are_updated(context):
+    for image_name in context.created_images_list:
+        metadata_image_are_updated(context, image_name)
