@@ -128,3 +128,206 @@ Feature: Image sync between regions using GlanceSync in the same federation but
             | 'type, fake'           | type         | fiware:apps   |              |               |
             | 'fake, nid'            |              |               | nid          | 453           |
             | 'fake, fake'           |              |               |              |               |
+
+
+    @skip @bug @CLAUDIA-5306
+    Scenario: 05: All metadata are synchronized when metadata_set property is empty
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties
+              | param_name      | param_value         |
+              | sdc_aware       | True                |
+              | type            | fiware:apps         |
+              | nid             | 453                 |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value           |
+              | DEFAULT         | metadata_condition  | image.is_public        |
+              | DEFAULT         | metadata_set        |                        |
+      When  I sync the image
+      Then  all images are synchronized
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | sdc_aware       | True                |
+              | type            | fiware:apps         |
+              | nid             | 453                 |
+
+
+    @skip @bug @CLAUDIA-5307 @CLAUDIA-5308
+    Scenario Outline: 06: Sync a public image with empty metadata values
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties
+              | param_name      | param_value         |
+              | sdc_aware       | <sdc_aware_value>   |
+              | nid             | <nid_value>         |
+              | other_att       | <other_att_value>   |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'sdc_aware,nid,other_att' |
+      When  I sync the image
+      Then  all images are synchronized
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" are only the following
+              | param_name      | param_value         |
+              | sdc_aware       | <sdc_aware_value>   |
+              | nid             | <nid_value>         |
+              | other_att       | <other_att_value>   |
+
+      Examples:
+            | sdc_aware_value | nid_value | other_att_value |
+            | True            | 12345     |                 |
+            | False           |           | abcd            |
+            |                 | 678       | abcd            |
+            |                 |           | abcd            |
+
+
+    Scenario: 07: Sync already existent images when its metadata have changed. Update existent values (no FIWARE atts)
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | new_att         | True                |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value          |
+              | DEFAULT         | metadata_condition  | image.is_public       |
+              | DEFAULT         | metadata_set        | 'nid, new_att'        |
+      And   an already synchronized images
+      And   the user properties of the image "qatesting01" are updated in the Glance of master node:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | new_att         | False               |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | new_att         | False               |
+              | nid             | 67890               |
+
+
+    Scenario: 07b: Sync already existent images when its metadata have changed. Update existent values. (Only FIWARE atts)
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | type            | fiware:util         |
+              | nid_version     | 1                   |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, type, nid_version'  |
+      And   an already synchronized images
+      And   the user properties of the image "qatesting01" are updated in the Glance of master node:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | type            | fiware:ops          |
+              | nid_version     | 2                   |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | type            | fiware:ops          |
+              | nid_version     | 2                   |
+
+
+    Scenario: 08: Sync already existent images when its metadata have changed. Add new attibrute. Same configuration properties.
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | sdc_aware       | True                |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, sdc_aware, new_att' |
+      And   an already synchronized images
+      And   the user properties of the image "qatesting01" are updated in the Glance of master node:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | sdc_aware       | False               |
+              | new_att         | qa-test             |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | sdc_aware       | False               |
+              | nid             | 67890               |
+              | new_att         | qa-test             |
+
+
+    Scenario: 09: Sync already existent images when its metadata have changed. Remove attribute. Same configuration properties.
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | sdc_aware       | True                |
+              | new_att         | qa-test             |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, sdc_aware, new_att' |
+      And   an already synchronized images
+      And   the image "qatesting01" is deleted from the Glance of master node
+      And   other new image created in the Glance of master node with name "qatesting01" and these properties:
+              | param_name      | param_value         |
+              | sdc_aware       | False               |
+              | nid             | 67890               |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | sdc_aware       | False               |
+              | nid             | 67890               |
+
+
+    Scenario: 10: Sync already existent images when its metadata have changed. Add and edit attributes. Same configuration properties.
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | sdc_aware       | True                |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, sdc_aware, new_att' |
+      And   an already synchronized images
+      And   the user properties of the image "qatesting01" are updated in the Glance of master node:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | sdc_aware       | False               |
+              | new_att         | qa-test             |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all nodes are the following:
+              | param_name      | param_value         |
+              | sdc_aware       | False               |
+              | nid             | 67890               |
+              | new_att         | qa-test             |
+
+
+    Scenario: 11: Sync already existent images when its metadata have changed. Attributes not present in metadata_set should not be updated.
+      Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+              | param_name      | param_value         |
+              | nid             | 12345               |
+              | sdc_aware       | True                |
+              | new_att         | qa-test             |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, sdc_aware, new_att' |
+      And   an already synchronized images
+      And   the user properties of the image "qatesting01" are updated in the Glance of master node:
+              | param_name      | param_value         |
+              | nid             | 67890               |
+              | sdc_aware       | False               |
+              | new_att         | qa-test2            |
+      And   GlanceSync configured to sync images using this configuration parameters:
+              | config_section  | config_key          | config_value              |
+              | DEFAULT         | metadata_condition  | image.is_public           |
+              | DEFAULT         | metadata_set        | 'nid, sdc_aware'          |
+      When  I sync images
+      Then  metadata of all images are updated
+      And   the image "qatesting01" is present in all nodes with the expected data
+      And   the properties values of the image "qatesting01" in all target nodes are the following:
+              | param_name      | param_value         |
+              | sdc_aware       | False               |
+              | nid             | 67890               |
+              | new_att         | qa-test             |

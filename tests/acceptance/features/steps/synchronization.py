@@ -143,6 +143,7 @@ def __get_real_value__(context, value_patter):
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)"')
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)" and this properties')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)"')
+@step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and these properties')
 def a_new_image_created_in_glance_of_master(context, image_name):
 
     __create_new_image__(context, image_name)
@@ -230,7 +231,7 @@ def image_is_synchronized(context, image_name):
 
             assert_that(context.glancesync_result,
                         contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+                        "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
 
 @step(u'all images are synchronized')
 def images_are_synchronized(context):
