@@ -170,7 +170,7 @@ def glancesync_configured_to_sync_images_default(context):
     for row in __dataset_utils__.prepare_data(context.table):
 
         value = row['config_value']
-        if row['config_key'] in ("replace", "rename", "dontupdate"):
+        if row['config_key'] in ("replace", "rename", "dontupdate", "forcesyncs"):
             # row['config_key'] could be:
             #       any
             #       checksum(image_name)
