@@ -7,7 +7,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   @happy_path
-  Scenario: Sync an image although it does not comply sync conditions: No public images. No conflicts.
+  Scenario: Sync an image although it does not comply sync conditions: Non-public images. No checksum conflicts.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
@@ -25,7 +25,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   @happy_path
-  Scenario: Sync some images although they do not comply sync conditions: No public images. No conflicts.
+  Scenario: Sync some images although they do not comply sync conditions: Non-public images. No checksum conflicts.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
@@ -54,7 +54,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
             | is_public       | False               |
 
 
-  Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesync property
+  Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesyncs property.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
@@ -67,7 +67,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
     Then  no images are synchronized
 
 
-  Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesync property
+  Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesyncs property.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
@@ -139,7 +139,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   @happy_path
-  Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: replace
+  Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: replace.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
@@ -162,7 +162,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
     And   the image "qatesting01" is present in all nodes with the content of file "qatesting01b"
 
 
-  Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: rename
+  Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: rename.
     Given a new image created in the Glance of master node with name "qatesting01" and this properties:
             | param_name      | param_value         |
             | is_public       | False               |
