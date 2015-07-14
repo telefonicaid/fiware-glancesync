@@ -33,7 +33,7 @@ from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
-    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT
+    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED
 import re
 
 # Use regular expressions for step param definition (Behave).
@@ -157,6 +157,16 @@ def other_new_image_created_in_glance_of_master(context, image_name, file):
     __create_new_image__(context, image_name, file)
 
 
+@step(u'a new image created in the Glance of target nodes with name "(?P<image_name>\w*)"')
+def a_new_image_created_in_glance_of_master(context, image_name):
+
+    for region in context.glance_manager_list:
+        glance_ops = context.glance_manager_list[region]
+        glance_ops.create_image(image_name, image_name)
+
+    context.created_images_list.append(image_name)
+
+
 @step(u'the following images created in the Glance of master node with name')
 def following_images_created_in_glance_of_master(context):
 
@@ -209,10 +219,24 @@ def sync_the_selected_image(context):
     context.glancesync_result = context.glancesync_client.sync()
 
 
+@step(u'I sync the image on "(?P<nodes>[\w,: ]*)"')
+@step(u'I sync images on "(?P<nodes>[\w,: ]*)"')
+def sync_the_selected_image_on_nodes(context, nodes):
+
+    context.glancesync_result = context.glancesync_client.sync(nodes)
+
+
 @step(u'an already synchronized images')
 def already_sync_images(context):
 
     sync_the_selected_image(context)
+    images_are_synchronized(context)
+
+
+@step(u'an already synchronized images on "(?P<nodes>[\w,: ]*)"')
+def already_sync_images(context, nodes):
+
+    sync_the_selected_image_on_nodes(context, nodes)
     images_are_synchronized(context)
 
 
@@ -339,6 +363,20 @@ def warning_message_checksum_confilc(context, image_name):
                         is_(contains_string(
                             GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT.format(image_name=image_name))),
                         "WARNING message for '{}' is not shown in results".format(image_name))
+
+
+@step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')
+def warning_message_duplicated(context, image_name):
+
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            assert_that(context.glancesync_result,
+                                is_(contains_string(
+                                    GLANCESYNC_OUTPUT_DUPLICATED.format(region_name=region, image_name=image_name))),
+                                "WARNING message for '{}' is not shown in results".format(image_name))
 
 
 @step(u'the image "(?P<image_name>\w*)" is deleted from the Glance of master node')
