@@ -423,3 +423,16 @@ Feature: Image sync between regions using GlanceSync in the same federation when
     And   the image "qatesting02" is renamed and replaced
     And   the image "qatesting01" is present in all target nodes with the content of file "qatesting01"
     And   the image "qatesting02" is present in all nodes with the content of file "qatesting02b"
+
+
+  Scenario: Sync an image when exists more than one image with the same name in target node
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01b"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting02b"
+    And   GlanceSync configured to sync images using this configuration parameters:
+            | config_section  | config_key          | config_value          |
+            | DEFAULT         | metadata_condition  | 'image.is_public'     |
+            | DEFAULT         | metadata_set        |                       |
+            | DEFAULT         | replace             | checksum(qatesting01) |
+    When  I sync images
+    And   a warning message is shown informing about image duplicity for "qatesting01"

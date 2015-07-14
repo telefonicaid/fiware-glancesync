@@ -28,13 +28,18 @@ __license__ = " Apache License, Version 2.0"
 
 import behave
 from behave import step
-from hamcrest import assert_that, is_not, contains_string, is_, equal_to
+from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
 from commons.constants import IMAGES_DIR
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
-    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED
+    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
 import re
+import logging
+
+
+# Get logger for Behave steps
+__logger__ = logger = logging.getLogger("synchronization_steps")
 
 # Use regular expressions for step param definition (Behave).
 behave.use_step_matcher("re")
@@ -43,16 +48,17 @@ REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()
 
 
-def __create_new_image__(context, image_name, image_filename=None):
+def __create_new_image__(context, region_name, image_name, image_filename=None):
     """
     HELPER: Create new image using given params and step context.
+    :param region_name (string): Name of the node where image will be created
     :param context (Behave Context): Behave context
     :param image_name (string): Name of the image
     :param image_file (string): Filename to be used as image.
     :return: None
     """
     # Get Glance Manager for master region
-    glance_ops = context.glance_manager_list[context.master_region_name]
+    glance_ops = context.glance_manager_list[region_name]
     properties = dict()
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
@@ -117,6 +123,24 @@ def __image_is_present_in_nodes__(context, region, image_name, filename_content=
                 "The image content for '{}' in '{}' is not the expected content".format(image_name, region))
 
 
+def __image_is_not_present_in_node(context, region, image_name):
+    """
+    HELPER: Check if an image is NOT present in the Glance of the given node (region)
+    :param context (Behave Context): Behave context
+    :param region: Node name to check
+    :param image_name (string): Name of the image
+    :return: None
+    """
+
+    glance_ops = context.glance_manager_list[region]
+    images_list = glance_ops.get_images(image_name)
+
+    # There must not be images with the given name
+    assert_that(len(images_list), is_(equal_to(0)),
+                "There are images with the name '{}' in '{}', and it sloudn't".format(image_name, region))
+
+
+
 def __get_real_value__(context, value_patter):
     """
     HELPER. This function returns the attribute value of the given image (master node).
@@ -146,7 +170,7 @@ def __get_real_value__(context, value_patter):
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and these properties')
 def a_new_image_created_in_glance_of_master(context, image_name):
 
-    __create_new_image__(context, image_name)
+    __create_new_image__(context, context.master_region_name, image_name)
 
 
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)", '
@@ -154,24 +178,37 @@ def a_new_image_created_in_glance_of_master(context, image_name):
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
 def other_new_image_created_in_glance_of_master(context, image_name, file):
 
-    __create_new_image__(context, image_name, file)
+    __create_new_image__(context, context.master_region_name, image_name, file)
 
 
-@step(u'a new image created in the Glance of target nodes with name "(?P<image_name>\w*)"')
-def a_new_image_created_in_glance_of_master(context, image_name):
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"')
+def a_new_image_created_in_glance_of_target(context, image_name):
+
+    for region in context.glance_manager_list:
+        __create_new_image__(context, region, image_name)
+
+
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
+def a_new_image_created_in_glance_of_target(context, image_name, file):
+
+    for region in context.glance_manager_list:
+        __create_new_image__(context, region, image_name, file)
+
+
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and without upload an image file')
+def a_new_image_created_in_glance_of_target_no_upload_file(context, image_name):
 
     for region in context.glance_manager_list:
         glance_ops = context.glance_manager_list[region]
-        glance_ops.create_image(image_name, image_name)
-
-    context.created_images_list.append(image_name)
+        glance_ops.create_image(image_name)
+        context.created_images_list.append(image_name)
 
 
 @step(u'the following images created in the Glance of master node with name')
 def following_images_created_in_glance_of_master(context):
 
     for row in __dataset_utils__.prepare_data(context.table):
-        __create_new_image__(context, row['image_name'])
+        __create_new_image__(context, context.master_region_name, row['image_name'])
 
 
 @step(u'GlanceSync configured to sync images using this configuration parameters')
@@ -272,6 +309,17 @@ def image_is_present_in_all_nodes(context, image_name):
         __image_is_present_in_nodes__(context, region, image_name)
 
 
+@step(u'the image "(?P<image_name>\w*)" is only present in target node "(?P<region_name>\w*)"')
+def image_is_present_only_in_node(context, image_name, region_name):
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            if region == region_name:
+                __image_is_present_in_nodes__(context, region_name, image_name)
+            else:
+                __image_is_not_present_in_node(context, region_name, image_name)
+
+
 @step(u'all synchronized images are present in all nodes with the expected data')
 def all_images_are_present_in_all_nodes(context):
 
@@ -301,12 +349,7 @@ def image_is_not_present_in_nodes(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            glance_ops = context.glance_manager_list[region]
-            images_list = glance_ops.get_images(image_name)
-
-            # There must not be images with the given name
-            assert_that(len(images_list), is_(equal_to(0)),
-                        "There are images with the name '{}' in '{}', and it sloudn't".format(image_name, region))
+            __image_is_not_present_in_node(context, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is not synchronized')
@@ -384,3 +427,22 @@ def image_is_deleted_from_glance_master(context, image_name):
 
     glance_ops = context.glance_manager_list[context.master_region_name]
     glance_ops.remove_all_images_by_name(image_name)
+
+
+@step(u'a warning message is shown informing about not active status in the image "(?P<image_name>\w*)"')
+def warning_message_not_active(context, image_name):
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            regex_message = GLANCESYNC_OUTPUT_NOT_ACTIVE.format(region_name=region, image_name=image_name)
+            __logger__.info("Regex pattern for NOT ACTIVE message: '%s'", regex_message)
+
+            pattern = re.compile(regex_message)
+            re_match = re.findall(pattern, context.glancesync_result)
+            __logger__.info("Result: %s", str(re_match))
+
+            assert_that(re_match, has_length(greater_than(0)),
+                                "WARNING message with patern '{}' "
+                                "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
