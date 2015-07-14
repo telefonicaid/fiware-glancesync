@@ -34,7 +34,7 @@ from datetime import datetime
 import logging
 
 
-# Get logger for steps
+# Get logger for Behave steps
 __logger__ = logger = logging.getLogger("order_steps")
 
 # Use regular expressions for step param definition (Behave).

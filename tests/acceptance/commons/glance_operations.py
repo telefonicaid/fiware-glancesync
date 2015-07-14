@@ -103,12 +103,13 @@ class GlanceOperations():
             __logger__.debug("Auth token: '%s'", token)
             return token
 
-    def create_image(self, image_glance_name, image_filename, container_format="bare", disk_format="qcow2",
+    def create_image(self, image_glance_name, image_filename=None, container_format="bare", disk_format="qcow2",
                      custom_properties=dict(), is_public=True):
         """
         Create a new image in the configured Glance with the given parameters
         :param image_glance_name (string): Name of the image.
         :param image_filename (string): Name of the resource file to use as "image".
+                If None, no image will be uploaded and status will not be ACTIVE
         :param container_format (string): Container format (Glance). Default: 'bare'
         :param disk_format (string): Disk format (Glance). Default: 'qcow2'
         :param custom_properties (dict): User properties to be added in the image metadata
@@ -121,9 +122,10 @@ class GlanceOperations():
                                                  container_format=container_format, disk_format=disk_format)
         __logger__.debug("Image created: %s", str(image))
 
-        image_path = "{}/{}".format(IMAGES_DIR, image_filename)
-        __logger__.debug("Updating image with content from file '%s'", image_path)
-        image.update(data=open(image_path, 'rb'))
+        if image_filename:
+            image_path = "{}/{}".format(IMAGES_DIR, image_filename)
+            __logger__.debug("Updating image with content from file '%s'", image_path)
+            image.update(data=open(image_path, 'rb'))
 
         __logger__.debug("Updating image property: 'is_public=%s'", is_public)
         image.update(properties=custom_properties, is_public=is_public)
