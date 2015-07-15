@@ -36,3 +36,5 @@ GLANCESYNC_OUTPUT_RENAMING = "{region_name}: Renaming and replacing image {image
 GLANCESYNC_OUTPUT_OWNER = "{region_name}: image {image_name} (UUID {uuid_image}) " \
                           "is owned by other tenant: {other_tenant}"
 GLANCESYNC_OUTPUT_METADATA_UPDATING = "{region_name}: Updating the metadata of image {image_name}"
+GLANCESYNC_OUTPUT_DUPLICATED = "{region_name}: image name {image_name} is duplicated."
+GLANCESYNC_OUTPUT_NOT_ACTIVE = "(.*){region_name}: state of image {image_name} with UUID ([\w-]*)  is not active(.*)"

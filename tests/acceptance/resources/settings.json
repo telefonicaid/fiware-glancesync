@@ -12,9 +12,9 @@
       "user": "admin",
       "password": "",
       "host_name": "",
-      "host_user": "glancesync",
+      "host_user": "",
       "host_password": "",
-      "host_key": "./fiware_cloud_rsa"
+      "host_key": ""
     },
     {
       "credential_type": "base_admin",
@@ -25,17 +25,35 @@
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": "",
-      "host_name": "",
-      "host_user": "glancesync",
-      "host_password": "",
-      "host_key": "./fiware_cloud_rsa"
+      "password": ""
     },
     {
       "credential_type": "secondary_admin",
       "federation_name": "Federation1",
       "region_name": "Burgos",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "keystone_url": "",
+      "tenant_id": "",
+      "tenant_name": "tenant-qa",
+      "user_domain_name": "default",
+      "user": "qa",
+      "password": ""
+    },
+    {
+      "credential_type": "base_admin",
+      "federation_name": "Federation1",
+      "region_name": "Salamanca",
+      "keystone_url": "",
+      "tenant_id": "",
+      "tenant_name": "admin",
+      "user_domain_name": "default",
+      "user": "admin",
+      "password": ""
+    },
+    {
+      "credential_type": "secondary_admin",
+      "federation_name": "Federation1",
+      "region_name": "Salamanca",
+      "keystone_url": "",
       "tenant_id": "",
       "tenant_name": "tenant-qa",
       "user_domain_name": "default",

@@ -114,3 +114,30 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     When  I sync images
     Then  no images are synchronized
     And   a warning message is shown informing about checksum conflict with "qatesting01"
+
+
+  Scenario: Sync an image when exists more than one image with the same name in target node
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  a warning message is shown informing about image duplicity for "qatesting01"
+
+
+  @env_dependant @experimentation
+  Scenario: Sync an image in a specific node given by params.
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images on "Burgos"
+    Then  the image "qatesting01" is synchronized
+    And   the image "qatesting01" is only present in target node "Burgos"
+
+
+  Scenario: Sync an image when it has got a non-final status in some target nodes.
+    Given a new image created in the Glance of master node with name "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and without upload an image file
+    And   GlanceSync configured to sync images without specifying any condition
+    When  I sync images
+    Then  the image "qatesting01" is synchronized
+    And   a warning message is shown informing about not active status in the image "qatesting01"

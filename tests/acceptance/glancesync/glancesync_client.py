@@ -51,13 +51,19 @@ class GlanceSyncClient():
         self.conf_file_backup_path = None
         self.bin_path = glancesyc_bin_path
 
-    def sync(self):
+    def sync(self, list_nodes=None):
         """
         Execute SYNC command.
+        :param list_nodes (String): String with the list of nodes. e.i:
+                "Burgos"
+                "master:Burgos"
+                "Burgos target2:Madrid"
+                "master:Burgos target2:Madrid"
         :return (String): Command output
         """
 
         command = "{}/{}".format(self.bin_path, COMMAND_SYNC) if self.bin_path is not None else "sync"
+        command = "{command} {list_nodes}".format(command=command, list_nodes=list_nodes) if list_nodes else command
         return self.fabric_utils.execute_command(command)
 
     def change_configuration_file(self, section, key, value):
