@@ -42,3 +42,4 @@ GLANCESYNC_OUTPUT_MISSING_KERNEL = "{region_name}: Not found {kernel_image_name}
                                    "of image {image_name}"
 GLANCESYNC_OUTPUT_MISSING_RAMDISK = "{region_name}: Not found {ramdisk_image_name} on region. It should be " \
                                     "ramdisk_id of image {image_name}"
+

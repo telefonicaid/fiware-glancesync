@@ -42,6 +42,7 @@ import logging
 # Get logger for Behave steps
 __logger__ = logging.getLogger("synchronization_steps")
 
+
 # Use regular expressions for step param definition (Behave).
 behave.use_step_matcher("re")
 
@@ -192,7 +193,7 @@ def a_new_image_created_in_glance_of_target(context, image_name):
 
 
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
-def a_new_image_created_in_glance_of_target(context, image_name, file):
+def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
 
     for region in context.glance_manager_list:
         __create_new_image__(context, region, image_name, file)

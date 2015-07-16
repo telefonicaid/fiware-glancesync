@@ -5,26 +5,27 @@
       "credential_type": "base_admin|host",
       "federation_name": "Federation1",
       "region_name": "Valladolid",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
+      "keystone_url": "",
+      "tenant_id": "",
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T",
-      "host_name": "10.95.55.167",
-      "host_user": "glancesync",
-      "host_password": "glancesync",
-      "host_key": "./fiware_cloud_rsa"
+      "password": "",
+      "host_name": "",
+      "host_user": "",
+      "host_password": "",
+      "host_key": ""
     },
     {
       "credential_type": "base_admin",
       "federation_name": "Federation1",
       "region_name": "Burgos",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
-      "tenant_name": "test",
+      "keystone_url": "",
+      "tenant_id": "",
+      "tenant_name": "admin",
       "user_domain_name": "default",
-      "user": "admin"
+      "user": "admin",
+      "password": ""
     },
     {
       "credential_type": "secondary_admin",
