@@ -9,12 +9,12 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   @happy_path
   Scenario: Sync images when there are checksum conflicts: replace. Image without metadata.
     Given a new image created in the Glance of master node with name "qatesting01"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync the image
@@ -25,12 +25,12 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   @skip @bug @CLAUDIA-5189
   Scenario Outline: Sync images when there are checksum conflicts. ImageID is not updated.
     Given a new image created in the Glance of master node with name "qatesting01"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | <config_key>        | 123-123-123-1231-2312 |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync images
@@ -45,17 +45,17 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
 
   Scenario Outline: Sync images when there are checksum conflicts: replace. One image with different metadata.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  |                       |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
             | DEFAULT         | replace             | <replace>             |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
             | param_name      | param_value         |
@@ -77,22 +77,22 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
 
   Scenario Outline: Sync images when there are checksum conflicts: replace. Some images with different metadata.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   a new image created in the Glance of master node with name "qatesting02" and this properties:
+    And   a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 67890               |
             | sdc_aware       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  |                       |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
             | DEFAULT         | replace             | <replace>             |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
@@ -130,12 +130,12 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   @happy_path
   Scenario: Sync images when there are checksum conflicts: rename. Image without metadata.
     Given a new image created in the Glance of master node with name "qatesting01"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | rename              | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync the image
@@ -145,17 +145,17 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
 
   Scenario Outline: Sync images when there are checksum conflicts: rename. One image with different metadata.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  |                       |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
             | DEFAULT         | rename              | <rename>              |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
             | param_name      | param_value         |
@@ -184,22 +184,22 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
 
   Scenario Outline: Sync images when there are checksum conflicts: rename. Some images with different metadata.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   a new image created in the Glance of master node with name "qatesting02" and this properties:
+    And   a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 67890               |
             | sdc_aware       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  |                       |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
             | DEFAULT         | rename              | <rename>              |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
@@ -250,13 +250,13 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   Scenario: Sync images when there are checksum conflicts: rename and replace. Image without metadata.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of master node with name "qatesting02"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | checksum(qatesting01) |
             | DEFAULT         | rename              | checksum(qatesting02) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
@@ -271,23 +271,23 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
 
   Scenario: Sync images when there are checksum conflicts: rename and replace. Some images with different metadata.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   a new image created in the Glance of master node with name "qatesting02" and this properties:
+    And   a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 67890               |
             | sdc_aware       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  |                       |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
             | DEFAULT         | replace             | checksum(qatesting01) |
             | DEFAULT         | rename              | checksum(qatesting02) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
@@ -327,13 +327,13 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   Scenario Outline: Sync images when there are checksum conflicts: rename and replace. If both properties are any or IMAGE_ID is in both: rename.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of master node with name "qatesting02"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | <replace>             |
             | DEFAULT         | rename              | <rename>              |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
@@ -354,13 +354,13 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
   Scenario: Sync images when there are checksum conflicts: rename and replace. IMAGE_ID overrides 'any' when executing rename behaviour
     Given a new image created in the Glance of master node with name "qatesting01"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | any                   |
             | DEFAULT         | rename              | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync images
@@ -371,13 +371,13 @@ Feature: Image sync between regions using GlanceSync in the same federation when
 
   Scenario: Sync images when there are checksum conflicts: rename and replace. IMAGE_ID overrides 'any' when executing replace behaviour (2/2)
     And   a new image created in the Glance of master node with name "qatesting02"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | checksum(qatesting02) |
             | DEFAULT         | rename              | any                   |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting02" and file "qatesting02b"
     When  I sync images
@@ -388,14 +388,14 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   @happy_path
   Scenario: Sync images when there are checksum conflicts: dontupdate.
     Given a new image created in the Glance of master node with name "qatesting01"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | any                   |
             | DEFAULT         | rename              | any                   |
             | DEFAULT         | dontupdate          | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync the image
@@ -406,14 +406,14 @@ Feature: Image sync between regions using GlanceSync in the same federation when
   Scenario: Sync images when there are checksum conflicts: dontupdate. Some images.
     Given a new image created in the Glance of master node with name "qatesting01"
     Given a new image created in the Glance of master node with name "qatesting02"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | replace             | any                   |
             | DEFAULT         | rename              | any                   |
             | DEFAULT         | dontupdate          | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
@@ -429,7 +429,7 @@ Feature: Image sync between regions using GlanceSync in the same federation when
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01b"
     And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting02b"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |

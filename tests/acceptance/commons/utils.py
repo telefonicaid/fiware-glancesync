@@ -29,8 +29,12 @@ __license__ = " Apache License, Version 2.0"
 from commons.constants import PROPERTIES_FILE
 from qautils.logger_utils import get_logger
 import json
+import re
 
 __logger__ = get_logger("qautils")
+
+# Pattern. REPLACE 'att_name(image_name)' by the real value of the 'att_name' in the image 'image_name'
+REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 
 
 def load_project_properties():
@@ -51,3 +55,31 @@ def load_project_properties():
     __logger__.debug("Properties loaded: %s", config)
 
     return config
+
+
+def get_real_value_of_image_property(glance_manager, value_patter):
+    """
+    This function returns the attribute value of the given image, managed by the given GlanceOps.
+    :param glance_manager (GlanceOperations). The initialized Glance manager for a node.
+    :param value_patter (string): Att to get from the stored image. For instance: checksum(image_name):
+        - It will return the value of the attribute 'checksum' of the given image 'image_name' (Glance of Master node)
+    :return string: Real att value of the image. If value_patter does NOT match with the patter,
+        it returns None
+    """
+
+    att_real_value = None
+    pattern = re.compile(REPLACE_CONFIG_VALUE_PATTER)
+    re_match = pattern.match(value_patter)
+    __logger__.debug("Get real value for '%s' with pattern '%s'", value_patter, REPLACE_CONFIG_VALUE_PATTER)
+    if re_match:
+        att_name = re_match.group(1)  # attribute of the immage
+        image_name = re_match.group(2)  # image name
+
+        image = glance_manager.get_images(image_name)[0]  # Get the first image found with that name
+
+        att_real_value = getattr(image, att_name)
+        __logger__.debug("Real att value for image '%s': '%s'", image_name, att_real_value)
+    else:
+        __logger__.debug("The given value '%s' does NOT match with the pattern.", value_patter)
+
+    return att_real_value

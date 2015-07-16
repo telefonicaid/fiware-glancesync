@@ -126,3 +126,18 @@ Configuration parameters (settings):
 - **host_user**: User name of the host.
 - **host_password**: Password for the previous user.
 - **host_key**: RSA key for ssh connections instead of previous user/password. If protected, _host_password_ should be set with the correct value to decrypt.
+
+
+**Images for testing purpose**
+
+Different 'fake' image files have been provided. These ones are located in `resources/images`.
+Each image has got different size to be used following GlanceSync algorithm: smallest images are synchronized
+before the biggest ones:
+
+- qatesting01
+- qatesting0b
+- qatesting02
+- qatesting02b
+- qatesting03
+- qatesting03b
+- qatesting10meg
