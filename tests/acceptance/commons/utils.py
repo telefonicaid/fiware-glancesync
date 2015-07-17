@@ -34,7 +34,7 @@ import re
 __logger__ = get_logger("qautils")
 
 # Pattern. REPLACE 'att_name(image_name)' by the real value of the 'att_name' in the image 'image_name'
-REPLACE_CONFIG_VALUE_PATTERN = "(\w*)\((\w*)\)"
+REPLACE_CONFIG_VALUE_PATTERN = "(\w*)\(([\w\.]*)\)"
 
 
 def load_project_properties():

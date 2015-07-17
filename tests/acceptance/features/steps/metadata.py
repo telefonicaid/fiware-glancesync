@@ -28,7 +28,7 @@ from behave import step, then
 from qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, equal_to, contains_string, is_not
 from glancesync.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
-
+from commons.utils import get_real_value_of_image_property
 behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
@@ -148,16 +148,19 @@ def step_impl_check_metadata_some_values(context, image_name):
 
 @step(u'the user properties of the image "(?P<image_name>\w*)" are updated in the Glance of master node')
 def update_user_prop_image_master_node(context, image_name):
-    properties = dict()
-
-    # Process table data
-    if context.table is not None:
-        for row in __dataset_utils__.prepare_data(context.table):
-            if 'param_name' in row.headings:
-                properties.update({row['param_name']: row['param_value']})
 
     # Get the Glance manager of Master region
     glance_ops = context.glance_manager_list[context.master_region_name]
+
+    # Process table data
+    properties = dict()
+    if context.table is not None:
+        for row in __dataset_utils__.prepare_data(context.table):
+            if 'param_name' in row.headings:
+                real_value = get_real_value_of_image_property(glance_ops, row['param_value'])
+                value = real_value if real_value is not None else row['param_value']
+                properties.update({row['param_name']: value})
+
     glance_ops.update_image_properties_by_name(image_name, custom_properties=properties)
 
 

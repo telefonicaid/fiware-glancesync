@@ -42,7 +42,7 @@ __dataset_utils__ = DatasetUtils()
 __logger__ = logging.getLogger("ami_images_steps")
 
 
-@step(u'the AMI image "(?P<image_name>\w*)" is present in all target nodes with the following properties')
+@step(u'the AMI image "(?P<image_name>[\w\.]*)" is present in all target nodes with the following properties')
 def ami_image_is_present_in_all_target_nodes(context, image_name):
     properties = dict()
 
@@ -89,3 +89,5 @@ def warning_message_missing_ami_image(context, type, type_image_name, image_name
                                                                    image_name=image_name)
 
             assert_that(context.glancesync_result, contains_string(message))
+
+

@@ -51,11 +51,27 @@ def image_is_replaced(context, image_name):
             assert_that(context.glancesync_result,
                         contains_string(GLANCESYNC_OUTPUT_IMAGE_REPLACING.format(region_name=region,
                                                                                  image_name=image_name)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+                        "Image '{}' is not 'replacing' to region '{}'".format(image_name, region))
 
             assert_that(context.glancesync_result,
                         contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
                         "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+
+
+@step(u'the image "(?P<image_name>\w*)" is not replaced')
+def image_is_not_replaced(context, image_name):
+
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            assert_that(context.glancesync_result,
+                        is_not(
+                            contains_string(GLANCESYNC_OUTPUT_IMAGE_REPLACING.format(region_name=region,
+                                                                                     image_name=image_name))),
+                        "Image '{}' is 'replacing' another one in region '{}' and it shouldn't".format(image_name,
+                                                                                                       region))
 
 
 @step(u'all images are replaced')
@@ -78,6 +94,22 @@ def image_is_renamed_replaced(context, image_name):
                                                                           image_name=image_name)),
                         "Image '{}' is not 'Renaming and Replacing' another one in region '{}'".format(image_name,
                                                                                                        region))
+
+
+@step(u'the image "(?P<image_name>\w*)" is neither renamed nor replaced')
+def image_is_not_renamed_replaced(context, image_name):
+
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+            assert_that(context.glancesync_result,
+                        is_not(
+                            contains_string(GLANCESYNC_OUTPUT_RENAMING.format(region_name=region,
+                                                                              image_name=image_name))),
+                        "Image '{}' is 'Renaming and Replacing' another one "
+                        "in region '{}', and it shouldn't".format(image_name, region))
 
 
 @step(u'all images are renamed and replaced')
