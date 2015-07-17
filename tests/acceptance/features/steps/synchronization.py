@@ -151,17 +151,18 @@ def __image_is_not_present_in_node(context, region, image_name):
                 "There are images with the name '{}' in '{}', and it sloudn't".format(image_name, region))
 
 
-def __get_real_att_value_image_in_master__(context, value_patter):
+def __get_real_att_value_image_in_master__(context, value_pattern):
     """
     HELPER. This function returns the attribute value of the given image (master node).
-    :param value_patter (string): Att to get from the stored image. For instance: checksum(image_name):
+    :param value_pattern (string): Attribute name to get its value from the stored image.
+        For instance: checksum(image_name):
         - It will return the value of the attribute 'checksum' of the given image 'image_name' (Glance of Master node)
     :return string: Real att value of the image or None, it the given value is not a valid pattern
     """
 
     glance_ops = context.glance_manager_list[context.master_region_name]
-    real_value = get_real_value_of_image_property(glance_ops, value_patter)
-    __logger__.info("Real value for patter '%s': '%s'", value_patter, real_value)
+    real_value = get_real_value_of_image_property(glance_ops, value_pattern)
+    __logger__.info("Real value for pattern '%s': '%s'", value_pattern, real_value)
 
     return real_value
 
