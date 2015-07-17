@@ -138,6 +138,7 @@ def after_scenario(context, scenario):
             context.glance_manager_list[region].remove_all_images_by_name(image_name)
             context.glance_manager_list[region].remove_all_images_by_name(image_name + ".old")
 
+
 def after_all(context):
     """
     HOOK: To be executed after all:

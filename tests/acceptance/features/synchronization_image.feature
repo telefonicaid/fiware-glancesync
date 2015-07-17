@@ -35,7 +35,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
   Scenario: Already synchronized images are not sync again
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images without specifying any condition
-    And   an already synchronized images
+    And   already synchronized images
     When  I sync images
     Then  the image "qatesting01" is not synchronized again
     And   the image "qatesting01" is present in all nodes with the expected data
@@ -47,7 +47,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
           | qatesting01 |
           | qatesting02 |
     And   GlanceSync configured to sync images without specifying any condition
-    And   an already synchronized images
+    And   already synchronized images
     When  I sync images
     Then  no images are synchronized
     And   the image "qatesting01" is not synchronized again
@@ -61,7 +61,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
           | qatesting01 |
           | qatesting02 |
     And   GlanceSync configured to sync images without specifying any condition
-    And   an already synchronized images
+    And   already synchronized images
     And   other new image created in the Glance of master node with name "qatesting03"
     When  I sync images
     Then  the image "qatesting03" is synchronized
@@ -72,7 +72,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
 
   @happy_path
   Scenario: Non-Public images are not synchronized by default
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties
             | param_name      | param_value         |
             | is_public       | False               |
     And   GlanceSync configured to sync images without specifying any condition
@@ -84,7 +84,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
   Scenario: Images with the same name are not sync again by default
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images without specifying any condition
-    And   an already synchronized images
+    And   already synchronized images
     And   other new image created in the Glance of master node with name "qatesting01"
     When  I sync images
     Then  no images are synchronized
@@ -108,7 +108,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
   Scenario: Sync an image with the same name that have changed its content (differente checksum)
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images without specifying any condition
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
     When  I sync images

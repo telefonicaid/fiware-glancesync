@@ -38,3 +38,8 @@ GLANCESYNC_OUTPUT_OWNER = "{region_name}: image {image_name} (UUID {uuid_image})
 GLANCESYNC_OUTPUT_METADATA_UPDATING = "{region_name}: Updating the metadata of image {image_name}"
 GLANCESYNC_OUTPUT_DUPLICATED = "{region_name}: image name {image_name} is duplicated."
 GLANCESYNC_OUTPUT_NOT_ACTIVE = "(.*){region_name}: state of image {image_name} with UUID ([\w-]*)  is not active(.*)"
+GLANCESYNC_OUTPUT_MISSING_KERNEL = "{region_name}: Not found {kernel_image_name} on region. It should be kernel_id " \
+                                   "of image {image_name}"
+GLANCESYNC_OUTPUT_MISSING_RAMDISK = "{region_name}: Not found {ramdisk_image_name} on region. It should be " \
+                                    "ramdisk_id of image {image_name}"
+

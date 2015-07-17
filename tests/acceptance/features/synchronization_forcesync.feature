@@ -8,10 +8,10 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario: Sync an image although it does not comply sync conditions: Non-public images. No checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
@@ -26,16 +26,16 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario: Sync some images although they do not comply sync conditions: Non-public images. No checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    Given a new image created in the Glance of master node with name "qatesting02" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    Given a new image created in the Glance of master node with name "qatesting03" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting03" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value                                        |
             | DEFAULT         | metadata_condition  | 'image.is_public'                                   |
             | DEFAULT         | metadata_set        |                                                     |
@@ -55,10 +55,10 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesyncs property.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
@@ -68,10 +68,10 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Images are not sync when they do not comply sync condition and its ID is not in forcesyncs property.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
@@ -81,11 +81,11 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Sync images although the do not comply sync conditions: Public image with metadata but not metadata_set to sync. No checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
             | att4            | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value                                |
             | DEFAULT         | metadata_condition  | 'image.is_public and "att3" in metadata_set'|
             | DEFAULT         | metadata_set        |                                             |
@@ -99,11 +99,11 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Sync images although the do not comply sync conditions: Public image with metadata and metadata_set. No checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
             | att4            | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value                                |
             | DEFAULT         | metadata_condition  | 'image.is_public and "att3" in metadata_set'|
             | DEFAULT         | metadata_set        | att4                                        |
@@ -119,18 +119,18 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @skip @bug @CLAUDIA-5189
   Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
     When  I sync the image
@@ -140,21 +140,21 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: replace.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
             | DEFAULT         | replace             | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
     When  I sync the image
@@ -163,19 +163,19 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts: rename.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
             | DEFAULT         | rename              | checksum(qatesting01) |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01" and file "qatesting01b"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | forcesyncs          | id(qatesting01)       |
     When  I sync the image
@@ -186,13 +186,13 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario Outline: Sync images although some of them do not comply sync conditions: Public and non-public images. No checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
-    Given a new image created in the Glance of master node with name "qatesting02" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
@@ -216,23 +216,23 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario: Sync images although some of them do not comply sync conditions: Public and non-public images with metadata and checksum conflicts.
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | att1            | att1                |
             | att2            | att2                |
-    Given a new image created in the Glance of master node with name "qatesting02" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting02" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
             | att1            | att1                |
             | att3            | att3                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value                                   |
             | DEFAULT         | metadata_condition  | 'image.is_public'                              |
             | DEFAULT         | metadata_set        | 'att1, att2'                                   |
             | DEFAULT         | forcesyncs          | id(qatesting02)                                |
             | DEFAULT         | replace             | 'checksum(qatesting01), checksum(qatesting02)' |
-    And   an already synchronized images
+    And   already synchronized images
     And   the image "qatesting01" is deleted from the Glance of master node
     And   the image "qatesting02" is deleted from the Glance of master node
     And   other new image created in the Glance of master node with name "qatesting01", file "qatesting01b" and these properties:
@@ -245,11 +245,11 @@ Feature: Image sync between regions using GlanceSync in the same federation with
             | is_public       | False               |
             | att1            | att1_v2             |
             | att3            | att3_v2             |
-    Given a new image created in the Glance of master node with name "qatesting03" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting03" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
             | att1            | att1                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | forcesyncs          | id(qatesting02)       |
     When  I sync the image
