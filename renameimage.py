@@ -36,6 +36,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     glancesync = GlanceSync()
+    glancesync.init_logs()
     if len(sys.argv) > 3:
         regions = sys.argv[3:]
     else:
@@ -50,16 +51,16 @@ if __name__ == '__main__':
             image_to_rename = None
             destination_name_exists = False
             for image in images:
-                if image['Name'] == sys.argv[1]:
+                if image.name == sys.argv[1]:
                     if image_to_rename is not None:
                         print 'Not renamed.'
                         msg = 'Name {0} is not unique in region {1}'
-                        logging.error(msg.format(image['Name'], region))
+                        logging.error(msg.format(image.name, region))
 
                         break
                     else:
                         image_to_rename = image
-                if image['Name'] == sys.argv[2]:
+                if image.name == sys.argv[2]:
                     # No error yet. Perhaps this image has been already renamed
                     destination_name_exists = True
 
@@ -69,7 +70,7 @@ if __name__ == '__main__':
                     msg = 'Destination name {0} already exists in region {1}'
                     logging.error(msg.format(sys.argv[2], region))
                 else:
-                    image_to_rename['Name'] = sys.argv[2]
+                    image_to_rename.name = sys.argv[2]
                     glancesync.update_metadata_image(region, image_to_rename)
                     print 'Renamed'
             else:

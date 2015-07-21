@@ -22,32 +22,27 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+author = 'chema'
 
 import sys
 import os
-import urllib
-import base64
 import logging
-from subprocess import Popen, PIPE
+import csv
+import copy
 
-import glance.client
-from keystoneclient.v2_0.client import Client as KeystoneClient
-
-from glancesyncconfig import GlanceSyncConfig
+from glancesync_config import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
+from glancesync_image import GlanceSyncImage
+import glancesync_ami
+from glancesync_serversfacade import ServersFacade
+from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
+
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
-
-Requirements:
-Glance images directory must be on path /var/lib/glance/images/
-python-keystoneclient and glanceclient must be installed
-
-This module works invoking the glance client through the CLI. Only
-when a functionality is not available directly from the CLI, it invokes
-the python library used by the glance and keystone clients.
 """
+
+logger = logging.getLogger('glancesync')
 
 
 class GlanceSync(object):
@@ -59,29 +54,41 @@ class GlanceSync(object):
     method.
     """
 
-    def __init__(self, glancesyncconfig=None):
+    def __init__(self, config_stream=None):
         """Constructor of the object
-
-        Note:
-        The list of images in the master region, and the list of regions
-        are obtained and cached when this constructor is called.
         """
-
-        if glancesyncconfig is None:
+        self.log = logging.getLogger('glancesync')
+        if config_stream is None:
             glancesyncconfig = GlanceSyncConfig()
+        else:
+            glancesyncconfig = GlanceSyncConfig(stream=config_stream)
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
+        self.images_dir = glancesyncconfig.images_dir
         self.targets = glancesyncconfig.targets
+        count = 0
+        for target in self.targets.values():
+            if 'facade_module' in target:
+                import_code = 'from ' + target['facade_module'] +\
+                              'import ServersFacade as Facade' + str(count)
+                instance_code = 'Facade' + str(count) + '(target)'
+                exec import_code
+                target['facade'] = eval(instance_code)
+            else:
+                if 'GLANCESYNC_USE_MOCK' in os.environ:
+                    target['facade'] = ServersFacadeMock(target)
+                elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
+                    target['facade'] = ServersFacadeMock(target)
+                    target['facade'].init_persistence(
+                        os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
+                else:
+                    target['facade'] = ServersFacade(target)
+
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
-        for target_name in self.targets.keys():
-            target = self.targets[target_name]
-            self.regions_uris.update(_get_regions_uris(
-                self.get_regions(False, target_name), target))
-        _set_environment(self.targets['master'])
-        self.master_region_dict = _get_master_region_dict(
-            GlanceSyncRegion(self.master_region, self.targets),
-            self.regions_uris[self.master_region])
+        master_region = GlanceSyncRegion(self.master_region, self.targets)
+        images = master_region.target['facade'].get_imagelist(master_region)
+        self.master_region_dict = glancesync_ami.get_master_region_dict(images)
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -92,102 +99,192 @@ class GlanceSync(object):
             list
         """
 
-        # get configuration
+        target_obj = self.targets[target]
+        target_obj['target_name'] = target
+        regions = target_obj['facade'].get_regions()
+        regions_filtered = list()
+        if target != 'master':
+            omit_master_region = False
 
-        _set_environment(self.targets[target])
-        p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'],
-                  stdin=None, stdout=PIPE)
+        for region in regions:
+            if omit_master_region and region == self.master_region:
+                continue
+            if region in self.targets[target]['ignore_regions']:
+                continue
+            if target == 'master':
+                regions_filtered.append(region)
+            else:
+                regions_filtered.append(target + ':' + region)
 
-        output_cmd = p.stdout
-        regions_list = list()
-        for line in output_cmd:
-            if line.startswith('| region'):
-                name = line.split('|')[2].strip()
-                if target != 'master':
-                    name = target + ':' + name
+        return regions_filtered
 
-                if omit_master_region and name == self.master_region:
-                    continue
-                regions_list.append(name)
-        p.wait()
-        return regions_list
-
-    def sync_region(self, regionstr):
+    def sync_region(self, regionstr, dry_run=False):
         """sync the specified region with the master region
-        Only the images that check these conditions are synchronized:
-
-        The image is public in master region
-        The image has nid attribute and/or type attribute
-
-        As exeception, images with a UUID included in the forcesync file
-        provided in the constructor are also synchronized.
+        Only the images that check the configured condition are synchronised.
 
         *If the image is not present on the remote region, is copied from the
-        master region, including metadata
-        *If the image is present, but has different sdc_aware, type or nid,
-        these values are synchronized, all the others are untouched.
+        master region, including the metadata subset specified in metadata_set
+        *If the image is present, but has different properties included in
+        metadata_set, these values are updated, the others are untouched.
         *If the image has kernel_id and ramdisk_id, it is checked if the ids
         are from this region. Otherwise, it they are from the master region,
         they are updated with the images with the same name on this region.
 
         It's possible that the image is present in the region, but with
         different content. This situation is detected comparing the checksums.
-        No image content is overrided, unless the file white_checksum.
+        No image content is overrided, unless specified in configuration.
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param dry_run: If true, images are not uploaded nor modified
+        :return: Nothing
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        imagesregion = _getimagelist(
-            regionobj, self.regions_uris[regionobj.region])
-        dictimages = dict((image['Name'], image) for image in imagesregion)
+        facade = regionobj.target['facade']
+        target = regionobj.target
+        only_tenant_images = target['only_tenant_images']
+        target['tenant_id'] = target['facade'].get_tenant_id()
+        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
+        imagesregion = self.get_images_region(regionstr, only_tenant_images)
+        dictimages = regionobj.local_images_filtered(master_images,
+                                                     imagesregion)
+        imagesregion = dictimages.values()
 
-        _sync_update_metada_region(
-            self.master_region_dict, regionobj, imagesregion, dictimages,
-            False)
-        _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, False)
+        # Important: tuples are sorted by image.size, in ascending order. This
+        # is important because:
+        # with AMI images, kernel/ramdisk must be uploaded before the image
+        # that refers them. They are smaller.
+        tuples = regionobj.image_list_to_sync(master_images, imagesregion)
+        totalmbs = 0
+        was_synchronised = True
 
-    def show_sync_region_status(self, regionstr):
-        """print a report about the images pending to sync in this region
+        # First, update metadata
+        for tuple in tuples:
+            if tuple[0] == 'pending_metadata':
+                was_synchronised = False
+                if dry_run:
+                    self.log.info(regionobj.fullname +
+                                  ': Image pending to update the metadata ' +
+                                  tuple[1].name)
+                else:
+                    self.log.info(regionobj.fullname +
+                                  ': Updating the metadata of image ' +
+                                  tuple[1].name)
+                    self.__update_meta(tuple[1], dictimages, regionobj)
 
-        This method is nearly a dry-run of the method sync_region
+        # Then, upload, replace, and rename_n_replace
+        for tuple in tuples:
+            uploaded = False
+            sizeimage = float(tuple[1].size) / 1024 / 1024
+            if tuple[0] == 'pending_upload':
+                uploaded = True
+                if not dry_run:
+                    self.log.info(regionobj.fullname + ': Uploading image ' +
+                                  tuple[1].name + ' (' + str(sizeimage) +
+                                  ' MB)')
+                    self.__upload_image(tuple[1], dictimages, regionobj)
+
+            elif tuple[0] == 'pending_replace':
+                uploaded = True
+                region_image = dictimages[tuple[1].name]
+                if not dry_run:
+                    self.log.info(regionobj.fullname + ': Replacing image ' +
+                                  tuple[1].name + ' (' + str(sizeimage) +
+                                  ' MB)')
+                    self.__upload_image(tuple[1], dictimages, regionobj)
+                    facade.delete_image(regionobj, region_image.id,
+                                        confirm=False)
+            elif tuple[0] == 'pending_rename_n_replace':
+                uploaded = True
+                region_image = dictimages[tuple[1].name]
+                if not dry_run:
+                    self.log.info(
+                        regionobj.fullname + ': Renaming and replacing image '
+                        + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+                    self.__upload_image(tuple[1], dictimages, regionobj)
+                    region_image.name += '.old'
+                    region_image.is_public = False
+                    facade.update_metadata(regionobj, region_image)
+
+            if uploaded:
+                was_synchronised = False
+                totalmbs += sizeimage
+                if dry_run:
+                    self.log.info(regionobj.fullname + ': Pending: ' +
+                                  tuple[1].name + ' (' + str(sizeimage) +
+                                  ' MB)')
+                else:
+                    self.log.info(regionobj.fullname + ': Image uploaded.')
+
+        # Finally, update pending AMI ids
+        for tuple in tuples:
+            if tuple[0] == 'pending_ami':
+                self.__update_meta(tuple[1], dictimages, regionobj)
+
+        if was_synchronised:
+            self.log.info(regionobj.fullname + ': Region is synchronized.')
+        else:
+            if dry_run:
+                self.log.info(regionobj.fullname + ': MBs pending : ' +
+                              str(int(totalmbs)))
+            else:
+                self.log.info(regionobj.fullname + 'Total uploaded to region '
+                              + regionobj.region +
+                              ': ' + str(int(totalmbs)) + ' (MB) ')
+
+    def export_sync_region_status(self, regionstr, stream):
+        """export a csv report about the images pending to sync in this region
+        The report follow this pattern:
+
+        <regionname>,<status>,<imagename>
+
+        Status can be:
+        *ok: the image is synchronised
+        *ok_stalled_checksum: the image is different (has other checksum) than
+        the master image, but users specifically has asked don't update this
+        image.
+        *pending_upload: the image is not synchronised
+        *pending_metadata: the image is uploaded, but some metadata must be
+        updated.
+        *pending_replace: the image must be replaced, because the checksum is
+        different.
+        *pending_rename_n_replace: the image must be replaced, but before this
+        the old image will be renamed.
+        *pending_ami: the image has kernel_id or ramdisk_id and this value is
+        pending because the image has not been uploaded yet.
+        *error_ami: the image references a kernel_id o ramdisk_id that is not
+        included in the set of images to synchronise
+        *error_checksum: the image has different checksum than master and
+        there is no information about what to do (dontupdate, replace, rename)
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param stream: Stream object (e.g. a file) where the data is written
+        :return: Nothing
         """
-
         regionobj = GlanceSyncRegion(regionstr, self.targets)
         target = regionobj.target
-        regionn = regionobj.region
-        imagesregion = _getimagelist(regionobj, self.regions_uris[regionn])
-        dictimages = dict((image['Name'], image) for image in imagesregion)
-
-        _sync_update_metada_region(
-            self.master_region_dict, regionobj, imagesregion, dictimages, True)
-        _sync_upload_missing_images(
-            self.master_region_dict, regionobj, dictimages, True)
-
-    def print_images_master_region(self):
-        """print the set of images in master region to be synchronized"""
-
-        _printimages(self.master_region_dict.values())
-
-    def print_images(self, regionstr):
-        """print a report about the images present on the specified region
-
-        This method is NOT intended to check the synchronization status
-        (for this is better show_sync_region_status) but to detect anomalies
-        as images present in some regions that are not in master region.
-
-        The images may be prefixed with a symbol indicating something special:
-        +: this image is not on the master glance server
-        $: this image is not active: may be still uploading or in an error
-           status.
-        -: this image is on the master glance server, but as non-public
-        !: this image is on the master glance server, but checksum is different
-        #: this image is on the master glance server, but some of these
-           attributes are different: nid, type, sdc_aware, Public (if it is
-           true on master and is false in the region
-        """
-
-        images_region = self.get_images_region(regionstr)
-        _printimages(images_region, self.master_region_dict)
+        target['tenant_id'] = target['facade'].get_tenant_id()
+        imagesregion = self.get_images_region(regionstr)
+        path = 'syncstatus_' + regionobj.fullname + '.csv'
+        try:
+            tuples = regionobj.image_list_to_sync(self.master_region_dict,
+                                                  imagesregion)
+            tuples.sort(key=lambda tuple: int(tuple[1].size))
+            writer = csv.writer(stream)
+            for tuple in tuples:
+                (status, image) = tuple
+                l = list()
+                l.append(status)
+                l.append(regionobj.fullname)
+                l.append(image.name)
+                writer.writerow(l)
+        except Exception, e:
+                msg = '{0}: Error retrieving images from region. Cause {1}'
+                msg = msg.format(regionstr, str(e))
+                self.log.error(msg)
+                raise Exception(msg)
 
     def update_metadata_image(self, regionstr, image):
         """update the metadata of the image in the specified region
@@ -195,30 +292,38 @@ class GlanceSync(object):
         This method takes all the metadata information included in the image
         and overrides the values of the image with the same name in the region.
 
-        Be careful if you use this method directly instead of using
-        sync_region!!!
+        Important: the synchronisation algorithm filters the metadata using
+        metadata_set, but this method DOES NOT.
 
-        sync_region doesn't overwrite all the medatada with the values of
-        master region: it overwrites only type, sdc_aware, nid and public and
-        also updates, if it is presented, kernel_id and ramdisk_id with the
-        UUIDs of the region.
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param image: GlanceSyncImage to update on the regional glance server.
+        :return: Nothing
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        _update_metadata_remote(regionobj, image)
+        facade = regionobj.target['facade']
+        facade.update_metadata(regionobj, image)
 
     def delete_image(self, regionstr, uuid, confirm=True):
         """delete a image on the specified region.
 
         Be careful, this action cannot be reverted and for this reason by
         default requires confirmation!
+
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param uuid: the UUID of the image to delete
+        :param confirm: True to ask for confirmation
+        :return: true if image is deleted, false if canceled
         """
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        _delete_image(regionobj, uuid, confirm)
+        facade = regionobj.target['facade']
+        return facade.delete_image(regionobj, uuid, confirm)
 
     def backup_glancemetadata_region(self, regionstr, path=None):
         """generate a backup of the metadata on the regional glance server
 
-        Of course, this metadata doesn't save metadata of other tenants!!
+        Of course, only data from the tenant and public images are saved!!
 
         :param regionstr: The region whose metadata is preserved in a backup
         :param path: Directory when the file is created (the file it is
@@ -227,631 +332,107 @@ class GlanceSync(object):
         """
 
         regionobj = GlanceSyncRegion(regionstr, self.targets)
-        # (target, region) = _targetedregion2target_region(
-        #    region, self.targets)
-        target = regionobj.target
-        region = regionobj.region
-        _set_environment(target, region)
         if path is None:
-            path = 'backup_' + region + '.txt'
+            path = 'backup_' + regionobj.fullname + '.csv'
         else:
-            path = os.path.join(path, 'backup_' + region + '.txt')
-        fich = open(path, 'w')
+            path = os.path.join(path, 'backup_' + regionobj.fullname + '.csv')
+        # Backup using csv
         try:
-            msg = 'Backup of region ' + region
-            logging.info(msg)
-            p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
-                      stdin=None, stdout=fich)
-            code = p.wait()
-            fich.close()
-        except Exception:
-            msg = 'Failed backup of ' + region + ' caused by '
-            logging.error(msg)
+            images = regionobj.target['facade'].get_imagelist(regionobj)
+            with open(path, 'w') as csvfile:
+                writer = csv.writer(csvfile)
+                for image in images:
+                    writer.writerow(image.to_field_list())
+        except Exception, e:
+            msg = '{0}:Error retrieving images from region. Cause {1}'
+            msg = msg.format(regionstr, str(e))
+            self.log.error(msg)
             raise Exception(msg)
-        else:
-            if code != 0:
-                msg = 'Failed backup of ' + region + \
-                      ' glance details returned a non-zero code'
-                logging.error(msg)
-                raise Exception(msg)
 
-    def get_images_region(self, regionstr):
-        """It returns a map with all the tenant's images in that region
+        msg = 'Backup of region ' + regionstr
+        self.log.info(msg)
 
-        This is a dictionary indexed by the name of the image. Each entry
-        is a new dictionary, with the metadata.
+    def get_images_region(self, regionstr, only_tenant_images=False):
+        """It returns a list with all the tenant's images in that region
 
-        This method provides the same information than glance details, with
-        some changes:
-
-        User defined metadata is prefixed with _ (e.g. _nid, _type...)
-        A checksum field is added.
+        :param regionstr: A region specified as 'target:region'. The prefix
+         'master:' may be omitted.
+        :param only_tenant_images: If true, only include the images owned by
+        the tenant or without owner.
+        :return: a list of GlanceSyncImage objects
         """
+
         region = GlanceSyncRegion(regionstr, self.targets)
-        return _getimagelist(region, self.regions_uris[region.region])
-
-
-def _update_metadata_remote(regionobj, image):
-    """ update the metadata of the image in the specified region
-    See GlanceSync.update_metadata_image for more details.
-
-    :param regionobj: region where it is the image to update
-    :param image: the image with the metadata to update
-    :return: this function doesn't return anything.
-    """
-
-    # get as a list all the properties (all of them start with _)
-    props = list(x[1:] + '=' + image[x] for x in image if x.startswith('_'))
-    # compose cmd line
-    arguments = [
-        'glance', 'update', image['Id'], 'disk_format=' + image[
-            'Disk format'], 'name=' + image['Name'], 'is_public=' + image[
-            'Public'], 'protected=' + image['Protected'], 'container_format=' +
-        image['Container format']]
-    arguments.extend(props)
-    # set credential
-    _set_environment(regionobj.target, regionobj.region)
-    # update
-    p = Popen(arguments, stdin=None, stdout=None, stderr=None)
-    p.wait()
-    if p.returncode != 0:
-        msg = 'update of ' + image['Name'] + 'failed'
-        logging(msg)
-        raise Exception(msg)
-
-
-def _delete_image(regionobj, uuid, confirm):
-    """delete a image on the specified region.
-
-    Be careful, this action cannot be reverted and for this reason by
-    default requires confirmation!
-    """
-
-    _set_environment(regionobj.target, regionobj.region)
-    if confirm:
-            p = Popen(['/usr/bin/glance', 'delete', uuid], stdin=None,
-                      stdout=None)
-    else:
-            p = Popen(['/usr/bin/glance', 'delete', uuid, '-f'], stdin=None,
-                      stdout=None)
-
-    p.wait()
-
-
-def _upload_image_remote(regionobj, image, replace_uuid=None,
-                         rename_uuid=None):
-    """Upload the image to the specified region.
-
-    Usually, this call is invoked by sync_region()
-    Be careful! if the image has kernel_id / ramdisk_id properties, it must be
-    updated with the ids of this region
-
-    :param regionobj: the region where the image is uploaded
-    :param image: the image to upload
-    :param replace_uuid: if it is not None, this image must be deleted
-    :param rename_uuid: if it is not None, this image must be renamed
-    :return: the UUID of the new image.
-    """
-    # set credential
-    _set_environment(regionobj.target, regionobj.region)
-    # if replace_uuid, first upload with other name and without nid
-    # nor type
-    if replace_uuid or rename_uuid:
-        saved_type = image.get('_type', None)
-        if saved_type:
-            del(image['_type'])
-
-        saved_nid = image.get('_nid', None)
-        if saved_nid:
-            del(image['_nid'])
-
-        saved_name = image['Name']
-        image['Name'] += '_tmp'
-        image['Public'] = 'No'
-
-    # get as a list all the properties (all of them start with _)
-    props = list(x[1:] + '=' + image[x] for x in image if x.startswith('_'))
-    # compose cmdline
-    arguments = ['glance', 'add', '--silent-upload', 'disk_format=' + image[
-        'Disk format'], 'name=' + image['Name'], 'is_public=' +
-        image['Public'], 'protected=' + image['Protected'],
-        'container_format=' + image['Container format']]
-    arguments.extend(props)
-    # run command
-    fich = open('/var/lib/glance/images/' + image['Id'], 'r')
-    p = Popen(arguments, stdin=fich, stdout=PIPE, stderr=None)
-    fich.close()
-    outputcmd = p.stdout
-    result = outputcmd.read()
-    p.wait()
-    if p.returncode != 0:
-        msg = 'Upload of ' + image['Name'] + " to region " +\
-              regionobj.region + ' Failed: ' + result
-        logging.error(msg)
-        raise Exception(msg)
-
-    newuuid = result.split(':')[1].strip()
-    if rename_uuid or replace_uuid:
-        newimage = dict(image)
-        newimage['Id'] = newuuid
-        if saved_nid:
-            newimage['_nid'] = saved_nid
-
-        if saved_type:
-            newimage['_type'] = saved_type
-
-        newimage['Name'] = saved_name
-        newimage['Public'] = 'Yes'
-        _update_metadata_remote(regionobj, newimage)
-        if replace_uuid:
-            _delete_image(regionobj, replace_uuid, confirm=False)
-        elif rename_uuid:
-            # locate old image
-            l = _getimagelist(regionobj)
-            oldimage = None
-            for i in l:
-                if i['Id'] == rename_uuid:
-                    oldimage = i
-                    if saved_nid:
-                        oldimage['_nid.bak'] = saved_nid
-                        del(oldimage['_nid'])
-
-                    oldimage['Name'] = saved_name + '.old'
-                    _update_metadata_remote(regionobj, oldimage)
-    return newuuid
-
-
-def _getimagelist(regionobj, region_uri):
-    """return a image list from the glance of the specified region
-
-     Each imagen is a dictionary indexed by name. Extra properties are
-     coded as _<name> the other labels are the returned by glance details.
-     List is completed with checksum. Only the images owned by the tenant
-     are included.
-    """
-
-    _set_environment(regionobj.target, regionobj.region)
-    images = list()
-    image = None
-    p = Popen(['/usr/bin/glance', 'details', '--limit=100000'],
-              stdin=None, stdout=PIPE)
-    outputcmd = p.stdout
-    # Read first a line; detect if there is an error
-    line = outputcmd.readline()
-    if line[0] != '=':
-        msg = 'Error retrieving image list. Cause: ' + line
-        for line in outputcmd:
-            msg += line
-        logging.error(msg)
-        raise Exception(msg)
-
-    checksums = _get_checksums(regionobj, region_uri)
-    image = dict()
-    for line in outputcmd:
-        if line[0] == '=':
-            if image is not None and image['Name'] != 'None':
-                image['checksum'] = checksums[image['Name']]
-                images.append(image)
-            image = dict()
+        facade = region.target['facade']
+        region.target['tenant_id'] = facade.get_tenant_id()
+        if only_tenant_images:
+            return list(
+                image for image in facade.get_imagelist(region) if
+                not image.owner or image.owner.zfill(32) ==
+                region.target['tenant_id'].zfill(32) or image.owner == '')
         else:
-            (key, value) = line.split(':', 1)
-            if key.startswith('Property \''):
-                key = '_' + key[10:-1]
-                if key == '_nic':
-                    continue
-            image[key] = value.strip()
-    return images
+            return facade.get_imagelist(region)
 
+    def init_logs(self, include_date=False):
+        """
+        Init the glancesync logger. This function is invoked by the frontends
+        tools to avoid the warning about missing Handlers in logger:
+           No handlers could be found for logger "glancesync"
 
-def _convert2csv(image, fields, allmandatory=False):
-    """Extract the fields of the image as a CSV
+        Another reason is because the front-end shows as progress the INFO
+        messages, and showing the INFO messages of other components may be
+        to verbose.
 
-    Only the fields specified in fields list are listed
-    If allmandatory is True, it returns None if some of the
-    fields are missing.
-    """
+        This class do not register a handler by default because in a library
+        typically this is a decision of the caller. Use this function at your
+        own convenience.
 
-    sub = list()
-    for field in fields:
-        if field in image:
-            sub.append(image[field])
-        else:
-            if allmandatory:
-                return None
-            sub.append('')
-    return ','.join(sub)
+        :param include_date: If true, include date in the logs
+        :return:
+        """
 
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter('%(levelname)s:%(message)s'))
+        logger = logging.getLogger('glancesync')
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+        logger.propagate = 0
 
-def _prefix(image, comparewith):
-    """It returns a character identifying the image synchronization status
+    def __upload_image(self, master_image, images_dict, regionobj):
+        new_image = copy.deepcopy(master_image)
+        # update kernel_id & ramdisk_id if necessary.
+        glancesync_ami.update_kernelramdisk_id(
+            new_image, master_image, images_dict)
+        # filter properties to upload
+        metadata_set = regionobj.target['metadata_set']
+        properties = list(new_image.user_properties.keys())
+        for p in properties:
+            if p not in metadata_set:
+                del new_image.user_properties[p]
 
-       It returns an empty string when the image is synchronized. In other way:
-       +: this image is not on the master glance server
-       $: this image is not active: may be still uploading or in an error
-           status.
-       -: this image is on the master glance server, but as non-public
-       !: this image is on the master glance server, but checksum is different
-       #: this image is on the master glance server, but some of these
-          attributes are different: nid, type, sdc_aware, Public (if it is
-          true on master and is false in the region
-    """
+        # upload
+        uuid = regionobj.target['facade'].upload_image(
+            regionobj, new_image)
 
-    name = image['Name']
-    if name not in comparewith:
-        return '+'
+        # update images_dict with the new image (needed for pending_ami images)
+        images_dict[new_image.name] = GlanceSyncImage(
+            new_image.name, uuid, regionobj.fullname)
 
-    if image['Status'] != 'active':
-        return '$'
-
-    image_master_region = comparewith[name]
-    if image_master_region['checksum'] != image['checksum']:
-        return '!'
-
-    if image_master_region.get('Public', None) != image.get('Public', None):
-        if image_master_region.get('Public', None) == 'No':
-            return '-'
-        else:
-            return '#'
-
-    if image_master_region.get('_nid', None) != image.get('_nid', None):
-        return '#'
-
-    if image_master_region.get('_type', None) != image.get('_type', None):
-        return '#'
-
-    if image_master_region.get('_sdc_aware', None) != image.get(
-            '_sdc_aware', None):
-        return '#'
-
-    return ''
-
-
-def _printimages(imagesregion, comparewith=None):
-    """ print a report about the images present on the specified region
-
-    See the documentation of GlanceSync.printimages for more details
-
-    :param imagesregion: the region of print
-    :param comparewith: the master region dictionary, used to compute the
-              image synchronization status.
-    :return: this function doesn't return anything.
-    """
-
-    images = list(
-        image for image in imagesregion if image['Public'] == 'Yes' and
-        ('_nid' in image and '_type' in image))
-    images.sort(key=lambda image: image['_type'] + image['Name'])
-    for image in images:
-        line = _convert2csv(image, ('Name', '_type', '_nid'))
-        if line is not None:
-            if comparewith is not None:
-                print _prefix(image, comparewith) + line
-            else:
-                print line
-    print "---"
-    images = list(
-        image for image in imagesregion if image['Public'] == 'Yes' and
-        ('_nid' not in image and '_type' in image))
-    images.sort(key=lambda image: image['_type'] + image['Name'])
-    for image in images:
-        line = _convert2csv(image, ('Name', '_type', '_nid'))
-        if line is not None:
-            if comparewith is not None:
-                print _prefix(image, comparewith) + line
-            else:
-                print line
-    print "---"
-    images = list(
-        image for image in imagesregion if image['Public'] == 'Yes' and
-        ('_nid' in image and '_type' not in image))
-    images.sort(key=lambda image: int(image['_nid']))
-    for image in images:
-        line = _convert2csv(image, ('Name', '_type', '_nid'))
-        if line is not None:
-            if comparewith is not None:
-                print _prefix(image, comparewith) + line
-            else:
-                print line
-
-
-def _sync_upload_missing_images(
-        master_region_dictimages, regionobj, dictimages, onlyshow=False):
-    """ upload images of master region to the region if they are not already
-    present.
-
-    only upload when both these two conditions are met:
-     * image is public
-     * image has the property type and/or the property nid
-     as an exception, also sync images in forcesync tuple
-
-    :param master_region_dictimages: a dictionary with the images on master
-     region
-    :param regionobj: the region
-    :param dictimages: a dictionary with the images on the region
-    :return: total mbs uploaded (or to be uploaded, if onlyshow it is True)
-
-    """
-    totalmbs = 0
-
-    # a set with UUIDs of images to synchronize even if they don't match all
-    # the conditions.
-    target = regionobj.target
-    forcesync = target['forcesyncs']
-
-    # There are two reason to upload first the smaller images:
-    #   *kernel and ramdisk must be updload before AMI images to insert the
-    #    UUID
-    #   *if there is a problem (e.g. server is full) the error appears before.
-    imgs = master_region_dictimages.values()
-    imgs.sort(key=lambda image: int(image['Size']))
-    for image in imgs:
-        image_name = image['Name']
-        uuid2replace = None
-        uuid2rename = ''
-        if image['Public'] == 'No' and not image['Id'] in forcesync:
-            continue
-
-        if image_name in dictimages:
-            checksum = dictimages[image_name]['checksum']
-            if image['checksum'] == checksum:
-                continue
-
-            if checksum in target['dontupdate']:
-                continue
-
-            if checksum in target['replace']:
-                uuid2replace = dictimages[image_name]['Id']
-            elif checksum in target['rename'] or 'any' in\
-                    target['rename']:
-                uuid2rename = dictimages[image_name]['Id']
-            elif 'any' in target['replace']:
-                uuid2replace = dictimages[image_name]['Id']
-            else:
-                continue
-        if '_type' not in image and '_nid' not in image and image[
-                'Id'] not in forcesync:
-            continue
-
-        sizeimage = int(image['Size']) / 1024 / 1024
-        totalmbs = totalmbs + sizeimage
-        if not onlyshow:
-            print 'Uploading image ' + image_name + ' (' +\
-                str(sizeimage) + ' MB)'
-            sys.stdout.flush()
-            # Check kernel_id and ramdisk_id if present
-            if '_kernel_id' in image:
-                kernel_id = image['_kernel_id']
-                ramdisk_id = image['_ramdisk_id']
-                kernel_name = master_region_dictimages[image_name][
-                    '_kernel_id']
-                ramdisk = master_region_dictimages[image_name]['_ramdisk_id']
-                if kernel_name not in dictimages:
-                    msg = 'image ' + kernel_name +\
-                        ' missing: is the kernel of ' + image_name
-                    logging.warning(msg)
+    def __update_meta(self, master_image, images_dict, regionobj):
+        image = images_dict[master_image.name]
+        glancesync_ami.update_kernelramdisk_id(
+            image, master_image, images_dict)
+        metadata_set = regionobj.target['metadata_set']
+        if metadata_set:
+            for prop in metadata_set:
+                if prop in master_image.user_properties:
+                    # This values are already updated
+                    if prop == 'kernel_id' or prop == 'ramdisk_id':
+                        continue
+                    image.user_properties[prop] = \
+                        master_image.user_properties[prop]
                 else:
-                    image['_kernel_id'] = dictimages[kernel_name]['Id']
-                if ramdisk not in dictimages:
-                    msg = 'image ' + ramdisk +\
-                        ' missing: is the ramdisk of ' + image_name
-                    logging.warning(msg)
-                else:
-                    image['_ramdisk_id'] = dictimages[ramdisk]['Id']
-            uuid = _upload_image_remote(regionobj, image, uuid2replace,
-                                        uuid2rename)
-            # we keep the UUID because if could be a kernel_id or ramdisk_id
-            newimage = dict()
-            newimage['Id'] = uuid
-            newimage['Name'] = image_name
-            dictimages[image_name] = newimage
-
-            print 'Done.'
-            sys.stdout.flush()
-        else:
-            print 'Pending: ' + image_name + ' (' + str(sizeimage) + ' MB)'
-    if totalmbs == 0:
-        print 'Region is synchronized.'
-    else:
-        if onlyshow:
-            print 'MBs pending : ' + str(totalmbs)
-        else:
-            print 'Total uploaded to region ' + regionobj.region + ': ' +\
-                  str(totalmbs) + ' (MB) '
-    sys.stdout.flush()
-    return totalmbs
-
-
-def _sync_update_metada_region(
-        master_region_dictimages, regionobj, imagesregion, dictimages,
-        onlyshow=False):
-    """This method synchronizes the metadata of the images that are both in
-    master region and in the specified region, but with different metadata.
-
-    :param master_region_dictimages: a dictionary with the images on master
-     region
-    :param regionobj: the region object
-    :param imagesregion: a list with the images in the region
-    :param dictimages: a dictionary with the images in the region
-    :param onlyshow: If it is True, don't synchronize: this is dry-run mode.
-    :returns Nothing.
-    """
-
-    dictimagesbyid = dict((image['Id'], image) for image in imagesregion)
-    regionimageset = set()
-    noactive = list()
-    for image in imagesregion:
-        p = _prefix(image, master_region_dictimages)
-        image_name = image['Name']
-        ids_need_update = False
-        # Check kernel_id and ramdisk_id if present
-        if '_kernel_id' in image and image_name in master_region_dictimages:
-            kernel_id = image['_kernel_id']
-            ramdisk_id = image['_ramdisk_id']
-            kernel_name = None
-            ramdisk_name = None
-            if kernel_id in dictimagesbyid:
-                kernel_name = dictimagesbyid[kernel_id]['Name']
-
-            if ramdisk_id in dictimagesbyid:
-                ramdisk_name = dictimagesbyid[ramdisk_id]['Name']
-
-            if kernel_name is None:
-                kernel_name_sp = master_region_dictimages[image_name][
-                    '_kernel_id']
-                if kernel_name_sp not in dictimages:
-                    msg = 'image ' + kernel_name_sp +\
-                          ' missing: is the kernel of ' + image_name
-                    logging.warning(msg)
-                else:
-                    image['_kernel_id'] = dictimages[kernel_name_sp]['Id']
-                    ids_need_update = True
-
-            if ramdisk_name is None:
-                ramdisk_name_sp = master_region_dictimages[
-                    image_name]['_ramdisk_id']
-                if ramdisk_name_sp not in dictimages:
-                    msg = 'image ' + ramdisk_name_sp +\
-                        ' missing: is the ramdisk of ' + image_name
-                    logging.warning(msg)
-                else:
-                    image['_ramdisk_id'] = dictimages[ramdisk_name_sp]['Id']
-                    ids_need_update = True
-
-        if p == '#' or ids_need_update:
-            image_mast_reg = master_region_dictimages[image_name]
-            if '_type' in image_mast_reg:
-                image['_type'] = image_mast_reg['_type']
-
-            if '_nid' in image_mast_reg:
-                image['_nid'] = image_mast_reg['_nid']
-
-            if '_sdc_aware' in image_mast_reg:
-                image['_sdc_aware'] = image_mast_reg['_sdc_aware']
-
-            image['Public'] = image_mast_reg['Public']
-            if not onlyshow:
-                _update_metadata_remote(regionobj, image)
-            else:
-                print 'Image penging to update the metadata ' + image_name
-
-        if p == '$':
-            msg = 'state of image ' + image_name + ' is not active: '\
-                  + image['Status']
-            logging.warning(msg)
-
-        if p == '!':
-            if image_name is None:
-                image_name = 'None'
-
-            c = image['checksum']
-            if not isinstance(c, unicode):
-                c = 'None'
-
-            image_mast_reg = master_region_dictimages[image_name]
-            if image_mast_reg.get('_sdc_aware', None) != image.get(
-                    '_sdc_aware', None):
-                msg = 'image ' + image_name + \
-                    ' has different checksum: ' + c + \
-                    ' and different value of sdc_aware '
-                logging.warning(msg)
-            else:
-                msg = 'image ' + image_name +\
-                    ' has different checksum: ' + c
-                logging.warning(msg)
-
-        if image_name in regionimageset:
-            msg = 'the image name ' + image_name +\
-                ' is duplicated '
-            logging.warning(msg)
-
-        regionimageset.add(image_name)
-
-
-def _get_regions_uris(region_list, credential):
-    """Get a dictionary with the URIs of the glance server in each region.
-
-    :param region_list: a list or regions
-    :param credential: the credential to contact with the keystone server
-    :return: a dictionary or URIs indexed by region name.
-    """
-
-    regions_uris = dict()
-    kc = KeystoneClient(
-        username=credential['user'], password=credential['password'],
-        tenant_name=credential['tenant'],
-        auth_url=credential['keystone_url'])
-    for region in region_list:
-        parts = region.split(':')
-        if len(parts) == 2:
-            region_without_target = parts[1]
-        else:
-            region_without_target = region
-        regions_uris[region] = kc.service_catalog.url_for(
-            'region', region_without_target, 'image')
-    return regions_uris
-
-
-def _get_checksums(regionobj, region_uri):
-    """Provide a dictionary with the checksums of each image in the region.
-
-    Only the images owned by the tenant are considered.
-
-    :param regionobj: the region where the images are
-    :param region_uri: the URL of the glance server
-    :return: a dictionary with checkums, indexed by image name.
-    """
-    _set_environment(regionobj.target, regionobj.region)
-    host = urllib.splithost(urllib.splittype(region_uri)[1])[0]
-    (host, port) = urllib.splitport(host)
-
-    images = glance.client.get_client(
-        host=host, port=port, region=regionobj.region).get_images(limit=5000)
-    checksum_region = dict()
-    for image in images:
-        checksum_region[image['name']] = image['checksum']
-    return checksum_region
-
-
-def _get_master_region_dict(master_region_obj, master_region_uri):
-    """Gets a dictionary with the information of the images in the master
-    region.
-
-    Only the images owned by the tenant are included.
-    :param master_region: the region name
-    :param master_region_uri: the URL of the glance server
-    :return: a dictionary indexed by
-    """
-
-    images = _getimagelist(master_region_obj, master_region_uri)
-    master_region_dictimagesbyid = dict((image['Id'], image) for image in
-                                        images)
-    master_region_dictimages = dict()
-    for image in images:
-        if '_kernel_id' in image:
-            image['_kernel_id'] = master_region_dictimagesbyid[image[
-                '_kernel_id']]['Name']
-
-        if '_ramdisk_id' in image:
-            image['_ramdisk_id'] = master_region_dictimagesbyid[image[
-                '_ramdisk_id']]['Name']
-
-        master_region_dictimages[image['Name']] = image
-    return master_region_dictimages
-
-
-def _set_environment(target, region=None):
-    """Set the environment with the credential provided.
-
-    CLI tools use environment variables to read the credential.
-
-    :param target: a dictionary with the credential
-    :param region: the region to set on OS_REGION_NAME
-    :return: this method doesn't return anything.
-    """
-
-    os.environ['OS_USERNAME'] = target['user']
-    os.environ['OS_PASSWORD'] = target['password']
-    os.environ['OS_AUTH_URL'] = target['keystone_url']
-    os.environ['OS_TENANT_NAME'] = target['tenant']
-    if region is not None:
-        os.environ['OS_REGION_NAME'] = region
+                    if prop in image.user_properties:
+                        del image.user_properties[prop]
+        image.is_public = master_image.is_public
+        regionobj.target['facade'].update_metadata(regionobj, image)
