@@ -42,9 +42,6 @@ from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
 the master region.
 """
 
-logger = logging.getLogger('glancesync')
-
-
 class GlanceSync(object):
     """Class to synchronize glance servers in different regions taking the base
      of the master region.
@@ -229,9 +226,9 @@ class GlanceSync(object):
                 self.log.info(regionobj.fullname + ': MBs pending : ' +
                               str(int(totalmbs)))
             else:
-                self.log.info(regionobj.fullname + 'Total uploaded to region '
-                              + regionobj.region +
-                              ': ' + str(int(totalmbs)) + ' (MB) ')
+                self.log.info(regionobj.fullname +
+                              ':   Total uploaded to region: ' +
+                              str(int(totalmbs)) + ' (MB) ')
 
     def export_sync_region_status(self, regionstr, stream):
         """export a csv report about the images pending to sync in this region
