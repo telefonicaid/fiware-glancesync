@@ -43,8 +43,8 @@ using a real server.
 Don't activate this test unless you know what are you doing"""
 
 testingFacadeReal = False
-region = 'regionOne'
-
+if 'TESTING_FACADE' in env:
+    testingFacadeReal = True
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
@@ -55,7 +55,12 @@ class TestGlanceServersFacade(unittest.TestCase):
         target['password'] = env['OS_PASSWORD']
         target['keystone_url'] = env['OS_AUTH_URL']
         target['tenant'] = env['OS_TENANT_NAME']
-        self.region = target['region'] = region
+        if 'OS_REGION_NAME' in env:
+            target['region'] = env['OS_REGION_NAME']
+        else:
+            target['region'] = 'regionOne'
+
+        self.region = target['region']
         targets = dict()
         targets['master'] = target
         self.region_obj = GlanceSyncRegion(self.region, targets)
