@@ -54,6 +54,8 @@ when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
 
+# Timeout to get image list
+timeout = 30
 
 class ServersFacade(object):
     def __init__(self, target):
@@ -176,7 +178,7 @@ def _getimagelist(regionobj):
         endpoint = auth.get_endpoint(
             session, 'image', region_name=regionobj.region)
         glance_client = GlanceClient('1', endpoint=endpoint, token=token)
-        glance_client.images.client.timeout = 10
+        glance_client.images.client.timeout = timeout
         # images = glance_client.images.list()
         pool = Pool()
         result = pool.apply_async(_getrawimagelist, (glance_client,))
