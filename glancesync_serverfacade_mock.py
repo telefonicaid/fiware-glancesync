@@ -105,6 +105,7 @@ class ServersFacade(object):
         updatedimage.user_properties = dict(image.user_properties)
         if ServersFacade.use_persistence:
             images[image.id] = updatedimage
+            images.sync()
 
     def upload_image(self, regionobj, image):
         """Upload the image to the glance server on the specified region.
@@ -128,6 +129,9 @@ class ServersFacade(object):
             dict(image.user_properties))
 
         ServersFacade.images[regionobj.fullname][imageid] = new_image
+        if ServersFacade.use_persistence:
+            ServersFacade.images[regionobj.fullname].sync()
+
         return imageid
 
     def delete_image(self, regionobj, id, confirm=True):
@@ -147,6 +151,9 @@ class ServersFacade(object):
         if id not in images:
             return False
         del images[id]
+
+        if ServersFacade.use_persistence:
+            ServersFacade.images[regionobj.fullname].sync()
         return True
 
     def get_tenant_id(self):
@@ -203,6 +210,8 @@ class ServersFacade(object):
             else:
                 ServersFacade.images[image.region] = dict()
         ServersFacade.images[image.region][image.id] = image
+        if ServersFacade.use_persistence:
+            ServersFacade.images[image.region].sync()
 
     @staticmethod
     def add_emptyregion_to_mock(region):
@@ -244,7 +253,8 @@ class ServersFacade(object):
                 for row in csv.reader(f):
                     image = GlanceSyncImage.from_field_list(row)
                     ServersFacade.images[region_name][image.id] = image
-
+            if ServersFacade.use_persistence:
+                ServersFacade.images[region_name].sync()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
