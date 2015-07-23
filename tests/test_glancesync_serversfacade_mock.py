@@ -149,7 +149,7 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
     def test_add_images_from_csv_to_mock(self):
         """test method add_images_from_cvs_to_mock. Check regions and images
         present"""
-        ServersFacade.add_images_from_csv_to_mock('test_data/basictest/')
+        ServersFacade.add_images_from_csv_to_mock('resources/basictest/')
         region = GlanceSyncRegion('other:Santander', self.targets)
         self.assertIn('Santander', self.mock_other.get_regions())
         images = self.mock_other.get_imagelist(region)
