@@ -30,7 +30,7 @@ from commons.constants import *
 from qautils.logger_utils import get_logger
 from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
-from glancesync.glancesync.glancesync_client import GlanceSyncClient
+from glancesync.glancesync_client import GlanceSyncClient
 
 __logger__ = get_logger("qautils")
 

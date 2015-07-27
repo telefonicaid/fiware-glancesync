@@ -28,9 +28,9 @@ __license__ = " Apache License, Version 2.0"
 
 import behave
 from behave import step
-from hamcrest import assert_that, is_not, contains_string
+from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from qautils.dataset_utils import DatasetUtils
-from glancesync.glancesync.output_constants import GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+from glancesync.output_constants import GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_RENAMING
 
 # Use regular expressions for step param definition (Behave).

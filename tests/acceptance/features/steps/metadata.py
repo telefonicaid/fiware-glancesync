@@ -27,7 +27,7 @@ import behave
 from behave import step, then
 from qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, equal_to, contains_string, is_not
-from glancesync.glancesync.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
+from glancesync.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
 from commons.utils import get_real_value_of_image_property
 behave.use_step_matcher("re")
 
