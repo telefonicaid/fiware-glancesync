@@ -39,8 +39,6 @@ from keystoneclient.auth.identity import v2 as identity
 from keystoneclient import session
 from glanceclient import Client as GlanceClient
 
-from keystoneclient.v2_0.client import Client as KeystoneClient
-
 from glancesync_image import GlanceSyncImage
 
 """This module contains all the code that interacts directly with the glance
@@ -180,7 +178,7 @@ def _getimagelist(regionobj):
         glance_client = GlanceClient('1', endpoint=endpoint, token=token)
         glance_client.images.client.timeout = timeout
         # images = glance_client.images.list()
-        pool = Pool()
+        pool = Pool(1)
         result = pool.apply_async(_getrawimagelist, (glance_client,))
         images = result.get(timeout=20)
         image_list = list()

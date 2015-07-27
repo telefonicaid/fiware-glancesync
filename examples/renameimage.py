@@ -24,9 +24,10 @@
 #
 author = 'jmpr22'
 import sys
-import os
 import logging
-from glancesync import GlanceSync
+
+from glancesync.glancesync import GlanceSync
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

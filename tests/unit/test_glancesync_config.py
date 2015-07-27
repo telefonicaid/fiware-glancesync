@@ -25,15 +25,14 @@
 author = 'chema'
 
 import unittest
-
 import tempfile
 import os
 import os.path
 import StringIO
 import copy
 
-import glancesync_config
-from glancesync_config import GlanceSyncConfig
+from glancesync import glancesync_config
+from glancesync.glancesync_config import GlanceSyncConfig
 
 configuration_content = """
 [main]
@@ -216,6 +215,7 @@ class TestGlanceSyncConfigFile(unittest.TestCase):
 
     def tearDown(self):
         # Restore environment
+        os.environ.clear()
         os.environ.update(self.environ)
         os.unlink(self.tempfile.name)
 
@@ -262,6 +262,7 @@ class TestGlanceSyncConfigOrder(unittest.TestCase):
 
     def tearDown(self):
         # Restore environment
+        os.environ.clear()
         os.environ.update(self.environ)
         os.unlink(self.tempfile.name)
         os.unlink(self.tempfile2.name)
@@ -330,6 +331,7 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
 
     def tearDown(self):
         # Restore environment
+        os.environ.clear()
         os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 
@@ -380,6 +382,7 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
 
     def tearDown(self):
         # Restore environment
+        os.environ.clear()
         os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 
@@ -424,6 +427,7 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
 
     def tearDown(self):
         # Restore environment
+        os.environ.clear()
         os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 

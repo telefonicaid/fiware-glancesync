@@ -26,7 +26,6 @@ author = 'chema'
 
 import csv
 import glob
-import os.path
 import shelve
 import copy
 import os
@@ -35,6 +34,7 @@ import tempfile
 import sys
 
 from glancesync_image import GlanceSyncImage
+
 """This module contains all the code that interacts directly with the glance
 implementation. It isolates the main code from the glance interaction.
 

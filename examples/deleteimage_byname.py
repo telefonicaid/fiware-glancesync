@@ -27,7 +27,8 @@ import sys
 import os
 import logging
 
-from glancesync import GlanceSync
+from glancesync.glancesync import GlanceSync
+
 
 if __name__ == '__main__':
     confirmation = True

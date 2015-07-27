@@ -22,20 +22,4 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
-import sys
-
-from glancesync import glancesync
-
-
-if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        target = sys.argv[1]
-    else:
-        target = 'master'
-
-    sync_obj = glancesync.GlanceSync()
-    sync_obj.init_logs()
-    regions = sync_obj.get_regions(target=target)
-    regions.sort()
-    print ','.join(regions)
+author = 'chema'

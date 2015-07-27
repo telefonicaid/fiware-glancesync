@@ -25,13 +25,12 @@
 author = 'chema'
 
 import unittest
-
 import copy
 import StringIO
 import logging
 
-from glancesync_region import GlanceSyncRegion
-from glancesync_image import GlanceSyncImage
+from glancesync.glancesync_region import GlanceSyncRegion
+from glancesync.glancesync_image import GlanceSyncImage
 
 
 class TestGlanceSyncRegionBasic(unittest.TestCase):

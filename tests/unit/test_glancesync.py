@@ -25,7 +25,6 @@
 author = 'chema'
 
 import unittest
-
 import StringIO
 import copy
 import hashlib
@@ -33,11 +32,12 @@ import os
 import glob
 import tempfile
 
-from glancesync_image import GlanceSyncImage
-os.environ['GLANCESYNC_USE_MOCK'] = 'True'
-from glancesync import GlanceSync
+from glancesync.glancesync_image import GlanceSyncImage
 
-from glancesync_serverfacade_mock import ServersFacade
+
+from glancesync.glancesync import GlanceSync
+
+from glancesync.glancesync_serverfacade_mock import ServersFacade
 
 
 def create_images(region, count, prefix, tenant):
@@ -115,6 +115,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
     """Class to test basic operations (i.e. all operations except
     the synchronisation ones"""
     def setUp(self):
+        os.environ['GLANCESYNC_USE_MOCK'] = 'True'
         self.config = StringIO.StringIO(config1)
         # populate mock with 4 regions, one of them is empty.
         ServersFacade.add_emptyregion_to_mock('other:Region2')
@@ -131,6 +132,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
             for filename in glob.glob(self.tmpdir + '/*.csv'):
                 os.unlink(filename)
             os.rmdir(self.tmpdir)
+        del os.environ['GLANCESYNC_USE_MOCK']
 
     def test_constructor(self):
         """test the object is correctly built"""
@@ -347,10 +349,11 @@ class TestGlanceSync_Sync(unittest.TestCase):
     """
 
     def config(self):
-        self.path_test = 'resources/alreadysync'
+        self.path_test = '../resources/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
     def setUp(self):
+        os.environ['GLANCESYNC_USE_MOCK'] = 'True'
         self.config()
         self.facade = ServersFacade(dict())
         ServersFacade.add_images_from_csv_to_mock(self.path_test)
@@ -363,6 +366,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
     def tearDown(self):
         ServersFacade.clear_mock()
+        del os.environ['GLANCESYNC_USE_MOCK']
 
     def test_check_status_pre(self):
         """test call export_sync_region_status before invoking sync"""
@@ -425,7 +429,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
     """Test a environment where the destination region has no images"""
     def config(self):
-        self.path_test = 'resources/emptyregions'
+        self.path_test = '../resources/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -433,7 +437,7 @@ class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     """Test a environment where the destination region has some of the images
     """
     def config(self):
-        self.path_test = 'resources/mixed'
+        self.path_test = '../resources/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -441,7 +445,7 @@ class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     """Test a environment where some images at the destination region has
     metadata different than the images on the master region"""
     def config(self):
-        self.path_test = 'resources/metadata'
+        self.path_test = '../resources/metadata'
         self.regions = ['master:Burgos']
 
 
@@ -449,14 +453,14 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     """Test a environment where some regional images has a checksum different
     than the master images"""
     def config(self):
-        self.path_test = 'resources/checksum'
+        self.path_test = '../resources/checksum'
         self.regions = ['master:Burgos']
 
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
-        self.path_test = 'resources/ami'
+        self.path_test = '../resources/ami'
         self.regions = ['master:Burgos']
 
 if __name__ == '__main__':

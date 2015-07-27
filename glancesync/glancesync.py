@@ -24,7 +24,6 @@
 #
 author = 'chema'
 
-import sys
 import os
 import logging
 import csv

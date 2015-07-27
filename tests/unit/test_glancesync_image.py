@@ -25,10 +25,9 @@
 author = 'jmpr22'
 
 import unittest
-
 import copy
 
-from glancesync_image import GlanceSyncImage
+from glancesync.glancesync_image import GlanceSyncImage
 
 
 class TestGlanceSyncImageRegion(unittest.TestCase):

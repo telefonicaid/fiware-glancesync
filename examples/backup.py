@@ -27,7 +27,8 @@ import sys
 import os
 import datetime
 
-from glancesync import GlanceSync
+from glancesync.glancesync import GlanceSync
+
 
 if __name__ == '__main__':
     now = datetime.datetime.now().isoformat()

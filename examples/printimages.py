@@ -24,8 +24,9 @@
 #
 author = 'jmpr22'
 import sys
-import os
-import glancesync_fi
+
+from glancesync import glancesync_fi
+
 
 if __name__ == '__main__':
     sync_obj = glancesync_fi.GlanceSyncFi()

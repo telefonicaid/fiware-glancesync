@@ -32,10 +32,10 @@ import copy
 
 from keystoneclient.auth.identity import v2, v3
 
-from glancesync_serversfacade import ServersFacade
+from glancesync.glancesync_serversfacade import ServersFacade
+from glancesync.glancesync_image import GlanceSyncImage
+from glancesync.glancesync_region import GlanceSyncRegion
 
-from glancesync_image import GlanceSyncImage
-from glancesync_region import GlanceSyncRegion
 
 """This is an integration test to verify that the facade works correctly
 using a real server.

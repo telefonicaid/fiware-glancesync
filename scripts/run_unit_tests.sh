@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd $(dirname $0)/../tests
-export PYTHONPATH=..
+cd $(dirname $0)/../tests/unit
+export PYTHONPATH=../..
 python -m unittest discover

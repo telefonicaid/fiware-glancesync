@@ -31,7 +31,7 @@ import datetime
 import argparse
 import logging
 
-from glancesync_fi import GlanceSyncFi as GlanceSync
+from glancesync.glancesync_fi import GlanceSyncFi as GlanceSync
 
 
 class Sync(object):

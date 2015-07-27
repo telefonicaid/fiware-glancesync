@@ -25,6 +25,8 @@ __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
+import re
+import logging
 
 import behave
 from behave import step
@@ -32,11 +34,10 @@ from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greate
 from commons.constants import IMAGES_DIR
 from commons.utils import get_real_value_of_image_property
 from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+from glancesync.glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
-import re
-import logging
+
 
 
 # Get logger for Behave steps

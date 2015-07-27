@@ -4,6 +4,8 @@ This is the code repository for the GlanceSync component, the FIWARE Ops tool us
 
 This project is part of [FIWARE](http://www.fiware.org).
 
+Although this component has been developed for FIWARE, the software is highly configurable, do not have special requirements beyond OpenStack libraries and may be used with any other project or as a generic tool to synchronise images. Moreover, all the OpenStack interface is in a module and it is possible to adapt the code to support other platforms.
+
 Any feedback on this documentation is highly welcome, including bugs, typos
 or things you think should be included but are not. You can use [github issues](https://github.com/telefonicaid/fiware-glancesync/issues/new) to provide feedback.
 
