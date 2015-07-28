@@ -222,8 +222,7 @@ def _delete_image(regionobj, id, confirm=True):
             print 'Not deleting image ' + id
             return False
 
-    p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None,
-              stdout=sys.stdout, stderr=sys.stderr)
+    p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None)
 
     code = p.wait()
     if code == 0:
@@ -296,7 +295,7 @@ def _upload_image(regionobj, image, images_dir):
     _set_environment(regionobj.target, regionobj.region)
     # run command
     with open(images_dir + '/' + image.id, 'r') as file_obj:
-        p = Popen(arguments, stdin=file_obj, stdout=PIPE, stderr=sys.stdout)
+        p = Popen(arguments, stdin=file_obj, stdout=PIPE)
         outputcmd = p.stdout
         result = outputcmd.read()
         p.wait()
@@ -329,7 +328,7 @@ def _get_regions(target):
         del(os.environ['OS_REGION_NAME'])
 
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
-              stdout=PIPE, stderr=sys.stderr)
+              stdout=PIPE)
 
     if value_to_restore:
         os.environ['OS_REGION_NAME'] = value_to_restore
