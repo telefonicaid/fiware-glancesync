@@ -25,22 +25,24 @@
 author = 'jmpr22'
 import sys
 import os
-import glancesync_fi
+import datetime
+
+from glancesync.glancesync import GlanceSync
+
 
 if __name__ == '__main__':
-    sync_obj = glancesync_fi.GlanceSyncFi()
-    sync_obj.init_logs()
+    now = datetime.datetime.now().isoformat()
+    glancesync = GlanceSync()
+    glancesync.init_logs()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     else:
-        regions = sync_obj.get_regions()
-        print '======Master (' + sync_obj.master_region + ')'
-        sync_obj.print_images_master_region()
+        regions = glancesync.get_regions(omit_master_region=False)
+    directory = 'backup_glance_' + now
+    os.mkdir(directory)
     for region in regions:
         try:
-            print "======" + region
-            sync_obj.print_images(region)
+            glancesync.backup_glancemetadata_region(region, directory)
         except Exception:
-            # Don't do anything. Message has been already printed
-            # try next region.
+            # do nothing. Already logged.
             continue

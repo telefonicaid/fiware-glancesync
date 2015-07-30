@@ -22,26 +22,5 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
-import sys
-import os
-import datetime
-
-from glancesync import GlanceSync
-
-if __name__ == '__main__':
-    now = datetime.datetime.now().isoformat()
-    glancesync = GlanceSync()
-    glancesync.init_logs()
-    if len(sys.argv) > 1:
-        regions = sys.argv[1:]
-    else:
-        regions = glancesync.get_regions(omit_master_region=False)
-    directory = 'backup_glance_' + now
-    os.mkdir(directory)
-    for region in regions:
-        try:
-            glancesync.backup_glancemetadata_region(region, directory)
-        except Exception:
-            # do nothing. Already logged.
-            continue
+author = 'chema'
+__all__ = ['glancesync', 'glancesync_image']

@@ -9,7 +9,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
   @happy_path @env_dependant @experimentation
   Scenario Outline: Sync images following a preferable order (default behaviour).
     Given a new image created in the Glance of master node with name "qatesting10meg"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value           |
             | DEFAULT         | metadata_condition  | 'image.is_public'      |
             | DEFAULT         | metadata_set        |                        |
@@ -27,7 +27,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
   @skip @bug @CLAUDIA-5323 @env_dependant @experimentation
   Scenario Outline: Sync images between different targets, following a preferable order.
     Given a new image created in the Glance of master node with name "qatesting10meg"
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value           |
             | DEFAULT         | metadata_condition  | 'image.is_public'      |
             | DEFAULT         | metadata_set        |                        |

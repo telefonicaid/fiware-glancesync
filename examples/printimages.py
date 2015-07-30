@@ -24,17 +24,24 @@
 #
 author = 'jmpr22'
 import sys
-import os
-import glancesync
+
+from glancesync import glancesync_fi
+
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        target = sys.argv[1]
-    else:
-        target = 'master'
-
-    sync_obj = glancesync.GlanceSync()
+    sync_obj = glancesync_fi.GlanceSyncFi()
     sync_obj.init_logs()
-    regions = sync_obj.get_regions(target=target)
-    regions.sort()
-    print ','.join(regions)
+    if len(sys.argv) > 1:
+        regions = sys.argv[1:]
+    else:
+        regions = sync_obj.get_regions()
+        print '======Master (' + sync_obj.master_region + ')'
+        sync_obj.print_images_master_region()
+    for region in regions:
+        try:
+            print "======" + region
+            sync_obj.print_images(region)
+        except Exception:
+            # Don't do anything. Message has been already printed
+            # try next region.
+            continue

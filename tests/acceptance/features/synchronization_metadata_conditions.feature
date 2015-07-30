@@ -7,10 +7,10 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario: Sync a private image
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'not image.is_public' |
             | DEFAULT         | metadata_set        |                       |
@@ -21,12 +21,12 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
   @happy_path
   Scenario Outline: Sync a private image with image attributes in metadata set
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | ''                    |
             | DEFAULT         | metadata_set        | <config_value>        |
@@ -43,10 +43,10 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Sync a private image with image attributes not in metadata set: Empty image properties
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | ''                    |
             | DEFAULT         | metadata_set        | 'nid, sdc_aware'      |
@@ -55,12 +55,12 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario Outline: Sync a private image with image attributes not in metadata set. Image properties not in metadata set
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | True                |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | ''                    |
             | DEFAULT         | metadata_set        | <config_value>        |
@@ -74,12 +74,12 @@ Feature: Image sync between regions using GlanceSync in the same federation with
 
 
   Scenario: Sync a private image with image attributes in metadata set but not passing the metadata condition
-    Given a new image created in the Glance of master node with name "qatesting01" and this properties:
+    Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |
             | is_public       | False               |
             | nid             | 12345               |
             | sdc_aware       | True                |
-    And   GlanceSync configured to sync images using this configuration parameters:
+    And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | image.is_public       |
             | DEFAULT         | metadata_set        | nid                   |

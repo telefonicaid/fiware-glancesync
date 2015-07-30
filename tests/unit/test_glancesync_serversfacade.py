@@ -32,10 +32,10 @@ import copy
 
 from keystoneclient.auth.identity import v2, v3
 
-from glancesync_serversfacade import ServersFacade
+from glancesync.glancesync_serversfacade import ServersFacade
+from glancesync.glancesync_image import GlanceSyncImage
+from glancesync.glancesync_region import GlanceSyncRegion
 
-from glancesync_image import GlanceSyncImage
-from glancesync_region import GlanceSyncRegion
 
 """This is an integration test to verify that the facade works correctly
 using a real server.
@@ -43,7 +43,8 @@ using a real server.
 Don't activate this test unless you know what are you doing"""
 
 testingFacadeReal = False
-
+if 'TESTING_FACADE' in env:
+    testingFacadeReal = True
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
@@ -54,7 +55,12 @@ class TestGlanceServersFacade(unittest.TestCase):
         target['password'] = env['OS_PASSWORD']
         target['keystone_url'] = env['OS_AUTH_URL']
         target['tenant'] = env['OS_TENANT_NAME']
-        self.region = target['region'] = env['OS_REGION_NAME']
+        if 'OS_REGION_NAME' in env:
+            target['region'] = env['OS_REGION_NAME']
+        else:
+            target['region'] = 'regionOne'
+
+        self.region = target['region']
         targets = dict()
         targets['master'] = target
         self.region_obj = GlanceSyncRegion(self.region, targets)
@@ -77,17 +83,15 @@ class TestGlanceServersFacade(unittest.TestCase):
     def create_image(self):
         """function to create_image, used by several tests; check that UUID
          is returned"""
-        class Raw(object):
-            pass
 
         image = GlanceSyncImage('imagetest', '01', self.region, False)
-        image.raw = Raw()
-        image.raw.disk_format = 'qcow2'
-        image.raw.is_public = 'False'
-        image.raw.protected = 'False'
-        image.raw.container_format = 'bare'
-        image.raw.min_ram = '0'
-        image.raw.min_disk = '0'
+        image.raw = dict()
+        image.raw['disk_format'] = 'qcow2'
+        image.raw['is_public'] = 'False'
+        image.raw['protected'] = 'False'
+        image.raw['container_format'] = 'bare'
+        image.raw['min_ram'] = '0'
+        image.raw['min_disk'] = '0'
 
         self.created = self.facade.upload_image(self.region_obj, image)
         self.assertIsNotNone(self.created)
@@ -95,7 +99,7 @@ class TestGlanceServersFacade(unittest.TestCase):
     def test_getregions(self):
         """test get_regions method"""
         regions = self.facade.get_regions()
-        self.assertTrue(len(regions) > 1)
+        self.assertTrue(len(regions) >= 1)
         self.assertIn(self.region, regions)
 
     def test_getimagelist(self):
