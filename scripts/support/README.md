@@ -20,7 +20,7 @@ This folder includes also shell scripts to create base images with the file inje
 
 The public keys included in the image may be modified changing the contents of the folder `activate_support_account.py`. To pass a different set of public keys and launching time, add a workload as the content of `cloud-init.example` to your cloud-init file.
 
-Important, to generate a new GPG pubkey, the name of the key must start with *FiWare support*. The keys can be generated with `gpg --gen-key` and then exported with `gpg --armor --output public.gpg --export "FiWare support"` but it may different depending of your implementation. For example, with a cryptocard, the key can be generated inside the card.
+Important, to generate a new GPG pubkey, the name of the key must start with *FiWare support*. The keys can be generated with `gpg --gen-key` and then exported with `gpg --armor --output public.gpg --export "FiWare support"` but it may different depending of your implementation. For example, with a cryptocard, the key can be generated inside the card: [link](https://www.gnupg.org/howtos/card-howto/en/smartcard-howto.html)
  
 The script `update_images.py` may be used to update existing images (created with the other scripts) to upgrade the script or change the public keys without regenerating all the image.
 
