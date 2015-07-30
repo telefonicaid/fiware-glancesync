@@ -1,0 +1,12 @@
+# support account - create support account to assist user if there is any problem
+#   password is randomly generated and optionally encrypted.
+start on stopped rc RUNLEVEL=[2345]
+stop on runlevel [S016]
+
+
+task
+
+console output
+
+exec /sbin/activate_support_account.py
+
