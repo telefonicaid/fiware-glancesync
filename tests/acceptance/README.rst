@@ -47,6 +47,8 @@ Features:
 - Logging.
 - Remote GlanceSync execution.
 
+Domain specific language implemented for building features: `GlanceSync Acceptance DSL <doc/dsl.rst>`_
+
 
 Acceptance test execution
 -------------------------

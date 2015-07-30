@@ -294,6 +294,23 @@ def image_is_synchronized(context, image_name):
                         contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
                         "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
 
+
+@step(u'the image "(?P<image_name>\w*)" is synchronized in target node "(?P<region>\w*)"')
+def image_is_synchronized_in_target_region(context, image_name, region):
+
+    assert_that(context.glancesync_result, is_not(None),
+                "Problem when executing Sync command")
+
+    assert_that(context.glancesync_result,
+                contains_string(GLANCESYNC_OUTPUT_UPLOADING.format(region_name=region,
+                                                                   image_name=image_name)),
+                "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+
+    assert_that(context.glancesync_result,
+                contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
+                "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
+
+
 @step(u'all images are synchronized')
 def images_are_synchronized(context):
 
@@ -315,9 +332,9 @@ def image_is_present_only_in_node(context, image_name, region_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             if region == region_name:
-                __image_is_present_in_nodes__(context, region_name, image_name)
+                __image_is_present_in_nodes__(context, region, image_name)
             else:
-                __image_is_not_present_in_node(context, region_name, image_name)
+                __image_is_not_present_in_node(context, region, image_name)
 
 
 @step(u'all synchronized images are present in all nodes with the expected data')
