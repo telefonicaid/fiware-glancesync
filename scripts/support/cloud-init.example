@@ -1,0 +1,38 @@
+#cloud-config
+fiware-support:
+   sshkey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIDYH0CKwia0T+6Yepo+mgL4WUZGlzQFx//rAt+aXKqMP+Fwd+7Dh83EQ9y5a+1s/RqsFO+SLJPik7IPsN5rZBsk34Iz7fsDOqvmaeHlTxjTIleQZjmIm6dFJ/oX1bLSiV8aR3jahbzkE+e1xkq1xVEwPN2GbH/bQQHtvgKN06pEJFMmoCfTPMpYHmvhfMJbfjb8CO1XV2TAWbn/F69GoIP2RZx12LIhZ9ljNriobc7MNHI8i80CSqHvezm6nSNleM6+tI0nwD/M5GaT6pmIcvLsZcqHR48BIsr+VWMdrP47bc6iN4lOimNEjILfefaIiA7E6Ut/x0HvTcEG+UMPG5 chema@dev-fiware-oscn-06
+
+   gpgkey: |
+      
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: GnuPG v1
+      
+      mQENBFWl/9QBCADC3w+sF7HgWGZsuGH+3xP5SiBt77gKRqNyK29MmBGnzBSEhGOk
+      ivAZQfVDFHNTKHjQVmD4Az+WJ1K62ErCnKQ2S/8vIJWmXWUlahgpTI7VKMqfrmyq
+      sHE9rbdhKGV/Yp16sR4dET+xwsZjdDcBqvwPv9BaT1ceMujLUdUMqwMS+LgTEGD1
+      p9ZtDR8XwOLtAciB8cfcTICc/CrPQ8ghgqQgrGZsh71sDL+mNv4LBbAp7Nx+SU6Z
+      5bMAN8izfN+d0KbCw4PcRRrjfqxypStLzsAnaWr2zLRo0Gf8pNfk9TFOPSimk/3T
+      TxFN59CyzWwqsE+WEdzEQvB1pLz6nY5/hkstABEBAAG0HkZpV2FyZSBzdXBwb3J0
+      IChmYWtlIHRlc3Qga2V5KYkBOAQTAQIAIgUCVaX/1AIbAwYLCQgHAwIGFQgCCQoL
+      BBYCAwECHgECF4AACgkQDdpV3Mn2JcxBqQf/dx/9WuSy1Mp9C1aV2woJzoZdgOli
+      GPvmnHdYM50ZjDqes3K6oaSD7tHnV9MiMSgKjJrq9Lxl45qh1Xyun5Ad+Tc6JGGc
+      WDZXsaYURT1cWmW3cB2SeN1PTx3FdO0XC8YQ6bIGn15D/1TiBU+ORH/XNjXUXLv6
+      EwFoJLpwP5irZNlwYQNy6nhaLwnox/TCR3/4V5RuEz7DfM/jFKsRIJtVknu7Akuk
+      0FX9jg35tknBUIs9lAWzf3lJCXqFd6Usg1xSzvfZ/O1M38u2s1yyOLiYzDgQAp1a
+      sn1O+uKRtv92nWPuZiYofTpwSSSx8au4Ms0d+j7bweTEVZAt3FqUvGbQj7kBDQRV
+      pf/UAQgAmj0wXYsb+C4SGEH0OVdR1++oDd+DOM/uftDAl4qMsUvHr28DGv7UMOm2
+      xbXyzplKKeMvT9RRKrkH1hu73qyb/yJFyqyaCxdSEJb5dJvP4HLp7Rx4n0ZDCzgQ
+      QG/KbXGyjdBSu5J3TUEpRdCjzXWBK77Z0WAjvF3Z5nUGEYvTeNI0J49+nJbvgu6t
+      jTzL+ABVcoZ5g4dj6a079QEvA/KcDgJvUvPfogm3QmWyzxLlmA6hD3HauXZ/rugS
+      XLVOnkXTopPMYZJxQCL771CpiUmkp/bgiVrZhntysNH97cEXwa5pBaky7s19JlT7
+      lZmsFd09hNf/XRhDddBo3FqOQWuftwARAQABiQEfBBgBAgAJBQJVpf/UAhsMAAoJ
+      EA3aVdzJ9iXMMdwIAJEI+INytN7mIVHihlxkbRnK4PH/MAUs23CQV4asTCekeJLj
+      cEtFR3VOuYCoJhXM1WZ4mgFlxDbqcSxyCGeh54wb3yblWyI20iuj3sS4q+tYW0Yz
+      coeUWMoXPBfKimzSgF40fqVZL2Fdj6nwxAZsVgK0XSt38Tt6ePxYhSqS8er14a3L
+      fGNzwZ4UALoAdslKGQklZBSw7V4zvXjVU7WX3hXNbEcvrTGZfeHpu/iXQIFq54AI
+      atltUw+YzkhqBXzWUcHXcQDkuiTvGoeMbmM5M793qOINCX2voZaxPTlta0mPOLFX
+      NAdAPbmNXyKtp73WVwLQY4deJ79d3RFSEuTeY5c=
+      =9uhM
+      -----END PGP PUBLIC KEY BLOCK-----
+
+
