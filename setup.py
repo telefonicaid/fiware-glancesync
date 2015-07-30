@@ -24,6 +24,7 @@
 #
 from distutils.core import setup
 from server import __version__
+
 setup(
 name='fiware-glancesync',
 packages=['fiware-glancesync'], # this must be the same as the name above
