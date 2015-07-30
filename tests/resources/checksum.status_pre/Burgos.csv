@@ -1,0 +1,5 @@
+ok_stalled_checksum,Burgos,image01
+pending_rename_n_replace,Burgos,image02
+ok,Burgos,image03
+pending_replace,Burgos,image04
+error_checksum,Burgos,image05
