@@ -25,18 +25,16 @@
 author = 'jmpr22'
 
 import unittest
-
 import copy
 
-from glancesync_image import GlanceSyncImage
-
+from glancesync.glancesync_image import GlanceSyncImage
 
 class TestGlanceSyncImageRegion(unittest.TestCase):
     """Class to test all methods but compare_with_masterregion, that has
     its own testing class"""
     def setUp(self):
         self.name = name = 'image1'
-        self.id = id = '0001'
+        self.id1 = id = '0001'
         self.region = region = 'Valladolid'
         self.owner = owner = '00000001'
         self.is_public = is_public = True
@@ -68,7 +66,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
     def test_contstructor(self):
         """Only check that each value is in the correct position"""
         self.assertEquals(self.image1.name, self.name)
-        self.assertEquals(self.image1.id, self.id)
+        self.assertEquals(self.image1.id, self.id1)
         self.assertEquals(self.image1.is_public, self.is_public)
         self.assertEquals(self.image1.checksum, self.checksum)
         self.assertEquals(self.image1.size, self.size)
@@ -92,7 +90,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
     def test_to_field_list(self):
         """Test method to_field_list, without filter"""
         result = [
-            self.region, self.name, self.id, self.status, self.size,
+            self.region, self.name, self.id1, self.status, self.size,
             self.checksum, self.owner, self.is_public, str(self.props)]
 
         self.assertEquals(self.image1.to_field_list(None), result)
@@ -101,7 +99,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         """test method to_field_lst, with filter"""
         props = ['p1', 'p2']
         result = [
-            self.region, self.name, self.id, self.status, self.size,
+            self.region, self.name, self.id1, self.status, self.size,
             self.checksum, self.owner, self.is_public, self.props['p1'],
             self.props['p2']]
         self.assertEquals(self.image1.to_field_list(props), result)
@@ -177,7 +175,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.assertTrue(self.image2.is_synchronisable(m, force, func))
         self.assertTrue(self.image3.is_synchronisable(m, force, func))
         self.assertTrue(self.image4.is_synchronisable(m, force, func))
-        force = set([self.id])
+        force = set([self.id1])
         self.assertTrue(self.image1.is_synchronisable(m, force, func))
 
     def test_is_synchronisable_metadata_function(self):
@@ -200,7 +198,7 @@ class TestGlanceSyncImageCompare(unittest.TestCase):
         self.owner = owner = 'owner1'
         size = 300000
         checksum = 'fac084184af34b'
-        self.id = id = '0001'
+        self.id1 = id = '0001'
         self.props1 = p = {'nid': 5043, 'type': 6043, 'localprop': 8888}
         self.master_images = dict()
         self.master_images[name] = GlanceSyncImage(

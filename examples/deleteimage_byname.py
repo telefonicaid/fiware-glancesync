@@ -25,29 +25,40 @@
 author = 'jmpr22'
 import sys
 import os
-import StringIO
+import logging
 
-from glancesync_fi import GlanceSyncFi as GlanceSync
+from glancesync.glancesync import GlanceSync
+
 
 if __name__ == '__main__':
+    confirmation = True
+    if os.environ.get('IKNOWWHATIAMDOING', None) == 'Yes!':
+        confirmation = False
+
+    if len(sys.argv) != 3 and len(sys.argv) != 2:
+        message = 'Use ' + sys.argv[0] + '<imagename> [<reg1> [<reg2> ...]]'
+        logging.error(message)
+        sys.exit(0)
     glancesync = GlanceSync()
     glancesync.init_logs()
-    regions_unsorted = glancesync.get_regions()
-    regions = list()
-    for region in glancesync.preferable_order:
-        if region in regions_unsorted:
-            regions.append(region)
-            regions_unsorted.remove(region)
+    if len(sys.argv) == 3:
+        regions = sys.argv[2:]
+        image_name = sys.argv[1]
+    else:
+        # Obtains the full list or region, including the master region
+        regions = glancesync.get_regions(omit_master_region=False)
+        image_name = sys.argv[1]
 
-    regions.extend(regions_unsorted)
-    if len(sys.argv) > 1:
-        regions = sys.argv[1:]
     for region in regions:
+        print "Region: " + region
         try:
-            stream = StringIO.StringIO()
-            glancesync.export_sync_region_status(region, stream)
-            print stream.getvalue()
+            images = glancesync.get_images_region(region)
         except Exception:
             # Don't do anything. Message has been already printed
-            # try next region
             continue
+        for image in images:
+            if image.name == image_name:
+                deleted = glancesync.delete_image(
+                    region, image.id, confirmation)
+                if deleted:
+                    print 'Image deleted from region ' + region

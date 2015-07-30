@@ -29,6 +29,7 @@ import logging
 from subprocess import Popen, PIPE, call
 import sys
 import re
+from multiprocessing import Pool
 
 logger = logging.getLogger('glancesync')
 
@@ -37,8 +38,6 @@ from keystoneclient.auth.identity import v2, v3
 from keystoneclient.auth.identity import v2 as identity
 from keystoneclient import session
 from glanceclient import Client as GlanceClient
-
-from keystoneclient.v2_0.client import Client as KeystoneClient
 
 from glancesync_image import GlanceSyncImage
 
@@ -53,6 +52,8 @@ when a functionality is not available directly from the CLI, it invokes
 the python library used by the glance and keystone clients.
 """
 
+# Timeout to get image list
+timeout = 30
 
 class ServersFacade(object):
     def __init__(self, target):
@@ -82,6 +83,7 @@ class ServersFacade(object):
         :param regionobj: The GlanceSyncRegion object of the region to list
         :return: a list of GlanceSyncImage objects
         """
+
         return _getimagelist(regionobj)
 
     def update_metadata(self, regionobj, image):
@@ -145,6 +147,17 @@ def _set_environment(target, region=None):
         os.environ['OS_REGION_NAME'] = region
 
 
+def _getrawimagelist(glance_client):
+    """Helper function that returns objects as dictionary.
+    We need this function because we use Pool to implement a timeout and
+    the original results is not pickable.
+
+    :param glance_client: the glance client
+    :return: a list of images (every image is a dictionary)
+    """
+    images = glance_client.images.list()
+    return list(image.to_dict() for image in images)
+
 def _getimagelist(regionobj):
     """return a image list from the glance of the specified region
 
@@ -163,18 +176,26 @@ def _getimagelist(regionobj):
         endpoint = auth.get_endpoint(
             session, 'image', region_name=regionobj.region)
         glance_client = GlanceClient('1', endpoint=endpoint, token=token)
-        images = glance_client.images.list()
+        glance_client.images.client.timeout = timeout
+        # images = glance_client.images.list()
+        pool = Pool(1)
+        result = pool.apply_async(_getrawimagelist, (glance_client,))
+        images = result.get(timeout=20)
         image_list = list()
         for image in images:
             i = GlanceSyncImage(
-                image.name, image.id, regionobj.fullname,
-                image.owner, image.is_public, image.checksum,
-                image.size, image.status, image.properties, image)
+                image['name'], image['id'], regionobj.fullname,
+                image['owner'], image['is_public'], image['checksum'],
+                image['size'], image['status'], image['properties'], image)
+
             image_list.append(i)
 
     except Exception, e:
+        cause = str(e)
+        if not cause:
+            cause = repr(e)
         msg = regionobj.fullname + \
-            ': Error retrieving image list. Cause: ' + str(e)
+            ': Error retrieving image list. Cause: ' + cause
         logger.error(msg)
         raise Exception(msg)
 
@@ -201,8 +222,7 @@ def _delete_image(regionobj, id, confirm=True):
             print 'Not deleting image ' + id
             return False
 
-    p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None,
-              stdout=sys.stdout, stderr=sys.stderr)
+    p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None)
 
     code = p.wait()
     if code == 0:
@@ -229,10 +249,10 @@ def _update_metadata(regionobj, image):
     # compose cmd line
     arguments = [
         '/usr/bin/glance', 'image-update', image.id, '--disk-format',
-        image.raw.disk_format, '--name', image.name, '--is-public',
+        image.raw['disk_format'], '--name', image.name, '--is-public',
         str(image.is_public), '--is-protected',
-        str(image.raw.protected), '--container-format',
-        image.raw.container_format]
+        str(image.raw['protected']), '--container-format',
+        image.raw['container_format']]
     for user_property in props:
         arguments.append('--property')
         arguments.append(user_property)
@@ -261,12 +281,12 @@ def _upload_image(regionobj, image, images_dir):
                  for x in image.user_properties)
     # compose cmdline
     arguments = [
-        'glance', 'image-create', '--disk-format', image.raw.disk_format,
-        '--name', image.name, '--is-public', str(image.raw.is_public),
-        '--is-protected', str(image.raw.protected),
-        '--container-format', image.raw.container_format,
-        '--min-ram', str(image.raw.min_ram), '--min-disk',
-        str(image.raw.min_disk)]
+        'glance', 'image-create', '--disk-format', image.raw['disk_format'],
+        '--name', image.name, '--is-public', str(image.raw['is_public']),
+        '--is-protected', str(image.raw['protected']),
+        '--container-format', image.raw['container_format'],
+        '--min-ram', str(image.raw['min_ram']), '--min-disk',
+        str(image.raw['min_disk'])]
     for user_property in props:
         arguments.append('--property')
         arguments.append(user_property)
@@ -275,7 +295,7 @@ def _upload_image(regionobj, image, images_dir):
     _set_environment(regionobj.target, regionobj.region)
     # run command
     with open(images_dir + '/' + image.id, 'r') as file_obj:
-        p = Popen(arguments, stdin=file_obj, stdout=PIPE, stderr=sys.stdout)
+        p = Popen(arguments, stdin=file_obj, stdout=PIPE)
         outputcmd = p.stdout
         result = outputcmd.read()
         p.wait()
@@ -308,7 +328,7 @@ def _get_regions(target):
         del(os.environ['OS_REGION_NAME'])
 
     p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
-              stdout=PIPE, stderr=sys.stderr)
+              stdout=PIPE)
 
     if value_to_restore:
         os.environ['OS_REGION_NAME'] = value_to_restore

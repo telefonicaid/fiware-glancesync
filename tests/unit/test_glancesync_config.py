@@ -25,14 +25,14 @@
 author = 'chema'
 
 import unittest
-
 import tempfile
 import os
 import os.path
 import StringIO
+import copy
 
-import glancesync_config
-from glancesync_config import GlanceSyncConfig
+from glancesync import glancesync_config
+from glancesync.glancesync_config import GlanceSyncConfig
 
 configuration_content = """
 [main]
@@ -208,10 +208,15 @@ class TestGlanceSyncConfigFile(unittest.TestCase):
         self.tempfile.write(configuration_content)
         self.tempfile.close()
 
+        # Preserve environment
+        self.environ = copy.deepcopy(os.environ)
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
 
     def tearDown(self):
+        # Restore environment
+        os.environ.clear()
+        os.environ.update(self.environ)
         os.unlink(self.tempfile.name)
 
     def test_constructor(self):
@@ -249,11 +254,16 @@ class TestGlanceSyncConfigOrder(unittest.TestCase):
             'region_etcfile'))
         self.tempfile3.close()
 
+        # Preserve environment
+        self.environ = copy.deepcopy(os.environ)
         os.environ['GLANCESYNC_CONFIG'] = self.tempfile.name
         self.preserve = glancesync_config.default_configuration_file
         glancesync_config.default_configuration_file = self.tempfile3.name
 
     def tearDown(self):
+        # Restore environment
+        os.environ.clear()
+        os.environ.update(self.environ)
         os.unlink(self.tempfile.name)
         os.unlink(self.tempfile2.name)
         os.unlink(self.tempfile3.name)
@@ -309,6 +319,8 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
         # Avoid reading the default configuration file
         self.preserve = glancesync_config.default_configuration_file
         glancesync_config.default_configuration_file = '/__noexistingfile'
+        # Preserve environment
+        self.environ = copy.deepcopy(os.environ)
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -318,6 +330,9 @@ class TestGlanceSyncNoConfig(unittest.TestCase):
         os.environ['OS_AUTH_URL'] = 'url'
 
     def tearDown(self):
+        # Restore environment
+        os.environ.clear()
+        os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 
     def test_constructor(self):
@@ -354,6 +369,8 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
         # Avoid reading the default configuration file
         self.preserve = glancesync_config.default_configuration_file
         glancesync_config.default_configuration_file = '/__noexistingfile'
+        # Preserve environment
+        self.environ = copy.deepcopy(os.environ)
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -364,6 +381,9 @@ class TestGlanceSyncEmptyConfig(unittest.TestCase):
         self.stream_empty = StringIO.StringIO(configuration_incomplete)
 
     def tearDown(self):
+        # Restore environment
+        os.environ.clear()
+        os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 
     def test_constructor(self):
@@ -395,6 +415,8 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
         # Avoid reading the default configuration file
         self.preserve = glancesync_config.default_configuration_file
         glancesync_config.default_configuration_file = '/__noexistingfile'
+        # Preserve environment
+        self.environ = copy.deepcopy(os.environ)
         if 'GLANCESYNC_CONFIG' in os.environ:
             del os.environ['GLANCESYNC_CONFIG']
         os.environ['OS_REGION_NAME'] = 'Valladolid'
@@ -404,6 +426,9 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
         os.environ['OS_AUTH_URL'] = 'url'
 
     def tearDown(self):
+        # Restore environment
+        os.environ.clear()
+        os.environ.update(self.environ)
         glancesync_config.default_configuration_file = self.preserve
 
     def test_content_empty(self):

@@ -23,9 +23,7 @@
 # contact with opensource@tid.es
 #
 author = 'jmpr22'
-import sys
-import os
-from glancesync import GlanceSync
+from glancesync.glancesync import GlanceSync
 
 images_with_changes = {
     'wirecloud-img': ('fiware:apps', 194, True, None),

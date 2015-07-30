@@ -25,13 +25,12 @@
 author = 'chema'
 
 import unittest
-
 import copy
 import logging
 import StringIO
 
-from glancesync_image import GlanceSyncImage
-import glancesync_ami as ami
+from glancesync.glancesync_image import GlanceSyncImage
+import glancesync.glancesync_ami as ami
 
 
 class TestGlanceSyncAMI(unittest.TestCase):
