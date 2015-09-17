@@ -47,6 +47,10 @@ nova delete $IMAGE
 IMAGE_ID=$(glance image-list | awk -F\| /${IMAGE}'snapshot/ {gsub(/^[ ]+/,"", $2) ; print $2}')
 sudo virt-sysprep -a /var/lib/glance/images/$IMAGE_ID
 sudo virt-sparsify  /var/lib/glance/images/$IMAGE_ID ${IMAGE}.new
+
+#CentOS images relabel SELinux and reboot.
+sudo kvm  -no-reboot -nographic  -m 2048 -hda ${IMAGE}.new
+
 #sudo qemu-img convert -O qcow2 /var/lib/glance/images/$IMAGE_ID ${IMAGE}.new
 glance image-delete ${IMAGE}snapshot
 
