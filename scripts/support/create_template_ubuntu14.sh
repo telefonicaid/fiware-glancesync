@@ -5,5 +5,5 @@ cd $(dirname $0)
 
 # Parameters: name, key, ip, scripts, test_script
 
-create_template_debian7 $1 $2 $3 $4 $5
+create_template_ubuntu14 $1 $2 $3 $4 $5
 
