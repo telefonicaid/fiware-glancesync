@@ -360,9 +360,10 @@ synchronises images with ``type=baseimages``
 Security consideration
 ----------------------
 
-Glancesyncs does not require root access. But at this version it requires
-read-only access to image directory ``/var/lib/glance/images`` (or a copy of
-all these files in other path and then set the option *images_path*)
+Glancesyncs does not require *root* privileges. But at this version it requires
+read-only access to image directory ``/var/lib/glance/images`` (or making
+available a copy of all these files, or at least the subset that may be
+synchronised, in other path and then set the option *images_path*)
 
 It is strongly recommended:
 
@@ -547,22 +548,6 @@ checks against a real glance server. To activate this eight tests, edit the file
 change testingFacadeReal to True. It needs the usual OpenStack environment
 variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
-
-Advanced topics
-===============
-
-* Installation and administration
-
- * [Building from sources](doc/manuals/admin/build_source.md)
- * [Running GlanceSync from command line](doc/manuals/admin/cli.md)
- * [Logs](doc/manuals/admin/logs.md)
- * [Resources & I/O Flows](doc/manuals/admin/resources.md)
-
-* [Problem diagnosis procedures](doc/manuals/admin/diagnosis.md)
-* Container-based deployment
-
- * [Vagrant](doc/manuals/vagrant.md)
- * [Sample code contributions](doc/manuals/code_contributions.md)
 
 License
 =======
