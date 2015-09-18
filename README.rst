@@ -103,10 +103,10 @@ shared images.
 How it works
 ------------
 
-First glancesync gets a list of the images in the master region. Then runs the
+First GlanceSync gets a list of the images in the master region. Then runs the
 algorithm with each specified region (or all the regions registered in the
 same keystone server than the master region, if not specified). If an error
-occurs within a region synchronisation, glancesync does not run more operations
+occurs within a region synchronisation, GlanceSync does not run more operations
 in that region and jumps to the next one.
 
 For each region, GlanceSync starts getting a list of its images. Then
@@ -367,8 +367,8 @@ synchronised, in other path and then set the option *images_path*)
 
 It is strongly recommended:
 
-* creating an account to run glancesync only
-* creating a configuration file only readable by the glancesync account. This
+* creating an account to run GlanceSync only
+* creating a configuration file only readable by the GlanceSync account. This
   is because the credentials should not be exposed to other users.
 
 Running
