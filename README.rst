@@ -142,8 +142,8 @@ different, the following algorithm is applied:
    ``dontupdate``, ``replace`` or ``rename`` parameters. In the meanwhile, the
    image is considered *stalled* and it is not synchronised at all.
 
-How the images to synchronise are selected
-------------------------------------------
+How the images to be synchronised are selected
+----------------------------------------------
 
 There are three parameters in the configuration that affects which images are
 selected: *forcesync*, *metadata_condition* and *metadata_set*. All of them can be
@@ -217,8 +217,8 @@ Now the system is ready to use. For future sessions, only the step2 is required.
 Configuration
 =============
 
-Working without configuration file
-----------------------------------
+Working without a configuration file
+------------------------------------
 
 The tool can work without a configuration file or with an empty one. In this
 case, the following OpenStack environment variables must be filled with the
@@ -226,8 +226,8 @@ administrator's credential: ``OS_USERNAME``, ``OS_PASSWORD``, ``OS_AUTH_URL``,
 ``OS_TENANT_NAME``, ``OS_REGION_NAME``. The value of ``OS_REGION_NAME`` will be
 the master region (in FIWARE Lab this region is Spain2).
 
-Configuration file
-------------------
+The configuration file
+----------------------
 
 The configuration used by the GlanceSync component is stored in the
 ``/etc/glancesync.conf`` file. However, this path may be changed with the
@@ -256,8 +256,8 @@ environment variable):
 If credentials are stored in the configuration file, it is convenient to
 make the file only readable by the user who invokes Glancesync.
 
-Example of configuration file
-_____________________________
+Example of a configuration file
+_______________________________
 
 The following is an example of a configuration file, with all the possible
 options auto explained in the comments. This file is also available
