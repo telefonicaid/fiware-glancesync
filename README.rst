@@ -26,7 +26,7 @@ to provide feedback.
 Overall description
 ===================
 
-Glancesync is a command line tool to solve the problem of the images
+GlanceSync is a command line tool to solve the problem of the images
 synchronisation between regions. It synchronises glance servers in different
 regions taking the base of a master region. It was designed for FIWARE project,
 but it has been expanded to be useful for other users or projects.
@@ -34,44 +34,44 @@ but it has been expanded to be useful for other users or projects.
 Sofware features
 ----------------
 
-Glancesync synchronises all the images with certain metadata owned by a tenant
+GlanceSync synchronises all the images with certain metadata owned by a tenant
 from a master region to each other region in a federation (or a subset of them).
 This feature works out of the box without configuration. It requires only the
 same set of environment variables, which are needed to contact the
-keystone server, than the glance tool. It's also possible to set these
+keystone server, than the glance tool. It is also possible to set these
 parameters in a file instead of using environment variables.
 
-Glancesync synchronisation algorithm (i.e. the method to determine if a master
+GlanceSync synchronisation algorithm (i.e. the method to determine if a master
 image must be synchronised to the other regions) is configurable. By default
 all public images are synchronised, but it is enough with adding a line in the
-configuration file to synchronise only the public images with certain metadata.
-(e.g. federated_image=True)
+configuration file to synchronise only the public images with certain metadata
+(e.g. federated_image=True).
 
-Glancesync supports also the synchronisation to regions which do not use the
+GlanceSync supports also the synchronisation to regions which do not use the
 same keystone server than the master region and therefore require their own set
 of credentials. The regions are grouped by *targets*: two regions may be in the
 same *target* if they use the same credential (therefore, their glance servers
 are registered in the same keystone server). The only mandatory *target* is the
-``master`` target, where the master region is. Most of the Glancesync
+``master`` target, where the master region is. Most of the GlanceSync
 configuration, including the criteria to select which images are synchronised,
 is defined at target level. It is okay to create several targets using the same
 credential, for example if some regions only share a minimal set of images and
 others have a broader list.
 
-Glancesync by default does not replace existing images. If an
+GlanceSync by default does not replace existing images. If an
 image checksum is different between the region to synchronise and the master
 region, a warning is emitted. The user has the option of forcing the
 overwriting of a specific image (optionally renaming the old one) including the
 checksums in a configuration file, using a whilelist or a blacklist.
 
 When the remote image has the same content than the master image, but the
-metadata differs, Glancesync updates the metadata, but only a limited set, to
+metadata differs, GlanceSync updates the metadata, but only a limited set, to
 avoid overwriting properties considered as local in that glance server. Also
 the system property ``is_public`` is updated.
 
-Glancesync has special support for *AMI* (Amazon Machine Image). Amazon images
+GlanceSync has special support for *AMI* (Amazon Machine Image). Amazon images
 include a reference to a kernel image (*AKI*) and to a ramdisk image (*ARI*),
-but they are named by UUID. Therefore Glancesync has to update this fields to
+but they are named by UUID. Therefore GlanceSync has to update this fields to
 reflect the UUIDs in that particular region. 
 
 About UUIDs and image names
@@ -86,18 +86,18 @@ reused.  If something similar to an UUID is required, it is better to use a
 metadata field to simulate it.
 
 The downside of using names, is that a region may have more than a image
-with the same name. This is specially challenging, when there is more than a
+with the same name. This is specially challenging, when there is more than one
 image in a destination target, with the name of the image to synchronise. In
-this situation, Glancesync takes the first it found and print a warning with
+this situation, GlanceSync takes the first that it found and print a warning with
 the others.
 
 Image names with duplicated names are easy to avoid, with one serious
 exception: when ordinary users can publish their images as public (shared), the
 risk of collision increases and escapes of the control of the user. To avoid
-this, Glancesync allows setting a parameter to ignore images of other tenants.
+this, GlanceSync allows setting a parameter to ignore images of other tenants.
 Anyway, this is a general problem, not only a synchronisation
-problem, because more than image with the same name is very confusing to the
-users of the images. Therefore it is better to restrict the publication of
+problem, due to more that one image with the same name is very confusing to users
+that want to use them. Therefore it is better to restrict the publication of
 shared images.
 
 How it works
@@ -109,7 +109,7 @@ same keystone server than the master region, if not specified). If an error
 occurs within a region synchronisation, glancesync does not run more operations
 in that region and jumps to the next one.
 
-For each region, Glancesync starts getting a list of its images. Then
+For each region, GlanceSync starts getting a list of its images. Then
 calculates with images should be synchronised to this region (this is detailed
 in the next section).
 
@@ -129,14 +129,14 @@ When a image with the same name is already present in the destination region,
 Glancesycn checks it they are the same comparing the checksums. When they are
 different, the following algorithm is applied:
 
-1) Is the checksum in the ``dontupdate`` list? print a warning only
-2) Is the checksum in the ``rename`` list? rename old image (adding the *.old*
+1) Is the checksum in the ``dontupdate`` list? Print a warning only
+2) Is the checksum in the ``rename`` list? Rename old image (adding the *.old*
    suffix), change it to private, and upload the master region's image
-3) Is the checksum in the replace list? replace the old image with the master
+3) Is the checksum in the replace list? Replace the old image with the master
    region's image
-4) Does the parameter ``replace`` include the keyword *any*? rename old image and
+4) Does the parameter ``replace`` include the keyword *any*? Rename old image and
    upload the  master region's image
-5) Does the parameter ``rename`` include the keyword *any*? replace the old image
+5) Does the parameter ``rename`` include the keyword *any*? Replace the old image
    with the master region's image
 6) Otherwise: print a warning. The user should take an action and fill
    ``dontupdate``, ``replace`` or ``rename`` parameters. In the meanwhile, the
@@ -162,13 +162,13 @@ This is the algorithm to determine if an image is synchronisable:
    *name*, *owner*, *size*, *region*, *is_public*. The image may be synchronised
    even if it is not public, to avoid this, check ``image.is_public`` in the condition.
 3) if ``metadata_condition`` is not defined, the image is public, and
-   ``metadata_set`` is defined, the image is synchronized if some of the
+   ``metadata_set`` is defined, the image is synchronised if some of the
    properties of ``metadata_set`` is on ``image.user_properties``.
 4) if ``metadata_condition`` is not defined, the image is public, and
-   ``metadata_set`` is not defined, the image is synchronized
+   ``metadata_set`` is not defined, the image is synchronised
 5) otherwise, the image is not synchronised.
 
-For example, to synchronise the images in FIWARE-LAB, the best choice is
+For example, to synchronise the images in FIWARE Lab, the best choice is
 setting ``metadata_set=nid, sdc_aware, type, nid_version``, because all the images to be
 synchronised has at least one of those properties.
 
@@ -188,7 +188,7 @@ Build and Install
 Requirements
 ------------
 
-At the moment, Glancesync is designed to run in the glance server of the master
+At the moment, GlanceSync is designed to run in the glance server of the master
 region, because it reads the images that are stored directly in the filesystem.
 This will be fixed in a future version.
 
@@ -207,8 +207,8 @@ The recommend installation method is using a virtualenv. Actually, the installat
 process is only about the python dependencies, because the python code do not need
 installation.
 
-1) Create a virtualenv 'glanceysncENV' invoking *virtualenv glancesyncENV*
-2) Activate the virtualenv with *source glancsyncENV/bin/activate*
+1) Create a virtualenv 'glancesyncENV' invoking *virtualenv glancesyncENV*
+2) Activate the virtualenv with *source glancesyncENV/bin/activate*
 3) Install the requirements running *pip install -r requirements.txt
    --allow-all-external*
 
@@ -254,14 +254,14 @@ environment variable):
 * using the options *user*, *password*, *tenant*, *keystone_url*.
 
 If credentials are stored in the configuration file, it is convenient to
-make the file only readable by the user who invokes Glancesync.
+make the file only readable by the user who invokes GlanceSync.
 
 Example of a configuration file
 _______________________________
 
 The following is an example of a configuration file, with all the possible
 options auto explained in the comments. This file is also available
-in the ``conf`` directory, but be aware that Glancesync does not read the
+in the ``conf`` directory, but be aware that GlanceSync does not read the
 configuration from this path unless explicitly requested by setting
 *GLANCESYNC_CONFIG*.
 
@@ -269,7 +269,7 @@ configuration from this path unless explicitly requested by setting
 
  [main]
 
- # Region where are the images in the "master" target that are synchronized to
+ # Region where are the images in the "master" target that are synchronised to
  # the other regions of "master" regions and/or to regions in other targets.
  master_region = Spain
 
@@ -308,7 +308,7 @@ configuration from this path unless explicitly requested by setting
  # these checksums
  # dontupdate =
 
- # List of UUIDs that must be synchronized unconditionally.
+ # List of UUIDs that must be synchronised unconditionally.
  #
  # This is useful for example to pre-sync images marked as private
 
@@ -329,7 +329,7 @@ configuration from this path unless explicitly requested by setting
  # if true, ignore public images of other tenants. That is, an image is upload
  # even when a image with the same name and content exist in the regional
  # server, if this image is not owned by the tenant specified in the credential.
- # Usually, it is convenience to set this value a True. It some images were
+ # Usually, it is convenience to set this value to True. It some images were
  # owned by other tenants, a better option is to change their owner.
  only_tenant_images = True
 
@@ -360,7 +360,7 @@ synchronises images with ``type=baseimages``
 Security consideration
 ----------------------
 
-Glancesyncs does not require *root* privileges. But at this version it requires
+GlanceSync does not require *root* privileges. But at this version it requires
 read-only access to image directory ``/var/lib/glance/images`` (or making
 available a copy of all these files, or at least the subset that may be
 synchronised, in other path and then set the option *images_path*)
@@ -410,7 +410,7 @@ that do not use the same keystone server. A *target* is a namespace to refer to
 the regions sharing a credential. The ``master`` target is the one
 where the master region is. Each target has a section with its name in the
 configuration file, to specify the credential and optionally other configuration
-(most of the parameters are local to each target)
+(most of the parameters are local to each target).
 
 The way to synchronise to regions that are in other *target*, is to specified
 the region with the preffix ``<target_name>:``. For example, to synchronise to region
@@ -449,11 +449,11 @@ It will show the status of the regions Trento, Mexico, Gent both in the *master*
 target, and the regions Region1 in Region2 defined in the *target2* target.
 
 The output of command is a line for each image to be synchronised for each
-region. That is, in the last example, if 15 images are syncrhonised to the
+region. That is, in the last example, if 15 images are synchronised to the
 regions of *master* and 10 images to the regions of *target2*, then a total
 of 15*3 + 10*2 images are printed.
 
-Each line is a CSV. The firt field is the synchronisation status, the
+Each line is a CSV. The first field is the synchronisation status, the
 seconds is the region's name, and the third is the image name. This is an
 example:
 
