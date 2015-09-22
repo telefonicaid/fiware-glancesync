@@ -41,7 +41,7 @@
     {
       "credential_type": "base_admin",
       "federation_name": "Federation1",
-      "region_name": "Salamanca",
+      "region_name": "Caceres",
       "keystone_url": "",
       "tenant_id": "",
       "tenant_name": "admin",
@@ -52,7 +52,7 @@
     {
       "credential_type": "secondary_admin",
       "federation_name": "Federation1",
-      "region_name": "Salamanca",
+      "region_name": "Caceres",
       "keystone_url": "",
       "tenant_id": "",
       "tenant_name": "tenant-qa",

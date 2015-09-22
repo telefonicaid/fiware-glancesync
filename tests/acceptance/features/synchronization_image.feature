@@ -130,7 +130,7 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images without specifying any condition
     When  I sync images on "Burgos"
-    Then  the image "qatesting01" is synchronized
+    Then  the image "qatesting01" is synchronized in target node "Burgos"
     And   the image "qatesting01" is only present in target node "Burgos"
 
 

@@ -42,12 +42,12 @@ behave.use_step_matcher("re")
 __dataset_utils__ = DatasetUtils()
 
 
-@step(u'a new image created in the Glance of any target node with name "(?P<image_name>\w*)", '
+@step(u'a new image created in the Glance of all target node with name "(?P<image_name>\w*)", '
       u'file "(?P<file_name>\w*)" and using a credential type "(?P<cred_type>\w*)"')
 def create_new_image_in_glance_of_target_node_and_credential(context, image_name, file_name, cred_type):
 
-    # Get the first credential found with the given type in NOT MASTER node
-    glance_ops = None
+    # Get the all credentials found with the given type in NOT MASTER node
+    context.target_credentials = None
     for cred in context.config[PROPERTIES_CONFIG_CRED]:
         if cred_type in cred[PROPERTIES_CONFIG_CRED_TYPE] \
                 and context.master_region_name != cred[PROPERTIES_CONFIG_CRED_REGION_NAME]:
@@ -59,15 +59,13 @@ def create_new_image_in_glance_of_target_node_and_credential(context, image_name
 
             # Init GlanceOperation
             glance_ops = GlanceOperations(username, password, tenant_id, auth_url, region_name)
-            break
 
-    assert_that(glance_ops, is_not(None),
+            context.target_credentials = list() if context.target_credentials is None else context.target_credentials
+            context.target_credentials.append({"image_id": glance_ops.create_image(image_name, file_name),
+                                               "region_name": region_name, "image_owner": tenant_id})
+
+    assert_that(context.target_credentials, is_not(None),
                 "Credential with type '{}' not found for target node".format(cred_type))
-
-    context.target_image_id = glance_ops.create_image(image_name, file_name)
-    context.target_region_name = region_name
-    context.target_image_owner = tenant_id
-
 
 @step(u'a warning message is shown informing about different owner for image "(?P<image_name>\w*)"')
 def warning_message_images_with_different_owner(context, image_name):
@@ -75,9 +73,11 @@ def warning_message_images_with_different_owner(context, image_name):
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
-    assert_that(context.glancesync_result,
-                is_(contains_string(
-                    GLANCESYNC_OUTPUT_OWNER.format(region_name=context.target_region_name, image_name=image_name,
-                                                   uuid_image=context.target_image_id,
-                                                   other_tenant=context.target_image_owner))),
-                "WARNING message for '{}' is not shown in results".format(image_name))
+    for target_credential in context.target_credentials:
+        assert_that(context.glancesync_result,
+                    is_(contains_string(
+                        GLANCESYNC_OUTPUT_OWNER.format(region_name=target_credential['region_name'],
+                                                       image_name=image_name,
+                                                       uuid_image=target_credential['image_id'],
+                                                       other_tenant=target_credential['image_owner']))),
+                    "WARNING message for '{}' is not shown in results".format(image_name))
