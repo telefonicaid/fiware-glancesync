@@ -136,6 +136,9 @@ EOF
   # sysprep VM
   echo "running virt-sysprep"
   sudo virt-sysprep -a tmp_image
+
+  # shrink VM
+  sudo ./shrink.py
   echo "running virt-sparsify"
   sudo virt-sparsify  tmp_image tmp_image.new
   rm tmp_image
