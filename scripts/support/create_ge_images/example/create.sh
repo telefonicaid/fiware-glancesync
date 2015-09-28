@@ -29,7 +29,7 @@ sudo apt-get update -q
 sudo apt-get install -q -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"  apache2-mpm-prefork 
 sudo tar xzf data.tgz -C/
 rm data.tgz
-sudo tee <EOF /etc/apache2/conf.d/myconf.conf >/dev/null
+sudo tee <<EOF /etc/apache2/conf.d/myconf.conf >/dev/null
 # Add here your own configuraton changes
 
 EOF
