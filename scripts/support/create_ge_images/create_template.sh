@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
@@ -23,6 +23,7 @@
 #
 
 # See: https://forge.fiware.org/plugins/mediawiki/wiki/testbed/index.php/FIWARE_LAB_Image_Deployement_Guideline
+
 set -e
 
 export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2}')
@@ -34,9 +35,6 @@ export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz
 export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
 
-
-unsecuressh="ssh -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no"
-unsecurescp="scp -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no"
 
 cd $(dirname $0)
 
@@ -85,42 +83,40 @@ create_template() {
   sleep 5
   nova floating-ip-associate $ID $IP
   # Wait until ssh is ready
+  ussh="ssh -oStrictHostKeyChecking=no"
+  ssh-keygen -f ~/.ssh/known_hosts -R $IP
   echo "Waiting until ssh is ready..."
   sleep 30
-  until $unsecuressh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
+  until $ussh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
 
   echo "VM is ready"
 
   # if present, upload file
-  if [ -n "${UPLOAD_FILE}" -a -f $UPLOAD_FILE ] ; then
-     echo "Uploading $UPLOAD_FILE"
-     $unsecurescp $UPLOAD_FILE ${user}@${IP}:
+  if [ -n "${UPLOAD_FILE}" -a -f scripts/$UPLOAD_FILE ] ; then
+     echo "Uploading scripts/${UPLOAD_FILE}"
+     scp scripts/$UPLOAD_FILE ${user}@${IP}:
   fi
+
+  # upload create script
+  scp scripts/$CREATESCRIPT ${user}@${IP}:create.sh
+  ssh ${user}@${IP} chmod 700 create.sh 
 
   # run script, delete support account,  poweroff the VM
   # Centos requires -t -t because sudo needs tty; with Debian -t -t sometimes 
   # hungs with apt-get upgrade.
   if [ "$user" = "centos" ] ; then
     echo 'Running script in CentOS distribution'
-    cat $CREATESCRIPT - <<EOF | $unsecuressh -t -t ${user}@${IP}
-
-echo "Finish."
-exit
-EOF
-  $unsecuressh -t ${user}@${IP} sudo userdel support
-  $unsecuressh -t ${user}@${IP} sudo rm -rf /home/support $UPLOAD_FILE
-  $unsecuressh -t ${user}@${IP} sudo poweroff || true
+    O="-t"
   else
-     echo 'Running script in Debian/Ubuntu distribution'
-     cat $CREATESCRIPT - <<EOF | $unsecuressh ${user}@${IP}
-
-echo "Finish."
-exit
-EOF
-  $unsecuressh  ${user}@${IP} sudo userdel support
-  $unsecuressh  ${user}@${IP} sudo rm -rf /home/support $UPLOAD_FILE
-  $unsecuressh  ${user}@${IP} sudo poweroff || true
+    echo 'Running script in Debian/Ubuntu distribution'
+    O=""
   fi
+  set -o pipefail
+  ssh $O ${user}@${IP} ./create.sh 2>&1 |tee create.log
+  set +o pipefail
+  ssh $O ${user}@${IP} sudo userdel support
+  ssh $O ${user}@${IP} sudo rm -rf /home/support create.sh $UPLOAD_FILE
+  ssh $O ${user}@${IP} sudo poweroff || true
 
   # create template from VM, delete VM
   sleep 20
@@ -141,7 +137,7 @@ EOF
   sudo ./shrink.py
   echo "running virt-sparsify"
   sudo virt-sparsify  tmp_image tmp_image.new
-  rm tmp_image
+  rm -f tmp_image
   mv tmp_image.new tmp_image
 
   # boot centOS images and poweroff after reboot; this is required because
@@ -152,7 +148,7 @@ EOF
 
   # upload template and delete file
   echo "uploading image"
-  glance image-create --name ${name} --disk-format qcow2 --container-format bare --is-public False --file tmp_image
+  glance image-create --name ${name}_rc --disk-format qcow2 --container-format bare --is-public False --file tmp_image
   rm -f tmp_image
 
   # test template
@@ -165,23 +161,24 @@ test_template() {
 
   # launch a VM using the new template
   echo "Launching a testing VM"
-  # ID = $(./launch_image.py test-$name $name $KEYPAIR $ip m1.small)
-  ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name} --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+  ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name}_rc --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
   echo "VM id: $ID"
   sleep 5
   nova floating-ip-associate $ID $IP
   # Wait until ssh is reading
-  unsecuressh="ssh -oStrictHostKeyChecking=no"
+  ussh="ssh -oStrictHostKeyChecking=no"
   ssh-keygen -f ~/.ssh/known_hosts -R $IP
   echo "Waiting until ssh is ready..."
   sleep 30
-  until $unsecuressh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
+  until $ussh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
 
   echo "Running the test"
   # run test script
   export USERNAME=${user}
-  chmod 700 ./${TESTSCRIPT}
-  ./${TESTSCRIPT}
+  chmod 700 scripts/${TESTSCRIPT}
+  set -o pipefail
+  scripts/${TESTSCRIPT} 2>&1 |tee test.log
+  set +o pipefail
 
   echo "Success. Deleting the VM"
   # delete the VM
