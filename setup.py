@@ -23,7 +23,8 @@
 # contact with opensource@tid.es
 #
 from distutils.core import setup
-from server import __version__
+
+__version__ = '1.0.0'
 
 setup(
 name='fiware-glancesync',
