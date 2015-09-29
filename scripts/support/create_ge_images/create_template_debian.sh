@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
@@ -21,7 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-
 
 cd $(dirname $0)
 . create_template.sh
