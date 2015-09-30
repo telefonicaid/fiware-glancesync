@@ -85,7 +85,9 @@ create_template() {
   nova floating-ip-associate $ID $IP
   # Wait until ssh is ready
   ussh="ssh -oStrictHostKeyChecking=no"
-  ssh-keygen -f ~/.ssh/known_hosts -R $IP
+  if [ -f ~/.ssh/known_hosts ] ; then 
+      ssh-keygen -f ~/.ssh/known_hosts -R $IP
+  fi
   echo "Waiting until ssh is ready..."
   sleep 30
   until $ussh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
