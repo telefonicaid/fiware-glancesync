@@ -33,6 +33,7 @@ export KEYPAIR=createimage
 export CREATESCRIPT=create.sh
 export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz
+export IMAGES_DIR=~/create_ge_images/
 export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
 
 
@@ -92,14 +93,14 @@ create_template() {
   echo "VM is ready"
 
   # if present, upload file
-  if [ -n "${UPLOAD_FILE}" -a -f scripts/$UPLOAD_FILE ] ; then
-     echo "Uploading scripts/${UPLOAD_FILE}"
-     scp scripts/$UPLOAD_FILE ${user}@${IP}:
+  if [ -n "${UPLOAD_FILE}" -a -f $IMAGES_DIR/${name}/$UPLOAD_FILE ] ; then
+     echo "Uploading ${UPLOAD_FILE}"
+     scp $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
   fi
 
   # upload create script
-  scp scripts/$CREATESCRIPT ${user}@${IP}:create.sh
-  ssh ${user}@${IP} chmod 700 create.sh 
+  scp $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
+  ssh ${user}@${IP} chmod 700 $CREATESCRIPT
 
   # run script, delete support account,  poweroff the VM
   # Centos requires -t -t because sudo needs tty; with Debian -t -t sometimes 
@@ -112,10 +113,10 @@ create_template() {
     O=""
   fi
   set -o pipefail
-  ssh $O ${user}@${IP} ./create.sh 2>&1 |tee create.log
+  ssh $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
   set +o pipefail
   ssh $O ${user}@${IP} sudo userdel support
-  ssh $O ${user}@${IP} sudo rm -rf /home/support create.sh $UPLOAD_FILE
+  ssh $O ${user}@${IP} sudo rm -rf /home/support $CREATESCRIPT $UPLOAD_FILE
   ssh $O ${user}@${IP} sudo poweroff || true
 
   # create template from VM, delete VM
@@ -125,31 +126,31 @@ create_template() {
 
   # download snapshot and delete it from server
   echo "downloading image"
-  glance image-download --file tmp_image ${name}-snapshot
+  glance image-download --file $IMAGES_DIR/${name}/tmp_image ${name}-snapshot
   echo "deleting image"
   glance image-delete ${name}-snapshot
 
   # sysprep VM
   echo "running virt-sysprep"
-  sudo virt-sysprep -a tmp_image
+  sudo virt-sysprep -a $IMAGES_DIR/${name}/tmp_image
 
   # shrink VM
-  sudo ./shrink.py
+  sudo ./shrink.py $IMAGES_DIR/${name}
   echo "running virt-sparsify"
-  sudo virt-sparsify  tmp_image tmp_image.new
-  rm -f tmp_image
-  mv tmp_image.new tmp_image
+  sudo virt-sparsify  $IMAGES_DIR/${name}/tmp_image $IMAGES_DIR/${name}/tmp_image.new
+  rm -f $IMAGES_DIR/${name}/tmp_image
+  mv $IMAGES_DIR/${name}/tmp_image.new $IMAGES_DIR/${name}/tmp_image
 
   # boot centOS images and poweroff after reboot; this is required because
   # SELinux relabeling.
   if [ "$user" = "centos" ] ; then
-      sudo kvm  -no-reboot -nographic  -m 2048 -hda tmp_image
+      sudo kvm  -no-reboot -nographic  -m 2048 -hda $IMAGES_DIR/${name}/tmp_image
   fi
 
   # upload template and delete file
   echo "uploading image"
-  glance image-create --name ${name}_rc --disk-format qcow2 --container-format bare --is-public False --file tmp_image
-  rm -f tmp_image
+  glance image-create --name ${name}_rc --disk-format qcow2 --container-format bare --is-public False --file $IMAGES_DIR/${name}/tmp_image
+  rm -f $IMAGES_DIR/${name}/tmp_image
 
   # test template
   test_template $name $user
@@ -175,9 +176,9 @@ test_template() {
   echo "Running the test"
   # run test script
   export USERNAME=${user}
-  chmod 700 scripts/${TESTSCRIPT}
+  chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
   set -o pipefail
-  scripts/${TESTSCRIPT} 2>&1 |tee test.log
+  $IMAGES_DIR/${name}/${TESTSCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/test.log
   set +o pipefail
 
   echo "Success. Deleting the VM"
