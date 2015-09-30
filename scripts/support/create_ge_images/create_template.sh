@@ -39,6 +39,26 @@ export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
 
 cd $(dirname $0)
 
+wait_ssh() {
+  user=$1
+  if [ -f ~/.ssh/known_hosts ] ; then 
+      ssh-keygen -f ~/.ssh/known_hosts -R $IP
+  fi
+  echo "Waiting until ssh is ready..."
+  sleep 30
+  tries=15
+  ussh="ssh -oStrictHostKeyChecking=no"
+  until $ussh ${user}@${IP} true ; do
+     sleep 10 
+     ((tries-=1))
+     if [ $tries -eq 0 ] ; then
+        echo "Timeout while waiting for ssh."
+        exit -1
+     fi
+  done
+  echo "VM is ready"
+
+}
 create_template_ubuntu12() {
   # Parameters: name
   check_params $*
@@ -83,16 +103,9 @@ create_template() {
   echo "VM id is $ID"
   sleep 5
   nova floating-ip-associate $ID $IP
-  # Wait until ssh is ready
-  ussh="ssh -oStrictHostKeyChecking=no"
-  if [ -f ~/.ssh/known_hosts ] ; then 
-      ssh-keygen -f ~/.ssh/known_hosts -R $IP
-  fi
-  echo "Waiting until ssh is ready..."
-  sleep 30
-  until $ussh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
 
-  echo "VM is ready"
+  # Wait until ssh is ready
+  wait_ssh $user
 
   # if present, upload file
   if [ -n "${UPLOAD_FILE}" -a -f $IMAGES_DIR/${name}/$UPLOAD_FILE ] ; then
@@ -168,12 +181,12 @@ test_template() {
   echo "VM id: $ID"
   sleep 5
   nova floating-ip-associate $ID $IP
+
   # Wait until ssh is reading
-  ussh="ssh -oStrictHostKeyChecking=no"
-  ssh-keygen -f ~/.ssh/known_hosts -R $IP
-  echo "Waiting until ssh is ready..."
-  sleep 30
-  until $ussh ${user}@${IP} true 2>/dev/null ; do sleep 10 ; done
+  wait_ssh $user
+
+  # remove sudo credential (to avoid the script use it)
+  sudo -k
 
   echo "Running the test"
   # run test script
