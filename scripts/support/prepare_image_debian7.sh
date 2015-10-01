@@ -37,10 +37,10 @@ $unsecuressh $USER@10.95.55.170 -t -t sudo apt-get -y upgrade
 $unsecuressh $USER@10.95.55.170 -t -t sudo apt-get -y install openjdk-6-jre-headless wget
 $unsecuressh $USER@10.95.55.170 -t -t sudo apt-get -y install unattended-upgrades
 cat <<EOF | $unsecuressh $USER@10.95.55.170 -t -t
-#sudo apt-get update
-#sudo apt-get -y upgrade
-#sudo apt-get -y install openjdk-6-jre-headless wget
-#sudo apt-get -y install unattended-upgrades
+sudo apt-get update
+sudo apt-get -y upgrade
+sudo apt-get -y install openjdk-6-jre-headless wget
+sudo apt-get -y install unattended-upgrades
 sudo mv activate_support_account.py /sbin
 sudo mv rc.local /etc/
 sudo chmod 755 /etc/rc.local
