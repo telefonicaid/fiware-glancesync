@@ -53,7 +53,8 @@ sudo virt-sysprep -a /var/lib/glance/images/$IMAGE_ID
 sudo qemu-img convert -O qcow2 /var/lib/glance/images/$IMAGE_ID ${IMAGE}.new
 glance image-delete ${IMAGE}snapshot
 
-#Relabel SELinux and reboot.
+##CentOS images relabel SELinux and reboot.
 sudo kvm  -no-reboot -nographic  -m 2048 -hda ${IMAGE}.new
+
 glance image-create --name ${IMAGE}_rc --disk-format qcow2 --container-format bare --is-public False --property type=baseimages --min-disk 2 --file ${IMAGE}.new
 sudo rm ${IMAGE}.new
