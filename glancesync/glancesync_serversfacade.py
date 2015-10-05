@@ -222,7 +222,7 @@ def _delete_image(regionobj, id, confirm=True):
             print 'Not deleting image ' + id
             return False
 
-    p = Popen(['/usr/bin/glance', 'image-delete', id], stdin=None)
+    p = Popen(['glance', 'image-delete', id], stdin=None)
 
     code = p.wait()
     if code == 0:
@@ -248,7 +248,7 @@ def _update_metadata(regionobj, image):
 
     # compose cmd line
     arguments = [
-        '/usr/bin/glance', 'image-update', image.id, '--disk-format',
+        'glance', 'image-update', image.id, '--disk-format',
         image.raw['disk_format'], '--name', image.name, '--is-public',
         str(image.is_public), '--is-protected',
         str(image.raw['protected']), '--container-format',
@@ -327,7 +327,7 @@ def _get_regions(target):
         value_to_restore = os.environ['OS_REGION_NAME']
         del(os.environ['OS_REGION_NAME'])
 
-    p = Popen(['/usr/bin/keystone', 'catalog', '--service=image'], stdin=None,
+    p = Popen(['keystone', 'catalog', '--service=image'], stdin=None,
               stdout=PIPE)
 
     if value_to_restore:
