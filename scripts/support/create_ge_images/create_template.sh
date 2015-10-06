@@ -95,6 +95,10 @@ create_template() {
   base_image=$2
   user=$3
 
+  if [ $ONLY_TEST ] ; then
+     test_template $name $user
+     exit
+  fi
   # ask sudo password at start
   sudo true
   # Launch de VM using base image
@@ -174,31 +178,67 @@ create_template() {
 test_template() {
   name=$1
   user=$2
+  export USERNAME=${user}
+
+  if [ $TEST_USING_VM ] ; then
+     ID2=$(nova boot tester-${name} --security-groups $SECURITY_GROUP_CREATE --flavor m1.tiny --key-name $KEYPAIR --image base_debian_7 --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+  fi
 
   # launch a VM using the new template
   echo "Launching a testing VM"
   ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name}_rc --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+
+     
   echo "VM id: $ID"
   sleep 5
-  nova floating-ip-associate $ID $IP
 
-  # Wait until ssh is reading
-  wait_ssh $user
+  if [ $TEST_USING_VM ] ; then
+     nova floating-ip-associate $ID2 $IP
+     IDSAVE=$ID
+     ID=$ID2 
+     wait_ssh debian
+     DIR=$IMAGES_DIR/${name}
+     CP="-o ControlPath=$DIR/cm_%h%p%r"
+     ssh -A -o ControlMaster=yes $CP -o ControlPersist=yes debian@$IP true
+     scp $CP $DIR/${TESTSCRIPT} debian@$IP:
+     ssh $CP debian@$IP chmod 700 $TESTSCRIPT
+     cat << EOF | ssh $CP debian@$IP 'cat - > ./testenv'
+     export IP=$IP
+     export USERNAME=$USERNAME
+     export TESTSCRIPT=$TESTSCRIPT
+     ssh -o StrictHostKeyChecking=no $USERNAME@$IP true
+EOF
 
-  # remove sudo credential (to avoid the script use it)
-  sudo -k
+     ID=$IDSAVE
+     nova floating-ip-associate $ID $IP
+     wait_ssh $user
+     # Connect to ID2, because we are using the master connection
+     set -o pipefail
+     ssh $CP debian@$IP '. testenv ; ./${TESTSCRIPT}' 2>&1 |tee $IMAGES_DIR/${name}/test.log
+     set +o pipefail
+     ssh $CP -O exit debian@$IP
+     nova delete $ID2 
+  else
+     nova floating-ip-associate $ID $IP
+     # Wait until ssh is reading
+     wait_ssh $user
+     # remove sudo credential (to avoid the script use it)
+     sudo -k
 
-  echo "Running the test"
-  # run test script
-  export USERNAME=${user}
-  chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
-  set -o pipefail
-  $IMAGES_DIR/${name}/${TESTSCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/test.log
-  set +o pipefail
+     echo "Running the test"
+     # run test script
+     chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
+     set -o pipefail
+     $IMAGES_DIR/${name}/${TESTSCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/test.log
+     set +o pipefail
+  fi
 
   echo "Success. Deleting the VM"
   # delete the VM
   nova delete $ID
+
+  # print the image UUID
+  echo "UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
 }
 
 check_params() {
