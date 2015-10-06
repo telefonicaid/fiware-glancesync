@@ -47,7 +47,7 @@ wait_ssh() {
   echo "Waiting until ssh is ready..."
   sleep 30
   tries=15
-  ussh="ssh -oStrictHostKeyChecking=no"
+  ussh="ssh -i $HOME/.ssh/createtestimage -oStrictHostKeyChecking=no"
   until $ussh ${user}@${IP} true ; do
      sleep 10 
      ((tries-=1))
@@ -95,7 +95,9 @@ create_template() {
   base_image=$2
   user=$3
 
-  if [ $ONLY_TEST ] ; then
+  I="-i $HOME/.ssh/createtestimage"
+
+  if [ $TEST_ONLY ] ; then
      test_template $name $user
      exit
   fi
@@ -114,25 +116,25 @@ create_template() {
   # if present, upload file
   if [ -n "${UPLOAD_FILE}" -a -f $IMAGES_DIR/${name}/$UPLOAD_FILE ] ; then
      echo "Uploading ${UPLOAD_FILE}"
-     scp $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
+     scp $I $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
   fi
 
   # upload create script
-  scp $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
-  ssh ${user}@${IP} chmod 700 $CREATESCRIPT
+  scp $I $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
+  ssh $I ${user}@${IP} chmod 700 $CREATESCRIPT
 
   # run script, delete support account,  poweroff the VM
   # Centos requires -t -t because sudo needs tty; with Debian -t -t sometimes 
   # hungs with apt-get upgrade.
   if [ "$user" = "centos" ] ; then
     echo 'Running script in CentOS distribution'
-    O="-t"
+    O="$I -t"
   else
     echo 'Running script in Debian/Ubuntu distribution'
-    O=""
+    O="$I"
   fi
   set -o pipefail
-  ssh $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
+  ssh  $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
   set +o pipefail
   ssh $O ${user}@${IP} sudo userdel support
   ssh $O ${user}@${IP} sudo rm -rf /home/support $CREATESCRIPT $UPLOAD_FILE
@@ -181,14 +183,14 @@ test_template() {
   export USERNAME=${user}
 
   if [ $TEST_USING_VM ] ; then
+     echo "Launching a tester VM"
      ID2=$(nova boot tester-${name} --security-groups $SECURITY_GROUP_CREATE --flavor m1.tiny --key-name $KEYPAIR --image base_debian_7 --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+     echo "VM id: $ID2"
   fi
 
   # launch a VM using the new template
   echo "Launching a testing VM"
   ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name}_rc --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
-
-     
   echo "VM id: $ID"
   sleep 5
 
@@ -199,7 +201,10 @@ test_template() {
      wait_ssh debian
      DIR=$IMAGES_DIR/${name}
      CP="-o ControlPath=$DIR/cm_%h%p%r"
-     ssh -A -o ControlMaster=yes $CP -o ControlPersist=yes debian@$IP true
+     eval $(ssh-agent)
+     ssh-add ~/.ssh/createtestimage
+
+     ssh -A -i ~/.ssh/createtestimage -o ControlMaster=yes $CP -o ControlPersist=yes debian@$IP true
      scp $CP $DIR/${TESTSCRIPT} debian@$IP:
      ssh $CP debian@$IP chmod 700 $TESTSCRIPT
      cat << EOF | ssh $CP debian@$IP 'cat - > ./testenv'
@@ -214,23 +219,36 @@ EOF
      wait_ssh $user
      # Connect to ID2, because we are using the master connection
      set -o pipefail
-     ssh $CP debian@$IP '. testenv ; ./${TESTSCRIPT}' 2>&1 |tee $IMAGES_DIR/${name}/test.log
+     ssh $CP debian@$IP '. testenv ; ./${TESTSCRIPT}' 2>&1 |tee $DIR/test.log || touch $DIR/failed
      set +o pipefail
      ssh $CP -O exit debian@$IP
-     nova delete $ID2 
+     ssh-agent -k
+     nova delete $ID2
+
   else
      nova floating-ip-associate $ID $IP
      # Wait until ssh is reading
      wait_ssh $user
      # remove sudo credential (to avoid the script use it)
      sudo -k
+     DIR=$IMAGES_DIR/${name}/nova li
+     eval $(ssh-agent)
+     ssh-add ~/.ssh/createtestimage
 
      echo "Running the test"
      # run test script
      chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
      set -o pipefail
-     $IMAGES_DIR/${name}/${TESTSCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/test.log
+     $DIR/${TESTSCRIPT} 2>&1 |tee $DIR/test.log || touch $DIR/failed
      set +o pipefail
+     ssh-agent -k
+
+  fi
+
+  if [ -f $DIR/failed ] ; then
+        rm $DIR/failed
+        echo "Failed."
+        exit -1
   fi
 
   echo "Success. Deleting the VM"
@@ -238,7 +256,7 @@ EOF
   nova delete $ID
 
   # print the image UUID
-  echo "UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
+  echo "Success. UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
 }
 
 check_params() {
