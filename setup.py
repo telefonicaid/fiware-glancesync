@@ -28,7 +28,7 @@ __version__ = '1.2.0'
 
 setup(
 name='fiware-glancesync',
-packages=['fiware-glancesync'], # this must be the same as the name above
+packages=['fiware-glancesync'],  # this must be the same as the name above
 version=__version__,
 description='Tool to synchronise images from a master region to other regions',
 author='Fernando Lopez Aguilar',
@@ -40,4 +40,3 @@ keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
 classifiers=[
 "License :: OSI Approved :: Apache Software License", ],
 )
-

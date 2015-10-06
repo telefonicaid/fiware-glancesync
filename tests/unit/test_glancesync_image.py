@@ -29,6 +29,7 @@ import copy
 
 from glancesync.glancesync_image import GlanceSyncImage
 
+
 class TestGlanceSyncImageRegion(unittest.TestCase):
     """Class to test all methods but compare_with_masterregion, that has
     its own testing class"""

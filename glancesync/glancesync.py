@@ -41,6 +41,7 @@ from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
 the master region.
 """
 
+
 class GlanceSync(object):
     """Class to synchronize glance servers in different regions taking the base
      of the master region.
