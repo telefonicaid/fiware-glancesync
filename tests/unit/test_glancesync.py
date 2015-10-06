@@ -349,7 +349,9 @@ class TestGlanceSync_Sync(unittest.TestCase):
     """
 
     def config(self):
-        self.path_test = '../resources/alreadysync'
+        path = os.path.abspath(os.curdir)
+        print 'Resolving problem in test_glancesync.py'
+        self.path_test = path + '/tests/resources/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
     def setUp(self):
@@ -429,7 +431,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
     """Test a environment where the destination region has no images"""
     def config(self):
-        self.path_test = '../resources/emptyregions'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -437,7 +440,8 @@ class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     """Test a environment where the destination region has some of the images
     """
     def config(self):
-        self.path_test = '../resources/mixed'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -445,7 +449,8 @@ class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     """Test a environment where some images at the destination region has
     metadata different than the images on the master region"""
     def config(self):
-        self.path_test = '../resources/metadata'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/metadata'
         self.regions = ['master:Burgos']
 
 
@@ -453,14 +458,16 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     """Test a environment where some regional images has a checksum different
     than the master images"""
     def config(self):
-        self.path_test = '../resources/checksum'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/checksum'
         self.regions = ['master:Burgos']
 
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
-        self.path_test = '../resources/ami'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/ami'
         self.regions = ['master:Burgos']
 
 if __name__ == '__main__':
