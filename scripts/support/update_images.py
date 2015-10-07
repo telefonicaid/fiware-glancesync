@@ -44,21 +44,20 @@ for image_name in images:
     image = glance.images.find(name=image_name)
     print image.name, image.id
     file_path = '/var/lib/glance/images/' + image.id
-    check_call(['sudo','cp', file_path, 'image.tmp'])
+    check_call(['sudo', 'cp', file_path, 'image.tmp'])
     try:
         if image in blacklist:
             copy_using_guestmount()
         else:
-            check_call(['sudo','virt-tar-in','-a', 'image.tmp', 'files.tar', '/'])
+            check_call(['sudo', 'virt-tar-in', '-a', 'image.tmp', 'files.tar', '/'])
     except Exception:
         copy_using_guestmount()
-        
+
     check_call(['sudo', 'chmod', '777', 'image.tmp'])
     uuid = glance.images.create(
          name=image.name, container_format='bare', disk_format='qcow2',
-         data=open('image.tmp'), properties={ 'type': 'baseimage'}, is_public = False,
-         min_disk = image.min_disk)
+         data=open('image.tmp'), properties={'type': 'baseimage'}, is_public=False,
+         min_disk=image.min_disk)
     print uuid
     os.unlink('image.tmp')
     image.delete()
-

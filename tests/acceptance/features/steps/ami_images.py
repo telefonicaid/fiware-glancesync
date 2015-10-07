@@ -66,8 +66,8 @@ def ami_image_is_present_in_all_target_nodes(context, image_name):
             __logger__.info("Properties to check in the image '%s' from '%s': '%s'", image_name, region, properties)
 
             assert_that(sync_properties, equal_to(properties),
-                        "GlanceSync has NOT synchronized the correct metadata velues for '{}' in '{}'".format(image_name,
-                                                                                                              region))
+                        "GlanceSync has NOT synchronized the correct metadata velues for '{}' in '{}'"
+                        .format(image_name, region))
 
 
 @step(u'a warning message is shown informing that the (?P<type>kernel|ramdisk) image "(?P<type_image_name>\w*)" '
@@ -89,5 +89,3 @@ def warning_message_missing_ami_image(context, type, type_image_name, image_name
                                                                    image_name=image_name)
 
             assert_that(context.glancesync_result, contains_string(message))
-
-
