@@ -350,7 +350,6 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
     def config(self):
         path = os.path.abspath(os.curdir)
-        print 'Resolving problem in test_glancesync.py'
         self.path_test = path + '/tests/resources/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
