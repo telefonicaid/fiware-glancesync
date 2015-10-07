@@ -534,12 +534,20 @@ prepare the environment to run the functional_test target.
 Unit tests
 ----------
 
-To run the unit tests, go to ``test/unit`` folder and run:
+To run the unit tests, you need to create a virtualenv using the requirements
+both contained in requirements.txt and requrirements_dev.txt. You only need to
+execute the nosetests program in the root dorectory of the fiware-glancesync
+code. Keep in mind that it requires python2.7 or superior to execute the unit
+tests.
 
 .. code::
 
-     export PYTHONPATH=../..
-     python -m unittest discover
+     virtualenv -p <root to python v2.7> venv
+      source ./venv/bin/activate
+      pip install -r requirements.txt
+      pip install -r requirements_dev.txt 
+     nosetest --exe
+     deactivate
 
 Eight tests are marked as skipped because they are more properly integration
 test. They are in the file ´´test_glancesync_serversfacade.py´´. The tested

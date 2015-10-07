@@ -114,7 +114,6 @@ class Sync(object):
             self._wait_child(children)
         print 'All is done.'
 
-
     def sequential_sync(self, dry_run=False):
         """Run the synchronisation sequentially (that is, do not start the
         synchronisation to a region before the previous one was completed or
@@ -161,16 +160,21 @@ if __name__ == '__main__':
     description = 'A tool to sync images from a master region to other '\
                   'regions'
     parser = argparse.ArgumentParser(description=description)
+
     parser.add_argument('regions', metavar='region', type=str, nargs='*',
                         help='region where the images are uploaded to')
+
     parser.add_argument('--parallel', action='store_true',
                         help='sync several regions in parallel')
+
     group = parser.add_mutually_exclusive_group()
+
     group.add_argument('--dry-run', action='store_true',
                        help='do not upload actually the images')
-    parser.add_argument('--show-status', action='store_true', help=
-                        'do not sync, but show the synchronisation'
-                        ' status')
+
+    parser.add_argument('--show-status', action='store_true',
+                        help='do not sync, but show the synchronisation status')
+
     meta = parser.parse_args()
 
     # Run cmd
@@ -182,5 +186,3 @@ if __name__ == '__main__':
         sync.parallel_sync()
     else:
         sync.sequential_sync(meta.dry_run)
-
-

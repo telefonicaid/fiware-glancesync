@@ -55,6 +55,7 @@ the python library used by the glance and keystone clients.
 # Timeout to get image list
 timeout = 30
 
+
 class ServersFacade(object):
     def __init__(self, target):
         self.target = target
@@ -157,6 +158,7 @@ def _getrawimagelist(glance_client):
     """
     images = glance_client.images.list()
     return list(image.to_dict() for image in images)
+
 
 def _getimagelist(regionobj):
     """return a image list from the glance of the specified region

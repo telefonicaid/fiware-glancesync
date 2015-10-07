@@ -59,7 +59,6 @@ def __check_properties__(context, region, image_name, properties, check_master=T
     assert_that(sync_properties, equal_to(properties),
                 "GlanceSync has NOT synchronized the images with the metadata values in {}".format(region))
 
-
 def __compare_dict__(dictA, dictB):
     """ We need to check that all the second keys and values are equal to the first values
         of key and values dict
@@ -69,23 +68,32 @@ def __compare_dict__(dictA, dictB):
              in which we return a simple dict without any value.
     """
 
+    #delete empty_keys in dictB
+    empty_keys = [k for k,v in dictB.iteritems() if not v]
+    for k in empty_keys:
+        del dictB[k]
+
     # Check all keys in first dict
     diff = dict()
     for key in dictB.keys():
         if key is u'':
             # if there is no key
             diff = {}
-        elif (not dictA.has_key(key)):
+        elif key not in dictA.keys():
             # we cannot found the key in the first dictionary
             diff[key] = (key, "Key not found {}: {}".format(key, dictB[key]))
-        elif (dictA[key] != dictB[key]):
+        elif dictA[key] != dictB[key]:
             # they are different keys
             diff[key] = (key, "Values are different {}:{} != {}:{}".format(dictB[key], dictA[key]))
         else:
-            diff = {}
+            diff[key] = "{}"
+
+    #delete empty_values due to they are equals
+    empty_values = [k for k,v in diff.iteritems() if v == '{}']
+    for v in empty_values:
+        del diff[v]
 
     return diff
-
 
 @step(u'the properties values of the image "(?P<image_name>\w*)" in all nodes are the following')
 def step_impl_check_metadata_values(context, image_name):
