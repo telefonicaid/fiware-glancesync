@@ -70,7 +70,7 @@ def launch_vm(vmname, imagename, ip, key, flavorname, cloudinit=False, configdri
         extra_params['userdata'] = cloud_init_meta
 
     if configdrive:
-        extra_params['files'] = {'/etc/fiware-support/defaultssh.pub' : open('fake_test_key.pub'),
+        extra_params['files'] = {'/etc/fiware-support/defaultssh.pub': open('fake_test_key.pub'),
                                   '/etc/fiware-support/defaultgpg.pub': open('public-fake.gpg')}
         extra_params['config_drive'] = True
         extra_params['meta'] = {'encrypt': 'True'}
@@ -83,7 +83,7 @@ def launch_vm(vmname, imagename, ip, key, flavorname, cloudinit=False, configdri
     if ip:
         server.add_floating_ip(ip)
     return server.id
-    
+
 
 def launch_with_cloudinit(name):
     (image, flavor) = images[name]
@@ -98,4 +98,3 @@ if len(sys.argv) == 4:
     print launch_vm(sys.argv[1], sys.argv[2], ip, key, sys.argv[3])
 elif len(sys.argv) == 6:
     print launch_vm(sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[3], sys.argv[5])
-

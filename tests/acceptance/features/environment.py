@@ -48,8 +48,8 @@ def before_all(context):
     # Load project properties
     __logger__.info("Loading project properties")
     context.config = load_project_properties()
-    context.master_region_name = context.config[PROPERTIES_CONFIG_GLANCESYNC] \
-        [PROPERTIES_CONFIG_GLANCESYNC_MASTER_REGION_NAME]
+    context.master_region_name = \
+        context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_MASTER_REGION_NAME]
 
     # Init Glance operation managers. Only 'base' managers relative to "CREDENTIAL_TYPE_BASE_ADMIN" credential type
     # Format: {Spain: GlanceOperations, Trento: GlanceOperations}
@@ -79,10 +79,12 @@ def before_all(context):
             username = cred[PROPERTIES_CONFIG_CRED_HOST_USER]
             password = cred[PROPERTIES_CONFIG_CRED_HOST_PASSWORD]
             key = cred[PROPERTIES_CONFIG_CRED_HOST_KEY]
-            config_file_path = context.config[PROPERTIES_CONFIG_GLANCESYNC] \
-                [PROPERTIES_CONFIG_GLANCESYNC_CONFIG_FILE]
-            glancesyc_bin_path = context.config[PROPERTIES_CONFIG_GLANCESYNC] \
-                [PROPERTIES_CONFIG_GLANCESYNC_BIN_PATH]
+            config_file_path = \
+                context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_CONFIG_FILE]
+
+            glancesyc_bin_path = \
+                context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_BIN_PATH]
+
             context.glancesync_client = GlanceSyncClient(hostname, username, password,
                                                          configuration_file_path=config_file_path,
                                                          glancesyc_bin_path=glancesyc_bin_path,

@@ -127,8 +127,10 @@ def log_print_response(logger, response):
     log_msg += '\t< Response code: {}\n'.format(str(response.status_code))
     log_msg += '\t< Headers: {}\n'.format(str(dict(response.headers)))
     try:
-        log_msg += '\t< Payload received:\n {}'.format(__get_pretty_body__(dict(response.headers), response.content))
+        log_msg += '\t< Payload received:\n {}'\
+            .format(__get_pretty_body__(dict(response.headers), response.content))
     except ValueError:
-        log_msg += '\t< Payload received:\n {}'.format(__get_pretty_body__(dict(response.headers), response.content.text))
+        log_msg += '\t< Payload received:\n {}'\
+            .format(__get_pretty_body__(dict(response.headers), response.content.text))
 
     logger.debug(log_msg)

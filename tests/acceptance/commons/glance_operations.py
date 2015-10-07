@@ -77,7 +77,6 @@ class GlanceOperations():
                          KEYSTONE_GLANCE_SERVICE_NAME, region_name, endpoint)
         return endpoint
 
-
     def __init_auth__(self, username, password, tenant_id, auth_url):
         """
         Init the variables related to authorization, needed to execute tests.

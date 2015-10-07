@@ -166,6 +166,7 @@ def __get_real_att_value_image_in_master__(context, value_pattern):
 
     return real_value
 
+
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)"')
 @step(u'a new image created in the Glance of master node with name "(?P<image_name>\w*)" and these properties')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)"')
@@ -200,7 +201,8 @@ def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
         __create_new_image__(context, region, image_name, file)
 
 
-@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and without upload an image file')
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"'
+      u' and without upload an image file')
 def a_new_image_created_in_glance_of_target_no_upload_file(context, image_name):
 
     for region in context.glance_manager_list:

@@ -29,33 +29,33 @@ from subprocess import Popen, PIPE
 import novaclient.exceptions
 
 nova = osclients.get_novaclient()
-try: 
+try:
     server = nova.servers.find(id=sys.argv[1])
 except novaclient.exceptions.NotFound:
     server = nova.servers.find(name=sys.argv[1])
-   
+
 logs = server.get_console_output()
 encrypted = list()
 plain = None
 is_encrypted = False
-found = False 
+found = False
 
 
 gpg_block = False
 for line in logs.splitlines():
     if gpg_block:
-         encrypted.append(line)
-         if line == '-----END PGP MESSAGE-----':
-             gpg_block = False
-             is_encrypted = True
-             found = True
+        encrypted.append(line)
+        if line == '-----END PGP MESSAGE-----':
+            gpg_block = False
+            is_encrypted = True
+            found = True
     elif line.endswith('FiWare Support:'):
-         gpg_block = True
-         encrypted = list()
+        gpg_block = True
+        encrypted = list()
     elif line.startswith('support:') or line.startswith('Fiware Support: '):
-         password = line.partition(':')[2].strip()
-         found = True
-         is_encrypted = False
+        password = line.partition(':')[2].strip()
+        found = True
+        is_encrypted = False
 
 if is_encrypted:
     encrypted = '\n'.join(encrypted)

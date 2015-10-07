@@ -1,0 +1,10 @@
+[report]
+omit =
+    tests/*
+    examples/*
+    scripts/*
+    */__init__.py
+    setup.py
+
+[report]
+ignore_errors = True

@@ -46,6 +46,7 @@ testingFacadeReal = False
 if 'TESTING_FACADE' in env:
     testingFacadeReal = True
 
+
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
     def setUp(self):
