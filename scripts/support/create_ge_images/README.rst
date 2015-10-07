@@ -2,10 +2,10 @@
 Scripts to create, test & publish GE images
 *******************************************
 
-This is the software use to implement the functionality described at
+This is the software used to implement the functionality described at
 https://forge.fiware.org/plugins/mediawiki/wiki/testbed/index.php/FIWARE_LAB_Image_Deployement_Guideline.
 
-That is, this software creates, tests and publish an image, using the pair of
+That is, this software creates, tests and publishes an image, using the pair of
 scripts, a create script and a test script, provided by each GE owner.
 
 
@@ -23,11 +23,10 @@ folder, must be copied.
 
 Each user must create the folder *~/create_ge_images* and load the environment
 variables (``OS_USERNAME``, ``OS_PASSWORD``, ``OS_TENANT_NAME``, ``OS_AUTH_URI``) with its
-FiwareLab credential. The script *sec_group* is useful to initialize the
+FIWARE Lab credential. The script *sec_group* is useful to initialize the
 user account: it creates a pair of security groups (one of them to create
 the image and the other one to test it), generates and registers a key pair and allocates a
-floating IP if it is not already allocated. The scripts expects that the first
-key in *~/.ssh/authorized_keys* is the user's public key.
+floating IP if it is not already allocated.
 
 Creating/testing the image
 **************************
@@ -95,7 +94,7 @@ VM machine but in the user account. Therefore, this script is a security risk
 and must be audited before running it. It is important also not using the root
 account to invoke the process. The script clean the sudo credential before
 invoking the script. As an experimental feature, it is possible to run the
-script inside a VM. This is described in next section.
+script inside a VM. This is described in next section.**
 
 Running the test script in a VM
 -------------------------------
