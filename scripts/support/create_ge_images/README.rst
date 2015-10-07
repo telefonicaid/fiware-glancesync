@@ -78,10 +78,11 @@ The local copy of the snapshot is *virt-syspred*. Then the shrink process and
 *<imagename>_rc* (*rc* means *release candidate*)
 
 The last phase is to check the image. A server is instantiated, using again the
-keypair of the user and assigning the floating IP. This time, however, the security
+generated keypair and assigning the floating IP. This time, however, the security
 group *allopen* is used and the name of the VM is the same than the image but
-with the *test-* prefix. Then the test script is invoked. If it complete without
-errors, the VM is deleted and the UUID of the image is printed. The image is
+with the *test-* prefix. A ssh-agent is started to insert the generated public key.
+Then the test script is invoked. If it complete without errors, the VM is deleted,
+the ssh-agent is killed and the UUID of the image is printed. The image is
 ready for publication.
 
 Be aware that if the create script fails, the virtual machine wont be deleted;
@@ -93,8 +94,26 @@ neither the virtual machine nor the release candidate image are deleted.
 VM machine but in the user account. Therefore, this script is a security risk
 and must be audited before running it. It is important also not using the root
 account to invoke the process. The script clean the sudo credential before
-invoking the script. In a feature release, a way to running the script
-securely will be provided, for example using another virtual machine.**
+invoking the script. As an experimental feature, it is possible to run the
+script inside a VM. This is described in next section.
+
+Running the test script in a VM
+-------------------------------
+
+If ``TEST_USING_VM`` is defined and not empty, the test script is executed
+inside a VM. This is an experimental feature that does not require an extra
+floating IP. It is more secure, but it needs more time to complete. If the
+script fails, maybe a good idea is to check that this experimental feature is
+not the cause of the problem. To repeat the test only, the variable ``TEST_ONLY``
+must be defined and not empty (and of course to use the traditional method,
+``TEST_USING_VM`` must be undefined)
+
+It works by creating a second VM (the tester). Initially the floating IP is assigned to
+this VM and a SSH connection is created, using SSH ControlMaster; this maintains
+a persistent connection that is reused by the following ssh commands. Then the
+IP is assigned to the testing VM; this change does not affect to the already
+created connections. This way is possible to connect to the tester VM via ssh,
+in spite of the floating IP is assigned to the testing VM.
 
 Publishing the image
 ********************
