@@ -543,9 +543,9 @@ tests.
 .. code::
 
      virtualenv -p <root to python v2.7> venv
-      source ./venv/bin/activate
-      pip install -r requirements.txt
-      pip install -r requirements_dev.txt 
+     source ./venv/bin/activate
+     pip install -r requirements.txt
+     pip install -r requirements_dev.txt
      nosetest --exe
      deactivate
 
