@@ -109,11 +109,11 @@ floating IP. It is more secure, but it needs more time to complete. If the
 script fails, maybe a good idea is to check that this experimental feature is
 not the cause of the problem. To repeat the test only, the variable ``TEST_ONLY``
 must be defined and not empty (and of course to use the traditional method,
-``TEST_USING_VM`` must be undefined)
+``TEST_USING_VM`` must be undefined).
 
 It works by creating a second VM (the tester). Initially the floating IP is assigned to
 this VM and a SSH connection is created, using SSH ControlMaster; this maintains
-a persistent connection that is reused by the following ssh commands. Then the
+a persistent connection that is reused by the subsequent ssh commands. Then the
 IP is assigned to the tested VM; this change does not affect to the already
 created connections. This way is possible to connect to the tester VM via ssh,
 in spite of the floating IP is assigned now to the tested VM.
