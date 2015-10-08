@@ -12,10 +12,14 @@ scripts, a create script and a test script, provided by each GE owner.
 Installation
 ************
 
-The software must be used from a Linux host with the following package installed:
+The software must be used from a Ubuntu 14.04 system with the following packages installed:
 
-* kvm
-* nova python client
+* qemu-kvm
+* python-novaclient
+* python-glanceclient
+* python-keystoneclient
+* python-neutronclient
+* libguestfs-tools
 
 The scripts should be copied to */opt/create_ge_images* to share the installation
 between several users. Also the module *osclients.py*, provided in the parent
