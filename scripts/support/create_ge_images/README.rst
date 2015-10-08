@@ -44,7 +44,7 @@ It is strongly recommended that both *create.sh* and *test.sh* scripts start wit
 a trace is displayed for each command invoked. Anyway, the exit status of the
 script must be zero only when the script runs without error.
 
-After this, one of the scripts *create_template_*.sh*, must be invoked passing
+After this, one of the scripts *create_template_\*.sh*, must be invoked passing
 as parameter the name of the image. For example, to create the image
 *myimage* using the *debian* image, the command to invoke is:
 
@@ -147,7 +147,7 @@ existing with the same name:
 
   /opt/create_ge_images/publish_image myimage
 
-The command renames the ol:d image (using the suffix .old) and makes it private.
+The command renames the old image (using the suffix .old) and makes it private.
 It also prints the old image checksum. This value must be append to the replace
 directive at ``/etc/glancesync.conf``, this way the old image will be replaced
 with the new one in the other regions.

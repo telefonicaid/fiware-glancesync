@@ -89,6 +89,14 @@ create_template_centos7() {
   create_template $1 base_centos_7 centos
 }
 
+launch_vm() {
+  # $1 name, $2 flavor, $3 security group, $4 image
+  nova boot $1 --flavor $2 --key-name $KEYPAIR --security-groups $3 --image $4 --nic net-id=$SHARED_NETWORK_ID
+}
+
+launch_vm_get_id() {
+  launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}'
+}
 
 create_template() {
   name=$1
@@ -105,7 +113,8 @@ create_template() {
   sudo true
   # Launch de VM using base image
   echo "launching VM $name $base_image $KEYPAIR $IP m1.small"
-  ID=$(nova boot ${name} --flavor m1.small --key-name $KEYPAIR --security-groups $SECURITY_GROUP_CREATE --image ${base_image} --nic net-id=$SHARED_NETWORK_ID | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}')
+  ID=$(launch_vm_get_id ${name} m1.small $SECURITY_GROUP_CREATE $base_image)
+
   echo "VM id is $ID"
   sleep 5
   nova floating-ip-associate $ID $IP
@@ -184,13 +193,15 @@ test_template() {
 
   if [ $TEST_USING_VM ] ; then
      echo "Launching a tester VM"
-     ID2=$(nova boot tester-${name} --security-groups $SECURITY_GROUP_CREATE --flavor m1.tiny --key-name $KEYPAIR --image base_debian_7 --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+     ID2=$(launch_vm_get_id tester-${name} m1.tiny $SECURITY_GROUP_CREATE base_debian_7)
+
      echo "VM id: $ID2"
   fi
 
   # launch a VM using the new template
   echo "Launching a testing VM"
-  ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name}_rc --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+  ID=$(launch_vm_get_id test-${name} m1.small $SECURITY_GROUP_TEST ${name}_rc)
+
   echo "VM id: $ID"
   sleep 5
 
@@ -231,7 +242,7 @@ EOF
      wait_ssh $user
      # remove sudo credential (to avoid the script use it)
      sudo -k
-     DIR=$IMAGES_DIR/${name}/nova li
+     DIR=$IMAGES_DIR/${name}
      eval $(ssh-agent)
      ssh-add ~/.ssh/createtestimage
 
