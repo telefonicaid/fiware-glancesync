@@ -136,8 +136,7 @@ The following three situations are possible:
   automatically.
 
 The script ``locate_images.py`` can be helpful. It shows a list of the images with
-its name, nid and type. It is also useful to see what NIDs are in use, if a new
-one must be used.
+its name, nid and type. It is also useful to see what NIDs are in use.
 
 To publish the image, the script ``publish_image.py`` can be used. The following
 order is used to publish the image *myimage*, that replaces an image already
