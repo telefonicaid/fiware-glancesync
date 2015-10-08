@@ -26,13 +26,15 @@
 from osclients import osclients
 import sys
 
- 
-if len(sys.argv) < 2 or len(sys.argv) > 4:
-   print >> sys.stderr , 'Please, use:'
-   print >> sys.stderr , '  If the image exists: ', sys.argv[0], '<image_uuid> [oldname]'
-   print >> sys.stderr , '  otherwise          : ', sys.argv[0], '<image_uuid> <nid> <type>'
 
-   sys.exit(-1)
+if len(sys.argv) < 2 or len(sys.argv) > 4:
+    print >> sys.stderr, 'Please, use:'
+    print >> sys.stderr, '  If the image exists: ', sys.argv[0],\
+        '<image_uuid> [oldname]'
+    print >> sys.stderr, '  otherwise          : ', sys.argv[0], \
+        '<image_uuid> <nid> <type>'
+
+    sys.exit(-1)
 
 owner = osclients.get_tenant_id()
 glance = osclients.get_glanceclient()
@@ -70,16 +72,18 @@ for i in images:
         image_type = i.properties['type']
         i.update(name=image.name + '.deprecated', is_public=False)
         print 'Renamed and made private image ', i.name, i.id
-        print 'Add this checksum to replace, at /etc/glancesync.conf: ', i.checksum
+        print 'Add this checksum to replace, at /etc/glancesync.conf: ',\
+            i.checksum
 
 if not nid or not image_type:
-   if len(sys.argv) == 4:
-       nid = sys.argv[2]
-       image_type = sys.argv[3]
-   else: 
-   	msg = 'There is not an image with name {0}. Please, use: {1} <image_uuid> <nid> <type>'
-   	print >> sys.stderr , msg.format(old_name, sys.argv[0])
-   	sys.exit(-1)
+    if len(sys.argv) == 4:
+        nid = sys.argv[2]
+        image_type = sys.argv[3]
+    else:
+        msg = 'There is not an image with name {0}. Please, use: {1} '\
+            '<image_uuid> <nid> <type>'
+        print >> sys.stderr, msg.format(old_name, sys.argv[0])
+        sys.exit(-1)
 
 properties = dict()
 properties['nid'] = nid
