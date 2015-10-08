@@ -6,7 +6,7 @@ This is the software used to implement the functionality described at
 https://forge.fiware.org/plugins/mediawiki/wiki/testbed/index.php/FIWARE_LAB_Image_Deployement_Guideline.
 
 That is, this software creates, tests and publishes an image, using the pair of
-scripts, a create script and a test script, provided by each GE owner.
+scripts, a creation script and a testing script, provided by each GE owner.
 
 
 Installation
@@ -54,10 +54,10 @@ as parameter the name of the image. For example, to create the image
 
 Inside the folder myimage, a pair of logs will be generated: *create.log* is the
 result of invoking the *create.sh* script and *test.log* is the output of
-the *test.sh* launch. Of course, if the execution of the create script fails,
+the *test.sh* launch. Of course, if the execution of the creation script fails,
 then only *create.log* is generated.
 
-If all the process ends without errors, the UUID of the new image is printed.
+If all the processes end without errors, the UUID of the new image is printed.
 This image is private and owned by the user, but it is ready to be published
 now.
 
@@ -69,41 +69,41 @@ keypair and the security group *sshopen*. The name of the virtual machine is
 the same than the image. Then it assigns the floating IP and wait until a SSH
 connection is ready.
 
-At this moment, the create.sh script is uploaded to the server (the data.tgz
+At this moment, the create.sh script is uploaded to the VM (the data.tgz
 is upload if it exists, too). Then the script is invoked via SSH.
 
 If the script did not fail, the support account and the script are deleted and
-the server is power down. Then a snapshot is made, downloaded and deleted. Also
+the VM is power down. Then a snapshot is made, downloaded and deleted. Also
 the VM is deleted.
 
 The local copy of the snapshot is *virt-syspred*. Then the shrink process and
 *virt-sparsify* are invoked. Finally, the resulting image is upload as
 *<imagename>_rc* (*rc* means *release candidate*)
 
-The last phase is to check the image. A server is instantiated, using again the
+The last phase is to check the image. A VM is instantiated from that image, using again the
 generated keypair and assigning the floating IP. This time, however, the security
 group *allopen* is used and the name of the VM is the same than the image but
 with the *test-* prefix. A ssh-agent is started to insert the generated public key.
-Then the test script is invoked. If it complete without errors, the VM is deleted,
+Then the testing script is invoked. If it complete without errors, the VM is deleted,
 the ssh-agent is killed and the UUID of the image is printed. The image is
 ready for publication.
 
-Be aware that if the create script fails, the virtual machine wont be deleted;
+Be aware that if the creation script fails, the virtual machine will not be deleted;
 this is useful to debug the problem, but anyway that virtual machine should be
-deleted before trying again. In the same way, if the test script fails,
+deleted before trying again. In the same way, if the testing script fails,
 neither the virtual machine nor the release candidate image are deleted.
 
-**Warning: the test script is executed directly, it is not invoked inside the
+**Warning: the testing script is executed directly, it is not invoked inside the
 VM machine but in the user account. Therefore, this script is a security risk
-and must be audited before running it. It is important also not using the root
-account to invoke the process. The script clean the sudo credential before
+and must be audited before running it. It is important also not use the root
+account to invoke the process. The script cleans the sudo credential before
 invoking the script. As an experimental feature, it is possible to run the
 script inside a VM. This is described in next section.**
 
-Running the test script in a VM
--------------------------------
+Running the testing script in a VM
+----------------------------------
 
-If ``TEST_USING_VM`` is defined and not empty, the test script is executed
+If ``TEST_USING_VM`` is defined and not empty, the testing script is executed
 inside a VM. This is an experimental feature that does not require an extra
 floating IP. It is more secure, but it needs more time to complete. If the
 script fails, maybe a good idea is to check that this experimental feature is
@@ -114,9 +114,9 @@ must be defined and not empty (and of course to use the traditional method,
 It works by creating a second VM (the tester). Initially the floating IP is assigned to
 this VM and a SSH connection is created, using SSH ControlMaster; this maintains
 a persistent connection that is reused by the following ssh commands. Then the
-IP is assigned to the testing VM; this change does not affect to the already
+IP is assigned to the tested VM; this change does not affect to the already
 created connections. This way is possible to connect to the tester VM via ssh,
-in spite of the floating IP is assigned to the testing VM.
+in spite of the floating IP is assigned now to the tested VM.
 
 Publishing the image
 ********************

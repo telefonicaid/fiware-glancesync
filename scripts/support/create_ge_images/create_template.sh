@@ -119,7 +119,7 @@ create_template() {
      scp $I $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
   fi
 
-  # upload create script
+  # upload creation script
   scp $I $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
   ssh $I ${user}@${IP} chmod 700 $CREATESCRIPT
 
@@ -235,8 +235,8 @@ EOF
      eval $(ssh-agent)
      ssh-add ~/.ssh/createtestimage
 
-     echo "Running the test"
-     # run test script
+     echo "Running the testing script"
+     # run testing script
      chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
      set -o pipefail
      $DIR/${TESTSCRIPT} 2>&1 |tee $DIR/test.log || touch $DIR/failed
