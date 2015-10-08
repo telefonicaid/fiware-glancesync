@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
@@ -21,19 +21,20 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+from osclients import osclients
 
 
-nova secgroup-create allopen
-nova secgroup-add-rule allopen icmp -1 -1 0.0.0.0/0
-nova secgroup-add-rule allopen tcp 1 65535 0.0.0.0/0
-nova secgroup-add-rule allopen udp 1 65535 0.0.0.0/0
-nova secgroup-create sshopen
-nova secgroup-add-rule sshopen tcp 22 22 0.0.0.0/0
+glance = osclients.get_glanceclient()
+images = glance.images.findall()
+nids = set()
+owner = osclients.get_tenant_id()
+print '*** Current images:'
+for image in images:
+    p = image.properties
+    if 'nid' in p and 'type' in p and image.owner == owner and image.is_public:
+        nids.add(p['nid'])
+        print image.name, p['nid'], p['type']
 
-nova keypair-add  createimage > ~/.ssh/createtestimage
-chmod 400 ~/.ssh/createtestimage
-
-IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
-if [ ! $IP ] ; then
-nova floating-ip-create public-ext-net-01
-fi
+nids_list = list(int(nid) for nid in nids)
+nids_list.sort()
+print '*** NIDs in use: ', nids_list

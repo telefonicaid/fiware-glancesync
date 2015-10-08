@@ -57,7 +57,8 @@ else:
 
 if newsize:
     print 'Resizing to ' + newsize
-    params = ['qemu-img', 'create', '-f', 'qcow2', '-o', 'preallocation=metadata',
+    params = ['qemu-img', 'create', '-f', 'qcow2', '-o',
+              'preallocation=metadata',
               'newdisk.qcow2', newsize]
     call(params, stdin=None, stdout=None, stderr=None)
     params = ['virt-resize', '--shrink', '/dev/sda1', 'tmp_image',

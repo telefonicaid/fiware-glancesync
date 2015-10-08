@@ -47,7 +47,7 @@ wait_ssh() {
   echo "Waiting until ssh is ready..."
   sleep 30
   tries=15
-  ussh="ssh -oStrictHostKeyChecking=no"
+  ussh="ssh -i $HOME/.ssh/createtestimage -oStrictHostKeyChecking=no"
   until $ussh ${user}@${IP} true ; do
      sleep 10 
      ((tries-=1))
@@ -89,17 +89,32 @@ create_template_centos7() {
   create_template $1 base_centos_7 centos
 }
 
+launch_vm() {
+  # $1 name, $2 flavor, $3 security group, $4 image
+  nova boot $1 --flavor $2 --key-name $KEYPAIR --security-groups $3 --image $4 --nic net-id=$SHARED_NETWORK_ID
+}
+
+launch_vm_get_id() {
+  launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}'
+}
 
 create_template() {
   name=$1
   base_image=$2
   user=$3
 
+  I="-i $HOME/.ssh/createtestimage"
+
+  if [ $TEST_ONLY ] ; then
+     test_template $name $user
+     exit
+  fi
   # ask sudo password at start
   sudo true
   # Launch de VM using base image
   echo "launching VM $name $base_image $KEYPAIR $IP m1.small"
-  ID=$(nova boot ${name} --flavor m1.small --key-name $KEYPAIR --security-groups $SECURITY_GROUP_CREATE --image ${base_image} --nic net-id=$SHARED_NETWORK_ID | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}')
+  ID=$(launch_vm_get_id ${name} m1.small $SECURITY_GROUP_CREATE $base_image)
+
   echo "VM id is $ID"
   sleep 5
   nova floating-ip-associate $ID $IP
@@ -110,25 +125,25 @@ create_template() {
   # if present, upload file
   if [ -n "${UPLOAD_FILE}" -a -f $IMAGES_DIR/${name}/$UPLOAD_FILE ] ; then
      echo "Uploading ${UPLOAD_FILE}"
-     scp $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
+     scp $I $IMAGES_DIR/${name}/$UPLOAD_FILE ${user}@${IP}:
   fi
 
-  # upload create script
-  scp $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
-  ssh ${user}@${IP} chmod 700 $CREATESCRIPT
+  # upload creation script
+  scp $I $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
+  ssh $I ${user}@${IP} chmod 700 $CREATESCRIPT
 
   # run script, delete support account,  poweroff the VM
   # Centos requires -t -t because sudo needs tty; with Debian -t -t sometimes 
   # hungs with apt-get upgrade.
   if [ "$user" = "centos" ] ; then
     echo 'Running script in CentOS distribution'
-    O="-t"
+    O="$I -t"
   else
     echo 'Running script in Debian/Ubuntu distribution'
-    O=""
+    O="$I"
   fi
   set -o pipefail
-  ssh $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
+  ssh  $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
   set +o pipefail
   ssh $O ${user}@${IP} sudo userdel support
   ssh $O ${user}@${IP} sudo rm -rf /home/support $CREATESCRIPT $UPLOAD_FILE
@@ -174,31 +189,85 @@ create_template() {
 test_template() {
   name=$1
   user=$2
+  export USERNAME=${user}
+
+  if [ $TEST_USING_VM ] ; then
+     echo "Launching a tester VM"
+     ID2=$(launch_vm_get_id tester-${name} m1.tiny $SECURITY_GROUP_CREATE base_debian_7)
+
+     echo "VM id: $ID2"
+  fi
 
   # launch a VM using the new template
   echo "Launching a testing VM"
-  ID=$(nova boot test-${name} --security-groups $SECURITY_GROUP_TEST --flavor m1.small --key-name $KEYPAIR --image ${name}_rc --nic net-id=$SHARED_NETWORK_ID | awk -F\| '/\|[ \t]+id[ \t]+\|/ {print $3}')
+  ID=$(launch_vm_get_id test-${name} m1.small $SECURITY_GROUP_TEST ${name}_rc)
+
   echo "VM id: $ID"
   sleep 5
-  nova floating-ip-associate $ID $IP
 
-  # Wait until ssh is reading
-  wait_ssh $user
+  if [ $TEST_USING_VM ] ; then
+     nova floating-ip-associate $ID2 $IP
+     IDSAVE=$ID
+     ID=$ID2 
+     wait_ssh debian
+     DIR=$IMAGES_DIR/${name}
+     CP="-o ControlPath=$DIR/cm_%h%p%r"
+     eval $(ssh-agent)
+     ssh-add ~/.ssh/createtestimage
 
-  # remove sudo credential (to avoid the script use it)
-  sudo -k
+     ssh -A -i ~/.ssh/createtestimage -o ControlMaster=yes $CP -o ControlPersist=yes debian@$IP true
+     scp $CP $DIR/${TESTSCRIPT} debian@$IP:
+     ssh $CP debian@$IP chmod 700 $TESTSCRIPT
+     cat << EOF | ssh $CP debian@$IP 'cat - > ./testenv'
+     export IP=$IP
+     export USERNAME=$USERNAME
+     export TESTSCRIPT=$TESTSCRIPT
+     ssh -o StrictHostKeyChecking=no $USERNAME@$IP true
+EOF
 
-  echo "Running the test"
-  # run test script
-  export USERNAME=${user}
-  chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
-  set -o pipefail
-  $IMAGES_DIR/${name}/${TESTSCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/test.log
-  set +o pipefail
+     ID=$IDSAVE
+     nova floating-ip-associate $ID $IP
+     wait_ssh $user
+     # Connect to ID2, because we are using the master connection
+     set -o pipefail
+     ssh $CP debian@$IP '. testenv ; ./${TESTSCRIPT}' 2>&1 |tee $DIR/test.log || touch $DIR/failed
+     set +o pipefail
+     ssh $CP -O exit debian@$IP
+     ssh-agent -k
+     nova delete $ID2
+
+  else
+     nova floating-ip-associate $ID $IP
+     # Wait until ssh is reading
+     wait_ssh $user
+     # remove sudo credential (to avoid the script use it)
+     sudo -k
+     DIR=$IMAGES_DIR/${name}
+     eval $(ssh-agent)
+     ssh-add ~/.ssh/createtestimage
+
+     echo "Running the testing script"
+     # run testing script
+     chmod 700 $IMAGES_DIR/${name}/${TESTSCRIPT}
+     set -o pipefail
+     $DIR/${TESTSCRIPT} 2>&1 |tee $DIR/test.log || touch $DIR/failed
+     set +o pipefail
+     ssh-agent -k
+
+  fi
+
+  if [ -f $DIR/failed ] ; then
+        rm $DIR/failed
+        echo "Failed."
+        exit -1
+  fi
 
   echo "Success. Deleting the VM"
   # delete the VM
   nova delete $ID
+
+  # print the image UUID
+  echo "Success. UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
 }
 
 check_params() {
