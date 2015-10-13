@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -- encoding: utf-8 --
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
