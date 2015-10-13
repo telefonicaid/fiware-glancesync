@@ -35,7 +35,7 @@ export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz
 export IMAGES_DIR=~/create_ge_images/
 export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
-
+export FLAVOR=${FLAVOR:-m1.small}
 
 cd $(dirname $0)
 
@@ -102,6 +102,7 @@ create_template() {
   name=$1
   base_image=$2
   user=$3
+  DIR=$IMAGES_DIR/${name}
 
   I="-i $HOME/.ssh/createtestimage"
 
@@ -112,8 +113,8 @@ create_template() {
   # ask sudo password at start
   sudo true
   # Launch de VM using base image
-  echo "launching VM $name $base_image $KEYPAIR $IP m1.small"
-  ID=$(launch_vm_get_id ${name} m1.small $SECURITY_GROUP_CREATE $base_image)
+  echo "launching VM $name $base_image $KEYPAIR $IP $FLAVOR"
+  ID=$(launch_vm_get_id ${name} $FLAVOR $SECURITY_GROUP_CREATE $base_image)
 
   echo "VM id is $ID"
   sleep 5
@@ -129,7 +130,7 @@ create_template() {
   fi
 
   # upload creation script
-  scp $I $IMAGES_DIR/${name}/$CREATESCRIPT ${user}@${IP}:
+  scp $I $DIR/$CREATESCRIPT ${user}@${IP}:
   ssh $I ${user}@${IP} chmod 700 $CREATESCRIPT
 
   # run script, delete support account,  poweroff the VM
@@ -143,7 +144,7 @@ create_template() {
     O="$I"
   fi
   set -o pipefail
-  ssh  $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $IMAGES_DIR/${name}/create.log
+  ssh  $O ${user}@${IP} ./${CREATESCRIPT} 2>&1 |tee $DIR/create.log
   set +o pipefail
   ssh $O ${user}@${IP} sudo userdel support
   ssh $O ${user}@${IP} sudo rm -rf /home/support $CREATESCRIPT $UPLOAD_FILE
@@ -156,31 +157,31 @@ create_template() {
 
   # download snapshot and delete it from server
   echo "downloading image"
-  glance image-download --file $IMAGES_DIR/${name}/tmp_image ${name}-snapshot
+  glance image-download --file $DIR/tmp_image ${name}-snapshot
   echo "deleting image"
   glance image-delete ${name}-snapshot
 
   # sysprep VM
   echo "running virt-sysprep"
-  sudo virt-sysprep -a $IMAGES_DIR/${name}/tmp_image
+  sudo virt-sysprep -a $DIR/tmp_image
 
   # shrink VM
-  sudo ./shrink.py $IMAGES_DIR/${name}
+  sudo ./shrink.py $DIR
   echo "running virt-sparsify"
-  sudo virt-sparsify  $IMAGES_DIR/${name}/tmp_image $IMAGES_DIR/${name}/tmp_image.new
-  rm -f $IMAGES_DIR/${name}/tmp_image
-  mv $IMAGES_DIR/${name}/tmp_image.new $IMAGES_DIR/${name}/tmp_image
+  sudo virt-sparsify  $DIR/tmp_image $DIR/tmp_image.new
+  rm -f $DIR/tmp_image
+  mv $DIR/tmp_image.new $DIR/tmp_image
 
   # boot centOS images and poweroff after reboot; this is required because
   # SELinux relabeling.
   if [ "$user" = "centos" ] ; then
-      sudo kvm  -no-reboot -nographic  -m 2048 -hda $IMAGES_DIR/${name}/tmp_image
+      sudo kvm  -no-reboot -nographic  -m 2048 -hda $DIR/tmp_image
   fi
 
   # upload template and delete file
   echo "uploading image"
-  glance image-create --name ${name}_rc --disk-format qcow2 --container-format bare --is-public False --file $IMAGES_DIR/${name}/tmp_image
-  rm -f $IMAGES_DIR/${name}/tmp_image
+  glance image-create --name ${name}_rc --disk-format qcow2 --container-format bare --is-public False --file $DIR/tmp_image
+  rm -f $DIR/tmp_image
 
   # test template
   test_template $name $user
@@ -200,7 +201,7 @@ test_template() {
 
   # launch a VM using the new template
   echo "Launching a testing VM"
-  ID=$(launch_vm_get_id test-${name} m1.small $SECURITY_GROUP_TEST ${name}_rc)
+  ID=$(launch_vm_get_id test-${name} $FLAVOR $SECURITY_GROUP_TEST ${name}_rc)
 
   echo "VM id: $ID"
   sleep 5

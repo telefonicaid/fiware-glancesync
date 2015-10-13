@@ -61,6 +61,10 @@ If all the processes end without errors, the UUID of the new image is printed.
 This image is private and owned by the user, but it is ready to be published
 now.
 
+By default, the *m1.small* flavor is used. To choose another flavor, the
+FLAVOR environment variable may be used. The flavor to be used is specified by the
+GE owners. They should choose the minimal flavor their images work with.
+
 How the script works
 --------------------
 
