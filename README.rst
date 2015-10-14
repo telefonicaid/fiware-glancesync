@@ -7,7 +7,7 @@ Introduction
 ============
 
 This is the code repository for the GlanceSync component, the FIWARE Ops tool
-used to sincronise the glance images in the different Glance servers connected
+used to synchronise the glance images in the different Glance servers connected
 in the FIWARE Lab.
 
 This project is part of `FIWARE`_.
@@ -94,7 +94,7 @@ the others.
 Image names with duplicated names are easy to avoid, with one serious
 exception: when ordinary users can publish their images as public (shared), the
 risk of collision increases and escapes of the control of the user. To avoid
-this, GlanceSync allows setting a parameter to ignore images of other tenants.
+this, GlanceSync ignore the images of other tenants by default.
 Anyway, this is a general problem, not only a synchronisation
 problem, due to more that one image with the same name is very confusing to users
 that want to use them. Therefore it is better to restrict the publication of
@@ -326,15 +326,25 @@ configuration from this path unless explicitly requested by setting
  # user variables are synchronised.
  metadata_set = nid , type, sdc_aware, nid_version
 
- # if true, ignore public images of other tenants. That is, an image is upload
- # even when a image with the same name and content exist in the regional
- # server, if this image is not owned by the tenant specified in the credential.
- # Usually, it is convenience to set this value to True. It some images were
- # owned by other tenants, a better option is to change their owner.
+ # When the software asks for the list of images in a region, it gets both the
+ # images owned by the tenant and the public images owned by other tenants.
+ # If this parameter is true (the default and recommended value), only the
+ # tenant's images are considered. This implies that it can exist after the
+ # synchronisation a new image with the same name that a public one from other
+ # user. It could be very confusing (actually, a warning is printed when it is
+ # detected), but usually it is not recommend to work with images from other
+ # tenants. To find out more about this, see 'About UUIDs and image names' in
+ # the documentation.
+ #
+ # This parameter only affects to the list of images obtained from the regional
+ # servers. From master region only the tenant's images are considered.
  only_tenant_images = True
 
  [master]
 
+ # This is the only mandatory target: it includes all the regions registered
+ # in the same keystone server than the master region.
+ #
  # credential set: user, base64(password), keystone_url, tenant_name
  # as alternative, options user, password, keystone_url and tenant can be used
  # only with master target, it is possible also to set the credential using
@@ -344,13 +354,14 @@ configuration from this path unless explicitly requested by setting
 
  # This parameter is useful when invoking the tool without specifying which
  # images to synchronise. All the regions with glance servers registered in
- # keystone are synchronised unless they are included in this parameter.
+ # the same keystone than the master region are synchronised unless they are
+ # included in this parameter. This parameter is useless with other targets.
  ignore_regions = Spain1
 
  [experimental]
 
+ # Another
  credential = user2,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://server2:4730/v2.0,tenantid2
- only_tenant_images = False
  metadata_condition = image.is_public and image.user_properties.get('type', None) == 'baseimages'
 
 This configuration file defines two *targets*: ``master`` and ``experimental``. The first one
