@@ -24,6 +24,8 @@ Important, to generate a new GPG pubkey, the name of the key must start with *Fi
  
 The script `update_images.py` may be used to update existing images (created with the other scripts) to upgrade the script or change the public keys without regenerating all the image.
 
+The python scripts require using virtualenv. It is possible to use the same virtualenv than glancesync, but using the requirements.txt of this directory. The only difference is that two new dependencies are added: *python-novaclient* and *python-neutronclient* 
+
 ### Retrieving the password
 
 The script *getpassword.py* is an example that retrieves the encrypted password from the console log, decrypts it and open a console to the VM using a browser
