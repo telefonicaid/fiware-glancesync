@@ -139,7 +139,7 @@ class GlanceSyncRegion(object):
          image will be replaced
         'pending_rename': there is an image, but with different checksum. The
          image will be replaced, but before this the old image will be renamed
-        'penging_ami': the image requires a kernel or ramding that is in state
+        'pending_ami': the image requires a kernel or ramdisk that is in state
         pending_upload, pending_replace or pending_rename_n_replace.
         'error_checksum': there is an image, but with a different checksum and
         there is not a matching dontupdate, rename or replace directive.
