@@ -94,7 +94,7 @@ the others.
 Image names with duplicated names are easy to avoid, with one serious
 exception: when ordinary users can publish their images as public (shared), the
 risk of collision increases and escapes of the control of the user. To avoid
-this, GlanceSync allows setting a parameter to ignore images of other tenants.
+this, GlanceSync ignore the images of other tenants by default.
 Anyway, this is a general problem, not only a synchronisation
 problem, due to more that one image with the same name is very confusing to users
 that want to use them. Therefore it is better to restrict the publication of
@@ -326,18 +326,18 @@ configuration from this path unless explicitly requested by setting
  # user variables are synchronised.
  metadata_set = nid , type, sdc_aware, nid_version
 
-# When the software asks for the list of images in a region, it gets both the
-# images owned by the tenant and the public images owned by other tenants.
-# If this parameter is true (the default and recommended value), only the
-# images of the tenant are considered.  This implies than after a synchronisation
-# can be a new image with the same name than a public image from other user,
-# which may be confusing (indeed, a warning is printed when detected), but usually
-# it is not convenience to work with images of other tenants. A better
-# alternative than putting this parameter to False is to change the owner of
-# the images and not allowing ordinary users to publish the images as public.
-#
-# This value only affects the list of images obtained from the regional
-# servers. From master region only the tenant's images are considered.
+ # When the software asks for the list of images in a region, it gets both the
+ # images owned by the tenant and the public images owned by other tenants.
+ # If this parameter is true (the default and recommended value), only the
+ # tenant's images are considered. This implies that it can exist after the
+ # synchronisation a new image with the same name that a public one from other
+ # user. It could be very confusing (actually, a warning is printed when it is
+ # detected), but usually it is not recommend to work with images from other
+ # tenants. To find out more about this, see 'About UUIDs and image names' in
+ # the documentation.
+ #
+ # This parameter only affects to the list of images obtained from the regional
+ # servers. From master region only the tenant's images are considered.
  only_tenant_images = True
 
  [master]
@@ -362,7 +362,6 @@ configuration from this path unless explicitly requested by setting
 
  # Another
  credential = user2,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://server2:4730/v2.0,tenantid2
- only_tenant_images = False
  metadata_condition = image.is_public and image.user_properties.get('type', None) == 'baseimages'
 
 This configuration file defines two *targets*: ``master`` and ``experimental``. The first one
