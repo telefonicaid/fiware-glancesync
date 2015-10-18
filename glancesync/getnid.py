@@ -29,6 +29,7 @@ Usage:
   getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps)
   getnid -h | --help
   getnid -v | --version
+  getnid
 
 Options:
   -h --help     Show this screen.
@@ -47,41 +48,39 @@ import re
 
 __version__ = '1.0.0'
 
-BASEURL = 'http://catalogue.fiware.org/chapter/'
-
-CHAPTER = ['advanced-middleware-and-interfaces-network-and-devices',
-           'cloud-hosting',
-           'advanced-web-based-user-interface?page=0',
-           'advanced-web-based-user-interface?page=1',
-           'security',
-           'internet-things-services-enablement',
-           'datacontext-management',
-           'applicationsservices-and-data-delivery']
-
-TYPE = {"i2nd": CHAPTER[0],
-        "cloud": CHAPTER[1],
-        "userinterface": CHAPTER[2],
-        "userinterface": CHAPTER[3],
-        "sec": CHAPTER[4],
-        "iot": CHAPTER[5],
-        "data": CHAPTER[6],
-        "apps": CHAPTER[7]}
-
 
 class NID(object):
     """Class to obtain the different nids values registered in the FIWARE Catalogue.
     """
+    def __init__(self):
+        self.BASEURL = 'http://catalogue.fiware.org/chapter/'
 
-    def getcataloginformation(self, chapter):
-        url = BASEURL + chapter
+        # 'advanced-web-based-user-interface?page=0': 1,
+
+        self.CHAPTER = {'advanced-middleware-and-interfaces-network-and-devices': 1,
+                        'cloud-hosting': 1,
+                        'advanced-web-based-user-interface': 2,
+                        'security': 1,
+                        'internet-things-services-enablement': 1,
+                        'datacontext-management': 1,
+                        'applicationsservices-and-data-delivery': 1}
+
+        self.TYPE = {"i2nd": 'advanced-middleware-and-interfaces-network-and-devices',
+                     "cloud": 'cloud-hosting',
+                     "userinterface": 'advanced-web-based-user-interface',
+                     "sec": 'security',
+                     "iot": 'internet-things-services-enablement',
+                     "data": 'datacontext-management',
+                     "apps": 'applicationsservices-and-data-delivery'}
+
+    def requestcatalog(self, url):
+        dictge = {}
+
         r = requests.get(url)
 
-        newtext = r.text
-
-        newtext = re.split(r'[\n]\s*', newtext)
+        newtext = re.split(r'[\n]\s*', r.text)
 
         listge = [line for line in newtext if "node-" in line]
-        dictge = {}
 
         # Search the NID and name of the GE
         for ge in listge:
@@ -91,48 +90,80 @@ class NID(object):
 
         return dictge
 
+    def getcataloginformation(self, chapter, page):
+        dictge = {}
 
-def getattribute(dicta, key):
-    # Check the attributes associated to the type option
-    aux = dicta[key]
+        if page >= 2:
+            for bucle in range(0, page):
+                url = self.BASEURL + chapter + '?page=' + str(bucle)
 
-    return aux
+                dictge.update(self.requestcatalog(url))
+        else:
+            url = self.BASEURL + chapter
+
+            dictge = self.requestcatalog(url)
+
+        return dictge
+
+    def getvalue(self, dicta):
+        # Return the corresponding type value
+        keys = list(self.TYPE.keys())
+        result = False
+
+        for value in keys:
+            if value in dicta.keys() and dicta[value] is True:
+                result = True
+                break
+
+        if result is False:
+            value = ''
+
+        return value
+
+    def gettypekey(self, key):
+        if key in self.TYPE.keys():
+            result = self.TYPE[key]
+            value = self.CHAPTER[result]
+        else:
+            result = ''
+            value = ''
+
+        return result, value
+
+    def getchapter(self):
+        return self.CHAPTER
 
 
-def getvalue(dicta):
-    # Return the corresponding type value
-    keys = list(TYPE.keys())
-
-    for value in keys:
-        if dicta[value] is True:
-            break
-
-    return value
-
-if __name__ == '__main__':
-    version = "Get NID code v{}".format(__version__)
-    arguments = docopt(__doc__, version=version)
-
+def processingnid(arguments):
     nid = {}
     iNID = NID()
 
-    typekey = getattribute(arguments, '--type')
+    typekey = arguments['--type']
 
     if typekey:
-        typevalor = getvalue(arguments)
+        typevalor = iNID.getvalue(arguments)
 
         print typevalor
 
         # key could be only a value or several one depending of the
         # number of pages in the catalog.
-        key = TYPE[typevalor]
+        key, value = iNID.gettypekey(typevalor)
 
         print key
 
-        nid[key] = iNID.getcataloginformation(key)
+        nid[key] = iNID.getcataloginformation(key, value)
     else:
-        for item in CHAPTER:
-            nid[item] = iNID.getcataloginformation(item)
+        for key, value in iNID.getchapter().iteritems():
+            nid[key] = iNID.getcataloginformation(key, value)
 
-    print "hello"
+    return nid
+
+if __name__ == '__main__':
+    version = "Get NID code v{}".format(__version__)
+    arguments = docopt(__doc__, version=version)
+
+    print arguments
+
+    nid = processingnid(arguments)
+
     pprint.pprint(nid)
