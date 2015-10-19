@@ -6,7 +6,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
   I want to obtain the corresponding NID for each of the Generic Enabler (GE) that are registered in the catalog
   So that each GE image can be assigned its corresponding unique identity number.
 
-  @happy_path, @skip
+  @happy_path
     Scenario Outline:: 01: Get the NID of a specific chapter with no version, help and wikitext parameter
      Given a connectivity to the FIWARE Catalogue
      When  I execute the getnid with the following values
@@ -26,7 +26,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | data          | datacontext-management                                 | nids-data          |
              | apps          | applicationsservices-and-data-delivery                 | nids-apps          |
 
-  @happy_path @skip
+  @happy_path
     Scenario Outline:: 02: Get the version of the application by invoking the appropriate command line instruction
      Given that I have the gitnid application installed
      When  I execute the gitnid application with the option
