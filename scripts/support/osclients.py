@@ -31,11 +31,16 @@ from keystoneclient import session
 from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
-from neutronclient.v2_0 import client as neutronclient
-from novaclient import client as novaclient
-from cinderclient.v2 import client as cinderclient
-from glanceclient import client as glanceclient
-from swiftclient import client as swiftclient
+from importlib import import_module
+
+# OpenStack modules available with their imports
+modules_available = {
+    'glance': 'glanceclient.client',
+    'nova': 'novaclient.client',
+    'cinder': 'cinderclient.v2.client',
+    'neutron': 'neutronclient.v2_0.client',
+    'swift': 'swiftclient.client'
+}
 
 
 class OpenStackClients(object):
@@ -47,27 +52,40 @@ class OpenStackClients(object):
     call set_keystone_version
     """
 
-    def __init__(self, auth_url=None):
+    def __init__(self, auth_url=None, modules='auto'):
         """Constructor of the class. The Keystone URL may be provided,
-        otherwise it is obtained from the environment (OS_AUTH_URL)
+        otherwise it is obtained from the environment (OS_AUTH_URL) or must
+        be provided later.
 
-        The fields with the user, password, tenant_id/tenant_name and region
-        are initialized with the environemnt variables if present, but they
-        can be set also with set_credential/set_region methods.
+        The fields with the user, password, tenant_id/tenant_name/trust_id and
+        region are initialized with the environment variables if present, but
+        they can be set also with set_credential/set_region methods.
+
+        OS_USERNAME: the username
+        OS_PASSWORD: the password
+        OS_TENANT_NAME/OS_TENANT_ID: alternate ways of providing the tenant
+        OS_TRUST_ID: a trust id, to impersonate another user. In this case
+          OS_TENANT_NAME/OS_TENANT_ID must not be provided.
 
         :param auth_url: The keystone URL (OS_AUTH_URL if omitted)
+        :param modules: This parameter refers to the modules to import (nova,
+        glance, cinder, swift, neutron; keystone is not considered a module
+         because it is always loaded). It can be:
+          auto: modules are imported automatically when a client is requested
+          all: import all the available modules
+          <csv>: a list of modules to import (e.g. neutron, nova, glance)
         :return: nothing
         """
+        global modules_available
+
         self.use_v3 = True
 
         if auth_url:
             self.auth_url = auth_url
-        else:
+        elif 'OS_AUTH_URL' in env:
             self.auth_url = env['OS_AUTH_URL']
-
-        if not self.auth_url:
-            raise(
-                'auth_url parameter must be provided or OS_AHT_URL be defined')
+        else:
+            self.auth_url = None
 
         self._session_v2 = None
         self._session_v3 = None
@@ -85,9 +103,9 @@ class OpenStackClients(object):
             self.__password = None
 
         if 'OS_TENANT_NAME' in env:
-            self.__tenant = env['OS_TENANT_NAME']
+            self.__tenant_name = env['OS_TENANT_NAME']
         else:
-            self.__tenant = None
+            self.__tenant_name = None
 
         if 'OS_TENANT_ID' in env:
             self.__tenant_id = env['OS_TENANT_ID']
@@ -99,34 +117,100 @@ class OpenStackClients(object):
         else:
             self.region = None
 
-    def set_credential(self, username, password, tenant, tenant_is_name=True):
+        if 'OS_TRUST_ID' in env:
+            self.__trust_id = env['OS_TRUST_ID']
+        else:
+            self.__trust_id = None
+
+        # dynamic imports
+
+        self._modules_imported = dict()
+        self._autoloadmodules = False
+
+        modules = modules.strip()
+        if modules == 'all':
+            for module_name in modules_available.keys():
+                self._modules_imported[module_name] = \
+                    import_module(modules_available[module_name])
+        elif modules == 'auto':
+            self._autoloadmodules = True
+        else:
+            for module in modules.split(','):
+                module = module.strip()
+
+                if module == 'keystone' or module == '':
+                    continue
+                if module not in modules_available.keys():
+                    m = 'Module ' + module + ' is unknown'
+                    raise Exception(m)
+
+                self._modules_imported[module] = \
+                    import_module(modules_available[module])
+
+    def _require_module(self, module_name):
+        """
+        Require module. If self._autoloadmodules, load it if not available.
+        If module is not present, raise an exception.
+        :param module_name: the module to load
+        :return: nothing
+        """
+        if module_name in self._modules_imported:
+            return
+
+        if self._autoloadmodules:
+            self._modules_imported[module_name] = \
+                import_module(modules_available[module_name])
+        else:
+            raise Exception('Module ' + module_name + ' was not loaded')
+
+    def set_credential(self, username, password, tenant_name=None,
+                       tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
-        exists, it is invalidate. It is possible to save and then restore the
+        exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
-        unless the OS_USERNAME, OS_PASSWORD, OS_TENANT_NAME/OS_TENANT_ID are
-        defined.
+        unless the OS_USERNAME, OS_PASSWORD is provided (in that case, also
+        OS_TENANT_NAME, OS_TENANT_ID and OS_TRUST_ID are considered)
 
-        The tenant may be a name (the default) or an id. In the last case, set
-        tenant_is_name to False.
+        The tenant may be a name or a tenant_id. However, when trust_id is
+        provided neither tenant_name nor tenant_id must be
+        provided, because the tenant is the corresponding to the trustor.
+
+        With the admin account also has sense do not provide
+        tenant/tenant_id/trust_id (this is an unscoped token, and it works
+        with many keystone operations).
 
         :param username: the username of the user
         :param password: the password of the user
-        :param tenant: the tenant name, but if tenat_is_name=False, this is
-               the tenant_id.
-        :param tenant_is_name: If true, the variable tenant is a name, if false
-         it is an id.
+        :param tenant_name: the tenant name (a.k.a. project_name)
+        :param tenant_id: the tenant id (a.k.a. project_id)
+        :param trust_id: optional parameter, that allows a user (the trustee)
+        to impersonate another one (the trustor). It works because
+        previously the trustor has created a delegation to the trustee and
+        passed them the generated trust_id. When trust_id is provided, do not
+        fill tenant_name nor tenant_id because the tenant of the trustor is
+        used.
         :return: Nothing.
         """
         self.__username = username
         self.__password = password
-        if tenant_is_name:
-            self.__tenant = tenant
+        if trust_id:
+            self.__trust_id = trust_id
             self.__tenant_id = None
+            self.__tenant_name = None
+        elif tenant_id:
+            self.__tenant_id = tenant_id
+            self.__tenant_name = None
+            self.__trust_id = None
+        elif tenant_name:
+            self.__tenant_name = tenant_name
+            self.__tenant_id = None
+            self.__trust_id = None
         else:
-            self.__tenant_id = tenant
-            self.__tenant = None
+            self.__trust_id = None
+            self.__tenant_id = None
+            self.__tenant_name = None
 
         # clear sessions
         if self._session_v2:
@@ -189,6 +273,10 @@ class OpenStackClients(object):
         if self._session_v2:
             return self._session_v2
 
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
+
         if self.auth_url.endswith('/v3/'):
             auth_url = self.auth_url[0:-2] + '2.0'
         elif self.auth_url.endswith('/v3'):
@@ -199,30 +287,34 @@ class OpenStackClients(object):
         if not self.__username:
             raise Exception('Username must be provided')
 
-        if self.__tenant:
-            auth = v2.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                tenant_name=self.__tenant)
-        else:
-            auth = v2.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                tenant_id=self.__tenant_id)
+        other_params = dict()
+        if self.__trust_id:
+            other_params['trust_id'] = self.__trust_id
+        elif self.__tenant_name:
+            other_params['tenant_name'] = self.__tenant_name
+        elif self.__tenant_id:
+            other_params['tenant_id'] = self.__tenant_id
+
+        auth = v2.Password(
+            auth_url=auth_url,
+            username=self.__username,
+            password=self.__password,
+            **other_params)
 
         self._session_v2 = session.Session(auth=auth)
         return self._session_v2
 
     def get_session_v3(self):
         """Get a v3 session. See get_session for more details about sessions
-
         :return: a session object
         """
 
         if self._session_v3:
             return self._session_v3
+
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
 
         if self.auth_url.endswith('/v2.0/'):
             auth_url = self.auth_url[0:-4] + '3'
@@ -234,20 +326,21 @@ class OpenStackClients(object):
         if not self.__username:
             raise Exception('Username must be provided')
 
-        if self.__tenant:
-            auth = v3.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                project_name=self.__tenant,
-                project_domain_name='default', user_domain_name='default')
-        else:
-            auth = v3.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                project_id=self.__tenant_id,
-                project_domain_name='default', user_domain_name='default')
+        other_params = dict()
+        if self.__trust_id:
+            other_params['trust_id'] = self.__trust_id
+        elif self.__tenant_name:
+            other_params['project_name'] = self.__tenant_name
+        elif self.__tenant_id:
+            other_params['project_id'] = self.__tenant_id
+
+        auth = v3.Password(
+            auth_url=auth_url,
+            username=self.__username,
+            password=self.__password,
+            project_domain_name='default', user_domain_name='default',
+            **other_params)
+
         self._session_v3 = session.Session(auth=auth)
         return self._session_v3
 
@@ -265,7 +358,8 @@ class OpenStackClients(object):
 
         :return: a neutron client valid for a region.
         """
-        return neutronclient.Client(
+        self._require_module('neutron')
+        return self._modules_imported['neutron'].Client(
             session=self.get_session(), region_name=self.region)
 
     def get_novaclient(self):
@@ -282,11 +376,12 @@ class OpenStackClients(object):
 
         :return: a nova client valid for a region.
         """
-        return novaclient.Client(
+        self._require_module('nova')
+        return self._modules_imported['nova'].Client(
             2, region_name=self.region, session=self.get_session())
 
     def get_cinderclient(self):
-        """Get a cinder client. A client is different for each region
+        """Get a cinder client (v2). A client is different for each region
         (although all clients share the same session and it is possible to have
          simultaneously clients to several regions).
 
@@ -299,8 +394,32 @@ class OpenStackClients(object):
 
         :return: a cinder client valid for a region.
         """
-        return cinderclient.Client(session=self.get_session(),
-                                   region_name=self.region)
+        self._require_module('cinder')
+        return self._modules_imported['cinder'].Client(
+            session=self.get_session(), region_name=self.region)
+
+    def get_cinderclientv1(self):
+        """Get a cinder clientv1. The API is older than the v2 provided with
+         get_cinderclient, but there is still a lot of
+         servers that do not have registered the version 2 end-point.
+
+         A client is different for each region (although all clients share the
+         same session and it is possible to have simultaneously clients to
+         several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a cinder client valid for a region.
+        """
+        self._require_module('cinder')
+        return self._modules_imported['cinder'].Client(
+            session=self.get_session(), region_name=self.region,
+            service_type='volume')
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region
@@ -316,19 +435,21 @@ class OpenStackClients(object):
 
         :return: a glance client valid for a region.
         """
-
+        self._require_module('glance')
         session = self.get_session()
         token = session.get_token()
         endpoint = session.get_endpoint(service_type='image',
                                         region_name=self.region)
-        return glanceclient.Client(version='1', endpoint=endpoint, token=token)
+        return self._modules_imported['glance'].Client(
+            version='1', endpoint=endpoint, token=token)
 
     def get_swiftclient(self):
+        self._require_module('swift')
         session = self.get_session()
-        token = session.get_token()
         endpoint = self.get_public_endpoint('object-store', self.region)
         token = session.get_token()
-        return swiftclient.Connection(preauthurl=endpoint, preauthtoken=token)
+        return self._modules_imported['swift'].Connection(
+            preauthurl=endpoint, preauthtoken=token)
 
     def get_keystoneclient(self):
         """Get a keystoneclient. A keystone server can be shared among several
@@ -490,20 +611,34 @@ class OpenStackClients(object):
         self._session_v2 = None
         self._session_v3 = None
 
-    def restore_session(self):
+    def restore_session(self, swap=False):
         """Restore the session saved with preserve_session.
 
-        See preserve_session for more details"""
-
-        if self._session_v2 and self._session_v2 != self._saved_session_v2:
-            self._session_v2.invalidate()
-        if self._session_v3 and self._session_v3 != self._saved_session_v3:
-            self._session_v3.invalidate()
-        self._session_v2 = self._saved_session_v2
-        self._session_v3 = self._saved_session_v3
+        See preserve_session for more details
+        :param swap: if True, save the current session (i.e. interchange
+          saved session <-> current session), if False, invalidate
+           the current session and restore the saved session.
+        """
+        if swap:
+            tmp_v2 = self._saved_session_v2
+            tmp_v3 = self._saved_session_v3
+            self._saved_session_v2 = self._session_v2
+            self._saved_session_v3 = self._session_v3
+            self._session_v2 = tmp_v2
+            self._session_v3 = tmp_v3
+        else:
+            if self._session_v2 and self._session_v2 != self._saved_session_v2:
+                self._session_v2.invalidate()
+            if self._session_v3 and self._session_v3 != self._saved_session_v3:
+                self._session_v3.invalidate()
+            self._session_v2 = self._saved_session_v2
+            self._session_v3 = self._saved_session_v3
 
 
 # create an object. This allows using this methods easily with
 # from osclients import osclients
 # nova = osclients.get_novaclient()
 osclients = OpenStackClients()
+if 'KEYSTONE_ADMIN_ENDPOINT' in env:
+    osclients.override_endpoint(
+        'identity', osclients.region, 'admin', env['KEYSTONE_ADMIN_ENDPOINT'])

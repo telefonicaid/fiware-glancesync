@@ -148,7 +148,7 @@ existing with the same name:
 
 .. code::
 
-  /opt/create_ge_images/publish_image myimage
+  /opt/create_ge_images/publish_image.py myimage
 
 The command renames the old image (using the suffix .old) and makes it private.
 It also prints the old image checksum. This value must be append to the replace
@@ -161,5 +161,8 @@ provided:
 
 .. code::
 
-  /opt/create_ge_images/publish_image myimage <nid> <type>
+  /opt/create_ge_images/publish_image.py myimage <nid> <type>
+
+Both *publish_image.py* as *locate_images.py* requires virtualevn with the same
+environment than the described in scripts/support/README.md
 
