@@ -7,7 +7,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
   So that each GE image can be assigned its corresponding unique identity number.
 
   @happy_path
-    Scenario Outline:: 01: Get the NID of a specific chapter with no version, help and wikitext parameter
+    Scenario Outline: 01: Get the NID of a specific chapter with no version, help and wikitext parameter.
      Given a connectivity to the FIWARE Catalogue
      When  I execute the getnid with the following values
              | type_value      | version | help  | wikitext |
@@ -27,7 +27,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | apps          | applicationsservices-and-data-delivery                 | nids-apps          |
 
   @happy_path
-    Scenario Outline:: 02: Get the version of the application by invoking the appropriate command line instruction
+    Scenario Outline: 02: Get the version of the application by invoking the appropriate command line instruction.
      Given that I have the gitnid application installed
      When  I execute the gitnid application with the option
              | option_value   |
@@ -42,7 +42,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | -v           | Get NID code vx.y.z |
 
   @happy_path
-    Scenario Outline:: 03: Get the help information of the application by invoking the appropriate command line instruction
+    Scenario Outline: 03: Get the help information of the application by invoking the appropriate command line instruction.
      Given that I have the gitnid application installed
      When  I execute the gitnid application with the option
              | option_value   |
@@ -55,3 +55,14 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | option_value | result_value |
              | --help       | help.info    |
              | -h           | help.info    |
+
+  @happy_path
+    Scenario: 04: Get the wikitext of the complete list of Generic Enabler.
+     Given a connectivity to the FIWARE Catalogue
+     When  I execute the getnid with the following values
+             | type_value | version | help  | wikitext |
+             | False      | False   | False | True     |
+
+     Then  I obtain the following document in tikiwiki format
+             | wikitext_file |
+             | wikitext      |

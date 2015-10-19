@@ -26,7 +26,7 @@
 
 Usage:
   getnid [--wikitext]
-  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps) [--wikitext]
+  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps)
   getnid -h | --help
   getnid -v | --version
 
@@ -132,6 +132,52 @@ class NID(object):
     def getchapter(self):
         return self.CHAPTER
 
+    def generatewikitext(self, result):
+        msg = '<center>\n' + self.__sectionA__(result) + '</center>'
+
+        return msg
+
+    def __sectionA__(self, result):
+        msg =
+        '''{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" class="wikitable"
+    |-
+    |+ align="center" style="background:DarkSlateBlue; color:white"|<big>\'\'\'Summary of usage in the Spain node\'\'\'</big>
+    ! ! width="100 px" style="background:Lavender; color:Black" | Chapter
+    ! width="100 px" style="background:Lavender; color:Black" | Generic Enabler
+    ! width="50 px" style="background:Lavender; color:Black" | NID
+    ! width="50 px" style="background:Lavender; color:Black" | NID Version
+    ! width="100 px" style="background:Lavender; color:Black" | Image
+    '''
+
+        msg = msg + '\n' + self.__sectionB__(result) + '\n\n|}\n'
+
+        return msg
+
+    def __sectionB__(self, result):
+        msg = ''
+
+        for k, v in result.items():
+            msg = msg + '|-\n|| '
+
+            msg = msg + k.replace('-', ' ') + "\n" + self.__sectionC__(v)
+
+        return msg
+
+    def __sectionC__(self, valuedict):
+        msg = ''
+        first = True
+
+        for k, v in valuedict.items():
+            if first is True:
+                msg = msg + '|| '
+                first = False
+            else:
+                msg = msg + '|-\n||\n|| '
+
+            msg = msg + k.replace('-', ' ') + '\n' + '| ! align="center" | ' + v.replace('-', ' ') + '\n|| --\n|| --\n\n'
+
+        return msg
+
 
 def processingnid(arguments):
     nid = {}
@@ -151,6 +197,11 @@ def processingnid(arguments):
         for key, value in iNID.getchapter().iteritems():
             nid[key] = iNID.getcataloginformation(key, value)
 
+    wikitext = arguments['--wikitext']
+
+    if wikitext:
+        nid = iNID.generatewikitext(nid)
+
     return nid
 
 if __name__ == '__main__':
@@ -159,4 +210,7 @@ if __name__ == '__main__':
 
     nid = processingnid(arguments)
 
-    pprint.pprint(nid)
+    if isinstance(nid, dict):
+        pprint.pprint(nid)
+    else:
+        print(nid)

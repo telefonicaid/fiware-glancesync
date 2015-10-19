@@ -52,7 +52,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
 
         self.responseiotnid = eval(self.loadfile("../resources/nid", "catalogiot.nid"))
         self.responsetotalnid = eval(self.loadfile("../resources/nid", "catalogtotal.nid"))
-
+        self.responsetotalwiki = self.loadfile("../resources/nid", "catalogtotal.wiki")
 
     def loadfile(self, relativepath, filename):
         """ Load the resources file that contain information needed to execute some
@@ -230,3 +230,43 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         value = processingnid(arguments)
 
         self.assertEquals(value, self.responsetotalnid)
+
+    def test_processingnid_all_wikitext(self, m):
+        arguments = {'--help': False,
+                     '--type': False,
+                     '--version': False,
+                     '--wikitext': True,
+                     'apps': False,
+                     'cloud': False,
+                     'data': False,
+                     'i2nd': False,
+                     'iot': False,
+                     'sec': False,
+                     'userinterface': False}
+
+        # we want to ask two pages and connect both of them
+        # url: 'http://catalogue.fiware.org/chapter/any chapter?page=0'
+        urli2nd = self.nid.BASEURL + 'advanced-middleware-and-interfaces-network-and-devices'
+        urlcloud = self.nid.BASEURL + 'cloud-hosting'
+        urluser0 = self.nid.BASEURL + 'advanced-web-based-user-interface?page=0'
+        urluser1 = self.nid.BASEURL + 'advanced-web-based-user-interface?page=1'
+        urlsec = self.nid.BASEURL + 'security'
+        urliot = self.nid.BASEURL + 'internet-things-services-enablement'
+        urldata = self.nid.BASEURL + 'datacontext-management'
+        urlapps = self.nid.BASEURL + 'applicationsservices-and-data-delivery'
+
+        m.get(urli2nd, text=self.responsei2nd)
+        m.get(urlcloud, text=self.responsecloud)
+        m.get(urluser0, text=self.responseuserinterface)
+        m.get(urluser1, text=self.responseuserinterface)
+        m.get(urlsec, text=self.responsesec)
+        m.get(urliot, text=self.responseiot)
+        m.get(urldata, text=self.responsedata)
+        m.get(urlapps, text=self.responseapps)
+
+        value = processingnid(arguments)
+
+        result = value.replace('\n', '').replace('\r', '').replace(" ", "")
+        expected = self.responsetotalwiki.replace('\n', '').replace('\r', '').replace(" ", "")
+
+        self.assertEquals(result, expected)

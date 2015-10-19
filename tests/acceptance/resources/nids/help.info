@@ -2,7 +2,7 @@ Get the NID of the different GE(r)i.
 
 Usage:
   getnid [--wikitext]
-  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps) [--wikitext]
+  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps)
   getnid -h | --help
   getnid -v | --version
 

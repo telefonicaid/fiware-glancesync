@@ -24,7 +24,7 @@
 __author__ = 'fla'
 
 import behave
-from behave import step
+from behave import when, then, given
 from hamcrest import assert_that, equal_to, is_, is_not
 from qautils.commandline_utils import execute_command as cmd
 from qautils.dataset_utils import DatasetUtils
@@ -34,7 +34,6 @@ behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 
-value = dict()
 
 def __load_response__(filename, reduce=True):
     """
@@ -59,7 +58,7 @@ def __load_response__(filename, reduce=True):
     os.chdir(current)
 
     if reduce is True:
-       str = str.replace('\n', '').replace('\r', '').replace(" ", "")
+        str = str.replace('\n', '').replace('\r', '').replace(" ", "")
 
     return str
 
@@ -99,21 +98,26 @@ def __check_version__(version1, version2):
 def step_check_availability_catalogue(context):
     code = urllib.urlopen("http://catalogue.fiware.org/").getcode()
 
-    assert_that(code, equal_to(200), "FIWARE Catalogue is not responding")
+    assert_that(code, equal_to(200), "FIWARE Catalogue is not responding.")
 
 
 @when(u'I execute the getnid with the following values')
 def step_obtain_list_ge_nids(context):
+    context.value = dict()
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
-            if 'type_value' in row.headings:
+            if 'type_value' in row.headings and row['type_value'] != 'False':
                 type = row['type_value']
 
                 command = '../../glancesync/getnid.py --type {}'.format(type)
 
-                context.value = dict()
                 context.value[type] = cmd(command).replace('\n', '').replace('\r', '').replace(" ", "")
                 context.type = type
+            elif 'wikitext' in row.headings:
+                command = '../../glancesync/getnid.py --wikitext'
+
+                context.value['wikitext'] = cmd(command).replace('\n', '').replace('\r', '').replace(" ", "")
 
 
 @then(u'I obtain the following list of nid corresponding to that chapter')
@@ -121,18 +125,17 @@ def step_check_data_recover(context):
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'chapter_value' in row.headings:
-                chapter = row['chapter_value']
                 resource = row['resources_value']
-                type = context.value
 
         # Load the content expected from file
         expected_value = __load_response__(resource)
 
     assert_that(context.value[context.type], equal_to(expected_value), "Response obtained from FIWARE Catalogue is not "
-                                                                       "the expected one")
+                                                                       "the expected one.")
+
 
 @given(u'that I have the gitnid application installed')
-def step_impl(context):
+def step_impl_check_application_installed(context):
     # Check the availability of the gitnid.py code
     result = os.path.isfile("../../glancesync/getnid.py")
 
@@ -140,7 +143,7 @@ def step_impl(context):
 
 
 @when(u'I execute the gitnid application with the option')
-def step_impl(context):
+def step_impl_execute_with_options(context):
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'option_value' in row.headings:
@@ -154,7 +157,7 @@ def step_impl(context):
 
 
 @then(u'the program return the corresponding version of this implementation')
-def step_impl(context):
+def step_impl_return_version(context):
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'result_value' in row.headings:
@@ -164,6 +167,7 @@ def step_impl(context):
 
                 assert_that(result, is_(True))
 
+
 @then(u'the program return the corresponding help information')
 def step_impl(context):
     if context.table is not None:
@@ -172,10 +176,20 @@ def step_impl(context):
                 # Load the content expected from file
                 expected_value = __load_response__(row['result_value'], False)
 
-                msg = "The returned value is not the same that was expected {} != {}"\
-                    .format(expected_value, context.result)
+                msg = "The returned value is not the same that was expected."
 
                 assert_that(expected_value, equal_to(context.result), msg)
 
 
+@then(u'I obtain the following document in tikiwiki format')
+def step_impl_wiki_text(context):
+    if context.table is not None:
+        for row in __dataset_utils__.prepare_data(context.table):
+            if 'wikitext_file' in row.headings:
+                # Load the content expected from file
+                filename = row['wikitext_file']
+                expected_value = __load_response__(filename)
 
+                msg = "The generated wiki text are not the same."
+
+                assert_that(expected_value, equal_to(context.value['wikitext']), msg)
