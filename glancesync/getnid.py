@@ -138,8 +138,7 @@ class NID(object):
         return msg
 
     def __sectionA__(self, result):
-        msg =
-        '''{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" class="wikitable"
+        msg = '''{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" class="wikitable"
     |-
     |+ align="center" style="background:DarkSlateBlue; color:white"|<big>\'\'\'Summary of usage in the Spain node\'\'\'</big>
     ! ! width="100 px" style="background:Lavender; color:Black" | Chapter
