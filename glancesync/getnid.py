@@ -25,11 +25,10 @@
 """Get the NID of the different GE(r)i.
 
 Usage:
-  getnid --wikitext
-  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps)
+  getnid [--wikitext]
+  getnid --type (i2nd | cloud | userinterface | sec | iot | data | apps) [--wikitext]
   getnid -h | --help
   getnid -v | --version
-  getnid
 
 Options:
   -h --help     Show this screen.
@@ -143,13 +142,9 @@ def processingnid(arguments):
     if typekey:
         typevalor = iNID.getvalue(arguments)
 
-        print typevalor
-
         # key could be only a value or several one depending of the
         # number of pages in the catalog.
         key, value = iNID.gettypekey(typevalor)
-
-        print key
 
         nid[key] = iNID.getcataloginformation(key, value)
     else:
@@ -161,8 +156,6 @@ def processingnid(arguments):
 if __name__ == '__main__':
     version = "Get NID code v{}".format(__version__)
     arguments = docopt(__doc__, version=version)
-
-    print arguments
 
     nid = processingnid(arguments)
 
