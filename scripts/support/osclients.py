@@ -166,7 +166,7 @@ class OpenStackClients(object):
     def set_credential(self, username, password, tenant_name=None,
                        tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
-        exists, it is invalidates. It is possible to save and then restore the
+        exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
