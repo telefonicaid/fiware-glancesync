@@ -31,6 +31,7 @@ import hashlib
 import os
 import glob
 import tempfile
+import logging
 
 from glancesync.glancesync_image import GlanceSyncImage
 
@@ -461,6 +462,28 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
         self.path_test = path + '/tests/resources/checksum'
         self.regions = ['master:Burgos']
 
+    def test_sync_warning(self):
+        """test that two warnings are emitted when replacing images with
+        a different checksum. The first one is a rename and replace warning
+        and the second one a replace warning"""
+        # Capture warnings
+        logger = logging.getLogger('glancesync')
+        self.buffer_log = StringIO.StringIO()
+        handler = logging.StreamHandler(self.buffer_log)
+        handler.setLevel(logging.WARNING)
+        logger.addHandler(handler)
+        TestGlanceSync_Checksum.setUp(self)
+
+        # run synchronisation
+        self.test_sync()
+
+        # Check that there are two warnings
+        warnings = self.buffer_log.getvalue().splitlines()
+        self.assertEquals(len(warnings), 2)
+        msg1 = 'Burgos: Renaming and replacing image image02'
+        msg2 = 'Burgos: Replacing image image04'
+        self.assertTrue(warnings[0].startswith(msg1))
+        self.assertTrue(warnings[1].startswith(msg2))
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
@@ -468,6 +491,7 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
         path = os.path.abspath(os.curdir)
         self.path_test = path + '/tests/resources/ami'
         self.regions = ['master:Burgos']
+
 
 if __name__ == '__main__':
         unittest.main()

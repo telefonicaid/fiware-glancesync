@@ -186,7 +186,7 @@ class GlanceSync(object):
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 if not dry_run:
-                    self.log.info(regionobj.fullname + ': Replacing image ' +
+                    self.log.warn(regionobj.fullname + ': Replacing image ' +
                                   tuple[1].name + ' (' + str(sizeimage) +
                                   ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
@@ -196,7 +196,7 @@ class GlanceSync(object):
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 if not dry_run:
-                    self.log.info(
+                    self.log.warn(
                         regionobj.fullname + ': Renaming and replacing image '
                         + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)

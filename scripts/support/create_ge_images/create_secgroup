@@ -30,7 +30,8 @@ nova secgroup-add-rule allopen udp 1 65535 0.0.0.0/0
 nova secgroup-create sshopen
 nova secgroup-add-rule sshopen tcp 22 22 0.0.0.0/0
 
-nova keypair-add  createimage --pub-key ~/.ssh/authorized_keys
+nova keypair-add  createimage > ~/.ssh/createtestimage
+chmod 400 ~/.ssh/createtestimage
 
 IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
 if [ ! $IP ] ; then

@@ -46,7 +46,7 @@ for image_name in images:
     file_path = '/var/lib/glance/images/' + image.id
     check_call(['sudo', 'cp', file_path, 'image.tmp'])
     try:
-        if image in blacklist:
+        if image in black_list:
             copy_using_guestmount()
         else:
             check_call(['sudo', 'virt-tar-in', '-a', 'image.tmp', 'files.tar', '/'])
