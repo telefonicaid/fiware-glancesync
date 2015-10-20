@@ -463,9 +463,8 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
         self.regions = ['master:Burgos']
 
     def test_sync_warning(self):
-        """test that two warnings are emitted when replacing images with
-        a different checksum. The first one is a rename and replace warning
-        and the second one a replace warning"""
+        """test that a warning is emitted with a image that has a
+        different checksum and there is not settings about what to do with."""
         # Capture warnings
         logger = logging.getLogger('glancesync')
         self.buffer_log = StringIO.StringIO()
@@ -479,11 +478,11 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
 
         # Check that there are two warnings
         warnings = self.buffer_log.getvalue().splitlines()
-        self.assertEquals(len(warnings), 2)
-        msg1 = 'Burgos: Renaming and replacing image image02'
-        msg2 = 'Burgos: Replacing image image04'
+        self.assertEquals(len(warnings), 1)
+        msg1 = 'Image image04 has a different checksum (ch4) in region Burgos'\
+               ' than in the master region. It was not set what to do. Please'\
+               ', fill either dontupdate, replace or rename with the checksum.'
         self.assertTrue(warnings[0].startswith(msg1))
-        self.assertTrue(warnings[1].startswith(msg2))
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""

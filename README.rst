@@ -88,8 +88,9 @@ metadata field to simulate it.
 The downside of using names, is that a region may have more than a image
 with the same name. This is specially challenging, when there is more than one
 image in a destination target, with the name of the image to synchronise. In
-this situation, GlanceSync takes the first that it found and print a warning with
-the others.
+this situation, GlanceSync takes the first image that is found with the same checkum
+(or absolutely the first image that is found if there is not a checksum match)
+and prints a warning for each duplicated image detected.
 
 Image names with duplicated names are easy to avoid, with one serious
 exception: when ordinary users can publish their images as public (shared), the

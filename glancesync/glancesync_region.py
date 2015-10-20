@@ -114,12 +114,17 @@ class GlanceSyncRegion(object):
 
             if image.name in filtered_images_region:
                 # print warning (duplicate)
+                previous = filtered_images_region[image.name]
                 msg = '{3}: image name {0} is duplicated. UUIDs: {1} {2}'
                 msg = msg.format(
-                    image.name, image.id,
-                    filtered_images_region[image.name].id, self.fullname)
+                    image.name, image.id, previous.id, self.fullname)
                 self.log.warning(msg)
-                continue
+                # ignore image (and use the found previously) unless the
+                # new image has the same checksum that the master image and
+                # the previous one not.
+                checksum = filtered_master_dict[image.name].checksum
+                if image.checksum != checksum or previous.checksum == checksum:
+                    continue
 
             filtered_images_region[image.name] = image
         return filtered_images_region
@@ -131,7 +136,7 @@ class GlanceSyncRegion(object):
         (GlanceSyncImage, sync_status). The sync status can be:
         'ok': the image is synchronised
         'ok_stalled_checksum': the image has a different checksum than master,
-        but is markes as 'dontupdate'
+        but it is marked as 'dontupdate'
         'pending_metadata': there is an image with the right content, but
          metadata must be updated (this may include ramdisk_id and kernel_id)
         'pending_upload': the image is not synchronised; it must be upload

@@ -256,6 +256,34 @@ class TestGlanceSyncRegion(unittest.TestCase):
         self.assertEquals(expected, set(region_filtered.keys()))
         self.assertNumberWarnings(1)
 
+    def test_local_images_filtered_duplicated_checksum(self):
+        """Check that if there is a duplicated name, but one of them has the
+        right checksum, the image with the right checksum is used. This is
+        independent of the warning"""
+        region_list = self.region_dict.values()
+        image_new_1 = self.dup_image(self.region_dict['image00'], 'Burgos',
+                                   11, '0')
+        image_new_2 = self.dup_image(self.region_dict['image00'], 'Burgos',
+                                   12, '0')
+        image_new_3 = self.dup_image(self.region_dict['image00'], 'Burgos',
+                                   13, '0')
+
+        image_new_2.checksum = self.region_dict['image00'].checksum
+        image_new_1.checksum = 'otherchecksum'
+        image_new_3.checksum = 'otherchecksum'
+        region_list = list()
+        region_list.append(image_new_1)
+        region_list.append(image_new_2)
+        region_list.append(image_new_3)
+
+        region_filtered = self.region.local_images_filtered(
+            self.expected_images_to_sync_dict, region_list)
+        images_ids = set(image.id for image in region_filtered.values())
+        self.assertIn('012', images_ids)
+        self.assertNotIn('011', images_ids)
+        self.assertNotIn('013', images_ids)
+        self.assertNumberWarnings(2)
+
     def test_image_list_to_sync(self):
         """ This function involves calling both images_to_sync_dict and
         local_images_filtered and a pair of methods of GlanceSyncRegion; it is
