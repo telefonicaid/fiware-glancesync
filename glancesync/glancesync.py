@@ -65,27 +65,26 @@ class GlanceSync(object):
         self.targets = glancesyncconfig.targets
         count = 0
         for target in self.targets.values():
-            if 'facade_module' in target:
-                import_code = 'from ' + target['facade_module'] +\
-                              'import ServersFacade as Facade' + str(count)
-                instance_code = 'Facade' + str(count) + '(target)'
-                exec import_code
-                target['facade'] = eval(instance_code)
+            if 'GLANCESYNC_USE_MOCK' in os.environ:
+                target['facade'] = ServersFacadeMock(target)
+            elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
+                target['facade'] = ServersFacadeMock(target)
+                target['facade'].init_persistence(
+                    os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
             else:
-                if 'GLANCESYNC_USE_MOCK' in os.environ:
-                    target['facade'] = ServersFacadeMock(target)
-                elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
-                    target['facade'] = ServersFacadeMock(target)
-                    target['facade'].init_persistence(
-                        os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
-                else:
-                    target['facade'] = ServersFacade(target)
+                target['facade'] = ServersFacade(target)
 
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
         master_region = GlanceSyncRegion(self.master_region, self.targets)
         images = master_region.target['facade'].get_imagelist(master_region)
-        self.master_region_dict = glancesync_ami.get_master_region_dict(images)
+        # Ignore (public) images of other tenants
+        tenant_id = target['facade'].get_tenant_id().zfill(32)
+        imgs = list(image for image in images if not image.owner or
+                    image.owner == '' or image.owner.zfill(32) == tenant_id)
+        # replace kernel_id, ramdisk_id with image name
+        self.master_region_dict = glancesync_ami.get_master_region_dict(imgs)
+
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -185,25 +184,34 @@ class GlanceSync(object):
             elif tuple[0] == 'pending_replace':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
-                if not dry_run:
-                    self.log.warn(regionobj.fullname + ': Replacing image ' +
+                self.log.info(regionobj.fullname + ': Replacing image ' +
                                   tuple[1].name + ' (' + str(sizeimage) +
                                   ' MB)')
+                if not dry_run:
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     facade.delete_image(regionobj, region_image.id,
                                         confirm=False)
             elif tuple[0] == 'pending_rename_n_replace':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
+                self.log.info(
+                    regionobj.fullname + ': Renaming and replacing image '
+                    + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+
                 if not dry_run:
-                    self.log.warn(
-                        regionobj.fullname + ': Renaming and replacing image '
-                        + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     region_image.name += '.old'
                     region_image.is_public = False
                     facade.update_metadata(regionobj, region_image)
-
+            elif tuple[0] == 'error_checksum':
+                msg =\
+                    'Image {0} has a different checksum ({2}) in region {1} '\
+                    'than in the master region. It was not set what to do. '\
+                    'Please, fill either dontupdate, replace or rename '\
+                    'with the checksum.'
+                self.log.warning(msg.format(region_image.name,
+                                            regionobj.fullname,
+                                            region_image.checksum))
             if uploaded:
                 was_synchronised = False
                 totalmbs += sizeimage
