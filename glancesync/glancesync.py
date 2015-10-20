@@ -78,13 +78,7 @@ class GlanceSync(object):
         self.max_children = glancesyncconfig.max_children
         master_region = GlanceSyncRegion(self.master_region, self.targets)
         images = master_region.target['facade'].get_imagelist(master_region)
-        # Ignore (public) images of other tenants
-        tenant_id = target['facade'].get_tenant_id().zfill(32)
-        imgs = list(image for image in images if not image.owner or
-                    image.owner == '' or image.owner.zfill(32) == tenant_id)
-        # replace kernel_id, ramdisk_id with image name
-        self.master_region_dict = glancesync_ami.get_master_region_dict(imgs)
-
+        self.master_region_dict = glancesync_ami.get_master_region_dict(images)
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
