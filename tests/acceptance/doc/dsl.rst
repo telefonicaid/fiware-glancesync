@@ -26,7 +26,12 @@ Given clauses
     >> other new image created in the Glance of master node with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"
     >> other new image created in the Glance of master node with name "(?P<image_name>\w*)", file "(?P<file>\w*)"
        and these properties
-
+    >> a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"
+    >> a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"
+    >> a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"
+       and without upload an image file
+    >> a new image created in the Glance of all target node with name "(?P<image_name>\w*) file "(?P<file_name>\w*)"
+       and using a credential type "(?P<cred_type>\w*)"
 
     >> the following images created in the Glance of master node with name
 

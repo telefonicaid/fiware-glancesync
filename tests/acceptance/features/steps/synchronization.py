@@ -62,7 +62,7 @@ def __create_new_image__(context, region_name, image_name, image_filename=None):
     __logger__.info("Creating new image '%s' in region '%s'. Image filename: '%s'",
                     image_name, region_name, image_filename)
 
-    # Get Glance Manager for master region
+    # Get Glance Manager for the given region
     glance_ops = context.glance_manager_list[region_name]
     properties = dict()
     if context.table is not None:
@@ -191,14 +191,16 @@ def other_new_image_created_in_glance_of_master(context, image_name, file):
 def a_new_image_created_in_glance_of_target(context, image_name):
 
     for region in context.glance_manager_list:
-        __create_new_image__(context, region, image_name)
+        if region != context.master_region_name:
+            __create_new_image__(context, region, image_name)
 
 
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
 def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
 
     for region in context.glance_manager_list:
-        __create_new_image__(context, region, image_name, file)
+        if region != context.master_region_name:
+            __create_new_image__(context, region, image_name, file)
 
 
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"'
@@ -206,9 +208,10 @@ def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
 def a_new_image_created_in_glance_of_target_no_upload_file(context, image_name):
 
     for region in context.glance_manager_list:
-        glance_ops = context.glance_manager_list[region]
-        glance_ops.create_image(image_name)
-        context.created_images_list.append(image_name)
+        if region != context.master_region_name:
+            glance_ops = context.glance_manager_list[region]
+            glance_ops.create_image(image_name)
+            context.created_images_list.append(image_name)
 
 
 @step(u'the following images created in the Glance of master node with name')
