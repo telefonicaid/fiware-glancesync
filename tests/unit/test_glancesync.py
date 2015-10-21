@@ -479,7 +479,7 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
         # Check that there are two warnings
         warnings = self.buffer_log.getvalue().splitlines()
         self.assertEquals(len(warnings), 1)
-        msg1 = 'Image image05 has a different checksum (ch4) in region Burgos'\
+        msg1 = 'Image image05 has a different checksum (ch5) in region Burgos'\
                ' than in the master region. It was not set what to do. Please'\
                ', fill either dontupdate, replace or rename with the checksum.'
         self.assertTrue(warnings[0].startswith(msg1))
