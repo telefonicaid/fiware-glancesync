@@ -25,9 +25,11 @@
 __author__ = 'fla'
 
 import unittest
-import requests_mock
-from glancesync.getnid import NID, processingnid
 import os
+
+import requests_mock
+
+from scripts.support.getnid import NID, processingnid
 
 
 @requests_mock.Mocker()
@@ -39,20 +41,20 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.nid = NID()
 
         # Load the text content file to execute the tests
-        self.responsedata = self.loadfile("../resources/nid", "catalogdata.request")
-        self.responseiot = self.loadfile("../resources/nid", "catalogiot.request")
-        self.responseapps = self.loadfile("../resources/nid", "catalogapps.request")
-        self.responsecloud = self.loadfile("../resources/nid", "catalogcloud.request")
-        self.responsei2nd = self.loadfile("../resources/nid", "catalogi2nd.request")
-        self.responsesec = self.loadfile("../resources/nid", "catalogsecurity.request")
-        self.responseuserinterface = self.loadfile("../resources/nid", "cataloguserinterface.request")
+        self.responsedata = self.loadfile("/tests/resources/nid", "catalogdata.request")
+        self.responseiot = self.loadfile("/tests/resources/nid", "catalogiot.request")
+        self.responseapps = self.loadfile("/tests/resources/nid", "catalogapps.request")
+        self.responsecloud = self.loadfile("/tests/resources/nid", "catalogcloud.request")
+        self.responsei2nd = self.loadfile("/tests/resources/nid", "catalogi2nd.request")
+        self.responsesec = self.loadfile("/tests/resources/nid", "catalogsecurity.request")
+        self.responseuserinterface = self.loadfile("/tests/resources/nid", "cataloguserinterface.request")
 
-        self.responsedictdata = eval(self.loadfile("../resources/nid", "catalogdata.response"))
-        self.responsedictiot = eval(self.loadfile("../resources/nid", "catalogiot.response"))
+        self.responsedictdata = eval(self.loadfile("/tests/resources/nid", "catalogdata.response"))
+        self.responsedictiot = eval(self.loadfile("/tests/resources/nid", "catalogiot.response"))
 
-        self.responseiotnid = eval(self.loadfile("../resources/nid", "catalogiot.nid"))
-        self.responsetotalnid = eval(self.loadfile("../resources/nid", "catalogtotal.nid"))
-        self.responsetotalwiki = self.loadfile("../resources/nid", "catalogtotal.wiki")
+        self.responseiotnid = eval(self.loadfile("/tests/resources/nid", "catalogiot.nid"))
+        self.responsetotalnid = eval(self.loadfile("/tests/resources/nid", "catalogtotal.nid"))
+        self.responsetotalwiki = self.loadfile("/tests/resources/nid", "catalogtotal.wiki")
 
     def loadfile(self, relativepath, filename):
         """ Load the resources file that contain information needed to execute some
@@ -63,17 +65,38 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         """
         # Load the corresponding file from the resources directory
         current = os.getcwd()
-        os.chdir(relativepath)
+        path = current.split('/')
+        finalpath = ''
+        finalstring = ''
 
-        # Open de file and get data
-        f = open(filename, 'r')
-        str = f.read().decode('unicode-escape')
-        f.close()
+        try:
+            index_to_glancesync = path.index('fiware-glancesync') + 1
+            if len(path) == index_to_glancesync:
+                finalpath = current + relativepath
+            else:
+                # Extract the path to fiware-glancesync and change to the /tests/units
+                # We are considering that at least the execution is inside the fiware-glancesync
+                # directory
+                for i in range(1, index_to_glancesync): # in path: desde el 1 al index(glancesync)
+                    finalpath = finalpath + '/' + path[i]
 
-        # Return to the corresponding directory
-        os.chdir(current)
+                finalpath = finalpath + relativepath
 
-        return str
+            os.chdir(finalpath)
+
+            # Open de file and get data
+            f = open(filename, 'r')
+            finalstring = f.read().decode('unicode-escape')
+            f.close()
+
+            # Return to the corresponding directory
+            os.chdir(current)
+
+        except ValueError:
+            print('Error: You have to be inside the fiware-glancesync directory to execute the unit tests')
+            raise
+
+        return finalstring
 
     def test_receive_correct_data_from_catalog(self, m):
         """
