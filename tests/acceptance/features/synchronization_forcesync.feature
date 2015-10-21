@@ -117,7 +117,6 @@ Feature: Image sync between regions using GlanceSync in the same federation with
             | att4            | False               |
 
 
-  @skip @bug @CLAUDIA-5189
   Scenario: Sync images although they do not comply sync conditions: Non-public images. Checksum conflicts.
     Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value         |

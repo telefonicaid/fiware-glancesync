@@ -22,7 +22,6 @@ Feature: Image sync between regions using GlanceSync in the same federation when
     And   the image "qatesting01" is present in all nodes with the content of file "qatesting01b"
 
 
-  @skip @bug @CLAUDIA-5189
   Scenario Outline: Sync images when there are checksum conflicts. ImageID is not updated.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images using these configuration parameters:
@@ -425,14 +424,43 @@ Feature: Image sync between regions using GlanceSync in the same federation when
     And   the image "qatesting02" is present in all nodes with the content of file "qatesting02b"
 
 
-  Scenario: Sync an image when exists more than one image with the same name in target node
-    Given a new image created in the Glance of master node with name "qatesting01"
+  Scenario: Sync an image when exist more than one image with the same name in target node
+    Given a new image created in the Glance of master node with name "qatesting01" and file "qatesting01"
     And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01b"
     And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting02b"
     And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value          |
             | DEFAULT         | metadata_condition  | 'image.is_public'     |
             | DEFAULT         | metadata_set        |                       |
-            | DEFAULT         | replace             | checksum(qatesting01) |
+            | DEFAULT         | replace             | any                   |
     When  I sync images
-    And   a warning message is shown informing about image duplicity for "qatesting01"
+    Then  a warning message is shown informing about image duplicity for "qatesting01"
+    And   the image "qatesting01" is replaced
+
+
+  Scenario: Sync an image when exist more than one image with the same name in target node and one of them with same checksum as the image in master (1/2)
+    Given a new image created in the Glance of master node with name "qatesting01" and file "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01b"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01"
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key          | config_value          |
+            | DEFAULT         | metadata_condition  | 'image.is_public'     |
+            | DEFAULT         | metadata_set        |                       |
+            | DEFAULT         | replace             | any                   |
+    When  I sync images
+    Then  a warning message is shown informing about image duplicity for "qatesting01"
+    And   no images are synchronized
+
+
+  Scenario: Sync an image when exist more than one image with the same name in target node and one of them with same checksum as the image in master (2/2)
+    Given a new image created in the Glance of master node with name "qatesting01" and file "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01"
+    And   a new image created in the Glance of all target nodes with name "qatesting01" and file "qatesting01b"
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key          | config_value          |
+            | DEFAULT         | metadata_condition  | 'image.is_public'     |
+            | DEFAULT         | metadata_set        |                       |
+            | DEFAULT         | replace             | any                   |
+    When  I sync images
+    Then  a warning message is shown informing about image duplicity for "qatesting01"
+    And   no images are synchronized

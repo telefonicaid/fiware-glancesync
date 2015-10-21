@@ -104,7 +104,6 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     And   the image "qatesting01" is present in all nodes with the expected data
 
 
-  @skip @bug @CLAUDIA-5189
   Scenario: Sync an image with the same name that have changed its content (differente checksum)
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images without specifying any condition
