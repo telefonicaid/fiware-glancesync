@@ -381,8 +381,9 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 region = region[7:]
             self.assertTrue(os.path.exists(path_status))
             f = open(path_status + '/' + region + '.csv', 'rU')
-            expected = f.read().replace('\n', '\r\n')
+            expected = f.read().replace('\n', ';')
             result = stream.getvalue()
+            result = result.replace('\r\n', ';')
             self.assertEquals(expected, result)
 
     def test_sync(self):
@@ -423,8 +424,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 region = region[7:]
             self.assertTrue(os.path.exists(path_status))
             f = open(path_status + '/' + region + '.csv', 'rU')
-            expected = f.read().replace('\n', '\r\n')
-            result = stream.getvalue()
+            expected = f.read().replace('\n', ';')
+            result = stream.getvalue().replace('\r\n', ';')
             self.assertEquals(expected, result)
 
 
