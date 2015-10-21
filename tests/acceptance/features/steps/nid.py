@@ -30,6 +30,11 @@ from qautils.commandline_utils import execute_command as cmd
 from qautils.dataset_utils import DatasetUtils
 import urllib
 import os
+import logging
+
+# Get logger for Behave steps
+__logger__ = logging.getLogger("getnid_steps")
+
 behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
@@ -42,7 +47,6 @@ def __load_response__(filename, reduce=True):
     :param filename: The name of the filename to be loaded
     :return: The content of the file in string unicode format without whitespaces and carriage returns.
     """
-    #filename = 'nids-{}'.format(type)
     relativepath = "./resources/nids"
 
     # Load the corresponding file from the resources directory
@@ -96,32 +100,39 @@ def __check_version__(version1, version2):
 
 @given(u'a connectivity to the FIWARE Catalogue')
 def step_check_availability_catalogue(context):
-    code = urllib.urlopen("http://catalogue.fiware.org/").getcode()
+    __logger__.info("Checking the availability of the FIWARE Catalogue")
+
+    code = urllib.urlopen(context.config['getnid']['catalogue_url']).getcode()
 
     assert_that(code, equal_to(200), "FIWARE Catalogue is not responding.")
 
 
 @when(u'I execute the getnid with the following values')
 def step_obtain_list_ge_nids(context):
+    __logger__.info("Obtaining the list of Generic Enabler NIDs")
+
     context.value = dict()
+    BIN_PATH = context.config['getnid']['bin_path']
 
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'type_value' in row.headings and row['type_value'] != 'False':
                 type = row['type_value']
 
-                command = '../../glancesync/getnid.py --type {}'.format(type)
+                command = BIN_PATH + ' --type {}'.format(type)
 
                 context.value[type] = cmd(command).replace('\n', '').replace('\r', '').replace(" ", "")
                 context.type = type
             elif 'wikitext' in row.headings:
-                command = '../../glancesync/getnid.py --wikitext'
+                command = BIN_PATH + ' --wikitext'
 
                 context.value['wikitext'] = cmd(command).replace('\n', '').replace('\r', '').replace(" ", "")
 
 
 @then(u'I obtain the following list of nid corresponding to that chapter')
 def step_check_data_recover(context):
+    __logger__.info("Checking the availability of the FIWARE Catalogue")
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'chapter_value' in row.headings:
@@ -136,26 +147,34 @@ def step_check_data_recover(context):
 
 @given(u'the getnid application installed')
 def step_impl_check_application_installed(context):
+    __logger__.info("Checking the availability of the getnid.py")
+
     # Check the availability of the getnid.py code
-    result = os.path.isfile("../../glancesync/getnid.py")
+    result = os.path.isfile(context.config['getnid']['bin_path'])
 
     assert_that(result, equal_to(True), "The python scripts does not exist in the folder ../../glancesync/getnid.py")
 
 
 @when(u'I execute the getnid application with the option')
 def step_impl_execute_with_options(context):
+    BIN_PATH = context.config['getnid']['bin_path']
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'option_value' in row.headings:
                 option = row['option_value']
 
-                command = '../../glancesync/getnid.py {}'.format(option)
+                __logger__.info("Execute the getnid.py with the option: {}".format(option))
+
+                command = BIN_PATH + ' {}'.format(option)
 
                 context.result = cmd(command)
 
 
 @then(u'the program return the corresponding version of this implementation')
 def step_impl_return_version(context):
+    __logger__.info("Checking the version format returned by getnid.py")
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'result_value' in row.headings:
@@ -168,6 +187,8 @@ def step_impl_return_version(context):
 
 @then(u'the program return the corresponding help information')
 def step_impl_help_information(context):
+    __logger__.info("Checking the help information returned by getnid.py")
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'result_value' in row.headings:
@@ -181,6 +202,8 @@ def step_impl_help_information(context):
 
 @then(u'I obtain the following document in tikiwiki format')
 def step_impl_wiki_text(context):
+    __logger__.info("Checking the tikiwiki format returned by getnid.py")
+
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'wikitext_file' in row.headings:
