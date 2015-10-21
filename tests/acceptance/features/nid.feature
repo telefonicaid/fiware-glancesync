@@ -17,19 +17,19 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | <chapter_value> | <resources_value> |
 
                 Examples:
-             | type_value    | chapter_value                                          | resources_value    |
-             | i2nd          | advanced-middleware-and-interfaces-network-and-devices | nids-i2nd          |
-             | cloud         | cloud-hosting                                          | nids-cloud         |
-             | userinterface | advanced-web-based-user-interface                      | nids-userinterface |
-             | sec           | security                                               | nids-sec           |
-             | iot           | internet-things-services-enablement                    | nids-iot           |
-             | data          | datacontext-management                                 | nids-data          |
-             | apps          | applicationsservices-and-data-delivery                 | nids-apps          |
+             | type_value | chapter_value                                          | resources_value    |
+             | i2nd       | advanced-middleware-and-interfaces-network-and-devices | nids-i2nd          |
+             | cloud      | cloud-hosting                                          | nids-cloud         |
+             | ui         | advanced-web-based-user-interface                      | nids-userinterface |
+             | sec        | security                                               | nids-sec           |
+             | iot        | internet-things-services-enablement                    | nids-iot           |
+             | data       | datacontext-management                                 | nids-data          |
+             | apps       | applicationsservices-and-data-delivery                 | nids-apps          |
 
   @happy_path
     Scenario Outline: 02: Get the version of the application by invoking the appropriate command line instruction.
-     Given that I have the gitnid application installed
-     When  I execute the gitnid application with the option
+     Given the getnid application installed
+     When  I execute the getnid application with the option
              | option_value   |
              | <option_value> |
      Then  the program return the corresponding version of this implementation
@@ -43,8 +43,8 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
 
   @happy_path
     Scenario Outline: 03: Get the help information of the application by invoking the appropriate command line instruction.
-     Given that I have the gitnid application installed
-     When  I execute the gitnid application with the option
+     Given the getnid application installed
+     When  I execute the getnid application with the option
              | option_value   |
              | <option_value> |
      Then  the program return the corresponding help information

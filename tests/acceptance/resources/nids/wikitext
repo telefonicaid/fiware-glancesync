@@ -24,6 +24,13 @@
 
 |-
 || datacontext management
+|| cloud messaging aeon
+| ! align="center" | 1501
+|| --
+|| --
+
+|-
+||
 || publishsubscribe context broker orion context broker
 | ! align="center" | 344
 || --

@@ -137,7 +137,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         self.assertEquals(result, 'cloud-hosting')
         self.assertEquals(value, 1)
 
-        result, value = self.nid.gettypekey('userinterface')
+        result, value = self.nid.gettypekey('ui')
         self.assertEquals(result, 'advanced-web-based-user-interface')
         self.assertEquals(value, 2)
 

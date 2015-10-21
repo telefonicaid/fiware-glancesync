@@ -134,15 +134,15 @@ def step_check_data_recover(context):
                                                                        "the expected one.")
 
 
-@given(u'that I have the gitnid application installed')
+@given(u'the getnid application installed')
 def step_impl_check_application_installed(context):
-    # Check the availability of the gitnid.py code
+    # Check the availability of the getnid.py code
     result = os.path.isfile("../../glancesync/getnid.py")
 
     assert_that(result, equal_to(True), "The python scripts does not exist in the folder ../../glancesync/getnid.py")
 
 
-@when(u'I execute the gitnid application with the option')
+@when(u'I execute the getnid application with the option')
 def step_impl_execute_with_options(context):
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
@@ -152,8 +152,6 @@ def step_impl_execute_with_options(context):
                 command = '../../glancesync/getnid.py {}'.format(option)
 
                 context.result = cmd(command)
-
-                assert_that(command, is_not(''))
 
 
 @then(u'the program return the corresponding version of this implementation')
@@ -165,11 +163,11 @@ def step_impl_return_version(context):
 
                 result = __check_version__(context.result, expected_result)
 
-                assert_that(result, is_(True))
+                assert_that(result, is_(True), 'The version information does not match with the expected value.')
 
 
 @then(u'the program return the corresponding help information')
-def step_impl(context):
+def step_impl_help_information(context):
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'result_value' in row.headings:
