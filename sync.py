@@ -31,7 +31,7 @@ import datetime
 import argparse
 import logging
 
-from glancesync.glancesync_fi import GlanceSyncFi as GlanceSync
+from glancesync.glancesync import GlanceSync
 
 
 class Sync(object):
@@ -122,7 +122,6 @@ class Sync(object):
         :param dry_run: if true, do not synchronise images actually
         """
         print '======Master (' + self.glancesync.master_region + ')'
-        self.glancesync.print_images_master_region()
 
         for region in self.regions:
             try:
