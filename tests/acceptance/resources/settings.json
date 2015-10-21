@@ -65,5 +65,9 @@
       "master_region_name": "Valladolid",
       "bin_path": "/opt/fiware/glancesync",
       "config_file": "/etc/glancesync.conf"
+  },
+  "getnid":{
+      "catalogue_url": "http://catalogue.fiware.org/",
+      "bin_path": "../../glancesync/getnid.py"
   }
 }
