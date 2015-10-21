@@ -198,6 +198,7 @@ class GlanceSync(object):
                     region_image.is_public = False
                     facade.update_metadata(regionobj, region_image)
             elif tuple[0] == 'error_checksum':
+                region_image = dictimages[tuple[1].name]
                 msg =\
                     'Image {0} has a different checksum ({2}) in region {1} '\
                     'than in the master region. It was not set what to do. '\
