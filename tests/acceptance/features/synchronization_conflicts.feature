@@ -22,7 +22,6 @@ Feature: Image sync between regions using GlanceSync in the same federation when
     And   the image "qatesting01" is present in all nodes with the content of file "qatesting01b"
 
 
-  @skip @bug @CLAUDIA-5189
   Scenario Outline: Sync images when there are checksum conflicts. ImageID is not updated.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   GlanceSync configured to sync images using these configuration parameters:

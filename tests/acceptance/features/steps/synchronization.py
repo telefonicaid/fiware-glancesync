@@ -430,10 +430,20 @@ def warning_message_checksum_confilc(context, image_name):
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
-    assert_that(context.glancesync_result,
-                        is_(contains_string(
-                            GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT.format(image_name=image_name))),
-                        "WARNING message for '{}' is not shown in results".format(image_name))
+    for region in context.glance_manager_list:
+        if region != context.master_region_name:
+
+            regex_message = GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT.format(image_name=image_name,
+                                                                               region_name=region)
+            __logger__.info("Regex pattern for message: '%s'", regex_message)
+
+            pattern = re.compile(regex_message)
+            re_match = re.findall(pattern, context.glancesync_result)
+            __logger__.info("Result: %s", str(re_match))
+
+            assert_that(re_match, has_length(greater_than(0)),
+                                "WARNING message with patern '{}' "
+                                "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
 
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')
