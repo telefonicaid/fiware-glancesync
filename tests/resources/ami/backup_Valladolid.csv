@@ -9,4 +9,8 @@ Valladolid,image08,008,active,1000,1ea51bf32497d1b3708522b430b288a129f65307,tena
 Valladolid,image09,009,active,1073741904,4b581cdce6283495fd4934ce574ac47e92881c64,tenant1id,True,"{'type': 'image', 'kernel_id': '007', 'ramdisk_id': '008'}"
 Valladolid,image10,010,active,1073741914,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,True,"{'type': 'image', 'kernel_id': '011', 'ramdisk_id': '012'}"
 Valladolid,image11,011,active,1000,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,True,{}
-Valladolid,image11,012,active,1000,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,True,{}
+Valladolid,image12,012,active,1000,b1d5781111d84f7b3fe45a0852e59758cd7a87e5,tenant1id,True,{}
+Valladolid,image13,013,active,1001,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1id,True,{'type': 'kernel'}
+Valladolid,image14,014,active,1001,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1id,True,{'type': 'ramdisk'}
+Valladolid,image15,015,active,2073741845,3ea6c91e241f256e5e3a88ebd647372022323a55,tenant1id,True,"{'type': 'image', 'kernel_id': '013', 'ramdisk_id': '014'}"
+

@@ -83,8 +83,8 @@ def update_kernelramdisk_id(image, master_image, region_images):
     The function returns True if the object has been modified and need to be
     updated.
 
-    If the kernel or ramdisk image is not found, a warning is emitted, the
-    image is marked as private and the kernel_id/ramdisk_id is filled with the
+    If the kernel or ramdisk image is not found, a warning is emitted
+    and the kernel_id/ramdisk_id is filled with the
     name of the missing image with the prefix __
 
     if the ramdisk_id/kernel_id is present in image but not in master image,
@@ -103,8 +103,7 @@ def update_kernelramdisk_id(image, master_image, region_images):
     return r1 or r2
 
 
-def _update_auximg_id(property_id, image, master_image, images_region,
-                      dry_run=False):
+def _update_auximg_id(property_id, image, master_image, images_region):
     """
     Utility function that modify, if required, a property in the image
     pointing to the id of other image. For example, it is used with kernel_id
@@ -114,7 +113,6 @@ def _update_auximg_id(property_id, image, master_image, images_region,
     :param image: the image to modify
     :param master_image: the master image
     :param images_region: a dictionary indexed by name with the region's images
-    :param dry_run: if true, don't modify the image, only check it is required
     :return:
     """
     if property_id not in master_image.user_properties:
@@ -123,21 +121,17 @@ def _update_auximg_id(property_id, image, master_image, images_region,
             return False
         else:
             # remove property
-            if not dry_run:
-                del image.user_properties[property_id]
+            del image.user_properties[property_id]
             return True
 
     # Get the name of the kernel/ramdisk image
     aux_image_name = master_image.user_properties[property_id]
     if aux_image_name not in images_region:
-        if dry_run:
-            return True
         # It is very unusual that an image exists and not its kernel or
         # ramdisk, because little images are upload first, but it is
         # possible (e.g. if the image is removed manually or it is
         # replaced by a more recent one)
-        # In this case, print a warning and mark the image as private
-        image.is_public = False
+        # In this case, print a warning
         msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
         _logger.warning(msg.format(aux_image_name, image.region,
                                    property_id, image.name))
@@ -150,8 +144,7 @@ def _update_auximg_id(property_id, image, master_image, images_region,
     if property_id in image.user_properties and\
             aux_image.id == image.user_properties[property_id]:
         return False
-    if not dry_run:
-        image.user_properties[property_id] = aux_image.id
+    image.user_properties[property_id] = aux_image.id
     return True
 
 
@@ -171,7 +164,7 @@ def check_ami(image, master_image, region_images, pending_images):
 
     Typically, images with state 'ready' can be ignored; images with state
     'update' can be updated before uploading the pending images. Images with
-    'missing' state must be updated after the uploading of pending images.
+    'pending' state must be updated after the uploading of pending images.
     Finally, images with 'missing' state are broken.
 
     :param image: the image to check

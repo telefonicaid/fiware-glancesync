@@ -251,6 +251,9 @@ class ServersFacade(object):
                     ServersFacade.images[region_name] = dict()
             with open(file) as f:
                 for row in csv.reader(f):
+                    # ignore blank lines
+                    if len(row) == 0:
+                        continue
                     image = GlanceSyncImage.from_field_list(row)
                     ServersFacade.images[region_name][image.id] = image
             if ServersFacade.use_persistence:
