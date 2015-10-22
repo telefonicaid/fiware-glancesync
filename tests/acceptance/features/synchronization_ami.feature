@@ -6,7 +6,7 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
   So that I can use the same base images in all nodes and keep them updated
 
 
-  @happy_path @skip @bug @CLAUDIA-5327
+  @happy_path
   Scenario: Simple AMI image synchronization between regions. The last uploaded image is the AMI image (biggest size)
     Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
     And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
@@ -43,7 +43,7 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
     And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02"
     And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting01"
 
-  @skip @bug @CLAUDIA-5327
+  @skip @bug @CLAUDIA-5632
   Scenario: Simple AMI image synchronization between regions. The kernel image is the last uploaded image. The AMI image is the second one.
     Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
     And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting01"
@@ -63,7 +63,7 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
             | ramdisk_id      | id(qatestingramdisk01)          |
 
 
-  @skip @bug @CLAUDIA-5327
+  @skip @bug @CLAUDIA-5632
   Scenario: Simple AMI image synchronization between regions. The ramdisk image is the last uploaded image. The AMI image is the second one.
     Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
     And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting03"
@@ -83,7 +83,6 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
             | kernel_id       | id(qatestingkernel01)           |
 
 
-  @skip @bug @CLAUDIA-5327
   Scenario: Simple AMI image synchronization between regions with custom metadata. The last uploaded image is the AMI image (biggest size)
     Given a new image created in the Glance of master node with name "qatestingkernel01", file "qatesting01" and these properties:
             | param_name      | param_value                     |
@@ -193,7 +192,7 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
             | custom_a1       | valueami1                       |
             | custom2         | valueami2                       |
 
-  @skip @bug @CLAUDIA-5327
+
   Scenario: AMI image synchronization between regions when conflicts. All checksum are different. No actions configured (replace/rename)
     Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
     And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
@@ -216,8 +215,145 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
     Then  no images are synchronized
 
 
-  @happy_path @skip @bug @CLAUDIA-5327
   Scenario: AMI image synchronization between regions when conflicts. All checksum are different. Replace.
+    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
+    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
+    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting03" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key                      | config_value                                                                          |
+            | DEFAULT         | metadata_condition              | 'image.is_public'                                                                     |
+            | DEFAULT         | metadata_set                    |                                                                                       |
+            | DEFAULT         | replace                         | 'checksum(qatestingami01), checksum(qatestingramdisk01), checksum(qatestingkernel01)' |
+    And   already synchronized images
+    And   the image "qatestingami01" is deleted from the Glance of master node
+    And   the image "qatestingramdisk01" is deleted from the Glance of master node
+    And   the image "qatestingkernel01" is deleted from the Glance of master node
+    And   other new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01b"
+    And   other new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02b"
+    And   other new image created in the Glance of master node with name "qatestingami01", file "qatesting03b" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    When  I sync images
+    Then  all images are replaced
+    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting01b"
+    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
+    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting03b"
+    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+
+
+  Scenario: AMI image synchronization between regions when conflicts. Only the kernel image has been modified (the checksum is different). Replace.
+    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
+    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
+    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting03" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key                      | config_value          |
+            | DEFAULT         | metadata_condition              | 'image.is_public'     |
+            | DEFAULT         | metadata_set                    |                       |
+            | DEFAULT         | replace                         | any                   |
+    And   already synchronized images
+    And   the image "qatestingkernel01" is deleted from the Glance of master node
+    And   other new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01b"
+    And   the user properties of the image "qatestingami01" are updated in the Glance of master node:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+    When  I sync images
+    Then  the image "qatestingkernel01" is replaced
+    And   the image "qatestingami01" is not replaced
+    And   the image "qatestingramdisk01" is not replaced
+    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting01b"
+    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02"
+    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting03"
+    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+
+
+  Scenario: AMI image synchronization between regions when conflicts. All checksum are different. Rename.
+    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
+    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
+    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting03" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key                      | config_value                                                                          |
+            | DEFAULT         | metadata_condition              | 'image.is_public'                                                                     |
+            | DEFAULT         | metadata_set                    |                                                                                       |
+            | DEFAULT         | rename                          | 'checksum(qatestingami01), checksum(qatestingramdisk01), checksum(qatestingkernel01)' |
+    And   already synchronized images
+    And   the image "qatestingami01" is deleted from the Glance of master node
+    And   the image "qatestingramdisk01" is deleted from the Glance of master node
+    And   the image "qatestingkernel01" is deleted from the Glance of master node
+    And   other new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01b"
+    And   other new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02b"
+    And   other new image created in the Glance of master node with name "qatestingami01", file "qatesting03b" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    When  I sync images
+    Then  all images are renamed and replaced
+    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting01b"
+    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
+    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting03b"
+    And   the image "qatestingkernel01.old" is present in all target nodes with the content of file "qatesting01"
+    And   the image "qatestingramdisk01.old" is present in all target nodes with the content of file "qatesting02"
+    And   the image "qatestingami01.old" is present in all target nodes with the content of file "qatesting03"
+    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    And   the AMI image "qatestingami01.old" is present in all target nodes with the following properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01.old)       |
+            | ramdisk_id      | id(qatestingramdisk01.old)      |
+
+
+  Scenario: AMI image synchronization between regions when conflicts. Only the ramdisk image has been modified (the checksum is different). Rename.
+    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting01"
+    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
+    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting03" and these properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    And   GlanceSync configured to sync images using these configuration parameters:
+            | config_section  | config_key                      | config_value                 |
+            | DEFAULT         | metadata_condition              | 'image.is_public'            |
+            | DEFAULT         | metadata_set                    |                              |
+            | DEFAULT         | rename                          | any                          |
+    And   already synchronized images
+    And   the image "qatestingramdisk01" is deleted from the Glance of master node
+    And   other new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02b"
+    And   the user properties of the image "qatestingami01" are updated in the Glance of master node:
+            | param_name      | param_value                     |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+    When  I sync images
+    Then  the image "qatestingramdisk01" is renamed and replaced
+    And   the image "qatestingami01" is neither renamed nor replaced
+    And   the image "qatestingkernel01" is neither renamed nor replaced
+    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting01"
+    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
+    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting03"
+    And   the image "qatestingkernel01.old" is not present in target nodes
+    And   the image "qatestingami01.old" is not present in target nodes
+    And   the image "qatestingramdisk01.old" is present in all target nodes with the content of file "qatesting02"
+    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
+            | param_name      | param_value                     |
+            | kernel_id       | id(qatestingkernel01)           |
+            | ramdisk_id      | id(qatestingramdisk01)          |
+
+  @skip @bug @CLAUDIA-5632
+  Scenario: AMI image synchronization between regions when conflicts. All checksum are different. Replace. AMI image is the last one synchronized.
     Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
     And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
     And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting01" and these properties:
@@ -226,6 +362,8 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
             | ramdisk_id      | id(qatestingramdisk01)          |
     And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key                      | config_value                                                                          |
+            | DEFAULT         | metadata_condition              | 'image.is_public'                                                                     |
+            | DEFAULT         | metadata_set                    |                                                                                       |
             | DEFAULT         | replace                         | 'checksum(qatestingami01), checksum(qatestingramdisk01), checksum(qatestingkernel01)' |
     And   already synchronized images
     And   the image "qatestingami01" is deleted from the Glance of master node
@@ -242,108 +380,6 @@ Feature: Image (AMI) sync between regions using GlanceSync in the same federatio
     And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting03b"
     And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
     And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting01b"
-    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-
-
-  @skip @bug @CLAUDIA-5327
-  Scenario: AMI image synchronization between regions when conflicts. Only the kernel image has been modified (the checksum is different). Replace.
-    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
-    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
-    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting01" and these properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-    And   GlanceSync configured to sync images using these configuration parameters:
-            | config_section  | config_key                      | config_value          |
-            | DEFAULT         | replace                         | any                   |
-    And   already synchronized images
-    And   the image "qatestingkernel01" is deleted from the Glance of master node
-    And   other new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03b"
-    And   the user properties of the image "qatestingami01" are updated in the Glance of master node:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-    When  I sync images
-    Then  the image "qatestingkernel01" is replaced
-    And   the image "qatestingami01" is not replaced
-    And   the image "qatestingramdisk01" is not replaced
-    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting03b"
-    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02"
-    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting01"
-    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-
-
-  @happy_path @skip @bug @CLAUDIA-5327
-  Scenario: AMI image synchronization between regions when conflicts. All checksum are different. Rename.
-    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
-    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
-    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting01" and these properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-    And   GlanceSync configured to sync images using these configuration parameters:
-            | config_section  | config_key                      | config_value                                                                          |
-            | DEFAULT         | rename                          | 'checksum(qatestingami01), checksum(qatestingramdisk01), checksum(qatestingkernel01)' |
-    And   already synchronized images
-    And   the image "qatestingami01" is deleted from the Glance of master node
-    And   the image "qatestingramdisk01" is deleted from the Glance of master node
-    And   the image "qatestingkernel01" is deleted from the Glance of master node
-    And   other new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03b"
-    And   other new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02b"
-    And   other new image created in the Glance of master node with name "qatestingami01", file "qatesting01b" and these properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-    When  I sync images
-    Then  all images are renamed and replaced
-    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting03b"
-    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
-    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting01b"
-    And   the image "qatestingkernel01.old" is present in all target nodes with the content of file "qatesting03"
-    And   the image "qatestingramdisk01.old" is present in all target nodes with the content of file "qatesting02"
-    And   the image "qatestingami01.old" is present in all target nodes with the content of file "qatesting01"
-    And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-    And   the AMI image "qatestingami01.old" is present in all target nodes with the following properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01.old)       |
-            | ramdisk_id      | id(qatestingramdisk01.old)      |
-
-
-  @skip @bug @CLAUDIA-5327
-  Scenario: AMI image synchronization between regions when conflicts. Only the ramdisk image has been modified (the checksum is different). Rename.
-    Given a new image created in the Glance of master node with name "qatestingkernel01" and file "qatesting03"
-    And   a new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02"
-    And   a new image created in the Glance of master node with name "qatestingami01", file "qatesting01" and these properties:
-            | param_name      | param_value                     |
-            | kernel_id       | id(qatestingkernel01)           |
-            | ramdisk_id      | id(qatestingramdisk01)          |
-    And   GlanceSync configured to sync images using these configuration parameters:
-            | config_section  | config_key                      | config_value                 |
-            | DEFAULT         | rename                          | any                          |
-    And   already synchronized images
-    And   the image "qatestingramdisk01" is deleted from the Glance of master node
-    And   other new image created in the Glance of master node with name "qatestingramdisk01" and file "qatesting02b"
-    And   the user properties of the image "qatestingami01" are updated in the Glance of master node:
-            | param_name      | param_value                     |
-            | ramdisk_id      | id(qatestingramdisk01)           |
-    When  I sync images
-    Then  the image "qatestingramdisk01" is renamed and replaced
-    And   the image "qatestingami01" is neither renamed nor replaced
-    And   the image "qatestingkernel01" is neither renamed nor replaced
-    And   the image "qatestingkernel01" is present in all target nodes with the content of file "qatesting03"
-    And   the image "qatestingramdisk01" is present in all target nodes with the content of file "qatesting02b"
-    And   the image "qatestingami01" is present in all target nodes with the content of file "qatesting01"
-    And   the image "qatestingkernel01.old" is not present in target nodes
-    And   the image "qatestingami01.old" is not present in target nodes
-    And   the image "qatestingramdisk01.old" is present in all target nodes with the content of file "qatesting02"
     And   the AMI image "qatestingami01" is present in all target nodes with the following properties:
             | param_name      | param_value                     |
             | kernel_id       | id(qatestingkernel01)           |
