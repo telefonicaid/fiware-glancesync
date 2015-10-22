@@ -28,7 +28,7 @@ __license__ = " Apache License, Version 2.0"
 __version__ = "1.0.0"
 
 
-from qa_utils.logger_utils import get_logger
+from qautils.logger_utils import get_logger
 import subprocess
 from subprocess import CalledProcessError
 

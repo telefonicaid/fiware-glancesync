@@ -485,6 +485,7 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
                ', fill either dontupdate, replace or rename with the checksum.'
         self.assertTrue(warnings[0].startswith(msg1))
 
+
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):

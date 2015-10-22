@@ -126,7 +126,7 @@ Publishing the image
 ********************
 
 Every GE image have two properties: the NID and the type. The values are
-registered at https://wikis.hi.inet/fi-ware/index.php/Cloud:GE_Identification
+registered at https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/GE-identification
 
 The following three situations are possible:
 

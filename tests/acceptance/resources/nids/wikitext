@@ -1,0 +1,322 @@
+<center>
+{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" class="wikitable"
+    |-
+    |+ align="center" style="background:DarkSlateBlue; color:white"|<big>'''Summary of usage in the Spain node'''</big>
+    ! ! width="100 px" style="background:Lavender; color:Black" | Chapter
+    ! width="100 px" style="background:Lavender; color:Black" | Generic Enabler
+    ! width="50 px" style="background:Lavender; color:Black" | NID
+    ! width="50 px" style="background:Lavender; color:Black" | NID Version
+    ! width="100 px" style="background:Lavender; color:Black" | Image
+
+|-
+|| advanced middleware and interfaces network and devices
+|| network information and control ofnic
+| ! align="center" | 497
+|| --
+|| --
+
+|-
+||
+|| kiara advanced middleware
+| ! align="center" | 1447
+|| --
+|| --
+
+|-
+|| datacontext management
+|| cloud messaging aeon
+| ! align="center" | 1501
+|| --
+|| --
+
+|-
+||
+|| publishsubscribe context broker orion context broker
+| ! align="center" | 344
+|| --
+|| --
+
+|-
+||
+|| complex event processing cep proactive technology online
+| ! align="center" | 146
+|| --
+|| --
+
+|-
+||
+|| stream oriented kurento
+| ! align="center" | 855
+|| --
+|| --
+
+|-
+||
+|| bigdata analysis cosmos
+| ! align="center" | 158
+|| --
+|| --
+
+|-
+|| internet things services enablement
+|| iot discovery
+| ! align="center" | 635
+|| --
+|| --
+
+|-
+||
+|| iot broker
+| ! align="center" | 476
+|| --
+|| --
+
+|-
+||
+|| gateway data handling ge cepheus
+| ! align="center" | 198
+|| --
+|| --
+
+|-
+||
+|| protocol adapter mr coap
+| ! align="center" | 1023
+|| --
+|| --
+
+|-
+||
+|| backend device management idas
+| ! align="center" | 696
+|| --
+|| --
+
+|-
+|| applicationsservices and data delivery
+|| application mashup wirecloud
+| ! align="center" | 194
+|| --
+|| --
+
+|-
+||
+|| data visualization spagobi
+| ! align="center" | 1436
+|| --
+|| --
+
+|-
+||
+|| marketplace wmarket
+| ! align="center" | 95
+|| --
+|| --
+
+|-
+||
+|| repository repository ri
+| ! align="center" | 58
+|| --
+|| --
+
+|-
+||
+|| store wstore
+| ! align="center" | 512
+|| --
+|| --
+
+|-
+||
+|| revenue settlement and sharing system rss ri
+| ! align="center" | 554
+|| --
+|| --
+
+|-
+|| cloud hosting
+|| monitoring ge sextant
+| ! align="center" | 559
+|| --
+|| --
+
+|-
+||
+|| object storage ge fiware implementation
+| ! align="center" | 162
+|| --
+|| --
+
+|-
+||
+|| application manager murano
+| ! align="center" | 1510
+|| --
+|| --
+
+|-
+||
+|| self service interfaces cloud portal
+| ! align="center" | 626
+|| --
+|| --
+
+|-
+||
+|| iaas ge fiware reference implementation
+| ! align="center" | 130
+|| --
+|| --
+
+|-
+||
+|| software deployment configuration sagitta
+| ! align="center" | 537
+|| --
+|| --
+
+|-
+||
+|| paas manager pegasus
+| ! align="center" | 528
+|| --
+|| --
+
+|-
+||
+|| docker
+| ! align="center" | 1518
+|| --
+|| --
+
+|-
+||
+|| policy manager bosun
+| ! align="center" | 1123
+|| --
+|| --
+
+|-
+|| security
+|| identity management keyrock
+| ! align="center" | 1045
+|| --
+|| --
+
+|-
+||
+|| security monitoring
+| ! align="center" | 315
+|| --
+|| --
+
+|-
+||
+|| authorization pdp authzforce
+| ! align="center" | 568
+|| --
+|| --
+
+|-
+||
+|| pep proxy wilma
+| ! align="center" | 1412
+|| --
+|| --
+
+|-
+|| advanced web based user interface
+|| 2d ui
+| ! align="center" | 1304
+|| --
+|| --
+
+|-
+||
+|| 3d ui xml3d
+| ! align="center" | 1204
+|| --
+|| --
+
+|-
+||
+|| virtual characters
+| ! align="center" | 1188
+|| --
+|| --
+
+|-
+||
+|| 3dui webtundra
+| ! align="center" | 1164
+|| --
+|| --
+
+|-
+||
+|| real virtual interaction
+| ! align="center" | 1249
+|| --
+|| --
+
+|-
+||
+|| synchronization
+| ! align="center" | 1182
+|| --
+|| --
+
+|-
+||
+|| synchronization fives
+| ! align="center" | 1494
+|| --
+|| --
+
+|-
+||
+|| gis data provider geoserver3d
+| ! align="center" | 1215
+|| --
+|| --
+
+|-
+||
+|| augmented reality
+| ! align="center" | 1176
+|| --
+|| --
+
+|-
+||
+|| poi data provider
+| ! align="center" | 1170
+|| --
+|| --
+
+|-
+||
+|| interface designer
+| ! align="center" | 1292
+|| --
+|| --
+
+|-
+||
+|| 2d3d capture
+| ! align="center" | 1257
+|| --
+|| --
+
+|-
+||
+|| cloud rendering
+| ! align="center" | 1286
+|| --
+|| --
+
+
+
+|}
+</center>

@@ -558,7 +558,7 @@ tests.
      source ./venv/bin/activate
      pip install -r requirements.txt
      pip install -r requirements_dev.txt
-     nosetest --exe
+     nosetests --exe
      deactivate
 
 Eight tests are marked as skipped because they are more properly integration
