@@ -11,6 +11,9 @@ in order to identify any instance in production. It is implemented in a specific
 that could be called to recover the information in any other python code. In the same way,
 there is implemented a specific Command-line Interface to execute the process. You can execute:
 
+The result obtained in the execution of the script, specially with the --wikitext option activated,
+will be used to generate the corresponding `FIWARE GE identification page`_.
+
 .. code::
 
      $ ./getnid.py -h
@@ -57,3 +60,4 @@ The scripts are licensed under Apache v2.0 license.
 .. _Internet of Things (Io) Services Enablement: http://catalogue.fiware.org/chapter/internet-things-services-enablement
 .. _Data/Context Management: http://catalogue.fiware.org/chapter/datacontext-management
 .. _Architecture of Applications/Services Ecosystem and Delivery Framework: http://catalogue.fiware.org/chapter/applicationsservices-and-data-delivery
+.. _FIWARE GE identification page_: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/GE-identification
