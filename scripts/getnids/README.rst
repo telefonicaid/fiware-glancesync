@@ -33,13 +33,13 @@ To see the help information about the use of this script, like the following:
        --type        Show details about the specific chapter
 
 The type value corresponding to each of the chapter that we have in FIWARE and are the following:
-* i2nd: `Advanced Middleware and Interfaces Network and Devices`_.
-* cloud: `Cloud Hosting`_.
-* ui: `Advanced Web-based User Interface`_.
-* sec: `Security`_.
-* iot: `Internet of Things (Io) Services Enablement`_.
-* data: `Data/Context Management`_.
-* apps: `Architecture of Applications/Services Ecosystem and Delivery Framework`_.
+- i2nd: `Advanced Middleware and Interfaces Network and Devices`_.
+- cloud: `Cloud Hosting`_.
+- ui: `Advanced Web-based User Interface`_.
+- sec: `Security`_.
+- iot: `Internet of Things (Io) Services Enablement`_.
+- data: `Data/Context Management`_.
+- apps: `Architecture of Applications/Services Ecosystem and Delivery Framework`_.
 
 
 License
