@@ -29,7 +29,7 @@ import os
 
 import requests_mock
 
-from scripts.support.getnid import NID, processingnid
+from scripts.getnids.getnid import NID, processingnid
 
 
 @requests_mock.Mocker()
@@ -209,7 +209,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
                      'i2nd': False,
                      'iot': True,
                      'sec': False,
-                     'userinterface': False}
+                     'ui': False}
 
         m.get(requests_mock.ANY, text=self.responseiot)
 
@@ -228,7 +228,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
                      'i2nd': False,
                      'iot': False,
                      'sec': False,
-                     'userinterface': False}
+                     'ui': False}
 
         # we want to ask two pages and connect both of them
         # url: 'http://catalogue.fiware.org/chapter/any chapter?page=0'
@@ -265,7 +265,7 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
                      'i2nd': False,
                      'iot': False,
                      'sec': False,
-                     'userinterface': False}
+                     'ui': False}
 
         # we want to ask two pages and connect both of them
         # url: 'http://catalogue.fiware.org/chapter/any chapter?page=0'

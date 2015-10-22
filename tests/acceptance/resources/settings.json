@@ -68,6 +68,6 @@
   },
   "getnid":{
       "catalogue_url": "http://catalogue.fiware.org/",
-      "bin_path": "../../scripts/support/getnid.py"
+      "bin_path": "../../scripts/getnids/getnid.py"
   }
 }

@@ -203,7 +203,7 @@ class NID(object):
     ! width="100 px" style="background:Lavender; color:Black" | Image
     '''
 
-        msg = msg + '\n' + self.__sectionB__(result) + '\n\n|}\n'
+        msg += '\n' + self.__sectionB__(result) + '\n\n|}\n'
 
         return msg
 
@@ -216,63 +216,61 @@ class NID(object):
         msg = ''
 
         for k, v in result.items():
-            msg = msg + '|-\n|| '
-
-            msg = msg + k.replace('-', ' ') + "\n" + self.__sectionC__(v)
+            msg = msg + '|-\n|| ' + k.replace('-', ' ') + "\n" + self.__sectionC__(v)
 
         return msg
 
-    def __sectionC__(self, valuedict):
+    @staticmethod
+    def __sectionC__(value):
         """
         Generate the section corresponding to each Generic Enabler.
-        :param result: The dictionary with the list of GE names and NID values.
+        :param value: The dictionary with the list of GE names and NID values.
         :return: The section corresponding to each Generic Enabler.
         """
         msg = ''
         first = True
 
-        for k, v in valuedict.items():
+        for k, v in value.items():
             if first is True:
-                msg = msg + '|| '
+                msg += '|| '
                 first = False
             else:
-                msg = msg + '|-\n||\n|| '
+                msg += '|-\n||\n|| '
 
-            msg = msg + k.replace('-', ' ') + '\n' + '| ! align="center" | ' \
-                  + v.replace('-', ' ') + '\n|| --\n|| --\n\n'
+            msg += k.replace('-', ' ') + '\n' + '| ! align="center" | ' + v.replace('-', ' ') + '\n|| --\n|| --\n\n'
 
         return msg
 
 
-def processingnid(arguments):
+def processingnid(params):
     """
     Method to process the arguments received from the CLI and obtain the list of GE(r)i nids.
-    :param arguments: Arguments received from the CLI.
+    :param params: Arguments received from the CLI.
     :return: A string format with the different GE(r)i and nids classified by chapter. If the --wikitext argument is
              specified, the method returns the data in tikiwiki format, nevertheless it returns in a dictionary
              representation.
     """
     nid = {}
-    iNID = NID()
+    nidclass = NID()
 
-    typekey = arguments['--type']
+    typekey = params['--type']
 
     if typekey:
-        typevalor = iNID.getvalue(arguments)
+        typevalor = nidclass.getvalue(params)
 
         # key could be only a value or several one depending of the
         # number of pages in the catalog.
-        key, value = iNID.gettypekey(typevalor)
+        key, value = nidclass.gettypekey(typevalor)
 
-        nid[key] = iNID.getcataloginformation(key, value)
+        nid[key] = nidclass.getcataloginformation(key, value)
     else:
-        for key, value in iNID.getchapter().iteritems():
-            nid[key] = iNID.getcataloginformation(key, value)
+        for key, value in nidclass.getchapter().iteritems():
+            nid[key] = nidclass.getcataloginformation(key, value)
 
-    wikitext = arguments['--wikitext']
+    wikitext = params['--wikitext']
 
     if wikitext:
-        nid = iNID.generatewikitext(nid)
+        nid = nidclass.generatewikitext(nid)
 
     return nid
 
@@ -280,10 +278,10 @@ if __name__ == '__main__':
     version = "Get NID code v{}".format(__version__)
     arguments = docopt(__doc__, version=version)
 
-    nid = processingnid(arguments)
+    genids = processingnid(arguments)
 
     # Depending if we have option --wikitext selected or not, we print in one format or another.
-    if isinstance(nid, dict):
-        pprint.pprint(nid)
+    if isinstance(genids, dict):
+        pprint.pprint(genids)
     else:
-        print(nid)
+        print(genids)
