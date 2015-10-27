@@ -68,9 +68,17 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         path = current.split('/')
         finalpath = ''
         finalstring = ''
+        texttofind = ''
 
         try:
-            index_to_glancesync = path.index('fiware-glancesync') + 1
+            if 'fiware-glancesync' in path:
+                texttofind = 'fiware-glancesync'
+            elif 'workspace' in path and 'develenv' in path:
+                texttofind = 'workspace'
+            else:
+                raise ValueError
+
+            index_to_glancesync = path.index(texttofind) + 1
             if len(path) == index_to_glancesync:
                 finalpath = current + relativepath
             else:
