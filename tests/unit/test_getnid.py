@@ -33,7 +33,7 @@ from scripts.getnids.getnid import NID, processingnid
 
 
 @requests_mock.Mocker()
-class TestGlanceSyncBasicOperation(unittest.TestCase):
+class TestGlanceSyncNIDOperations(unittest.TestCase):
     """Class to test basic operations (i.e. all operations except
     the synchronisation ones"""
     def setUp(self):
