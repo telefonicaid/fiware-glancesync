@@ -578,7 +578,7 @@ GlanceSync is licensed under Apache v2.0 license.
 
 .. IMAGES
 
-.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=feature%2Fclaudia-5210_travis_configuration
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-glancesync
    :alt: Build status
 
