@@ -33,11 +33,10 @@ from scripts.getnids.getnid import NID, processingnid
 
 
 @requests_mock.Mocker()
-class TestGlanceSyncBasicOperation(unittest.TestCase):
+class TestGlanceSyncNIDOperations(unittest.TestCase):
     """Class to test the operation to obtain the list of Generic
     Enabler NIDs from the FIWARE Catalogue and show them classified
     by dictionary or in tikiwiki format style"""
-
     def setUp(self):
         # Load the file content
         self.nid = NID()
@@ -65,37 +64,17 @@ class TestGlanceSyncBasicOperation(unittest.TestCase):
         :param filename: File name to be read.
         :return: The file content.
         """
-        # Load the corresponding file from the resources directory
-        current = os.getcwd()
-        path = current.split('/')
-        finalpath = ''
-        finalstring = ''
-
         try:
-            index_to_glancesync = path.index('fiware-glancesync') + 1
-            if len(path) == index_to_glancesync:
-                finalpath = current + relativepath
-            else:
-                # Extract the path to fiware-glancesync and change to the /tests/units
-                # We are considering that at least the execution is inside the fiware-glancesync
-                # directory
-                for i in range(1, index_to_glancesync): # in path: desde el 1 al index(glancesync)
-                    finalpath = finalpath + '/' + path[i]
-
-                finalpath = finalpath + relativepath
-
-            os.chdir(finalpath)
+            filename = os.getcwd() + relativepath + '/' + filename
 
             # Open de file and get data
             f = open(filename, 'r')
             finalstring = f.read().decode('unicode-escape')
             f.close()
 
-            # Return to the corresponding directory
-            os.chdir(current)
-
         except ValueError:
-            print('Error: You have to be inside the fiware-glancesync directory to execute the unit tests')
+            msg = 'Error: Cannot read the content of the {} in the {} directory'.format(filename, relativepath)
+            print(msg)
             raise
 
         return finalstring
