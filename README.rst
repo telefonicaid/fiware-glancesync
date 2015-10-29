@@ -1,6 +1,8 @@
 GlanceSync - Glance Synchronization Component
 *********************************************
 
+| |Build Status|
+
 .. contents:: :local:
 
 Introduction
@@ -573,6 +575,12 @@ License
 =======
 
 GlanceSync is licensed under Apache v2.0 license.
+
+.. IMAGES
+
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=develop
+   :target: https://travis-ci.org/telefonicaid/fiware-glancesync
+   :alt: Build status
 
 .. REFERENCES
 
