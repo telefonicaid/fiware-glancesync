@@ -34,8 +34,9 @@ from scripts.getnids.getnid import NID, processingnid
 
 @requests_mock.Mocker()
 class TestGlanceSyncNIDOperations(unittest.TestCase):
-    """Class to test basic operations (i.e. all operations except
-    the synchronisation ones"""
+    """Class to test the operation to obtain the list of Generic
+    Enabler NIDs from the FIWARE Catalogue and show them classified
+    by dictionary or in tikiwiki format style"""
     def setUp(self):
         # Load the file content
         self.nid = NID()
