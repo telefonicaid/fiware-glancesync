@@ -66,15 +66,15 @@
 
 |-
 ||
-|| iot broker
-| ! align="center" | 476
+|| iot data edge consolidation ge cepheus
+| ! align="center" | 198
 || --
 || --
 
 |-
 ||
-|| gateway data handling ge cepheus
-| ! align="center" | 198
+|| iot broker
+| ! align="center" | 476
 || --
 || --
 
