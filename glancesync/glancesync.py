@@ -135,8 +135,16 @@ class GlanceSync(object):
         target = regionobj.target
         only_tenant_images = target['only_tenant_images']
         target['tenant_id'] = target['facade'].get_tenant_id()
-        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
+
+        # Get a list of obsolete images in the region
+        # they are managed differently that the other images to sync, because:
+        # * they are not uploaded if not present
+        # * the name is changed (the _obsolete suffix is added)
+        syncprops = target.get('obsolete_syncprops', None)
+        obsolete = regionobj.image_list_to_obsolete(self.master_region_dict,
+                                                    imagesregion, syncprops)
+        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         dictimages = regionobj.local_images_filtered(master_images,
                                                      imagesregion)
         imagesregion = dictimages.values()
@@ -148,6 +156,11 @@ class GlanceSync(object):
         tuples = regionobj.image_list_to_sync(master_images, imagesregion)
         totalmbs = 0
         was_synchronised = True
+
+        # previous step: manage obsolete images. Obsolete images are not
+        # synchronisable.
+        for image in obsolete:
+            facade.update_metadata(regionobj, image)
 
         # First, update metadata
         for tuple in tuples:

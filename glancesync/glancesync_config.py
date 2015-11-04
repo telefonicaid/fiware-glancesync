@@ -187,6 +187,9 @@ class GlanceSyncConfig(object):
                 else:
                     target['only_tenant_images'] = True
 
+                target['obsolete_syncprops'] = configparser.getset(
+                        section, 'obsolete_syncprops')
+
         # Default configuration if it is not present
         if self.master_region is None:
             if 'OS_REGION_NAME' in os.environ:

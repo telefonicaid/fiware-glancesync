@@ -241,3 +241,107 @@ class GlanceSyncRegion(object):
                 images_list.append(('pending_upload', image))
                 images_pending_upload.add(image.name)
         return images_list
+
+    def _sync_obsolete_props(self, image_master, image, obsolete_syncprops):
+        """Update the properties specified in obsolete_syncprops in image
+        with the values of image_master. Also is_public is updated.
+
+        Return True if the object was
+        modified, False otherwise.
+
+        :param image: the image the values are synchronised to
+        :param image_master: the image the values are synchronised from
+        :param obsolete_syncprops: the properties to synchronise
+        :return: True if image object was updated
+        """
+        need_update = False
+        if obsolete_syncprops:
+            for prop in obsolete_syncprops:
+                if prop not in image_master.user_properties:
+                    continue
+                value_m = image_master.user_properties[prop]
+                if prop not in image.user_properties or \
+                        image.user_properties[prop] != value_m:
+                    image.user_properties[prop] = value_m
+                    need_update = True
+
+        if image_master.is_public != image.is_public:
+            image.is_public = image_master.is_public
+            need_update = True
+
+        return need_update
+
+    def image_list_to_obsolete(self, images_master_region, images_region,
+                                obsolete_syncprops=None):
+        """Obtain a list of images in the region that must be mark as obsolete,
+        i.e. the suffix must be renamed to '_obsolete' and make it private.
+
+        If obsolete_syncprops is defined, also these properties are
+        synchronised.
+
+        The function returns a list with the images to be updated, with the
+        metadata (name, is_public, properties) with the right values. An image
+        is not added to the list if not changed are needed.
+
+        It is not possible to manage obsolete images with the ordinary code
+        for three reasons:
+        *an obsolete image must not be synchronisable. Otherwise, it will be
+        upload to regions where it is not upload, instead of updating only
+        the existing images.
+        *an obsolete image name is changed
+        *an obsolete image may use a different metadata_set
+
+        :param images_master_region: a dict with the images on master region
+        :param images_region: a list with the images on the region
+        :param obsolete_syncprops: a set of properties to synchronise
+        :return: a list of obsolete images on the region with changes in their
+                 metadata
+        """
+        images_to_obsolete = list()
+
+        # prefilter the images_master_region dict. Any '<name>_obsolete' image
+        # is removed if '<name>' image exists ant it is synchronisable.
+
+        filtered = dict()
+        for image in images_master_region.values():
+            if image.name.endswith('_obsolete') and image.name[0:-9] in \
+                    images_master_region:
+                t = self.target
+                img = images_master_region[image.name[0:-9]]
+                if img.is_synchronisable(t['metadata_set'], t['forcesyncs'],
+                                         t.get('metadata_condition', None)):
+                    m = 'Ignore obsolete master image {0} because {1} exists '\
+                        'and it is synchronisable.'
+                    self.log.warning(m.format(image.name, img.name))
+                    continue
+            filtered[image.name] = image
+
+        images_master_region = filtered
+        for image in images_region:
+            if image.owner and image.owner != '' and image.owner.zfill(32) !=\
+                    self.target['tenant_id'].zfill(32):
+                continue
+            if image.name in images_master_region and \
+                    image.name.endswith('_obsolete'):
+                # Already obsoleted, but add to the list if medadata is not
+                # updated unless checksum is different
+                if image.checksum == images_master_region[image.name].checksum:
+                    need_update = False
+                    image_master = images_master_region[image.name]
+
+                    need_update = self._sync_obsolete_props(
+                        image_master, image, obsolete_syncprops)
+                    if need_update:
+                        images_to_obsolete.append(image)
+
+            elif image.name + '_obsolete' in images_master_region:
+                # Found image without the _obsolete suffix.
+                image.name += '_obsolete'
+                image_master = images_master_region[image.name]
+                if image.checksum == image_master.checksum:
+                    self._sync_obsolete_props(
+                        image_master, image, obsolete_syncprops)
+                    images_to_obsolete.append(image)
+
+        return images_to_obsolete
+

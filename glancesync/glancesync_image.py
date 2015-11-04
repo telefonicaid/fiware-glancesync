@@ -241,6 +241,7 @@ class GlanceSyncImage(object):
             self, metadata_set, forcesync, metadata_condition=None):
         """Determines if the image is synchronisable according to this
         algorithm:
+           if image.name ends with '_obsolete' it is not synchronisable
            if image id is in forcesync, it is synchronisable
            if metadata_condition is provided, evaluate it and return the result
            if image is not public, it is not synchronisable
@@ -251,6 +252,9 @@ class GlanceSyncImage(object):
         :param metadata_condition: expression to evaluate if the image is sync.
         :return:
         """
+        if self.name.endswith('_obsolete'):
+            return False
+
         if self.id in forcesync:
             return True
 

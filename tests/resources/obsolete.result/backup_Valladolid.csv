@@ -1,0 +1,7 @@
+Valladolid,image01_obsolete,001,active,1000,checksum01,tenant1id,True,"{'sync':'True', 'prop1':'key1', 'prop2':'key2'}"
+Valladolid,image02,002,active,1000,checksum02,tenant1id,True,"{'sync':'True', 'prop1':'key1', 'prop2':'key2'}"
+Valladolid,image03,003,active,1000,checksum03new,tenant1id,False,"{}"
+Valladolid,image03_obsolete,004,active,1000,checksum03,tenant1id,False,"{'prop1':'key1', 'prop2':'key2'}"
+Valladolid,image04_obsolete,005,active,1000,checksum04,tenant1id,False,"{'prop1':'key1', 'prop2':'key2'}"
+Valladolid,image05_obsolete,006,active,1000,checksum05,tenant1id,False,"{'prop1':'key1', 'prop2':'key2'}"
+Valladolid,image06_obsolete,007,active,1000,checksum06,tenant1id,False,"{'prop1':'key1', 'prop2':'key2'}"

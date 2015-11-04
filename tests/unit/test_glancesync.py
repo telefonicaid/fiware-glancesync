@@ -424,8 +424,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 region = region[7:]
             self.assertTrue(os.path.exists(path_status))
             f = open(path_status + '/' + region + '.csv', 'rU')
-            expected = f.read().replace('\n', ';')
-            result = stream.getvalue().replace('\r\n', ';')
+            expected = f.read().rstrip().replace('\n', ';')
+            result = stream.getvalue().rstrip().replace('\r\n', ';')
             self.assertEquals(expected, result)
 
 
@@ -485,7 +485,6 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
                ', fill either dontupdate, replace or rename with the checksum.'
         self.assertTrue(warnings[0].startswith(msg1))
 
-
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
@@ -493,6 +492,11 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
         self.path_test = path + '/tests/resources/ami'
         self.regions = ['master:Burgos']
 
+class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
+    def config(self):
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/obsolete'
+        self.regions = ['other:Burgos']
 
 if __name__ == '__main__':
         unittest.main()
