@@ -28,6 +28,65 @@ import logging
 
 from glancesync.glancesync import GlanceSync
 
+"""This code renames an image in all the regions. The image must exist in
+the master region (it is OK if the image has been already renamed). If the
+image does not exists in the remote regions, it is silently ignored.
+
+The image is only renamed if the checksum is the same than the image in the
+master region. Also the is_public property is updated. This code is also a
+way to deprecated an image: adding the suffix "deprecated" and changing
+is_public to False.
+
+If there is more than image in a region matching the name and checksum, an
+error is printed and no image is renamed. If a image to rename is found but a
+image with the name of the new image already exists, an error is printed and
+the image is not renamed. Only the errors in the master region halts the
+program.
+
+The properties in sync_properties are also synchronised when the image is
+updated.
+"""
+
+sync_properties = ['sdc_aware']
+
+def update_image(image, image_master):
+    """
+    Update the image with the name and contents of image_master
+    :param image:
+    :param image_master:
+    :return: nothing
+    """
+    image.name = image_master.name
+    image.is_public = image_master.is_public
+    for prop in sync_properties:
+        if prop in image_master.user_properties:
+            image.user_properties[prop] = image_master.user_properties[prop]
+
+    glancesync.update_metadata_image(image.region, image)
+
+def metadata_outdated(image, image_master):
+    """Compare metadata of image and image_master; return
+    True if image needs to be updated
+
+    :param image: the image in the region
+    :param image_master:  the master image
+    :return: True if the image needs an update, False otherwise.
+    """
+    if image.is_public != image_master.is_public:
+        return True
+    for prop in sync_properties:
+        if prop not in image_master.user_properties:
+            if prop in image.user_properties:
+                del image.user_properties[prop]
+            else:
+                continue
+        elif prop not in image.user_properties:
+            return True
+        else:
+            if image.user_properties[prop] != \
+                    image_master.user_properties[prop]:
+                return False
+    return True
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -38,44 +97,100 @@ if __name__ == '__main__':
 
     glancesync = GlanceSync()
     glancesync.init_logs()
+    master = glancesync.master_region
+
+    master_images = glancesync.get_images_region(master)
+
+    old_image = None
+    new_image = None
+    for image in master_images:
+        if image.name == sys.argv[1]:
+            if old_image:
+                msg = 'There are more than an image with the old name in the' \
+                      ' master region'
+                logging.error(msg)
+                sys.exit(-1)
+            else:
+                old_image = image
+        elif image.name == sys.argv[2]:
+            if new_image:
+                msg = 'There are more than an image with the new name in the' \
+                      ' master region'
+                logging.error(msg)
+                sys.exit(-1)
+            else:
+                new_image = image
+
+    if old_image and new_image:
+        msg = 'Both an image with the new name and the old new exists in the' \
+            ' master region'
+        logging.error(msg)
+        sys.exit(-1)
+
+    if new_image:
+        master_image = new_image
+    elif old_image:
+        master_image = old_image
+        old_image.name = sys.argv[2]
+        glancesync.update_metadata_image(master, old_image)
+        print 'Renamed image in master region'
+    else:
+        msg = 'Neither an image with the old name nor a one with the new name'\
+            ' exists in the master region'
+        logging.error(msg)
+        sys.exit(-1)
+
     if len(sys.argv) > 3:
         regions = sys.argv[3:]
     else:
-        regions = glancesync.get_regions(False)
+        regions = glancesync.get_regions()
 
     for region in regions:
         print region + ' ',
         try:
             images = glancesync.get_images_region(region)
-            # only rename if the target name does not exist and the
-            # source name is unique.
+
+            # only rename if the target name does not exist, the image
+            # has the right checksum and there is only one image to
+            # rename.
             image_to_rename = None
             destination_name_exists = False
+            ignore_region = False
+            image_already_renamed = None
             for image in images:
-                if image.name == sys.argv[1]:
+                if image.name == sys.argv[1] and\
+                        image.checksum == master_image.checksum:
                     if image_to_rename is not None:
                         print 'Not renamed.'
                         msg = 'Name {0} is not unique in region {1}'
                         logging.error(msg.format(image.name, region))
-
+                        ignore_region = True
                         break
                     else:
                         image_to_rename = image
                 if image.name == sys.argv[2]:
-                    # No error yet. Perhaps this image has been already renamed
-                    destination_name_exists = True
+                    image_already_renamed = image
 
-            if image_to_rename is not None:
-                if destination_name_exists:
+            if ignore_region:
+                continue
+
+            if image_to_rename:
+                if image_already_renamed:
                     print 'Not renamed.'
                     msg = 'Destination name {0} already exists in region {1}'
                     logging.error(msg.format(sys.argv[2], region))
                 else:
-                    image_to_rename.name = sys.argv[2]
-                    glancesync.update_metadata_image(region, image_to_rename)
+                    update_image(image_to_rename, master_image)
                     print 'Renamed'
             else:
-                print 'Not found.'
+                if image_already_renamed:
+                    if metadata_outdated(image_already_renamed, master_image):
+                        update_image(image_already_renamed, master_image)
+                        print 'medatadata updated in already renamed image'
+                    else:
+                        print 'Already renamed'
+                else:
+                    print 'Not found.'
         except Exception:
             # Don't do anything. Message has been already printed with
             # logging. Only print status and continue with next region
