@@ -46,7 +46,7 @@ wait_ssh() {
   fi
   echo "Waiting until ssh is ready..."
   sleep 30
-  tries=15
+  tries=25
   ussh="ssh -i $HOME/.ssh/createtestimage -oStrictHostKeyChecking=no"
   until $ussh ${user}@${IP} true ; do
      sleep 10 
@@ -56,7 +56,7 @@ wait_ssh() {
         exit -1
      fi
   done
-  echo "VM is ready"
+  echo "VM is ready for ssh"
 
 }
 create_template_ubuntu12() {
