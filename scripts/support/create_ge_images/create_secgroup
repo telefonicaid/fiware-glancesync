@@ -23,13 +23,15 @@
 #
 
 
-nova secgroup-create allopen
+export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
+nova secgroup-create allopen "all open"
 nova secgroup-add-rule allopen icmp -1 -1 0.0.0.0/0
 nova secgroup-add-rule allopen tcp 1 65535 0.0.0.0/0
 nova secgroup-add-rule allopen udp 1 65535 0.0.0.0/0
-nova secgroup-create sshopen
+nova secgroup-create sshopen "ssh open"
 nova secgroup-add-rule sshopen tcp 22 22 0.0.0.0/0
 
+rm -f ~/.ssh/createtestimage
 nova keypair-add  createimage > ~/.ssh/createtestimage
 chmod 400 ~/.ssh/createtestimage
 

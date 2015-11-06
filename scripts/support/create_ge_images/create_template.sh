@@ -26,6 +26,9 @@
 
 set -e
 
+# Force use of apt-get installed packages instead of the pip ones
+export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
+
 export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2}')
 export SECURITY_GROUP_CREATE=sshopen
 export SECURITY_GROUP_TEST=allopen
