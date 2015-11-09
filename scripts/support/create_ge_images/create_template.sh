@@ -62,6 +62,23 @@ wait_ssh() {
   echo "VM is ready for ssh"
 
 }
+
+wait_vm() {
+  vm=$1
+  echo "Waiting until VM $1 is active..."
+  sleep 5
+  tries=10
+  until nova show $1 |egrep -q '^\|[ ]+OS-EXT-STS:vm_state[ ]+\|[ ]+active' ; do
+     sleep 5
+     ((tries-=1))
+     if [ $tries -eq 0 ] ; then
+        echo "Timeout while waiting for VM active."
+        exit -1
+     fi
+   done
+   echo "VM is acitve"
+}
+
 create_template_ubuntu12() {
   # Parameters: name
   check_params $*
@@ -120,7 +137,7 @@ create_template() {
   ID=$(launch_vm_get_id ${name} $FLAVOR $SECURITY_GROUP_CREATE $base_image)
 
   echo "VM id is $ID"
-  sleep 5
+  wait_vm $ID
   nova floating-ip-associate $ID $IP
 
   # Wait until ssh is ready
@@ -207,9 +224,10 @@ test_template() {
   ID=$(launch_vm_get_id test-${name} $FLAVOR $SECURITY_GROUP_TEST ${name}_rc)
 
   echo "VM id: $ID"
-  sleep 5
 
   if [ $TEST_USING_VM ] ; then
+     # wait before associating the floating IP
+     wait_vm $ID2
      nova floating-ip-associate $ID2 $IP
      IDSAVE=$ID
      ID=$ID2 
@@ -230,6 +248,7 @@ test_template() {
 EOF
 
      ID=$IDSAVE
+     wait_vm $ID
      nova floating-ip-associate $ID $IP
      wait_ssh $user
      # Connect to ID2, because we are using the master connection
@@ -241,6 +260,8 @@ EOF
      nova delete $ID2
 
   else
+     # wait before associating the floating IP
+     wait_vm $ID
      nova floating-ip-associate $ID $IP
      # Wait until ssh is reading
      wait_ssh $user
