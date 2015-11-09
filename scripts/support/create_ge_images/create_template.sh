@@ -115,7 +115,8 @@ launch_vm() {
 }
 
 launch_vm_get_id() {
-  launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}'
+ ID=$(launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}')
+ echo $ID |tee $DIR/last_vm 
 }
 
 create_template() {
@@ -126,12 +127,16 @@ create_template() {
 
   I="-i $HOME/.ssh/createtestimage"
 
+  # Delete old VM if it exists
+  nova delete $(cat $DIR/last_vm 2>/dev/null) >/dev/null 2>&1  || true
+
   if [ $TEST_ONLY ] ; then
      test_template $name $user
      exit
   fi
   # ask sudo password at start
   sudo true
+
   # Launch de VM using base image
   echo "launching VM $name $base_image $KEYPAIR $IP $FLAVOR"
   ID=$(launch_vm_get_id ${name} $FLAVOR $SECURITY_GROUP_CREATE $base_image)
@@ -174,6 +179,7 @@ create_template() {
   sleep 20
   nova image-create ${ID} ${name}-snapshot --poll
   nova delete ${ID}
+  rm -f $DIR/last_vm
 
   # download snapshot and delete it from server
   echo "downloading image"
@@ -290,6 +296,7 @@ EOF
   echo "Success. Deleting the VM"
   # delete the VM
   nova delete $ID
+  rm -f $DIR/last_vm
 
   # print the image UUID
   echo "Success. UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
