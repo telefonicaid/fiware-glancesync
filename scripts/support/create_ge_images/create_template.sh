@@ -76,7 +76,7 @@ wait_vm() {
         exit -1
      fi
    done
-   echo "VM is acitve"
+   echo "VM is active"
 }
 
 create_template_ubuntu12() {
@@ -210,6 +210,7 @@ create_template() {
   rm -f $DIR/tmp_image
 
   # test template
+  echo $user > $DIR/dist_type
   test_template $name $user
 }
 
