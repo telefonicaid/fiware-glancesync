@@ -63,6 +63,12 @@ wait_ssh() {
 
 }
 
+get_uuid_image() {
+   #Parameters: name
+   name=$1
+   glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}'
+}
+
 wait_vm() {
   vm=$1
   echo "Waiting until VM $1 is active..."
@@ -133,6 +139,16 @@ create_template() {
   if [ $TEST_ONLY ] ; then
      test_template $name $user
      exit
+  fi
+  if glance image-show ${name}_rc >/dev/null 2>&1 ; then
+     UUID=$(get_uuid_image $name)
+     echo "A image with name ${name}_rc already exists. You can:"
+     echo "  Delete it with: glance image-delete $UUID"
+     echo "  Rename it with: glance image-update $UUID --name othername"
+     echo
+     echo "Another option is to transfer the image to another tenant, if they want to analyse it. You need the admin account:"
+     echo "  glance image-update $UUID --owner tenant_id"
+     exit -1
   fi
   # ask sudo password at start
   sudo true
@@ -218,6 +234,7 @@ test_template() {
   name=$1
   user=$2
   export USERNAME=${user}
+  UUID=$(get_uuid_image $name)
 
   if [ $TEST_USING_VM ] ; then
      echo "Launching a tester VM"
@@ -300,7 +317,7 @@ EOF
   rm -f $DIR/last_vm
 
   # print the image UUID
-  echo "Success. UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
+  echo "Success. UUID: $UUID"
 }
 
 check_params() {
