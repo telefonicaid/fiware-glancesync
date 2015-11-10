@@ -65,6 +65,9 @@ By default, the *m1.small* flavor is used. To choose another flavor, the
 FLAVOR environment variable may be used. The flavor to be used is specified by the
 GE owners. They should choose the minimal flavor their images work with.
 
+The scripts will use the first floating ip it found in the project regardless it state,
+unless a specific IP is set using FLOATING_IP environment variable.
+
 How the script works
 --------------------
 
