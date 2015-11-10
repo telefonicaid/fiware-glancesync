@@ -31,5 +31,6 @@ DIR=$IMAGES_DIR/$1
 user=$(cat $DIR/dist_type)
 # Delete old VM if it exists
 nova delete $(cat $DIR/last_vm 2>/dev/null) >/dev/null 2>&1  || true
+rm -f $DIR/last_vm
 test_template $1 $user
 

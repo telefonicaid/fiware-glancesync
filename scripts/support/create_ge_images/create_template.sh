@@ -37,7 +37,8 @@ export CREATESCRIPT=create.sh
 export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz
 export IMAGES_DIR=~/create_ge_images/
-export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
+export IP=${FLOATINGIP:-$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2; exit }')}
+
 export FLAVOR=${FLAVOR:-m1.small}
 
 cd $(dirname $0)
@@ -140,16 +141,13 @@ create_template() {
      test_template $name $user
      exit
   fi
+
+  # Delete old image if it exists
   if glance image-show ${name}_rc >/dev/null 2>&1 ; then
      UUID=$(get_uuid_image $name)
-     echo "A image with name ${name}_rc already exists. You can:"
-     echo "  Delete it with: glance image-delete $UUID"
-     echo "  Rename it with: glance image-update $UUID --name othername"
-     echo
-     echo "Another option is to transfer the image to another tenant, if they want to analyse it. You need the admin account:"
-     echo "  glance image-update $UUID --owner tenant_id"
-     exit -1
+     glance image-delete $UUID
   fi
+
   # ask sudo password at start
   sudo true
 
@@ -308,6 +306,13 @@ EOF
   if [ -f $DIR/failed ] ; then
         rm $DIR/failed
         echo "Failed."
+        echo "The image ${name}_rc was not deleted because it may be useful for debugging the problem."
+        echo " However, it will be purged if the create script is invoked again. You can:"
+        echo "  Delete it with: glance image-delete $UUID"
+        echo "  Rename it with: glance image-update $UUID --name othername"
+        echo
+        echo "Another option is to transfer the image to another tenant, if they want to analyse it. You need the admin account:"
+        echo "  glance image-update $UUID --owner tenant_id"
         exit -1
   fi
 
