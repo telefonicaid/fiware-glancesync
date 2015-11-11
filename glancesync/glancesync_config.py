@@ -206,6 +206,11 @@ class GlanceSyncConfig(object):
                 else:
                     target['only_tenant_images'] = True
 
+                # This is only for the mock mode
+                if configparser.has_option(section, 'tenant_id'):
+                    target['tenant_id'] = configparser.get(
+                        section, 'tenant_id')
+
         # Default configuration if it is not present
         if self.master_region is None:
             if 'OS_REGION_NAME' in os.environ:

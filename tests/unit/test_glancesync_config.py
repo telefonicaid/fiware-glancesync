@@ -116,6 +116,8 @@ credential = user2,\
   http://server2:4730/v2.0,tenant2
 ignore_regions = Spain
 metadata_condition=
+# A hack useful in mock mode
+tenant_id = tenant2_id
 
 """
 
@@ -197,6 +199,7 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertEquals(experimental['tenant'], 'tenant2')
         self.assertTrue(experimental['only_tenant_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
+        self.assertEquals(experimental['tenant_id'], 'tenant2_id')
 
     def test_override(self):
         """check overriding options passing a dictionary to constructor"""
