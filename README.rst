@@ -601,7 +601,7 @@ Top_
 License
 =======
 
-(c) 2015 Telefónica I+D, Apache License 2.0
+\(c) 2015 Telefónica I+D, Apache License 2.0
 
 Top_
 
