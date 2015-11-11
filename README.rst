@@ -210,11 +210,11 @@ properties and the visibility is also managed when there is a image in the
 region to synchronise that is already renamed but without the other changes
 propagated.
 
-Actually, there are some checks to do before propagating the changes of an
+There are some checks to do before propagating the changes of an
 obsoleted image:
 
-* Are the two images the same? The checksum is compared and only if they are
-  equals the change is done.
+* Are the two images the same? The checksums are compared and only if they are
+  the same the change is done.
 * Is the image in the region to synchronise a public image of another tenant?
   in this case do not touch the image.
 * Is there an image with the same name but without the suffix also in the
