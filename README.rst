@@ -1,4 +1,4 @@
-.. Top_:
+.. _Top:
 GlanceSync - Glance Synchronization Component
 *********************************************
 
