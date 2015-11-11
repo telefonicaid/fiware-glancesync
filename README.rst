@@ -612,7 +612,7 @@ Top_
    :target: https://travis-ci.org/telefonicaid/fiware-glancesync
    :alt: Build status
 .. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
-   :target: https://stackoverflow.com/questions/tagged/fiware-health
+   :target: https://stackoverflow.com/questions/tagged/fiware-glancesync
    :alt: Help? Ask questions
 
 .. REFERENCES
