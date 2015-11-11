@@ -198,6 +198,12 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertTrue(experimental['only_tenant_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
 
+    def test_override(self):
+        """check overriding options passing a dictionary to constructor"""
+        override = {'master.user': 'otheruser', 'only_tenant_images': 'False'}
+        config = GlanceSyncConfig(stream=self.stream, override_d=override)
+        self.assertEquals(config.targets['master']['user'], 'otheruser')
+        self.assertFalse(config.targets['experimental']['only_tenant_images'])
 
 class TestGlanceSyncConfigFile(unittest.TestCase):
     """Class to test that is possible to provide the configuration using a

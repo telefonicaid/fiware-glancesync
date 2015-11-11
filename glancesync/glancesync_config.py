@@ -81,7 +81,7 @@ class GlanceSyncConfig(object):
     OS_REGION_NAME
     """
 
-    def __init__(self, configuration_path=None, stream=None):
+    def __init__(self, configuration_path=None, stream=None, override_d=None):
         """
         Init a a instance of the configuration. It can be created from a stream
         (e.g. a file or a StringIO) or from a configuration file whose path.
@@ -97,7 +97,11 @@ class GlanceSyncConfig(object):
         file is not.
 
         :param configuration_path: the path of the configuration file
-        :param stream: a stream object with the configuration file
+        :param stream: a stream object with the configuration
+        :param override_d: an optional dictionary to override options in the
+               configuration file. To override key1 in section sec1, use as
+               key 'sec1.key1'. If the key is not namespaced, DEFAULT section
+               is used.
         :return: nothing
         """
 
@@ -121,7 +125,22 @@ class GlanceSyncConfig(object):
                 configparser.readfp(stream)
             else:
                 configparser.read(configuration_path)
+        else:
+            configparser = None
 
+        if override_d:
+            if not configparser:
+                configparser = ConfigParser.SafeConfigParser()
+
+            for key in override_d.keys():
+                value = override_d[key]
+                key_parts = key.split('.')
+                if len(key_parts) == 2:
+                    configparser.set(key_parts[0], key_parts[1], value)
+                else:
+                    configparser.set('DEFAULT', key_parts[0], value)
+
+        if configparser:
             if configparser.has_option('main', 'master_region'):
                 self.master_region = configparser.get('main', 'master_region')
 
