@@ -39,8 +39,24 @@ class Sync(object):
         """init object"""
         self.glancesync = GlanceSync(options_dict=override_d)
         self.glancesync.init_logs()
+
+        regions_expanded = list()
+        already_sorted = True
+        for region in regions:
+            if region.endswith(':'):
+                regions_expanded.extend(self.glancesync.get_regions(
+                    target=region[:-1]))
+                already_sorted = False
+            else:
+                regions_expanded.append(region)
+
+        regions = regions_expanded
         if not regions:
-            regions_unsorted = self.glancesync.get_regions()
+            regions = self.glancesync.get_regions()
+            already_sorted = False
+
+        if not already_sorted:
+            regions_unsorted = regions
             regions = list()
             for region in self.glancesync.preferable_order:
                 if region in regions_unsorted:
@@ -229,7 +245,7 @@ if __name__ == '__main__':
             if len(pair) != 2:
                 parser.error('config options must have the format key=value')
                 sys.exit(-1)
-            options[pair[0]] = pair[1]
+            options[pair[0].strip()] = pair[1]
 
     # Run cmd
     sync = Sync(meta.regions, options)
