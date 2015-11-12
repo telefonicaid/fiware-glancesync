@@ -316,10 +316,8 @@ Example of a configuration file
 _______________________________
 
 The following is an example of a configuration file, with all the possible
-options auto explained in the comments. This file is also available
-in the ``conf`` directory, but be aware that GlanceSync does not read the
-configuration from this path unless explicitly requested by setting
-*GLANCESYNC_CONFIG*.
+options auto explained in the comments. A configuration file like this can be
+generated invoking *script/generated_config_file.py*
 
 .. glancesync_conf_begin
 .. code::
