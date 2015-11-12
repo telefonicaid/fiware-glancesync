@@ -1,4 +1,4 @@
-{'cloud-hosting': {u'application-manager-murano': u'1510',
+{'cloud-hosting': {u'application-management-murano': u'1510',
 u'docker': u'1518',
 u'iaas-ge-fiware-reference-implementation': u'130',
 u'monitoring-ge-sextant': u'559',

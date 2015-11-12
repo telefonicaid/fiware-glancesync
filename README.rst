@@ -1,7 +1,8 @@
+.. _Top:
 GlanceSync - Glance Synchronization Component
 *********************************************
 
-| |Build Status|
+| |Build Status| |StackOverflow|
 
 .. contents:: :local:
 
@@ -25,6 +26,9 @@ or things you think should be included but are not. You can use
 `github issues`_
 to provide feedback.
 
+Top_
+
+
 Overall description
 ===================
 
@@ -32,9 +36,6 @@ GlanceSync is a command line tool to solve the problem of the images
 synchronisation between regions. It synchronises glance servers in different
 regions taking the base of a master region. It was designed for FIWARE project,
 but it has been expanded to be useful for other users or projects.
-
-Software features
-----------------
 
 GlanceSync synchronises all the images with certain metadata owned by a tenant
 from a master region to each other region in a federation (or a subset of them).
@@ -197,6 +198,7 @@ are copied. Be aware that system property *is_public* must not be included in
 ``metadata_set``, because it is not a user property but a system one. Anyway,
 *is_public* is unconditionally synchronised.
 
+<<<<<<< HEAD
 How the obsoleted images are managed
 ------------------------------------
 
@@ -225,6 +227,8 @@ Usually obsoleted images are made private, because are not supported anymore.
 It is possible to restore an image as public for local use after renaming or changing
 the tenant (to avoid that it is made private again automatically), but before this is
 important to look out more about the security status of the image.
+
+Top_
 
 Build and Install
 =================
@@ -257,6 +261,9 @@ installation.
    --allow-all-external*
 
 Now the system is ready to use. For future sessions, only the step2 is required.
+
+Top_
+
 
 Configuration
 =============
@@ -426,6 +433,9 @@ It is strongly recommended:
 * creating a configuration file only readable by the GlanceSync account. This
   is because the credentials should not be exposed to other users.
 
+Top_
+
+
 Running
 =======
 
@@ -568,6 +578,8 @@ themselves.
 * penging_ami: the image requires a kernel or ramdisk image that is in state
   *pending_upload*, *pending_replace* or *pending_rename*.
 
+Top_
+
 
 Testing
 =======
@@ -612,18 +624,38 @@ change testingFacadeReal to True. It needs the usual OpenStack environment
 variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
 
+Top_
+
+
+Support
+=======
+
+Ask your thorough programmming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
+In both cases please use the tag *fiware-health*
+
+Top_
+
+
 License
 =======
 
-GlanceSync is licensed under Apache v2.0 license.
+\(c) 2015 Telefónica I+D, Apache License 2.0
+
+Top_
+
 
 .. IMAGES
 
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-glancesync
    :alt: Build status
+.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+   :target: https://stackoverflow.com/questions/tagged/fiware-glancesync
+   :alt: Help? Ask questions
 
 .. REFERENCES
 
 .. _FIWARE: http://www.fiware.org
 .. _github issues: https://github.com/telefonicaid/fiware-glancesync/issues/new
+.. _stackoverflow: http://stackoverflow.com/questions/ask
+.. _`FIWARE Q&A`: https://ask.fiware.org
