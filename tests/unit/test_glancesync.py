@@ -496,7 +496,7 @@ class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
     def config(self):
         path = os.path.abspath(os.curdir)
         self.path_test = path + '/tests/resources/obsolete'
-        self.regions = ['other:Burgos']
+        self.regions = ['other:Burgos', 'target2:Madrid']
 
 if __name__ == '__main__':
         unittest.main()

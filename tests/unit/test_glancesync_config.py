@@ -116,6 +116,7 @@ credential = user2,\
   http://server2:4730/v2.0,tenant2
 ignore_regions = Spain
 metadata_condition=
+support_obsolete_images = False
 
 """
 
@@ -196,6 +197,8 @@ class TestGlanceSyncStream(unittest.TestCase):
                           'http://server2:4730/v2.0')
         self.assertEquals(experimental['tenant'], 'tenant2')
         self.assertTrue(experimental['only_tenant_images'])
+        self.assertTrue(master['support_obsolete_images'])
+        self.assertFalse(experimental['support_obsolete_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
 
 

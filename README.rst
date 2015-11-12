@@ -1,4 +1,5 @@
 .. _Top:
+
 GlanceSync - Glance Synchronization Component
 *********************************************
 
@@ -198,7 +199,6 @@ are copied. Be aware that system property *is_public* must not be included in
 ``metadata_set``, because it is not a user property but a system one. Anyway,
 *is_public* is unconditionally synchronised.
 
-<<<<<<< HEAD
 How the obsoleted images are managed
 ------------------------------------
 
@@ -227,6 +227,11 @@ Usually obsoleted images are made private, because are not supported anymore.
 It is possible to restore an image as public for local use after renaming or changing
 the tenant (to avoid that it is made private again automatically), but before this is
 important to look out more about the security status of the image.
+
+The treatment of obsolete images can be disabled for a *target* with
+*support_obsolete_images=False*. This flag affects the image renaming and
+the metadata updating, but anyway images with '_obsolete' suffix are never
+synchronisable.
 
 Top_
 

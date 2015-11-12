@@ -141,9 +141,13 @@ class GlanceSync(object):
         # they are managed differently that the other images to sync, because:
         # * they are not uploaded if not present
         # * the name is changed (the _obsolete suffix is added)
-        syncprops = target.get('obsolete_syncprops', None)
-        obsolete = regionobj.image_list_to_obsolete(self.master_region_dict,
-                                                    imagesregion, syncprops)
+        if target['support_obsolete_images']:
+            syncprops = target.get('obsolete_syncprops', None)
+            obsolete = regionobj.image_list_to_obsolete(self.master_region_dict,
+                                                        imagesregion, syncprops)
+        else:
+            obsolete = list()
+         
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         dictimages = regionobj.local_images_filtered(master_images,
                                                      imagesregion)

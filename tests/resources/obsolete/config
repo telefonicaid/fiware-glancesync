@@ -4,8 +4,17 @@ master_region = Valladolid
 [master]
 credential = user,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server:4730/v2.0,tenant1
+
 [other]
 credential = user2,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server2:4730/v2.0,tenant2
 metadata_set = sync
 obsolete_syncprops = prop1, prop3
+
+[target2]
+credential = user3,ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
+  http://server3:4730/v2.0,tenant3
+# Do not support rename of obsolete images
+support_obsolete_images = False
+# Do not synchronise
+metadata_condition = False

@@ -1,8 +1,0 @@
-Valladolid,image01,001,active,1073741824,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1id,True,{}
-Valladolid,image02,002,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1id,True,{'sync': 'true'}
-Valladolid,image02_obsolete,003,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1id,False,{'prop1':'key1', 'prop2':'key2'}"
-Valladolid,image03_obsolete,004,active,1073741854,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1id,True,{'prop1':'key1', 'prop2':'key2'}"
-Valladolid,image04_obsolete,005,active,1073741864,28a5c2818590ee3c4d5d93a448190f3397144303,tenant1id,True,{'prop1':'key1', 'prop2':'key2'}"
-Valladolid,image05_obsolete,006,active,1073741874,7316b3d5fef9b3562d32f7c39f154a3bc3ab9c58,tenant1id,True,{'prop1':'key1', 'prop2':'key2'}"
-Valladolid,image05,007,active,1073741884,39f193cfd7d0955cc821f3074a82b7d4b89d22bc,tenant1id,False,{'prop1':'key1', 'prop2':'key2'}"
-Valladolid,image08_obsolete,008,active,1073741894,1ea51bf32497d1b3708522b430b288a129f65307,tenant1id,True,{'prop1':'key1', 'prop2':'key2'}"
