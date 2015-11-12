@@ -321,6 +321,7 @@ in the ``conf`` directory, but be aware that GlanceSync does not read the
 configuration from this path unless explicitly requested by setting
 *GLANCESYNC_CONFIG*.
 
+.. glancesync_conf_begin
 .. code::
 
  [main]
@@ -396,6 +397,14 @@ configuration from this path unless explicitly requested by setting
  # servers. From master region only the tenant's images are considered.
  only_tenant_images = True
 
+ # When this option is true (the default), the renaming and metadata updating of
+ # obsolete images is activate. See the documentation for details.
+ support_obsolete_images = True
+
+ # These are the properties that are synchronised (in addition to is_public
+ # and the name) in obsolete images, when support_obsolete_images is True.
+ obsolete_syncprops = sdc_aware
+
  [master]
 
  # This is the only mandatory target: it includes all the regions registered
@@ -419,6 +428,8 @@ configuration from this path unless explicitly requested by setting
  # Another
  credential = user2,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://server2:4730/v2.0,tenantid2
  metadata_condition = image.is_public and image.user_properties.get('type', None) == 'baseimages'
+
+.. glancesync_conf_end
 
 This configuration file defines two *targets*: ``master`` and ``experimental``. The first one
 synchronises all the public images with properties *nid* and/or *type* defined. The last one only
