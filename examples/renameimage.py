@@ -146,7 +146,7 @@ if __name__ == '__main__':
         # Rename
         master_image.name = sys.argv[2]
         glancesync.update_metadata_image(master, master_image)
-        print 'Renamed image in master region'
+        print('Renamed image in master region')
     else:
         msg = 'Neither an image with the old name nor a one with the new name'\
             ' exist in the master region'
@@ -159,7 +159,8 @@ if __name__ == '__main__':
         regions = glancesync.get_regions()
 
     for region in regions:
-        print region + ' ',
+        sys.stdout.write(region + ' ')
+        sys.stdout.flush()
         try:
             images = glancesync.get_images_region(region)
 
@@ -174,7 +175,7 @@ if __name__ == '__main__':
                 if image.name == sys.argv[1] and\
                         image.checksum == master_image.checksum:
                     if image_to_rename is not None:
-                        print 'Not renamed.'
+                        print('Not renamed.')
                         msg = 'Name {0} is not unique in region {1}.'
                         logging.error(msg.format(image.name, region))
                         ignore_region = True
@@ -189,23 +190,23 @@ if __name__ == '__main__':
 
             if image_to_rename:
                 if image_already_renamed:
-                    print 'Not renamed.'
+                    print('Not renamed.')
                     msg = 'Destination name {0} already exists in region {1}.'
                     logging.error(msg.format(sys.argv[2], region))
                 else:
                     update_image(image_to_rename, master_image)
-                    print 'Renamed'
+                    print('Renamed')
             else:
                 if image_already_renamed:
                     if metadata_outdated(image_already_renamed, master_image):
                         update_image(image_already_renamed, master_image)
-                        print 'medatadata updated in already renamed image.'
+                        print('medatadata updated in already renamed image.')
                     else:
-                        print 'Already renamed.'
+                        print('Already renamed.')
                 else:
-                    print 'Not found.'
+                    print('Not found.')
         except Exception:
             # Don't do anything. Message has been already printed with
             # logging. Only print status and continue with next region
-            print 'Failed.'
+            print('Failed.')
             continue
