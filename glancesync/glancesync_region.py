@@ -273,8 +273,9 @@ class GlanceSyncRegion(object):
 
     def image_list_to_obsolete(self, images_master_region, images_region,
                                 obsolete_syncprops=None):
-        """Obtain a list of images in the region that must be mark as obsolete,
-        i.e. the suffix must be renamed to '_obsolete' and make it private.
+        """Obtain a list of images in the region that must be marked as
+        obsolete, i.e. the suffix must be renamed to '_obsolete' and made it
+        private.
 
         If obsolete_syncprops is defined, also these properties are
         synchronised.
