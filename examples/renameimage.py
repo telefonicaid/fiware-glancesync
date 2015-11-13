@@ -61,6 +61,8 @@ def update_image(image, image_master):
     for prop in sync_properties:
         if prop in image_master.user_properties:
             image.user_properties[prop] = image_master.user_properties[prop]
+        elif prop in image.user_properties:
+            del image.user_properties[prop]
 
     glancesync.update_metadata_image(image.region, image)
 
@@ -72,21 +74,28 @@ def metadata_outdated(image, image_master):
     :param image_master:  the master image
     :return: True if the image needs an update, False otherwise.
     """
+    needs_update = False
     if image.is_public != image_master.is_public:
-        return True
-    for prop in sync_properties:
-        if prop not in image_master.user_properties:
-            if prop in image.user_properties:
-                del image.user_properties[prop]
-            else:
-                continue
-        elif prop not in image.user_properties:
-            return True
-        else:
-            if image.user_properties[prop] != \
-                    image_master.user_properties[prop]:
-                return False
-    return True
+        needs_update = True
+    else:
+        for prop in sync_properties:
+            if prop in image_master.user_properties:
+                if prop not in image.user_properties:
+                    # prop in master but no in image
+                    # must be added
+                    needs_update = True
+                    break
+                elif image.user_properties[prop] != \
+                        image_master.user_properties[prop]:
+                    # must be changed
+                    needs_update = True
+                    break
+            elif prop in image.user_properties:
+                # prop in image but not in master
+                # must be deleted
+                needs_update = True
+
+    return needs_update
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -162,7 +171,7 @@ if __name__ == '__main__':
                         image.checksum == master_image.checksum:
                     if image_to_rename is not None:
                         print 'Not renamed.'
-                        msg = 'Name {0} is not unique in region {1}'
+                        msg = 'Name {0} is not unique in region {1}.'
                         logging.error(msg.format(image.name, region))
                         ignore_region = True
                         break
@@ -177,7 +186,7 @@ if __name__ == '__main__':
             if image_to_rename:
                 if image_already_renamed:
                     print 'Not renamed.'
-                    msg = 'Destination name {0} already exists in region {1}'
+                    msg = 'Destination name {0} already exists in region {1}.'
                     logging.error(msg.format(sys.argv[2], region))
                 else:
                     update_image(image_to_rename, master_image)
@@ -186,13 +195,13 @@ if __name__ == '__main__':
                 if image_already_renamed:
                     if metadata_outdated(image_already_renamed, master_image):
                         update_image(image_already_renamed, master_image)
-                        print 'medatadata updated in already renamed image'
+                        print 'medatadata updated in already renamed image.'
                     else:
-                        print 'Already renamed'
+                        print 'Already renamed.'
                 else:
                     print 'Not found.'
         except Exception:
             # Don't do anything. Message has been already printed with
             # logging. Only print status and continue with next region
-            print 'Exception'
+            print 'Failed.'
             continue
