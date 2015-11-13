@@ -104,44 +104,48 @@ if __name__ == '__main__':
         logging.error(msg)
         sys.exit(-1)
 
+    old_name = sys.argv[1]
+    new_name = sys.argv[2]
+
     glancesync = GlanceSync()
     glancesync.init_logs()
     master = glancesync.master_region
 
     master_images = glancesync.get_images_region(master)
 
-    old_image = None
-    new_image = None
+    found_with_old_name = None
+    found_with_new_name = None
     for image in master_images:
-        if image.name == sys.argv[1]:
-            if old_image:
+        if image.name == old_name:
+            if found_with_old_name:
                 msg = 'There are more than an image with the old name in the' \
                       ' master region'
                 logging.error(msg)
                 sys.exit(-1)
             else:
-                old_image = image
-        elif image.name == sys.argv[2]:
-            if new_image:
+                found_with_old_name = image
+        elif image.name == new_name:
+            if found_with_new_name:
                 msg = 'There are more than an image with the new name in the' \
                       ' master region'
                 logging.error(msg)
                 sys.exit(-1)
             else:
-                new_image = image
+                found_with_new_name = image
 
-    if old_image and new_image:
-        msg = 'Both an image with the new name and the old new exists in the' \
+    if found_with_old_name and found_with_new_name:
+        msg = 'Both an image with the new name and an image with the old new exists in the' \
             ' master region'
         logging.error(msg)
         sys.exit(-1)
 
-    if new_image:
-        master_image = new_image
-    elif old_image:
-        master_image = old_image
-        old_image.name = sys.argv[2]
-        glancesync.update_metadata_image(master, old_image)
+    if found_with_new_name:
+        master_image = found_with_new_name
+    elif found_with_old_name:
+        master_image = found_with_old_name
+        # Rename
+        master_image.name = sys.argv[2]
+        glancesync.update_metadata_image(master, master_image)
         print 'Renamed image in master region'
     else:
         msg = 'Neither an image with the old name nor a one with the new name'\
