@@ -75,7 +75,7 @@ wait_vm() {
   echo "Waiting until VM $1 is active..."
   sleep 5
   tries=10
-  until nova show $1 |egrep -q '^\|[ ]+OS-EXT-STS:vm_state[ ]+\|[ ]+active' ; do
+  until nova show $vm |egrep -q '^\|[ ]+OS-EXT-STS:vm_state[ ]+\|[ ]+active' ; do
      sleep 5
      ((tries-=1))
      if [ $tries -eq 0 ] ; then
