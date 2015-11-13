@@ -56,7 +56,7 @@ wait_ssh() {
      sleep 10 
      ((tries-=1))
      if [ $tries -eq 0 ] ; then
-        echo "Timeout while waiting for ssh."
+        echo "Maximum attempts reached while waiting for ssh."
         exit -1
      fi
   done
@@ -79,7 +79,7 @@ wait_vm() {
      sleep 5
      ((tries-=1))
      if [ $tries -eq 0 ] ; then
-        echo "Timeout while waiting for VM active."
+        echo "Maximum attempts reached while waiting for VM active."
         exit -1
      fi
    done
