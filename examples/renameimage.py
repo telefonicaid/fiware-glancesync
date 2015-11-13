@@ -37,7 +37,7 @@ master region. Also the is_public property is updated. This code is also a
 way to deprecated an image: adding the suffix "deprecated" and changing
 is_public to False.
 
-If there is more than image in a region matching the name and checksum, an
+If there is more than one image in a region matching the name and checksum, an
 error is printed and no image is renamed. If a image to rename is found but a
 image with the name of the new image already exists, an error is printed and
 the image is not renamed. Only the errors in the master region halts the
@@ -134,8 +134,8 @@ if __name__ == '__main__':
                 found_with_new_name = image
 
     if found_with_old_name and found_with_new_name:
-        msg = 'Both an image with the new name and an image with the old new exists in the' \
-            ' master region'
+        msg = 'There is an image with the same old and new name in the master'\
+            ' region'
         logging.error(msg)
         sys.exit(-1)
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         print 'Renamed image in master region'
     else:
         msg = 'Neither an image with the old name nor a one with the new name'\
-            ' exists in the master region'
+            ' exist in the master region'
         logging.error(msg)
         sys.exit(-1)
 
