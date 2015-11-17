@@ -36,6 +36,6 @@ lines_iter.next()
 
 line = lines_iter.next()
 while line != '.. glancesync_conf_end':
-    print line[1:]
+    print(line[1:])
     line = lines_iter.next()
 
