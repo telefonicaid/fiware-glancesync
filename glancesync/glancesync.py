@@ -147,6 +147,11 @@ class GlanceSync(object):
                                                         imagesregion, syncprops)
         else:
             obsolete = list()
+
+        # previous step: manage obsolete images. Obsolete images are not
+        # synchronisable.
+        for image in obsolete:
+            facade.update_metadata(regionobj, image)
          
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         dictimages = regionobj.local_images_filtered(master_images,
@@ -160,11 +165,6 @@ class GlanceSync(object):
         tuples = regionobj.image_list_to_sync(master_images, imagesregion)
         totalmbs = 0
         was_synchronised = True
-
-        # previous step: manage obsolete images. Obsolete images are not
-        # synchronisable.
-        for image in obsolete:
-            facade.update_metadata(regionobj, image)
 
         # First, update metadata
         for tuple in tuples:
