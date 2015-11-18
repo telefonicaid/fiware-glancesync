@@ -1,0 +1,4 @@
+other:Burgos,image03,104,active,1000,checksum03,tenant2id,True,"{'prop1':'key2', 'prop2':'key3'}"
+other:Burgos,image04,105,active,1000,checksum04,othertenant,False,"{'prop1':'key1', 'prop2':'key2'}"
+other:Burgos,image05,106,active,1000,otherchecksum05,tenant2id,False,"{'prop1':'key1', 'prop2':'key2'}"
+other:Burgos,image06_obsolete,107,active,1000,checksum06,tenant2id,False,"{'prop1':'key2', 'prop2':'key3'}"
