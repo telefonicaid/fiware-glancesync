@@ -463,5 +463,138 @@ class TestGlanceSyncRegion(unittest.TestCase):
         self.assertEqual(expected_as_list, result_as_list)
 
 
+class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
+    def _create_images(self, name):
+        """Create a pair or images, one on each region"""
+        image1 = GlanceSyncImage(
+            name, 'id_VA_' + name, 'Valladolid', 'VA_tenant1', True,
+            'checksum', 1000, 'active', dict())
+        image1.is_public = False
+
+        image2 = GlanceSyncImage(
+            name, 'id_BU_' + name, 'Burgos', 'BU_tenant1', True,
+            'checksum', 1000, 'active', dict())
+        image2.is_public = False
+
+        return image1, image2
+
+    def setUp(self):
+        """constructor"""
+        self.master_region_dict = dict()
+        self.images_region = list()
+        target_master = {'tenant_id': 'VA_tenant1'}
+        target_other = {'tenant_id': 'BU_tenant1'}
+        self.targets = dict()
+        self.targets['master'] = target_master
+        self.targets['other'] = target_other
+        target_other['metadata_set'] = set(['sync'])
+        target_other['forcesyncs'] = list()
+
+        self.master_region = GlanceSyncRegion('Valladolid', self.targets)
+        self.region = GlanceSyncRegion('other:Burgos', self.targets)
+
+
+    def test_images_list_to_obsolete_notfound(self):
+        """No images with _obsolete suffix in master"""
+        (image1, image2) = self._create_images('image1')
+        self.master_region_dict[image1.name] = image1
+        self.images_region.append(image2)
+        (image1, image2) = self._create_images('image2')
+        image2.name = 'image2_obsolete'
+        self.master_region_dict[image1.name] = image2
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertFalse(result)
+
+    def test_images_list_to_obsolete_notfound_checksum(self):
+        """Image found, but bad checksum"""
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        image2.name = 'image1'
+        image2.checksum = 'other_checksum'
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertFalse(result)
+
+    def test_images_list_to_obsolete_notfound_checksum(self):
+        """Image found, but bad owner"""
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        image2.name = 'image1'
+        image2.owner = 'other_owner'
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertFalse(result)
+
+    def test_images_list_to_obsolete_found_alreadydone(self):
+        """Found image obsolete, but already renamed and has the same meta
+        """
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertFalse(result)
+
+    def test_images_list_to_obsolete_found_pending_rename(self):
+        """Found image to rename"""
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        image2.name = 'image1'
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertTrue(len(result) == 1)
+
+    def test_images_list_to_obsolete_found_pending_public(self):
+        """Found image already renamed, but public"""
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        image2.is_public = True
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertTrue(len(result) == 1)
+        self.assertFalse(result[0].is_public)
+
+    def test_images_list_to_obsolete_found_pending_metadata(self):
+        """Found image already renamed, but different metadata"""
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        image1.user_properties['key1'] = 'value1'
+        image2.user_properties['key1'] = 'value2'
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region, set(['key1']))
+        self.assertTrue(len(result) == 1)
+        self.assertEquals(result[0].user_properties['key1'], 'value1')
+
+    def test_images_list_to_obsolete_warning(self):
+        """there is an image_obsoleted, but also exists image and it is
+        synchronisable"""
+
+        # Capture warnings
+        logger = logging.getLogger('glancesync')
+        self.buffer_log = StringIO.StringIO()
+        handler = logging.StreamHandler(self.buffer_log)
+        handler.setLevel(logging.WARNING)
+        logger.addHandler(handler)
+
+        (image1, image2) = self._create_images('image1_obsolete')
+        self.master_region_dict[image1.name] = image1
+        (image1, image2) = self._create_images('image1')
+        image1.user_properties['sync'] = True
+        image1.is_public = True
+        self.master_region_dict[image1.name] = image1
+        self.images_region.append(image2)
+        result = self.region.image_list_to_obsolete(
+            self.master_region_dict, self.images_region)
+        self.assertFalse(result)
+        msg = 'Ignore obsolete master image image1_obsolete because image1 '\
+              'exists and it is synchronisable.'
+        self.assertEquals(self.buffer_log.getvalue().strip(), msg)
+
 if __name__ == '__main__':
     unittest.main()

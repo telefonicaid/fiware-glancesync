@@ -244,6 +244,7 @@ class GlanceSyncImage(object):
             self, metadata_set, forcesync, metadata_condition=None):
         """Determines if the image is synchronisable according to this
         algorithm:
+           if image.name ends with '_obsolete' it is not synchronisable
            if image id is in forcesync, it is synchronisable
            if metadata_condition is provided, evaluate it and return the result
            if image is not public, it is not synchronisable
@@ -254,22 +255,28 @@ class GlanceSyncImage(object):
         :param metadata_condition: expression to evaluate if the image is sync.
         :return:
         """
-        if self.id in forcesync:
-            result = True
+        synchronisable = False
+
+        if self.name.endswith('_obsolete'):
+            synchronisable = False
+        elif self.id in forcesync:
+            synchronisable = True
         elif metadata_condition:
+            image = self
             globals_dict = dict()
             globals_dict['image'] = self
             globals_dict['metadata_set'] = metadata_set
-            result = eval(metadata_condition, globals_dict)
+            synchronisable = eval(metadata_condition, globals_dict)
         elif not self.is_public:
-            result = False
+            synchronisable = False
         elif not metadata_set:
-            result = True
+            synchronisable = True
         else:
-            result = False
+            some_property_in = False
             for prop in metadata_set:
                 if prop in self.user_properties:
-                    result = True
+                    some_property_in = True
                     break
+            synchronisable = some_property_in
 
-        return result
+        return synchronisable

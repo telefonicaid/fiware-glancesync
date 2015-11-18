@@ -1,4 +1,5 @@
 .. _Top:
+
 GlanceSync - Glance Synchronization Component
 *********************************************
 
@@ -36,9 +37,6 @@ GlanceSync is a command line tool to solve the problem of the images
 synchronisation between regions. It synchronises glance servers in different
 regions taking the base of a master region. It was designed for FIWARE project,
 but it has been expanded to be useful for other users or projects.
-
-Software features
------------------
 
 GlanceSync synchronises all the images with certain metadata owned by a tenant
 from a master region to each other region in a federation (or a subset of them).
@@ -79,6 +77,17 @@ GlanceSync has special support for *AMI* (Amazon Machine Image). Amazon images
 include a reference to a kernel image (*AKI*) and to a ramdisk image (*ARI*),
 but they are named by UUID. Therefore GlanceSync has to update this fields to
 reflect the UUIDs in that particular region. 
+
+GlanceSync supports marking an image as obsolete, adding the suffix *_obsolete*.
+An obsolete image is not synchronisable, but it is managed in a special way:
+when an image is renamed, the change is propagated to the other regions. Also
+the visibility of the image is propagated (i.e. if the master image is
+marked as private, is made private in all the other regions).
+
+The idea of marking the obsoleted images, is allow the administrator of the
+regions to make a decision about them. These images are not part of set of
+mandatory images in a federation anymore, but perhaps are in use by their local
+users.
 
 About UUIDs and image names
 ---------------------------
@@ -159,21 +168,22 @@ an option is to put this options in the *DEFAULT* section.
 
 This is the algorithm to determine if an image is synchronisable:
 
-1) if the UUID of the image is included in ``forcesync``, then it is synchronised
+1) images with the '_obsolete' suffix, are never synchronised
+2) if the UUID of the image is included in ``forcesync``, then it is synchronised
    unconditionally, even if the image is not public.
-2) if ``metadata_condition`` is defined, it contains python code that is evaluated
+3) if ``metadata_condition`` is defined, it contains python code that is evaluated
    to determine if the image is synchronised. The code can use two variables:
    image, with the information about the image and ``metadata_set``, with the content
    of that parameter. The more interesting field of image is ``user_properties``,
    that is a dictionary with the metadata of the image. Other properties are *id*,
    *name*, *owner*, *size*, *region*, *is_public*. The image may be synchronised
    even if it is not public, to avoid this, check ``image.is_public`` in the condition.
-3) if ``metadata_condition`` is not defined, the image is public, and
+4) if ``metadata_condition`` is not defined, the image is public, and
    ``metadata_set`` is defined, the image is synchronised if some of the
    properties of ``metadata_set`` is on ``image.user_properties``.
-4) if ``metadata_condition`` is not defined, the image is public, and
+5) if ``metadata_condition`` is not defined, the image is public, and
    ``metadata_set`` is not defined, the image is synchronised
-5) otherwise, the image is not synchronised.
+6) otherwise, the image is not synchronised.
 
 For example, to synchronise the images in FIWARE Lab, the best choice is
 setting ``metadata_set=nid, sdc_aware, type, nid_version``, because all the images to be
@@ -189,8 +199,41 @@ are copied. Be aware that system property *is_public* must not be included in
 ``metadata_set``, because it is not a user property but a system one. Anyway,
 *is_public* is unconditionally synchronised.
 
-Top_
+How the obsoleted images are managed
+------------------------------------
 
+An obsolete image is an image with the *_obsolete* suffix. When an image is
+marked as obsoleted is not synchronised anymore and therefore it is not upload to
+regions where it is not present. However, if an image exists in the remote region
+with the same name but without the suffix, it is renamed and the visibility is
+updated with the value on the master region. Also the properties specified
+in *obsolete_syncprop*, if any, are synchronised. The synchronisation of the
+properties and the visibility is also managed when there is a image in the
+region to synchronise that is already renamed but without the other changes
+propagated.
+
+There are some checks to do before propagating the changes of an
+obsoleted image:
+
+* Are the two images the same? The checksums are compared and only if they are
+  the same the change is done.
+* Is the image in the region to synchronise a public image of another tenant?
+  in this case do not touch the image.
+* Is there an image with the same name but without the suffix also in the
+  master region and is synchronisable? In this case the image will be
+  synchronised normally without taking in consideration the obsolete image.
+
+Usually obsoleted images are made private, because are not supported anymore.
+It is possible to restore an image as public for local use after renaming or changing
+the tenant (to avoid that it is made private again automatically), but before this is
+important to look out more about the security status of the image.
+
+The treatment of obsolete images can be disabled for a *target* with
+*support_obsolete_images=False*. This flag affects the image renaming and
+the metadata updating, but anyway images with '_obsolete' suffix are never
+synchronisable.
+
+Top_
 
 Build and Install
 =================
@@ -273,11 +316,10 @@ Example of a configuration file
 _______________________________
 
 The following is an example of a configuration file, with all the possible
-options auto explained in the comments. This file is also available
-in the ``conf`` directory, but be aware that GlanceSync does not read the
-configuration from this path unless explicitly requested by setting
-*GLANCESYNC_CONFIG*.
+options auto explained in the comments. A configuration file like this can be
+generated invoking *script/generated_config_file.py*
 
+.. glancesync_conf_begin
 .. code::
 
  [main]
@@ -353,6 +395,14 @@ configuration from this path unless explicitly requested by setting
  # servers. From master region only the tenant's images are considered.
  only_tenant_images = True
 
+ # When this option is true (the default), the renaming and metadata updating of
+ # obsolete images is activate. See the documentation for details.
+ support_obsolete_images = True
+
+ # These are the properties that are synchronised (in addition to is_public
+ # and the name) in obsolete images, when support_obsolete_images is True.
+ obsolete_syncprops = sdc_aware
+
  [master]
 
  # This is the only mandatory target: it includes all the regions registered
@@ -376,6 +426,8 @@ configuration from this path unless explicitly requested by setting
  # Another
  credential = user2,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://server2:4730/v2.0,tenantid2
  metadata_condition = image.is_public and image.user_properties.get('type', None) == 'baseimages'
+
+.. glancesync_conf_end
 
 This configuration file defines two *targets*: ``master`` and ``experimental``. The first one
 synchronises all the public images with properties *nid* and/or *type* defined. The last one only
