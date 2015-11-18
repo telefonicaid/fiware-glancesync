@@ -191,6 +191,12 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.assertFalse(self.image3.is_synchronisable(m, force, func))
         self.assertFalse(self.image4.is_synchronisable(m, force, func))
 
+    def test_is_synchronisable_obsolete(self):
+        """if image name ends with '_obsolete' it is not synchronisable"""
+        force_sync = list([self.image1.id])
+        self.assertTrue(self.image1.is_synchronisable(set(), force_sync))
+        self.image1.name += '_obsolete'
+        self.assertFalse(self.image1.is_synchronisable(set(), force_sync))
 
 class TestGlanceSyncImageCompare(unittest.TestCase):
     """Class to test compare_with_masterregion under different conditions"""

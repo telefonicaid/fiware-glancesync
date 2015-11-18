@@ -210,6 +210,14 @@ class GlanceSyncConfig(object):
                 if configparser.has_option(section, 'tenant_id'):
                     target['tenant_id'] = configparser.get(
                         section, 'tenant_id')
+                target['obsolete_syncprops'] = configparser.getset(
+                        section, 'obsolete_syncprops')
+
+                if configparser.has_option(section, 'support_obsolete_images'):
+                    target['support_obsolete_images'] = configparser.getboolean(
+                        section, 'support_obsolete_images')
+                else:
+                    target['support_obsolete_images'] = True
 
         # Default configuration if it is not present
         if self.master_region is None:
