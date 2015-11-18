@@ -44,7 +44,7 @@ if __name__ == '__main__':
         regions = glancesync.get_regions(False)
 
     for region in regions:
-        print region + ' ',
+        print(region + ' ')
         try:
             images = glancesync.get_images_region(region)
             # only rename if the target name does not exist and the
@@ -54,7 +54,7 @@ if __name__ == '__main__':
             for image in images:
                 if image.name == sys.argv[1]:
                     if image_to_rename is not None:
-                        print 'Not renamed.'
+                        print('Not renamed.')
                         msg = 'Name {0} is not unique in region {1}'
                         logging.error(msg.format(image.name, region))
 
@@ -67,17 +67,17 @@ if __name__ == '__main__':
 
             if image_to_rename is not None:
                 if destination_name_exists:
-                    print 'Not renamed.'
+                    print('Not renamed.')
                     msg = 'Destination name {0} already exists in region {1}'
                     logging.error(msg.format(sys.argv[2], region))
                 else:
                     image_to_rename.name = sys.argv[2]
                     glancesync.update_metadata_image(region, image_to_rename)
-                    print 'Renamed'
+                    print('Renamed')
             else:
-                print 'Not found.'
+                print('Not found.')
         except Exception:
             # Don't do anything. Message has been already printed with
             # logging. Only print status and continue with next region
-            print 'Exception'
+            print('Exception')
             continue

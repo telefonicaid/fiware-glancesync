@@ -38,4 +38,4 @@ if __name__ == '__main__':
     sync_obj.init_logs()
     regions = sync_obj.get_regions(target=target)
     regions.sort()
-    print ','.join(regions)
+    print(','.join(regions))

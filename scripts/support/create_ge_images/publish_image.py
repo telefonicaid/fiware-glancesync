@@ -28,11 +28,13 @@ import sys
 
 
 if len(sys.argv) < 2 or len(sys.argv) > 4:
-    print >> sys.stderr, 'Please, use:'
-    print >> sys.stderr, '  If the image exists: ', sys.argv[0],\
-        '<image_uuid> [oldname]'
-    print >> sys.stderr, '  otherwise          : ', sys.argv[0], \
-        '<image_uuid> <nid> <type>'
+    sys.stderr.write('Please, use:')
+
+    msg = '  If the image exists: {} <image_uuid> [oldname]'.format(sys.argv[0])
+    sys.stderr.write(msg)
+
+    msg = '  otherwise          : {} <image_uuid> <nid> <type>'.format(sys.argv[0])
+    sys.stderr.write(msg)
 
     sys.exit(-1)
 
@@ -40,8 +42,8 @@ owner = osclients.get_tenant_id()
 glance = osclients.get_glanceclient()
 image = glance.images.get(sys.argv[1])
 if image.name[-3:] != '_rc':
-    msg = 'According the name, the image to publish is not a _rc:'
-    print >>sys.stderr, msg, image.name
+    msg = 'According the name, the image to publish is not a _rc: {}'.format(image.name)
+    sys.stderr.write(msg)
     sys.exit(-1)
 
 images = glance.images.findall()
@@ -59,21 +61,20 @@ for i in images:
     if old_name == i.name and i.is_public:
         if not set(('nid', 'type')).intersection(i.properties):
             m = 'Warning: image with the same name found, but without nid/type'
-            print >>sys.stderr, m
-            print >>sys.stderr, i.name, i.id, i.owner
+            sys.stderr.write(m)
+            sys.stderr.write(i.name, i.id, i.owner)
             continue
         if i.owner != owner:
             m = 'Warning: image with the same name found, with another owner'
-            print >>sys.stderr, m
-            print >>sys.stderr, i.name, i.id, i.owner
+            sys.stderr.write(m)
+            sys.stderr.write(i.name, i.id, i.owner)
             continue
 
         nid = i.properties['nid']
         image_type = i.properties['type']
         i.update(name=image.name + '.deprecated', is_public=False)
-        print 'Renamed and made private image ', i.name, i.id
-        print 'Add this checksum to replace, at /etc/glancesync.conf: ',\
-            i.checksum
+        print('Renamed and made private image {} {}'.format(i.name, i.id))
+        print('Add this checksum to replace, at /etc/glancesync.conf: {}'.format(i.checksum))
 
 if not nid or not image_type:
     if len(sys.argv) == 4:
@@ -82,7 +83,7 @@ if not nid or not image_type:
     else:
         msg = 'There is not an image with name {0}. Please, use: {1} '\
             '<image_uuid> <nid> <type>'
-        print >> sys.stderr, msg.format(old_name, sys.argv[0])
+        sys.stderr.write(msg.format(old_name, sys.argv[0]))
         sys.exit(-1)
 
 properties = dict()
@@ -91,4 +92,4 @@ properties['type'] = image_type
 name = image.name[0:-3]
 
 image.update(owner=owner, name=name, properties=properties, is_public=True)
-print 'Done.'
+print('Done.')

@@ -102,18 +102,21 @@ class GlanceSyncImage(object):
         :return: True if both images has the same attributes
         """
         if self.id != other.id or self.name != other.name:
-            return False
-        if self.region != other.region or self.status != other.status:
-            return False
-        if self.owner != other.owner or self.is_public != other.is_public:
-            return False
-        if int(self.size) != int(other.size) or self.raw != other.raw:
-            return False
-        if self.user_properties != other.user_properties:
-            return False
-        if self.checksum != other.checksum:
-            return False
-        return True
+            result = False
+        elif self.region != other.region or self.status != other.status:
+            result = False
+        elif self.owner != other.owner or self.is_public != other.is_public:
+            result = False
+        elif int(self.size) != int(other.size) or self.raw != other.raw:
+            result = False
+        elif self.user_properties != other.user_properties:
+            result = False
+        elif self.checksum != other.checksum:
+            result = False
+        else:
+            result = True
+
+        return result
 
     def __ne__(self, other):
         """Se __eq__"""
@@ -252,24 +255,21 @@ class GlanceSyncImage(object):
         :return:
         """
         if self.id in forcesync:
-            return True
-
-        if metadata_condition:
-            image = self
+            result = True
+        elif metadata_condition:
             globals_dict = dict()
             globals_dict['image'] = self
             globals_dict['metadata_set'] = metadata_set
-            return eval(metadata_condition, globals_dict)
+            result = eval(metadata_condition, globals_dict)
+        elif not self.is_public:
+            result = False
+        elif not metadata_set:
+            result = True
+        else:
+            result = False
+            for prop in metadata_set:
+                if prop in self.user_properties:
+                    result = True
+                    break
 
-        if not self.is_public:
-            return False
-
-        if not metadata_set:
-            return True
-
-        some_property_in = False
-        for prop in metadata_set:
-            if prop in self.user_properties:
-                some_property_in = True
-                break
-        return some_property_in
+        return result
