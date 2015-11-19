@@ -90,7 +90,6 @@ class Sync(object):
                   str(now.minute).zfill(2)
 
         print '======Master (' + self.glancesync.master_region + ')'
-        self.glancesync.print_images_master_region()
         sys.stdout.flush()
         os.mkdir('sync_' + datestr)
         children = dict()
@@ -137,7 +136,7 @@ class Sync(object):
 
         :param dry_run: if true, do not synchronise images actually
         """
-        print '======Master (' + self.glancesync.master_region + ')'
+        print '======Master: (' + self.glancesync.master_region + ')'
 
         for region in self.regions:
             try:
