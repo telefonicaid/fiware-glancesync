@@ -65,6 +65,9 @@ By default, the *m1.small* flavor is used. To choose another flavor, the
 FLAVOR environment variable may be used. The flavor to be used is specified by the
 GE owners. They should choose the minimal flavor their images work with.
 
+The scripts will use the first floating ip it is found in the project regardless 
+of its state, unless a specific IP is set using FLOATING_IP environment variable.
+
 How the script works
 --------------------
 
@@ -93,9 +96,13 @@ the ssh-agent is killed and the UUID of the image is printed. The image is
 ready for publication.
 
 Be aware that if the creation script fails, the virtual machine will not be deleted;
-this is useful to debug the problem, but anyway that virtual machine should be
-deleted before trying again. In the same way, if the testing script fails,
+this is useful to debug the problem; anyway that virtual machine is deleted automatically 
+if trying again with the same image. In the same way, if the testing script fails,
 neither the virtual machine nor the release candidate image are deleted.
+
+To execute again a test but without creating the image (this is useful when only
+the test script is update) invoke ``/opt/create_ge_images/test_only.sh``, passing
+the name of the image.
 
 **Warning: the testing script is executed directly, it is not invoked inside the
 VM machine but in the user account. Therefore, this script is a security risk
@@ -111,9 +118,7 @@ If ``TEST_USING_VM`` is defined and not empty, the testing script is executed
 inside a VM. This is an experimental feature that does not require an extra
 floating IP. It is more secure, but it needs more time to complete. If the
 script fails, maybe a good idea is to check that this experimental feature is
-not the cause of the problem. To repeat the test only, the variable ``TEST_ONLY``
-must be defined and not empty (and of course to use the traditional method,
-``TEST_USING_VM`` must be undefined).
+not the cause of the problem.
 
 It works by creating a second VM (the tester). Initially the floating IP is assigned to
 this VM and a SSH connection is created, using SSH ControlMaster; this maintains

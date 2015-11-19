@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -- encoding: utf-8 --
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
@@ -52,7 +53,7 @@ nid = None
 image_type = None
 
 # if there is a public image with the same name, use its nid, type
-# rename the image, turn it private and print the checksum
+# rename the image and turn it private
 if len(sys.argv) == 3:
     old_name = sys.argv[2]
 else:
@@ -74,7 +75,7 @@ for i in images:
 
         nid = i.properties['nid']
         image_type = i.properties['type']
-        i.update(name=image.name + '.deprecated', is_public=False)
+        i.update(name=image.name + '_obsolete', is_public=False)
         print('Renamed and made private image {} {}'.format(i.name, i.id))
         print('Add this checksum to replace, at /etc/glancesync.conf: {}'.format(i.checksum))
 

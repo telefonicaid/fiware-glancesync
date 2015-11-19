@@ -26,6 +26,9 @@
 
 set -e
 
+# Force use of apt-get installed packages instead of the pip ones
+export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
+
 export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2}')
 export SECURITY_GROUP_CREATE=sshopen
 export SECURITY_GROUP_TEST=allopen
@@ -34,7 +37,8 @@ export CREATESCRIPT=create.sh
 export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz
 export IMAGES_DIR=~/create_ge_images/
-export IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
+export IP=${FLOATINGIP:-$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2; exit }')}
+
 export FLAVOR=${FLAVOR:-m1.small}
 
 cd $(dirname $0)
@@ -46,19 +50,42 @@ wait_ssh() {
   fi
   echo "Waiting until ssh is ready..."
   sleep 30
-  tries=15
+  tries=25
   ussh="ssh -i $HOME/.ssh/createtestimage -oStrictHostKeyChecking=no"
   until $ussh ${user}@${IP} true ; do
      sleep 10 
      ((tries-=1))
      if [ $tries -eq 0 ] ; then
-        echo "Timeout while waiting for ssh."
+        echo "Maximum attempts reached while waiting for ssh."
         exit -1
      fi
   done
-  echo "VM is ready"
+  echo "VM is ready for ssh"
 
 }
+
+get_uuid_image() {
+   #Parameters: name
+   name=$1
+   glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}'
+}
+
+wait_vm() {
+  vm=$1
+  echo "Waiting until VM $1 is active..."
+  sleep 5
+  tries=10
+  until nova show $vm |egrep -q '^\|[ ]+OS-EXT-STS:vm_state[ ]+\|[ ]+active' ; do
+     sleep 5
+     ((tries-=1))
+     if [ $tries -eq 0 ] ; then
+        echo "Maximum attempts reached while waiting for VM active."
+        exit -1
+     fi
+   done
+   echo "VM is active"
+}
+
 create_template_ubuntu12() {
   # Parameters: name
   check_params $*
@@ -95,7 +122,8 @@ launch_vm() {
 }
 
 launch_vm_get_id() {
-  launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}'
+ ID=$(launch_vm $* | awk -F\| '$2 ~ /[ \t]+id[ \t]+/ {print $3}')
+ echo $ID |tee $DIR/last_vm 
 }
 
 create_template() {
@@ -106,18 +134,29 @@ create_template() {
 
   I="-i $HOME/.ssh/createtestimage"
 
+  # Delete old VM if it exists
+  nova delete $(cat $DIR/last_vm 2>/dev/null) >/dev/null 2>&1  || true
+
   if [ $TEST_ONLY ] ; then
      test_template $name $user
      exit
   fi
+
+  # Delete old image if it exists
+  if glance image-show ${name}_rc >/dev/null 2>&1 ; then
+     UUID=$(get_uuid_image $name)
+     glance image-delete $UUID
+  fi
+
   # ask sudo password at start
   sudo true
+
   # Launch de VM using base image
   echo "launching VM $name $base_image $KEYPAIR $IP $FLAVOR"
   ID=$(launch_vm_get_id ${name} $FLAVOR $SECURITY_GROUP_CREATE $base_image)
 
   echo "VM id is $ID"
-  sleep 5
+  wait_vm $ID
   nova floating-ip-associate $ID $IP
 
   # Wait until ssh is ready
@@ -154,6 +193,7 @@ create_template() {
   sleep 20
   nova image-create ${ID} ${name}-snapshot --poll
   nova delete ${ID}
+  rm -f $DIR/last_vm
 
   # download snapshot and delete it from server
   echo "downloading image"
@@ -184,13 +224,26 @@ create_template() {
   rm -f $DIR/tmp_image
 
   # test template
+  echo $user > $DIR/dist_type
   test_template $name $user
+}
+
+test_only() {
+  name=$1
+  DIR=$IMAGES_DIR/$1
+  user=$(cat $DIR/dist_type)
+
+  # Delete old VM if it exists
+  nova delete $(cat $DIR/last_vm 2>/dev/null) >/dev/null 2>&1  || true
+  rm -f $DIR/last_vm
+  test_template $1 $user
 }
 
 test_template() {
   name=$1
   user=$2
   export USERNAME=${user}
+  UUID=$(get_uuid_image $name)
 
   if [ $TEST_USING_VM ] ; then
      echo "Launching a tester VM"
@@ -204,9 +257,10 @@ test_template() {
   ID=$(launch_vm_get_id test-${name} $FLAVOR $SECURITY_GROUP_TEST ${name}_rc)
 
   echo "VM id: $ID"
-  sleep 5
 
   if [ $TEST_USING_VM ] ; then
+     # wait before associating the floating IP
+     wait_vm $ID2
      nova floating-ip-associate $ID2 $IP
      IDSAVE=$ID
      ID=$ID2 
@@ -227,6 +281,7 @@ test_template() {
 EOF
 
      ID=$IDSAVE
+     wait_vm $ID
      nova floating-ip-associate $ID $IP
      wait_ssh $user
      # Connect to ID2, because we are using the master connection
@@ -238,6 +293,8 @@ EOF
      nova delete $ID2
 
   else
+     # wait before associating the floating IP
+     wait_vm $ID
      nova floating-ip-associate $ID $IP
      # Wait until ssh is reading
      wait_ssh $user
@@ -260,15 +317,23 @@ EOF
   if [ -f $DIR/failed ] ; then
         rm $DIR/failed
         echo "Failed."
+        echo "The image ${name}_rc was not deleted because it may be useful for debugging the problem."
+        echo " However, it will be purged if the create script is invoked again. You can:"
+        echo "  Delete it with: glance image-delete $UUID"
+        echo "  Rename it with: glance image-update $UUID --name othername"
+        echo
+        echo "Another option is to transfer the image to another tenant, if they want to analyse it. You need the admin account:"
+        echo "  glance image-update $UUID --owner tenant_id"
         exit -1
   fi
 
   echo "Success. Deleting the VM"
   # delete the VM
   nova delete $ID
+  rm -f $DIR/last_vm
 
   # print the image UUID
-  echo "Success. UUID: $(glance image-show ${name}_rc | awk '/^\|[ ]+id/ {print $4}')"
+  echo "Success. UUID: $UUID"
 }
 
 check_params() {

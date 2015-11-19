@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
@@ -22,20 +22,9 @@
 # contact with opensource@tid.es
 #
 
+cd $(dirname $0)
+. create_template.sh
+# Parameters: name
+check_params $*
 
-export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
-nova secgroup-create allopen "all open"
-nova secgroup-add-rule allopen icmp -1 -1 0.0.0.0/0
-nova secgroup-add-rule allopen tcp 1 65535 0.0.0.0/0
-nova secgroup-add-rule allopen udp 1 65535 0.0.0.0/0
-nova secgroup-create sshopen "ssh open"
-nova secgroup-add-rule sshopen tcp 22 22 0.0.0.0/0
-
-rm -f ~/.ssh/createtestimage
-nova keypair-add  createimage > ~/.ssh/createtestimage
-chmod 400 ~/.ssh/createtestimage
-
-IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
-if [ ! $IP ] ; then
-nova floating-ip-create public-ext-net-01
-fi
+test_only $1
