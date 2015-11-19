@@ -56,7 +56,7 @@ class Sync(object):
             try:
                 stream = StringIO.StringIO()
                 self.glancesync.export_sync_region_status(region, stream)
-                print stream.getvalue()
+                print(stream.getvalue())
             except Exception:
                 # Don't do anything. Message has been already printed
                 # try next region
@@ -73,7 +73,8 @@ class Sync(object):
                   str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
                   str(now.minute).zfill(2)
 
-        print '======Master (' + self.glancesync.master_region + ')'
+        msg = '======Master (' + self.glancesync.master_region + ')'
+        print(msg)
         self.glancesync.print_images_master_region()
         sys.stdout.flush()
         os.mkdir('sync_' + datestr)
@@ -112,7 +113,7 @@ class Sync(object):
                 sys.exit(-1)
         while len(children) > 0:
             self._wait_child(children)
-        print 'All is done.'
+        print('All is done.')
 
     def sequential_sync(self, dry_run=False):
         """Run the synchronisation sequentially (that is, do not start the
@@ -121,11 +122,13 @@ class Sync(object):
 
         :param dry_run: if true, do not synchronise images actually
         """
-        print '======Master (' + self.glancesync.master_region + ')'
+        msg = '======Master (' + self.glancesync.master_region + ')'
+        print(msg)
 
         for region in self.regions:
             try:
-                print "======" + region
+                msg = "======" + region
+                print(msg)
                 sys.stdout.flush()
                 self.glancesync.sync_region(region, dry_run=dry_run)
             except Exception:
@@ -148,9 +151,11 @@ class Sync(object):
             else:
                 finish_direct_child = True
                 if status == 0:
-                    print 'Region {0} finish'.format(children[pid])
+                    msg = 'Region {0} finish'.format(children[pid])
+                    print(msg)
                 else:
-                    print 'Region {0} finish with errors'.format(children[pid])
+                    msg = 'Region {0} finish with errors'.format(children[pid])
+                    print(msg)
                 del children[pid]
                 sys.stdout.flush()
 

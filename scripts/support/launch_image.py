@@ -95,6 +95,6 @@ def launch_without_cloudinit(name):
     return launch_vm(name, image, ip, key, flavor)
 
 if len(sys.argv) == 4:
-    print launch_vm(sys.argv[1], sys.argv[2], ip, key, sys.argv[3])
+    print(launch_vm(sys.argv[1], sys.argv[2], ip, key, sys.argv[3]))
 elif len(sys.argv) == 6:
-    print launch_vm(sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[3], sys.argv[5])
+    print(launch_vm(sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[3], sys.argv[5]))

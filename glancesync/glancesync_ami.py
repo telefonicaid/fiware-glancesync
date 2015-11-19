@@ -118,34 +118,37 @@ def _update_auximg_id(property_id, image, master_image, images_region):
     if property_id not in master_image.user_properties:
         if property_id not in image.user_properties:
             # Nothing to do
-            return False
+            result = False
         else:
             # remove property
             del image.user_properties[property_id]
-            return True
+            result = True
+    else:
+        # Get the name of the kernel/ramdisk image
+        aux_image_name = master_image.user_properties[property_id]
+        if aux_image_name not in images_region:
+            # It is very unusual that an image exists and not its kernel or
+            # ramdisk, because little images are upload first, but it is
+            # possible (e.g. if the image is removed manually or it is
+            # replaced by a more recent one)
+            # In this case, print a warning
+            msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
+            _logger.warning(msg.format(aux_image_name, image.region,
+                                       property_id, image.name))
+            # Put the aux image name; this provides information to the caller
+            # about the missing image. Put '__' as prefix.
+            image.user_properties[property_id] = '__' + aux_image_name
+            result = True
+        else:
+            aux_image = images_region[aux_image_name]
+            if property_id in image.user_properties and\
+                    aux_image.id == image.user_properties[property_id]:
+                result = False
+            else:
+                image.user_properties[property_id] = aux_image.id
+                result = True
 
-    # Get the name of the kernel/ramdisk image
-    aux_image_name = master_image.user_properties[property_id]
-    if aux_image_name not in images_region:
-        # It is very unusual that an image exists and not its kernel or
-        # ramdisk, because little images are upload first, but it is
-        # possible (e.g. if the image is removed manually or it is
-        # replaced by a more recent one)
-        # In this case, print a warning
-        msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
-        _logger.warning(msg.format(aux_image_name, image.region,
-                                   property_id, image.name))
-        # Put the aux image name; this provides information to the caller
-        # about the missing image. Put '__' as prefix.
-        image.user_properties[property_id] = '__' + aux_image_name
-        return True
-
-    aux_image = images_region[aux_image_name]
-    if property_id in image.user_properties and\
-            aux_image.id == image.user_properties[property_id]:
-        return False
-    image.user_properties[property_id] = aux_image.id
-    return True
+    return result
 
 
 def check_ami(image, master_image, region_images, pending_images):
@@ -209,24 +212,26 @@ def _check_auximg_id(property_id, image, master_image, images_region,
     if property_id not in master_image.user_properties:
         if property_id not in image.user_properties:
             # Nothing to do
-            return 'ready'
+            result = 'ready'
         else:
-            return 'update'
-
-    # Get the name of the kernel/ramdisk image
-    aux_image_name = master_image.user_properties[property_id]
-
-    # Check if the aux_image exists
-    if aux_image_name not in images_region:
-        if aux_image_name in pending_images:
-            return 'pending'
-        else:
-            return 'missing'
-
-    # Found image, Check it is OK or must be updated
-    aux_image = images_region[aux_image_name]
-    if property_id in image.user_properties and\
-            aux_image.id == image.user_properties[property_id]:
-        return 'ready'
+            result = 'update'
     else:
-        return 'update'
+        # Get the name of the kernel/ramdisk image
+        aux_image_name = master_image.user_properties[property_id]
+
+        # Check if the aux_image exists
+        if aux_image_name not in images_region:
+            if aux_image_name in pending_images:
+                result = 'pending'
+            else:
+                result = 'missing'
+        else:
+            # Found image, Check it is OK or must be updated
+            aux_image = images_region[aux_image_name]
+            if property_id in image.user_properties and\
+                    aux_image.id == image.user_properties[property_id]:
+                result = 'ready'
+            else:
+                result = 'update'
+
+    return result

@@ -42,7 +42,7 @@ glance = osclients.get_glanceclient()
 check_call(['./preparetar.sh'])
 for image_name in images:
     image = glance.images.find(name=image_name)
-    print image.name, image.id
+    print(image.name, image.id)
     file_path = '/var/lib/glance/images/' + image.id
     check_call(['sudo', 'cp', file_path, 'image.tmp'])
     try:
@@ -58,6 +58,6 @@ for image_name in images:
          name=image.name, container_format='bare', disk_format='qcow2',
          data=open('image.tmp'), properties={'type': 'baseimage'}, is_public=False,
          min_disk=image.min_disk)
-    print uuid
+    print(uuid)
     os.unlink('image.tmp')
     image.delete()
