@@ -728,15 +728,20 @@ For a scenario 'new_scenario', the following folders must be created:
 * new_scenario: there are files for each region with the backup of the metadata
                 BEFORE invoking the synchronisation. These files can be generated
                 with *sync.py --make-backup*
-* new_scenario.result: there are files for each region with teh backup of the
+* new_scenario.result: there are files for each region with the backup of the
                        metadata AFTER invoking the synchronisation
 * new_scenario_pre: there are files with the status of each region BEFORE invoking
                     the synchronisation. These files can be generated with the
                     output of *sync.py --show-status*
 * new_scenario_post: there are files with the status of each region AFTER invoking
                      the synchronisation. These files can be generated with the
+                     output of *sync.py --show-status*
 
-Then, a test class must be defined extending TestGlanceSync_Sync, for example:
+Inside the forlder *new_sceneario*, optionally a *config* file may be included.
+If this file is not found, then the default configuration defined in the variable
+*config1* of the test file ´´tests/unit/test_glancesync.py´´ is used.
+
+Then, a test class must be defined extending *TestGlanceSync_Sync*, for example:
 
 .. code::
 
@@ -746,6 +751,8 @@ Then, a test class must be defined extending TestGlanceSync_Sync, for example:
             path = os.path.abspath(os.curdir)
             self.path_test = path + '/tests/resources/ami'
             self.regions = ['master:Burgos']
+
+This class is provided in ´´tests/unit/test_glancesync.py´´.
 
 More information about the mock: mock_
 
