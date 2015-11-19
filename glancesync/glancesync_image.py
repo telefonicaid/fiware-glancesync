@@ -102,18 +102,21 @@ class GlanceSyncImage(object):
         :return: True if both images has the same attributes
         """
         if self.id != other.id or self.name != other.name:
-            return False
-        if self.region != other.region or self.status != other.status:
-            return False
-        if self.owner != other.owner or self.is_public != other.is_public:
-            return False
-        if int(self.size) != int(other.size) or self.raw != other.raw:
-            return False
-        if self.user_properties != other.user_properties:
-            return False
-        if self.checksum != other.checksum:
-            return False
-        return True
+            result = False
+        elif self.region != other.region or self.status != other.status:
+            result = False
+        elif self.owner != other.owner or self.is_public != other.is_public:
+            result = False
+        elif int(self.size) != int(other.size) or self.raw != other.raw:
+            result = False
+        elif self.user_properties != other.user_properties:
+            result = False
+        elif self.checksum != other.checksum:
+            result = False
+        else:
+            result = True
+
+        return result
 
     def __ne__(self, other):
         """Se __eq__"""
@@ -241,6 +244,7 @@ class GlanceSyncImage(object):
             self, metadata_set, forcesync, metadata_condition=None):
         """Determines if the image is synchronisable according to this
         algorithm:
+           if image.name ends with '_obsolete' it is not synchronisable
            if image id is in forcesync, it is synchronisable
            if metadata_condition is provided, evaluate it and return the result
            if image is not public, it is not synchronisable
@@ -251,25 +255,28 @@ class GlanceSyncImage(object):
         :param metadata_condition: expression to evaluate if the image is sync.
         :return:
         """
-        if self.id in forcesync:
-            return True
+        synchronisable = False
 
-        if metadata_condition:
+        if self.name.endswith('_obsolete'):
+            synchronisable = False
+        elif self.id in forcesync:
+            synchronisable = True
+        elif metadata_condition:
             image = self
             globals_dict = dict()
             globals_dict['image'] = self
             globals_dict['metadata_set'] = metadata_set
-            return eval(metadata_condition, globals_dict)
+            synchronisable = eval(metadata_condition, globals_dict)
+        elif not self.is_public:
+            synchronisable = False
+        elif not metadata_set:
+            synchronisable = True
+        else:
+            some_property_in = False
+            for prop in metadata_set:
+                if prop in self.user_properties:
+                    some_property_in = True
+                    break
+            synchronisable = some_property_in
 
-        if not self.is_public:
-            return False
-
-        if not metadata_set:
-            return True
-
-        some_property_in = False
-        for prop in metadata_set:
-            if prop in self.user_properties:
-                some_property_in = True
-                break
-        return some_property_in
+        return synchronisable

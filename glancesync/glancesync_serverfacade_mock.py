@@ -287,12 +287,14 @@ if __name__ == '__main__':
     else:
         meta.path = os.path.normpath(os.path.expanduser(meta.path))
         m = 'The directory "%s" is not empty. If you are sure, pass --confirm'
-        if os.path.exists(meta.path) and not meta.confirm:
-            if len(glob.glob(meta.path + '/_persist_*')) != 0:
+        if os.path.exists(meta.path) and not meta.confirm \
+                and len(glob.glob(meta.path + '/_persist_*')) != 0:
+
                 logging.error(m % meta.path)
                 sys.exit(-1)
 
     facade = ServersFacade(dict())
     facade.init_persistence(meta.path, True)
     facade.add_images_from_csv_to_mock(meta.initial_load)
-    print 'export GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path
+
+    print('export GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path)
