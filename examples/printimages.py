@@ -35,11 +35,11 @@ if __name__ == '__main__':
         regions = sys.argv[1:]
     else:
         regions = sync_obj.get_regions()
-        print '======Master (' + sync_obj.master_region + ')'
+        print('======Master (' + sync_obj.master_region + ')')
         sync_obj.print_images_master_region()
     for region in regions:
         try:
-            print "======" + region
+            print("======" + region)
             sync_obj.print_images(region)
         except Exception:
             # Don't do anything. Message has been already printed

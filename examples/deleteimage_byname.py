@@ -50,7 +50,7 @@ if __name__ == '__main__':
         image_name = sys.argv[1]
 
     for region in regions:
-        print "Region: " + region
+        print("Region: {}".format(region))
         try:
             images = glancesync.get_images_region(region)
         except Exception:
@@ -61,4 +61,4 @@ if __name__ == '__main__':
                 deleted = glancesync.delete_image(
                     region, image.id, confirmation)
                 if deleted:
-                    print 'Image deleted from region ' + region
+                    print('Image deleted from region {}'.format(region))

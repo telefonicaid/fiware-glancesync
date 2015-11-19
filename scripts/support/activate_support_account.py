@@ -24,7 +24,6 @@
 #
 
 import base64
-import os.path
 import os
 import shutil
 import pwd
@@ -50,7 +49,7 @@ Injection is done through http://169.254.169.254/openstack/latest/user_data
 """
 
 
-#If this is true, use password from configDrive if available
+# If this is true, use password from configDrive if available
 readPasswordDiskImage = False
 
 fiware_gpg = '/etc/fiware-support/gpg'
@@ -75,7 +74,7 @@ def generate_password():
 def read_password_from_cd():
     if not os.path.exists('/dev/sr0'):
         return None
-    subprocess.call(['mount', '/dev/sr0', '/mnt', '-o', 'mode=0400,norock'])
+    call(['mount', '/dev/sr0', '/mnt', '-o', 'mode=0400,norock'])
     f = open('/mnt/openstack/latest/meta_data.json')
     data = json.load(f)
     return data['admin_path']

@@ -59,10 +59,10 @@ for line in logs.splitlines():
 
 if is_encrypted:
     encrypted = '\n'.join(encrypted)
-    print encrypted
+    print(encrypted)
     output = Popen(['gpg', '-d'], stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate(encrypted)[0]
-    print output.partition(':')[2].strip(),
+    print(output.partition(':')[2].strip())
 elif found:
-    print password,
+    print(password)
 
-print server.get_vnc_console('novnc')['console']['url']
+print(server.get_vnc_console('novnc')['console']['url'])

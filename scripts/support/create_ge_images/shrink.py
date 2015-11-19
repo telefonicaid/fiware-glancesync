@@ -56,7 +56,7 @@ else:
 # shrink disk
 
 if newsize:
-    print 'Resizing to ' + newsize
+    print('Resizing to ' + newsize)
     params = ['qemu-img', 'create', '-f', 'qcow2', '-o',
               'preallocation=metadata',
               'newdisk.qcow2', newsize]

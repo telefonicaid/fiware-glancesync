@@ -7,7 +7,7 @@
     ! width="50 px" style="background:Lavender; color:Black" | NID
     ! width="50 px" style="background:Lavender; color:Black" | NID Version
     ! width="100 px" style="background:Lavender; color:Black" | Image
-
+    
 |-
 || advanced middleware and interfaces network and devices
 || network information and control ofnic
@@ -24,15 +24,8 @@
 
 |-
 || datacontext management
-|| cloud messaging aeon
-| ! align="center" | 1501
-|| --
-|| --
-
-|-
-||
-|| publishsubscribe context broker orion context broker
-| ! align="center" | 344
+|| stream oriented kurento
+| ! align="center" | 855
 || --
 || --
 
@@ -45,8 +38,15 @@
 
 |-
 ||
-|| stream oriented kurento
-| ! align="center" | 855
+|| publishsubscribe context broker orion context broker
+| ! align="center" | 344
+|| --
+|| --
+
+|-
+||
+|| cloud messaging aeon
+| ! align="center" | 1501
 || --
 || --
 
@@ -54,6 +54,13 @@
 ||
 || bigdata analysis cosmos
 | ! align="center" | 158
+|| --
+|| --
+
+|-
+||
+|| ckan
+| ! align="center" | 1457
 || --
 || --
 

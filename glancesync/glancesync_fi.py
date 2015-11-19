@@ -88,11 +88,10 @@ def _printimages(imagesregion, comparewith=None):
         line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
+                print(image.compare_with_masterregion(comparewith, properties) + line)
             else:
-                print line
-    print "---"
+                print(line)
+    print("---")
     images = list(
         image for image in imagesregion if image.is_public and
         ('nid' not in image.user_properties and 'type' in
@@ -102,11 +101,10 @@ def _printimages(imagesregion, comparewith=None):
         line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
+                print(image.compare_with_masterregion(comparewith, properties) + line)
             else:
-                print line
-    print "---"
+                print(line)
+    print("---")
     images = list(
         image for image in imagesregion if image.is_public and
         ('nid' in image.user_properties and 'type' not in
@@ -116,7 +114,6 @@ def _printimages(imagesregion, comparewith=None):
         line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print image.compare_with_masterregion(
-                    comparewith, properties) + line
+                print(image.compare_with_masterregion(comparewith, properties) + line)
             else:
-                print line
+                print(line)

@@ -221,7 +221,7 @@ def _delete_image(regionobj, id, confirm=True):
         confirm = raw_input('Delete image {0}? [y/N]'.format(id))
         confirm = confirm.strip()
         if confirm != 'y' and confirm != 'Y':
-            print 'Not deleting image ' + id
+            print('Not deleting image ' + id)
             return False
 
     p = Popen(['glance', 'image-delete', id], stdin=None)
