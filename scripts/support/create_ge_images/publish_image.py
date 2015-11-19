@@ -28,12 +28,12 @@ import sys
 
 
 if len(sys.argv) < 2 or len(sys.argv) > 4:
-    sys.stderr.write('Please, use:')
+    sys.stderr.write('Please, use:\n')
 
-    msg = '  If the image exists: {} <image_uuid> [oldname]'.format(sys.argv[0])
+    msg = '  If the image exists: {} <image_uuid> [oldname]\n'.format(sys.argv[0])
     sys.stderr.write(msg)
 
-    msg = '  otherwise          : {} <image_uuid> <nid> <type>'.format(sys.argv[0])
+    msg = '  otherwise          : {} <image_uuid> <nid> <type>\n'.format(sys.argv[0])
     sys.stderr.write(msg)
 
     sys.exit(-1)
@@ -42,7 +42,7 @@ owner = osclients.get_tenant_id()
 glance = osclients.get_glanceclient()
 image = glance.images.get(sys.argv[1])
 if image.name[-3:] != '_rc':
-    msg = 'According the name, the image to publish is not a _rc: {}'.format(image.name)
+    msg = 'According the name, the image to publish is not a _rc: {}\n'.format(image.name)
     sys.stderr.write(msg)
     sys.exit(-1)
 
@@ -60,14 +60,16 @@ else:
 for i in images:
     if old_name == i.name and i.is_public:
         if not set(('nid', 'type')).intersection(i.properties):
-            m = 'Warning: image with the same name found, but without nid/type'
+            m = 'Warning: image with the same name found, but without nid/type\n'
             sys.stderr.write(m)
             sys.stderr.write(i.name, i.id, i.owner)
+            sys.stderr.write('\n')
             continue
         if i.owner != owner:
-            m = 'Warning: image with the same name found, with another owner'
+            m = 'Warning: image with the same name found, with another owner\n'
             sys.stderr.write(m)
             sys.stderr.write(i.name, i.id, i.owner)
+            sys.stderr.write('\n')
             continue
 
         nid = i.properties['nid']
@@ -82,7 +84,7 @@ if not nid or not image_type:
         image_type = sys.argv[3]
     else:
         msg = 'There is not an image with name {0}. Please, use: {1} '\
-            '<image_uuid> <nid> <type>'
+            '<image_uuid> <nid> <type>\n'
         sys.stderr.write(msg.format(old_name, sys.argv[0]))
         sys.exit(-1)
 
