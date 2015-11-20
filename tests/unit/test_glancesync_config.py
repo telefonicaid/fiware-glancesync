@@ -116,6 +116,8 @@ credential = user2,\
   http://server2:4730/v2.0,tenant2
 ignore_regions = Spain
 metadata_condition=
+# A hack useful in mock mode
+tenant_id = tenant2_id
 support_obsolete_images = False
 
 """
@@ -200,7 +202,14 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertTrue(master['support_obsolete_images'])
         self.assertFalse(experimental['support_obsolete_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
+        self.assertEquals(experimental['tenant_id'], 'tenant2_id')
 
+    def test_override(self):
+        """check overriding options passing a dictionary to constructor"""
+        override = {'master.user': 'otheruser', 'only_tenant_images': 'False'}
+        config = GlanceSyncConfig(stream=self.stream, override_d=override)
+        self.assertEquals(config.targets['master']['user'], 'otheruser')
+        self.assertFalse(config.targets['experimental']['only_tenant_images'])
 
 class TestGlanceSyncConfigFile(unittest.TestCase):
     """Class to test that is possible to provide the configuration using a

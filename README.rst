@@ -207,7 +207,7 @@ marked as obsoleted is not synchronised anymore and therefore it is not upload t
 regions where it is not present. However, if an image exists in the remote region
 with the same name but without the suffix, it is renamed and the visibility is
 updated with the value on the master region. Also the properties specified
-in *obsolete_syncprop*, if any, are synchronised. The synchronisation of the
+in *obsolete_syncprops*, if any, are synchronised. The synchronisation of the
 properties and the visibility is also managed when there is a image in the
 region to synchronise that is already renamed but without the other changes
 propagated.
@@ -282,6 +282,15 @@ administrator's credential: ``OS_USERNAME``, ``OS_PASSWORD``, ``OS_AUTH_URL``,
 ``OS_TENANT_NAME``, ``OS_REGION_NAME``. The value of ``OS_REGION_NAME`` will be
 the master region (in FIWARE Lab this region is Spain2).
 
+It is also possible to pass any configuration option using command line. For
+example, the following invocation runs a synchronisation taking from command
+line the parameters *master_region* in the *main* section and *metadata_set* in
+the *DEFAULT* section:
+
+.. code::
+
+ ./sync.py --config main.master_region=Spain2 metadata_set=nid,type,sdc_aware,sdc_version
+
 The configuration file
 ----------------------
 
@@ -331,8 +340,10 @@ generated invoking *script/generated_config_file.py*
  # A sorted list of regions. Regions that are not present are silently
  # ignored. Synchronization is done also to the other regions, but first this
  # list is revised and then the Regions are prefixed with "target:"
- # This parameter is only used when running synchronisation without parameters.
- # When the region list is provided explicitly via command line, the order of
+ # This parameter is only used when running synchronisation without parameters
+ # or the region list includes a 'target' (e.g. 'master:' that is expanded to
+ # the regions in master but the specified in ignore_regions). When the full region
+ # list is provided explicitly via command line, the order of
  # the parameters is used instead.
  preferable_order = Trento, Lannion, Waterford, Berlin, Prague
 
@@ -416,9 +427,9 @@ generated invoking *script/generated_config_file.py*
  credential = user,W91c2x5X2RpZF95b3VfdGhpbmtfdGhpc193YXNfdGhlX3JlYWxfcGFzc3dvcmQ/,http://server:4730/v2.0,tenantid1
 
  # This parameter is useful when invoking the tool without specifying which
- # images to synchronise. All the regions with glance servers registered in
- # the same keystone than the master region are synchronised unless they are
- # included in this parameter. This parameter is useless with other targets.
+ # images to synchronise or when the list includes a "target" without a region
+ # (e.g. master:). In this case it is expanded with the list of regions in that
+ # target except the included in ignore_regions
  ignore_regions = Spain1
 
  [experimental]
@@ -464,7 +475,10 @@ When ``./sync.py`` is invoked without parameters, it synchronises the images fro
 the master region to all the other regions with a glance endpoint registered in
 the keystone server (except the ones, if any, specified as a comma separated list
 in the ``ignore_regions`` parameter, inside the ``master`` section). The command
-can also receive as parameters the regions to synchronise.
+can also receive as parameters the regions to synchronise. It is possible also
+to specify a target name and the suffix *:*; this way it is expanded to all the
+regions in that target (e.g. if there are two regions, *regionA* and *regionB* in
+target *target1*, then *target1:* is expanded with *target1:regionA target1:regionB*)
 
 Advanced use
 ------------
@@ -479,6 +493,16 @@ region with the log of the synchronisation process.
 
 The option *--dry-run* shows the changes needed to synchronise the images,
 but without doing the operations actually.
+
+The option *--show-regions* shows all the regions available in all the targets
+defined in the configuration file.
+
+The option *--make-backups* creates a backup of the medatada of the images
+in the regional Glance servers, instead of running the synchronisation.
+
+It is possible to override any parameter of the configuration file, using the
+option *--config*. Be aware that the way of setting several parameters is
+separating them with spaces (e.g. *--config option1=value1 option2=value2*)
 
 Finally, the option *--show-status* is to obtain a report about the
 synchronisation status of the regions. A more detailed information of this is
@@ -502,6 +526,63 @@ following command must be invoked:
    ./sync.py Trento Berlin2 other:RegionOne other:RegionTwo
    
 Note that the *master:* prefix may be omitted.
+
+Making a backup of metadata
+---------------------------
+
+The option *--make-backups* create a backup of the metadata in the specified
+regions and in the master region. This is useful for example for
+debugging or testing, because GlanceSync supports the use of a mock that reads
+files likes these as input instead of contacting to the real servers. The mock
+is also used for testing real scenarios.
+
+The backup is created in a directory named *backup_glance_* with the date and
+time as suffix. There is a file for each region (the name is backup_<region>.csv)
+and inside the file a line for each image. The following fields are included:
+
+* the region name
+* the image name
+* the UUID of the image in the region
+* the status of the image (the OK status is 'active')
+* the size in bytes
+* the checksum
+* the tenant id of the owner (a.k.a. project id)
+* a boolean indicating if the image is Public
+* a dictionary with the user properties
+
+Only the information about public images/ the images owned by the tenant, can
+be obtained. This is a limitation of the glance API: even the administrator
+does not get a list of private images of other users.
+
+Using a mock with a backup
+__________________________
+
+.. _mock:
+
+It is possible to use the result of a backup (optionally after changing the
+contents) for testing different scenarios.
+
+Supposing the backup directory *backup_glance_2015-11-17T12:54:26.117838* is
+renamed to *scenario1*. After invoking this line, instead of operating with
+the real servers, a mock with metadata saved in *persistent_data* folder is
+used:
+
+.. code::
+
+  eval $(glancesync/glancesync_serverfacade_mock.py  --path persistent_data scenenario1)
+  export PYTHONPATH=glancesync
+
+The created scenario is persistent, that is, is possible to invoke *sync.py --show-status*
+before and after running the synchronisation for checking that the state has
+changed.
+
+The mock uses as tenant_id (this is important to compare the owner of the files)
+the paremeter *tenant_id* if defined in the configuration, otherwise *id* is
+added to the tenant_name as suffix.
+
+To make test results deterministic, when a new image is created in the mock, the
+UUID is not random. The UUID's pattern is *<seq>$<image_name>* where seq is a number
+starting with 1 that guarantees the UUID uniqueness.
 
 Checking status
 ---------------
@@ -637,6 +718,43 @@ checks against a real glance server. To activate this eight tests, edit the file
 change testingFacadeReal to True. It needs the usual OpenStack environment
 variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
+
+Contributing new tests
+______________________
+
+It is possible to contribute new tests defining a scenario in *tests/resources*
+For a scenario 'new_scenario', the following folders must be created:
+
+* new_scenario: there are files for each region with the backup of the metadata
+                BEFORE invoking the synchronisation. These files can be generated
+                with *sync.py --make-backup*
+* new_scenario.result: there are files for each region with the backup of the
+                       metadata AFTER invoking the synchronisation
+* new_scenario_pre: there are files with the status of each region BEFORE invoking
+                    the synchronisation. These files can be generated with the
+                    output of *sync.py --show-status*
+* new_scenario_post: there are files with the status of each region AFTER invoking
+                     the synchronisation. These files can be generated with the
+                     output of *sync.py --show-status*
+
+Inside the forlder *new_sceneario*, optionally a *config* file may be included.
+If this file is not found, then the default configuration defined in the variable
+*config1* of the test file ´´tests/unit/test_glancesync.py´´ is used.
+
+Then, a test class must be defined extending *TestGlanceSync_Sync*, for example:
+
+.. code::
+
+    class TestGlanceSync_AMI(TestGlanceSync_Sync):
+        """Test a environment with AMI images (kernel_id/ramdisk_id)"""
+        def config(self):
+            path = os.path.abspath(os.curdir)
+            self.path_test = path + '/tests/resources/ami'
+            self.regions = ['master:Burgos']
+
+This class is provided in ´´tests/unit/test_glancesync.py´´.
+
+More information about the mock: mock_
 
 Top_
 

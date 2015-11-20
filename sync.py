@@ -31,16 +31,32 @@ import datetime
 import argparse
 import logging
 
-from glancesync.glancesync import GlanceSync
+from glancesync.glancesync import GlanceSync, GlanceSyncConfig
 
 
 class Sync(object):
-    def __init__(self, regions):
+    def __init__(self, regions, override_d=None):
         """init object"""
-        self.glancesync = GlanceSync()
+        self.glancesync = GlanceSync(options_dict=override_d)
         self.glancesync.init_logs()
+
+        regions_expanded = list()
+        already_sorted = True
+        for region in regions:
+            if region.endswith(':'):
+                regions_expanded.extend(self.glancesync.get_regions(
+                    target=region[:-1]))
+                already_sorted = False
+            else:
+                regions_expanded.append(region)
+
+        regions = regions_expanded
         if not regions:
-            regions_unsorted = self.glancesync.get_regions()
+            regions = self.glancesync.get_regions()
+            already_sorted = False
+
+        if not already_sorted:
+            regions_unsorted = regions
             regions = list()
             for region in self.glancesync.preferable_order:
                 if region in regions_unsorted:
@@ -73,7 +89,7 @@ class Sync(object):
                   str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
                   str(now.minute).zfill(2)
 
-        msg = '======Master (' + self.glancesync.master_region + ')'
+        msg = '======Master is ' + self.glancesync.master_region
         print(msg)
         self.glancesync.print_images_master_region()
         sys.stdout.flush()
@@ -122,7 +138,7 @@ class Sync(object):
 
         :param dry_run: if true, do not synchronise images actually
         """
-        msg = '======Master (' + self.glancesync.master_region + ')'
+        msg = '======Master is ' + self.glancesync.master_region
         print(msg)
 
         for region in self.regions:
@@ -159,6 +175,43 @@ class Sync(object):
                 del children[pid]
                 sys.stdout.flush()
 
+    def show_regions(self):
+        """print a full list of the regions available (excluding the
+        master region) in all the targets defined in the configuration file"""
+        regions = self.glancesync.get_regions()
+        for target in self.glancesync.targets.keys():
+            if target == 'facade' or target == 'master':
+                continue
+            regions.extend(self.glancesync.get_regions(target=target))
+
+        print(' '.join(regions))
+
+    def make_backup(self):
+        """make a backup of the metadata in the regions specified at the
+        constructor (in addition to the master region). The backup is created
+        in a  directory named 'backup_glance_' with the date and time as suffix
+
+        There is a file for each region (the name is backup_<region>.csv) and
+        inside the file a line for each image.
+
+        Only the information about public images/ the images owned by
+        the tenant, can be obtained, regardless if the user is an admin. This
+        is a limitation of the glance API"""
+
+        now = datetime.datetime.now().isoformat()
+        directory = 'backup_glance_' + now
+        os.mkdir(directory)
+
+        regions = set(self.regions)
+        regions.add(self.glancesync.master_region)
+        for region in regions:
+            try:
+                self.glancesync.backup_glancemetadata_region(region, directory)
+            except Exception:
+                # do nothing. Already logged.
+                continue
+
+
 if __name__ == '__main__':
     # Parse cmdline
     description = 'A tool to sync images from a master region to other '\
@@ -171,22 +224,44 @@ if __name__ == '__main__':
     parser.add_argument('--parallel', action='store_true',
                         help='sync several regions in parallel')
 
+    parser.add_argument(
+        '--config', nargs='+', help='override configuration options. (e.g. ' +
+        "main.master_region=Valladolid metadata_condition='image.name=name1')")
+
     group = parser.add_mutually_exclusive_group()
 
     group.add_argument('--dry-run', action='store_true',
                        help='do not upload actually the images')
 
-    parser.add_argument('--show-status', action='store_true',
+    group.add_argument('--show-status', action='store_true',
                         help='do not sync, but show the synchronisation status')
 
+    group.add_argument('--show-regions', action='store_true',
+                       help='don not sync, only show the available regions')
+
+    group.add_argument('--make-backup', action='store_true', help=
+                       "do no sync, make a backup of the regions' metadata")
     meta = parser.parse_args()
+    options = dict()
+
+    if meta.config:
+        for option in meta.config:
+            pair = option.split('=')
+            if len(pair) != 2:
+                parser.error('config options must have the format key=value')
+                sys.exit(-1)
+            options[pair[0].strip()] = pair[1]
 
     # Run cmd
-    sync = Sync(meta.regions)
+    sync = Sync(meta.regions, options)
 
     if meta.show_status:
         sync.report_status()
     elif meta.parallel:
         sync.parallel_sync()
+    elif meta.show_regions:
+        sync.show_regions()
+    elif meta.make_backup:
+        sync.make_backup()
     else:
         sync.sequential_sync(meta.dry_run)
