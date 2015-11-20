@@ -184,7 +184,7 @@ class Sync(object):
                 continue
             regions.extend(self.glancesync.get_regions(target=target))
 
-        print ' '.join(regions)
+        print(' '.join(regions))
 
     def make_backup(self):
         """make a backup of the metadata in the regions specified at the
