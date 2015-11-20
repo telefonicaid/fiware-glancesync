@@ -207,7 +207,7 @@ marked as obsoleted is not synchronised anymore and therefore it is not upload t
 regions where it is not present. However, if an image exists in the remote region
 with the same name but without the suffix, it is renamed and the visibility is
 updated with the value on the master region. Also the properties specified
-in *obsolete_syncprop*, if any, are synchronised. The synchronisation of the
+in *obsolete_syncprops*, if any, are synchronised. The synchronisation of the
 properties and the visibility is also managed when there is a image in the
 region to synchronise that is already renamed but without the other changes
 propagated.
