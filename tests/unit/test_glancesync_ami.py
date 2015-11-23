@@ -34,7 +34,7 @@ import glancesync.glancesync_ami as ami
 
 
 class TestGlanceSyncAMI(unittest.TestCase):
-    """class to test only the get_master_region_dict method"""
+    """class to test only the clean_ami_ids method"""
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
             'kernel1', '0001', 'Valladolid', 'own0', True, '00', 10000,
@@ -56,7 +56,8 @@ class TestGlanceSyncAMI(unittest.TestCase):
 
     def test_get_master_region_dict(self):
         """test gest_master_region_dict"""
-        master_dict = ami.get_master_region_dict(self.list)
+        master_dict = dict((image.name, image) for image in self.list)
+        ami.clean_ami_ids(master_dict)
         self.assertEquals(master_dict, self.dict_master)
 
 

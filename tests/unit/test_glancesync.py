@@ -493,10 +493,19 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
         self.regions = ['master:Burgos']
 
 class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
+    """Test obsolete images support"""
     def config(self):
         path = os.path.abspath(os.curdir)
         self.path_test = path + '/tests/resources/obsolete'
         self.regions = ['other:Burgos', 'target2:Madrid']
+
+class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
+    """Test that master images with duplicated name, status != active, and
+    owner differnt than the tenant, are ignored"""
+    def config(self):
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + '/tests/resources/master_filtered'
+        self.regions = ['Burgos']
 
 if __name__ == '__main__':
         unittest.main()

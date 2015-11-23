@@ -79,7 +79,9 @@ class GlanceSync(object):
         self.max_children = glancesyncconfig.max_children
         master_region = GlanceSyncRegion(self.master_region, self.targets)
         images = master_region.target['facade'].get_imagelist(master_region)
-        self.master_region_dict = glancesync_ami.get_master_region_dict(images)
+
+        self.master_region_dict = self._master_images_to_dict(images)
+        glancesync_ami.clean_ami_ids(self.master_region_dict)
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -152,6 +154,7 @@ class GlanceSync(object):
         # previous step: manage obsolete images. Obsolete images are not
         # synchronisable.
         for image in obsolete:
+            self.log.info('updating obsolete image ' + image.name)
             facade.update_metadata(regionobj, image)
          
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
@@ -385,9 +388,10 @@ class GlanceSync(object):
         region.target['tenant_id'] = facade.get_tenant_id()
         if only_tenant_images:
             return list(
-                image for image in facade.get_imagelist(region) if
-                not image.owner or image.owner.zfill(32) ==
-                region.target['tenant_id'].zfill(32) or image.owner == '')
+                image for image in facade.get_imagelist(region)
+                if image.name and
+                (not image.owner or image.owner.zfill(32) ==
+                region.target['tenant_id'].zfill(32) or image.owner == ''))
         else:
             return facade.get_imagelist(region)
 
@@ -455,3 +459,34 @@ class GlanceSync(object):
                         del image.user_properties[prop]
         image.is_public = master_image.is_public
         regionobj.target['facade'].update_metadata(regionobj, image)
+
+    def _master_images_to_dict(self, images):
+        """Convert the list of images to a dictionary. Remove images with a
+        duplicate name (e.g. if name appears three times, remove the three
+        images), images with a non-active status and images with a different
+        owner
+        :param images: a list of master images
+        :return: a dictionary of master images indexed by name
+        """
+        # ignore images of other tenants and not active images
+        tenant_id = self.targets['master']['facade'].get_tenant_id().zfill(32)
+        images = list(image for image in images
+                      if image.status == 'active' and image.name and
+                      (not image.owner or image.owner.zfill(32) == tenant_id))
+
+        # Verify that there are not two active images with the same name
+        images_set = set()
+        duplicated = set()
+        msg = 'Duplicated images with name {0} will be ignored'
+        for image in images:
+            if image.name in images_set and image.name not in duplicated:
+                self.log.warning(msg.format(image.name))
+                duplicated.add(image.name)
+            else:
+                images_set.add(image.name)
+
+        # make dictionary
+        images = dict((image.name, image) for image in images
+                      if image.name not in duplicated)
+
+        return images
