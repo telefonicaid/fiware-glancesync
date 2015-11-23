@@ -25,22 +25,76 @@
 author = 'jmpr22'
 import sys
 
-from glancesync import glancesync_fi
+from glancesync.glancesync import GlanceSync
+
+def _printimages(imagesregion, comparewith=None):
+    """ print a report about the images present on the specified region
+
+    See the documentation of GlanceSync.printimages for more details
+
+    :param imagesregion: the region of print
+    :param comparewith: the master region dictionary, used to compute the
+              image synchronization status.
+    :return: this function doesn't return anything.
+    """
+
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' in image.user_properties and 'type' in image.user_properties))
+    images.sort(key=lambda image: image.user_properties['type'] + image.name)
+    properties = ('type', 'nid')
+    for image in images:
+        line = image.csv_userproperties(properties)
+        if line is not None:
+            if comparewith is not None:
+                print(image.compare_with_masterregion(comparewith, properties)
+                      + line)
+            else:
+                print(line)
+    print("---")
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' not in image.user_properties and 'type' in
+         image.user_properties))
+    images.sort(key=lambda image: image.user_properties['type'] + image.name)
+    for image in images:
+        line = image.csv_userproperties(properties)
+        if line is not None:
+            if comparewith is not None:
+                print(image.compare_with_masterregion(comparewith, properties)
+                      + line)
+            else:
+                print(line)
+    print("---")
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' in image.user_properties and 'type' not in
+         image.user_properties))
+    images.sort(key=lambda image: int(image.user_properties['nid']))
+    for image in images:
+        line = image.csv_userproperties(properties)
+        if line is not None:
+            if comparewith is not None:
+                print(image.compare_with_masterregion(comparewith, properties) + line)
+            else:
+                print(line)
 
 
 if __name__ == '__main__':
-    sync_obj = glancesync_fi.GlanceSyncFi()
-    sync_obj.init_logs()
+    GlanceSync.init_logs()
+    sync_obj = GlanceSync()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     else:
         regions = sync_obj.get_regions()
         print('======Master (' + sync_obj.master_region + ')')
-        sync_obj.print_images_master_region()
+        _printimages(sync_obj.master_region_dict.values())
+
     for region in regions:
         try:
             print("======" + region)
-            sync_obj.print_images(region)
+            images_region = sync_obj.get_images_region(region)
+            _printimages(images_region, sync_obj.master_region_dict)
         except Exception:
             # Don't do anything. Message has been already printed
             # try next region.
