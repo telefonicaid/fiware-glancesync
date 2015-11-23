@@ -395,7 +395,8 @@ class GlanceSync(object):
         else:
             return facade.get_imagelist(region)
 
-    def init_logs(self, include_date=False):
+    @staticmethod
+    def init_logs(include_date=False):
         """
         Init the glancesync logger. This function is invoked by the frontends
         tools to avoid the warning about missing Handlers in logger:

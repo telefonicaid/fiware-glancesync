@@ -107,8 +107,8 @@ if __name__ == '__main__':
     old_name = sys.argv[1]
     new_name = sys.argv[2]
 
+    GlanceSync.init_logs()
     glancesync = GlanceSync()
-    glancesync.init_logs()
     master = glancesync.master_region
 
     master_images = glancesync.get_images_region(master)
