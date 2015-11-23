@@ -507,5 +507,24 @@ class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
         self.path_test = path + '/tests/resources/master_filtered'
         self.regions = ['Burgos']
 
+    def test_sync_warning(self):
+        """test that a warning is emitted with a image name is duplicated"""
+        # Capture warnings
+        logger = logging.getLogger('glancesync')
+        self.buffer_log = StringIO.StringIO()
+        handler = logging.StreamHandler(self.buffer_log)
+        handler.setLevel(logging.WARNING)
+        logger.addHandler(handler)
+        TestGlanceSync_MasterFiltered.setUp(self)
+
+        # run synchronisation
+        self.test_sync()
+
+        # Check that there are two warnings
+        warnings = self.buffer_log.getvalue().splitlines()
+        self.assertEquals(len(warnings), 1)
+        msg1 = 'Duplicated images with name image01 will be ignored'
+        self.assertTrue(warnings[0].startswith(msg1))
+
 if __name__ == '__main__':
         unittest.main()
