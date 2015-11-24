@@ -1,80 +1,83 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+TITLE: FIWARE-GlanceSync API v1 Specification
+DATE: 24 November 2015
+VERSION: v1.0
+APIARY_PROJECT: glancesync
 
-# GlanceSync
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+# FIWARE GlanceSync
 
-## Questions Collection [/questions]
+<!--
+Copyright 2015 Telefónica I+D
+All Rights Reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this file except in compliance with the License. You may obtain
+a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+-->
 
-### List All Questions [GET]
+The FIWARE GlanceSync tools is developed under the FIWARE Ops tool 
+and it is used to synchronise the glance images in the different 
+Glance servers connected in the FIWARE Lab.
 
-+ Response 200 (application/json)
+Although this component has been developed for FIWARE, the software 
+is highly configurable, do not have special requirements beyond 
+OpenStack libraries and may be used with any other project or as 
+a generic tool to synchronise images. Moreover, all the OpenStack 
+interface is in a module and it is possible to adapt the code to 
+support other platforms.
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
+## Editors
 
-### Create a New Question [POST]
+  + Fernando López Aguilar, Telefónica I+D
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+## Copyright
 
-+ Request (application/json)
+This specification is licensed under the
+[FIWARE Open Specification License](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28essential_patents_license%29).
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+## Status
 
-+ Response 201 (application/json)
+Final version aligned with FIWARE Release 5.1.
 
-    + Headers
 
-            Location: /questions/2
+# Group glancesync v1
 
-    + Body
+## API authentication
+All the operations, except the information of the service, in the 
+GlanceSync API needs to have a valid token to access it. To obtain 
+the token, you need to have an account in FIWARE Lab 
+(account.lab.fi-ware.org). With the credentials (username, password 
+and tenantName) you can obtain a valid token.
 
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
-            }
+The GlanceSync API returns the 404 Not Found error code if you provide 
+a token that it is not validate or it is expired. Besides, GlanceSync 
+API returns the 401 Unauthorized error code if the role of the token 
+is not authorized to realize the operation.
+
+## Faults
+
+The error code is returned in the body of the response for convenience. 
+The message section returns a human-readable message that is appropriate 
+for display to the end user. The details section is optional and may 
+contain information—for example, a stack trace—to assist in tracking 
+down an error. The detail section may or may not be appropriate for 
+display to an end user.
+
+<table>
+    <tr><td><b>Fault Element</b></td><td><b>HTTP code</b></td><td><b>Description</b></td></tr>
+    <tr><td>Fault</td><td>500, 400, other codes possible</td><td>Error in the operation</td></tr>
+    <tr><td>serviceUnavailable</td><td>503</td><td>The service is not available</td></tr>
+    <tr><td>unauthorized</td><td>401</td><td>You are not authorized to access to that operation. The token is not correct.</td></tr>
+    <tr><td>forbidden</td><td>403</td><td>It is forbidden</td></tr>
+    <tr><td>badRequest</td><td>400</td><td>The request has not been done correctly</td></tr>
+    <tr><td>badMediaType</td><td>415</td><td>The payload media is not correct</td></tr>
+    <tr><td>itemNotFound</td><td>404</td><td>It is not exist</td></tr>
+    <tr><td>badMethod</td><td>405</td><td>Method not allowed</td></tr>
+    <tr><td>overLimit</td><td>413</td><td>Request entity too large</td></tr>
+</table>
