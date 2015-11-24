@@ -240,6 +240,3 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         r = ami.check_ami(self.reg_image, self.master_image, self.dict_reg,
                           set())
         self.assertEquals(r, 'update')
-
-if __name__ == '__main__':
-    unittest.main()

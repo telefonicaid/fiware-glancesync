@@ -152,6 +152,3 @@ class TestGlanceServersFacade(unittest.TestCase):
     def test_get_tenant_id(self):
         """check get_tenant_id method. Only check that a value is obtained"""
         self.assertIsNotNone(self.facade.get_tenant_id())
-
-if __name__ == '__main__':
-        unittest.main()

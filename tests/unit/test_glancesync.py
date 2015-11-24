@@ -525,6 +525,3 @@ class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
         self.assertEquals(len(warnings), 1)
         msg1 = 'Duplicated images with name image01 will be ignored'
         self.assertTrue(warnings[0].startswith(msg1))
-
-if __name__ == '__main__':
-        unittest.main()

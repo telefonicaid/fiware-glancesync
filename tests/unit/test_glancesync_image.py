@@ -268,6 +268,3 @@ class TestGlanceSyncImageCompare(unittest.TestCase):
         self.image.status = 'pending'
         r = self.image.compare_with_masterregion(self.master_images, None)
         self.assertEquals(r, '$')
-
-if __name__ == '__main__':
-    unittest.main()

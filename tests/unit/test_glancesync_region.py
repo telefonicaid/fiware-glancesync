@@ -595,6 +595,3 @@ class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
         msg = 'Ignore obsolete master image image1_obsolete because image1 '\
               'exists and it is synchronisable.'
         self.assertEquals(self.buffer_log.getvalue().strip(), msg)
-
-if __name__ == '__main__':
-    unittest.main()
