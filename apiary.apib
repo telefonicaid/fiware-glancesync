@@ -71,13 +71,35 @@ display to an end user.
 
 <table>
     <tr><td><b>Fault Element</b></td><td><b>HTTP code</b></td><td><b>Description</b></td></tr>
-    <tr><td>Fault</td><td>500, 400, other codes possible</td><td>Error in the operation</td></tr>
+    <tr><td>Compute Fault</td><td>400, 500, other codes possible</td><td>Error in the operation</td></tr>
     <tr><td>serviceUnavailable</td><td>503</td><td>The service is not available</td></tr>
-    <tr><td>unauthorized</td><td>401</td><td>You are not authorized to access to that operation. The token is not correct.</td></tr>
-    <tr><td>forbidden</td><td>403</td><td>It is forbidden</td></tr>
     <tr><td>badRequest</td><td>400</td><td>The request has not been done correctly</td></tr>
-    <tr><td>badMediaType</td><td>415</td><td>The payload media is not correct</td></tr>
+    <tr><td>unauthorized</td><td>401</td><td>You are not authorized to access to that operation. The token is not correct.</td></tr>
     <tr><td>itemNotFound</td><td>404</td><td>It is not exist</td></tr>
     <tr><td>badMethod</td><td>405</td><td>Method not allowed</td></tr>
-    <tr><td>overLimit</td><td>413</td><td>Request entity too large</td></tr>
+    <tr><td>badRegion</td><td>410</td><td>Region does not exist</td></tr>
 </table>
+
+## API version [/]
+
+### Get information about GlanceSync API [GET]
+
+Lists information about GlanceSync API version.
+
++ Request
+
+    + Headers
+    
+            X-Auth-Token: token-id
+
++ Response 200 (application/json)
+
+        {
+        "id": "v1.0",
+        "owner": "Telefonica I+D",
+        "status": "SUPPORTED",
+        "version": "1.0",
+        "updated": "2011-01-21T11:33:21Z",
+        "runningfrom": "2011-01-21T11:33:21Z",
+        "href": "https://github.com/telefonicaid/fiware-glancesync",
+        }
