@@ -27,12 +27,44 @@ import sys
 
 from glancesync.glancesync import GlanceSync
 
+def _print_images_group(images, properties, comparewith):
+    """
+    Auxiliary function to print a list of images with the status.
+
+    :param images: a list with the images to print
+    :param properties: tuple with the properties to print
+    :param comparewith: the master region dictionary, used to compute the
+              image synchronization status.
+    :return:
+    """
+    for image in images:
+        line = image.csv_userproperties(properties)
+        if line is not None:
+            if comparewith is not None:
+                print(image.compare_with_masterregion(comparewith, properties)
+                      + line)
+            else:
+                print(line)
+    print("---")
+
 def _printimages(imagesregion, comparewith=None):
     """ print a report about the images present on the specified region
 
-    See the documentation of GlanceSync.printimages for more details
+        The images may be prefixed with a symbol indicating something special:
+        +: this image is not on the master glance server
+        $: this image is not active: may be still uploading or in an error
+           status.
+        -: this image is on the master glance server, but as non-public
+        !: this image is on the master glance server, but checksum is different
+        #: this image is on the master glance server, but some of these
+           attributes are different: nid, type, sdc_aware, Public (if it is
+           true on master and is false in the region
 
-    :param imagesregion: the region of print
+      Be aware that some of this symbols are only printed to detect anomalies
+      as images present in some regions that are not in master region. Anyway,
+      synchronisation is always from master to the other regions.
+
+    :param imagesregion: a list with the images to print
     :param comparewith: the master region dictionary, used to compute the
               image synchronization status.
     :return: this function doesn't return anything.
@@ -43,41 +75,19 @@ def _printimages(imagesregion, comparewith=None):
         ('nid' in image.user_properties and 'type' in image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
     properties = ('type', 'nid')
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print(image.compare_with_masterregion(comparewith, properties)
-                      + line)
-            else:
-                print(line)
-    print("---")
+    _print_images_group(images, properties, comparewith)
     images = list(
         image for image in imagesregion if image.is_public and
         ('nid' not in image.user_properties and 'type' in
          image.user_properties))
     images.sort(key=lambda image: image.user_properties['type'] + image.name)
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print(image.compare_with_masterregion(comparewith, properties)
-                      + line)
-            else:
-                print(line)
-    print("---")
+    _print_images_group(images, properties, comparewith)
     images = list(
         image for image in imagesregion if image.is_public and
         ('nid' in image.user_properties and 'type' not in
          image.user_properties))
     images.sort(key=lambda image: int(image.user_properties['nid']))
-    for image in images:
-        line = image.csv_userproperties(properties)
-        if line is not None:
-            if comparewith is not None:
-                print(image.compare_with_masterregion(comparewith, properties) + line)
-            else:
-                print(line)
+    _print_images_group(images, properties, comparewith)
 
 
 if __name__ == '__main__':
