@@ -146,8 +146,8 @@ class GlanceSync(object):
         # * the name is changed (the _obsolete suffix is added)
         if target['support_obsolete_images']:
             syncprops = target.get('obsolete_syncprops', None)
-            obsolete = regionobj.image_list_to_obsolete(self.master_region_dict,
-                                                        imagesregion, syncprops)
+            obsolete = regionobj.image_list_to_obsolete(
+                self.master_region_dict, imagesregion, syncprops)
         else:
             obsolete = list()
 
@@ -156,7 +156,7 @@ class GlanceSync(object):
         for image in obsolete:
             self.log.info('updating obsolete image ' + image.name)
             facade.update_metadata(regionobj, image)
-         
+
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         dictimages = regionobj.local_images_filtered(master_images,
                                                      imagesregion)
@@ -200,8 +200,8 @@ class GlanceSync(object):
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 self.log.info(regionobj.fullname + ': Replacing image ' +
-                                  tuple[1].name + ' (' + str(sizeimage) +
-                                  ' MB)')
+                              tuple[1].name + ' (' + str(sizeimage) +
+                              ' MB)')
                 if not dry_run:
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     facade.delete_image(regionobj, region_image.id,
@@ -391,7 +391,7 @@ class GlanceSync(object):
                 image for image in facade.get_imagelist(region)
                 if image.name and
                 (not image.owner or image.owner.zfill(32) ==
-                region.target['tenant_id'].zfill(32) or image.owner == ''))
+                 region.target['tenant_id'].zfill(32) or image.owner == ''))
         else:
             return facade.get_imagelist(region)
 
