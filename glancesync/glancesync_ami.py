@@ -23,7 +23,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 
 import logging
 """This internal module check and update the kernel_id and ramdisk_id of
