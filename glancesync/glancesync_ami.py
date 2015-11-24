@@ -43,7 +43,7 @@ _logger = logging.getLogger('glancesync')
 
 
 def clean_ami_ids(image_dict):
-    """replace at parameters kernel_id and ramdisk_id the UUID with the name of
+    """replace at kernel_id and ramdisk_id parameters the UUID with the name of
     the image.
 
     :param image_dict: a dictionary of master images
