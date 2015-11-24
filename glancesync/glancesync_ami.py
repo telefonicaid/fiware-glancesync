@@ -23,7 +23,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 
 import logging
 """This internal module check and update the kernel_id and ramdisk_id of
@@ -42,19 +42,18 @@ ramdisk_id.
 _logger = logging.getLogger('glancesync')
 
 
-def get_master_region_dict(image_list):
-    """Convert the image list to a dictionary indexed by name and also
-    replace at parameters kernel_id and ramdisk_id the UUID with the name of
+def clean_ami_ids(image_dict):
+    """replace at kernel_id and ramdisk_id parameters the UUID with the name of
     the image.
 
-    :param image_list: the list of images on the master region
-    :return: a dictionary indexed by name
+    :param image_dict: a dictionary of master images
+    :return: nothing
     """
 
     master_region_dictimagesbyid = dict(
-        (image.id, image) for image in image_list if image.status == 'active')
+        (image.id, image) for image in image_dict.values())
     master_region_dictimages = dict()
-    for image in image_list:
+    for image in image_dict.values():
         if 'kernel_id' in image.user_properties:
             # Prevent curious bug, images with empty values
             if not image.user_properties['kernel_id']:
@@ -71,9 +70,6 @@ def get_master_region_dict(image_list):
                 image.user_properties['ramdisk_id'] = \
                     master_region_dictimagesbyid[image.user_properties[
                         'ramdisk_id']].name
-
-        master_region_dictimages[image.name] = image
-    return master_region_dictimages
 
 
 def update_kernelramdisk_id(image, master_image, region_images):

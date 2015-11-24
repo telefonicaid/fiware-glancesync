@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 import sys
 import logging
 
@@ -107,8 +107,8 @@ if __name__ == '__main__':
     old_name = sys.argv[1]
     new_name = sys.argv[2]
 
+    GlanceSync.init_logs()
     glancesync = GlanceSync()
-    glancesync.init_logs()
     master = glancesync.master_region
 
     master_images = glancesync.get_images_region(master)

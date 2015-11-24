@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import unittest
 import copy
@@ -34,7 +34,7 @@ import glancesync.glancesync_ami as ami
 
 
 class TestGlanceSyncAMI(unittest.TestCase):
-    """class to test only the get_master_region_dict method"""
+    """class to test only the clean_ami_ids method"""
     def setUp(self):
         self.img_kernel = GlanceSyncImage(
             'kernel1', '0001', 'Valladolid', 'own0', True, '00', 10000,
@@ -56,7 +56,8 @@ class TestGlanceSyncAMI(unittest.TestCase):
 
     def test_get_master_region_dict(self):
         """test gest_master_region_dict"""
-        master_dict = ami.get_master_region_dict(self.list)
+        master_dict = dict((image.name, image) for image in self.list)
+        ami.clean_ami_ids(master_dict)
         self.assertEquals(master_dict, self.dict_master)
 
 
@@ -239,6 +240,3 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
         r = ami.check_ami(self.reg_image, self.master_image, self.dict_reg,
                           set())
         self.assertEquals(r, 'update')
-
-if __name__ == '__main__':
-    unittest.main()

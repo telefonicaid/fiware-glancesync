@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import unittest
 import copy
@@ -212,6 +212,3 @@ class TestGlanceServersFacadeMockPersist(TestGlanceServersFacadeMock):
         self.mock_master.init_persistence(self.dir_persist)
         after = len(self.mock_master.get_imagelist(self.region2))
         self.assertEquals(before + 1, after)
-
-if __name__ == '__main__':
-    unittest.main()

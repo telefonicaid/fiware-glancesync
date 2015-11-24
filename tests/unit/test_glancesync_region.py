@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import unittest
 import copy
@@ -595,6 +595,3 @@ class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
         msg = 'Ignore obsolete master image image1_obsolete because image1 '\
               'exists and it is synchronisable.'
         self.assertEquals(self.buffer_log.getvalue().strip(), msg)
-
-if __name__ == '__main__':
-    unittest.main()

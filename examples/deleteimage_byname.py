@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 import sys
 import os
 import logging
@@ -39,8 +39,8 @@ if __name__ == '__main__':
         message = 'Use ' + sys.argv[0] + '<imagename> [<reg1> [<reg2> ...]]'
         logging.error(message)
         sys.exit(0)
+    GlanceSync.init_logs()
     glancesync = GlanceSync()
-    glancesync.init_logs()
     if len(sys.argv) == 3:
         regions = sys.argv[2:]
         image_name = sys.argv[1]

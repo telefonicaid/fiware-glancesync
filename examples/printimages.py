@@ -22,25 +22,89 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 import sys
 
-from glancesync import glancesync_fi
+from glancesync.glancesync import GlanceSync
+
+def _print_images_group(images, properties, comparewith):
+    """
+    Auxiliary function to print a list of images with the status.
+
+    :param images: a list with the images to print
+    :param properties: tuple with the properties to print
+    :param comparewith: the master region dictionary, used to compute the
+              image synchronization status.
+    :return:
+    """
+    for image in images:
+        line = image.csv_userproperties(properties)
+        if line is not None:
+            if comparewith is not None:
+                print(image.compare_with_masterregion(comparewith, properties)
+                      + line)
+            else:
+                print(line)
+    print("---")
+
+def _printimages(imagesregion, comparewith=None):
+    """ print a report about the images present on the specified region
+
+        The images may be prefixed with a symbol indicating something special:
+        +: this image is not on the master glance server
+        $: this image is not active: may be still uploading or in an error
+           status.
+        -: this image is on the master glance server, but as non-public
+        !: this image is on the master glance server, but checksum is different
+        #: this image is on the master glance server, but some of these
+           attributes are different: nid, type, sdc_aware, Public (if it is
+           true on master and is false in the region
+
+      Be aware that some of this symbols are only printed to detect anomalies
+      as images present in some regions that are not in master region. Anyway,
+      synchronisation is always from master to the other regions.
+
+    :param imagesregion: a list with the images to print
+    :param comparewith: the master region dictionary, used to compute the
+              image synchronization status.
+    :return: this function doesn't return anything.
+    """
+
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' in image.user_properties and 'type' in image.user_properties))
+    images.sort(key=lambda image: image.user_properties['type'] + image.name)
+    properties = ('type', 'nid')
+    _print_images_group(images, properties, comparewith)
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' not in image.user_properties and 'type' in
+         image.user_properties))
+    images.sort(key=lambda image: image.user_properties['type'] + image.name)
+    _print_images_group(images, properties, comparewith)
+    images = list(
+        image for image in imagesregion if image.is_public and
+        ('nid' in image.user_properties and 'type' not in
+         image.user_properties))
+    images.sort(key=lambda image: int(image.user_properties['nid']))
+    _print_images_group(images, properties, comparewith)
 
 
 if __name__ == '__main__':
-    sync_obj = glancesync_fi.GlanceSyncFi()
-    sync_obj.init_logs()
+    GlanceSync.init_logs()
+    sync_obj = GlanceSync()
     if len(sys.argv) > 1:
         regions = sys.argv[1:]
     else:
         regions = sync_obj.get_regions()
         print('======Master (' + sync_obj.master_region + ')')
-        sync_obj.print_images_master_region()
+        _printimages(sync_obj.master_region_dict.values())
+
     for region in regions:
         try:
             print("======" + region)
-            sync_obj.print_images(region)
+            images_region = sync_obj.get_images_region(region)
+            _printimages(images_region, sync_obj.master_region_dict)
         except Exception:
             # Don't do anything. Message has been already printed
             # try next region.

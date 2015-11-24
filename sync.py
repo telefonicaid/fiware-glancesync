@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 import sys
 import StringIO
 import os
@@ -31,14 +31,14 @@ import datetime
 import argparse
 import logging
 
-from glancesync.glancesync import GlanceSync, GlanceSyncConfig
+from glancesync.glancesync import GlanceSync
 
 
 class Sync(object):
     def __init__(self, regions, override_d=None):
         """init object"""
+        GlanceSync.init_logs()
         self.glancesync = GlanceSync(options_dict=override_d)
-        self.glancesync.init_logs()
 
         regions_expanded = list()
         already_sorted = True
