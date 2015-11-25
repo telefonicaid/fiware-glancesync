@@ -167,9 +167,7 @@ regionid. Keep in mind that regionId is the name of the regions.
 
 + Parameters
     + regionId (required, string, `Spain2`) ... Region name how you can obtain from the Keystone service.
-    + imageName (string, optional) ... A filter to apply to the query in order to recover only the information associated to an image identified by its imageName.
-
-        + Default: no defined value.
+    + imageName (string, optional, `base_ubuntu_14.04`) ... A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
 
 + Request (application/json)
 
@@ -230,6 +228,7 @@ execution of the process.
 
 + Parameters
     + regionId (required, string, `Spain2`) ... Region name how you can obtain from the Keystone service.
+    + imageName (string, optional, `base_ubuntu_14.04`) ... A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
 
 + Request (application/json)
 
