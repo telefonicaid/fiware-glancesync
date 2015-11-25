@@ -30,7 +30,7 @@ from behave import step
 from qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, is_not, is_, contains_string
 from glancesync.output_constants import GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, \
-    GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE, GLANCESYNC_OUTPUT_IMAGE_UPLOADED
+    GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
 import logging
 
 
@@ -75,9 +75,5 @@ def the_obsolete_image_is_synchronized(context, image_name):
         if region != context.master_region_name:
             assert_that(context.glancesync_result,
                         contains_string(GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE.format(region_name=region,
-                                                                                  image_name=image_name)),
-                        "Obsolete image '{}' is not 'uploading' to region '{}'".format(image_name, region))
-
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Obsolete image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
+                                                                                    image_name=image_name)),
+                        "Obsolete image '{}' is not 'updated' to region '{}'".format(image_name, region))

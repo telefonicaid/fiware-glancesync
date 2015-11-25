@@ -138,9 +138,10 @@ class GlanceOperations():
         """
         Update the image properties of the given image_id
         :param image_id: Image ID
-        :param custom_properties (dict): User properties to be added in the image metadata
-        :param name (string): Image name to be updated.
-        :param is_public (boolean): Visibility of the image.
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): Image name to be updated.
+            - is_public (boolean): Visibility of the image.
         :return: None
         """
 
@@ -160,10 +161,11 @@ class GlanceOperations():
         """
         Update properties of all images found by the given name
         :param image_name: Name of the image to update (data)
-        :param custom_properties (dict): User properties to be added in the image metadata
-        :param name (string): New image name to be updated.
-        :param is_public (boolean): Visibility of the image.
-        :return:
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): New image name to be updated.
+            - is_public (boolean): Visibility of the image.
+        :return: None
         """
 
         __logger__.debug("Updating all images by name '%s'. Props: '%s'", image_name, kwargs)

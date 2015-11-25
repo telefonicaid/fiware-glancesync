@@ -48,7 +48,6 @@ Feature: Image sync between regions using GlanceSync, when images are obsoletes.
     When  I sync images
     Then  no images are synchronized
     And   the image "qatesting01_obsolete" is not present in target nodes
-    And   a warning message is shown informing about ignored obsolete image "qatesting01"
 
 
   Scenario: Sync a new image with the same name as the obsolete one (already sync) and same checksum (Obsolete is deleted before sync).
@@ -98,7 +97,7 @@ Feature: Image sync between regions using GlanceSync, when images are obsoletes.
     And   a warning message is shown informing about ignored obsolete image "qatesting01"
 
 
-  Scenario: Visibility of the image is synchronized to its 'obsolete'.
+  Scenario: Visibility of the image is synchronized to its corresponding 'obsolete'.
     Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value             |
             | is_public       | True                    |
@@ -116,7 +115,7 @@ Feature: Image sync between regions using GlanceSync, when images are obsoletes.
             | is_public       | False                   |
 
 
-  Scenario: Custom properties of the image are synchronized to its 'obsolete'.
+  Scenario: Custom properties of the image are synchronized to its corresponding 'obsolete'.
     Given a new image created in the Glance of master node with name "qatesting01" and these properties:
             | param_name      | param_value             |
             | is_public       | True                    |
@@ -158,7 +157,7 @@ Feature: Image sync between regions using GlanceSync, when images are obsoletes.
     And   the image "qatesting03" is synchronized
     And   the image "qatesting01_obsolete" is present in all nodes with the content of file "qatesting01"
     And   the image "qatesting02_obsolete" is present in all nodes with the content of file "qatesting02"
-    And   the image "qatesting03" is present in all nodes with the content of file "qatesting3"
+    And   the image "qatesting03" is present in all nodes with the content of file "qatesting03"
 
 
   Scenario: Images with the same name and checksum but different tenants are not considered obsoletes.
