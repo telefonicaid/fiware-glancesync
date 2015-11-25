@@ -676,6 +676,20 @@ themselves.
 Top_
 
 
+API Overview
+============
+The GlanceSync offers a REST API, which can be used for synchronizing images
+in different regions. Please have a look at the API Reference Documentation section
+bellow.
+
+API Reference Documentation
+---------------------------
+
+- `FIWARE GlanceSync v1 (Apiary) <http://docs.glancesync.apiary.io/>`_
+
+Top_
+
+
 Testing
 =======
 
