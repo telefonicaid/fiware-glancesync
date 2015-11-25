@@ -680,7 +680,7 @@ API Overview
 ============
 The GlanceSync offers a REST API, which can be used for synchronizing images
 in different regions. Please have a look at the API Reference Documentation section
-bellow and at the programmer guide.
+bellow.
 
 API Reference Documentation
 ---------------------------
