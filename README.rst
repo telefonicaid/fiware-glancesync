@@ -670,7 +670,7 @@ themselves.
   image will be replaced
 * pending_rename: there is an image, but with different checksum. The
   image will be replaced, but before this the old image will be renamed
-* penging_ami: the image requires a kernel or ramdisk image that is in state
+* pending_ami: the image requires a kernel or ramdisk image that is in state
   *pending_upload*, *pending_replace* or *pending_rename*.
 
 Top_
