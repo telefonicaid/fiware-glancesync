@@ -145,7 +145,7 @@ class GlanceSyncRegion(object):
         'pending_rename': there is an image, but with different checksum. The
          image will be replaced, but before this the old image will be renamed
         'pending_ami': the image requires a kernel or ramdisk that is in state
-        pending_upload, pending_replace or pending_rename_n_replace.
+        pending_upload, pending_replace or pending_rename.
         'error_checksum': there is an image, but with a different checksum and
         there is not a matching dontupdate, rename or replace directive.
         'error_ami': the image requires a kernel or ramdisk that is not in the
@@ -208,7 +208,7 @@ class GlanceSyncRegion(object):
                         continue
                     elif set([checksum, 'any']).intersection(
                             self.target['rename']):
-                        images_list.append(('pending_rename_n_replace', image))
+                        images_list.append(('pending_rename', image))
                         del filtered_images_region[image.name]
                         images_pending_upload.add(image.name)
                         continue

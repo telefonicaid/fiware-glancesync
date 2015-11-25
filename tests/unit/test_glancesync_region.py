@@ -395,7 +395,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
                                                 self.region_dict.values())
         expected = [
             ('ok', self.region_dict['image00']),
-            ('pending_rename_n_replace', self.region_dict['image01']),
+            ('pending_rename', self.region_dict['image01']),
             ('ok', self.region_dict['image02']),
             ('pending_ami', self.region_dict['image03']),
             ('pending_metadata', self.region_dict['image09'])]
@@ -418,7 +418,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
             ('pending_replace', self.region_dict['image00']),
             ('ok_stalled_checksum', self.region_dict['image01']),
             ('ok', self.region_dict['image02']),
-            ('pending_rename_n_replace', self.region_dict['image03']),
+            ('pending_rename', self.region_dict['image03']),
             ('pending_metadata', self.region_dict['image09'])]
         result_as_list = list(x[1].name + '_' + x[0] for x in result)
         expected_as_list = list(x[1].name + '_' + x[0] for x in expected)
