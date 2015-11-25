@@ -269,8 +269,8 @@ execution of the process.
 ### Get the status of a synchronization task [GET]
 
 Get the status of a task to synchronize a region with name regionId. Keep in mind 
-that when the status return to *synced*, we should make a manual delete of the task 
-in order to delete the corresponding text message.
+that when the returned status is *synced* or *failed*, we have to execute the DELETE 
+operation of the task in order to delete the corresponding resources.
 
 
 + Parameters
