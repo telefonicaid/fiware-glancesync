@@ -26,7 +26,6 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_TYPE, \
@@ -35,9 +34,6 @@ from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CON
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import GLANCESYNC_OUTPUT_OWNER
 from commons.glance_operations import GlanceOperations
-
-# Use regular expressions for step param definition (Behave).
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 

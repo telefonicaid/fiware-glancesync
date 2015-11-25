@@ -33,6 +33,8 @@ COMMAND_SYNC = "sync.py"
 
 class GlanceSyncClient():
 
+    """ Remote GlanceSync client for testing purposes """
+
     def __init__(self, master_hostname, master_username, master_password, configuration_file_path,
                  master_keyfile=None, glancesyc_bin_path=None):
         """
@@ -50,21 +52,6 @@ class GlanceSyncClient():
         self.conf_file_path = configuration_file_path
         self.conf_file_backup_path = None
         self.bin_path = glancesyc_bin_path
-
-    def sync(self, list_nodes=None):
-        """
-        Execute SYNC command.
-        :param list_nodes (String): String with the list of nodes. e.i:
-                "Burgos"
-                "master:Burgos"
-                "Burgos target2:Madrid"
-                "master:Burgos target2:Madrid"
-        :return (String): Command output
-        """
-
-        command = "{}/{}".format(self.bin_path, COMMAND_SYNC) if self.bin_path is not None else "sync"
-        command = "{command} {list_nodes}".format(command=command, list_nodes=list_nodes) if list_nodes else command
-        return self.fabric_utils.execute_command(command)
 
     def change_configuration_file(self, section, key, value):
         """
@@ -100,3 +87,20 @@ class GlanceSyncClient():
         command = "cp -f {backup_file} {config_file}".format(backup_file=self.conf_file_backup_path,
                                                              config_file=self.conf_file_path)
         self.fabric_utils.execute_command(command)
+
+    def sync(self, list_nodes=None, options=None):
+        """
+        Execute SYNC command. If options are given, they will be passed to the  GlanceSync CLI.
+        :param list_nodes (String): String with the list of nodes. e.i:
+                "Burgos"
+                "master:Burgos"
+                "Burgos target2:Madrid"
+                "master:Burgos target2:Madrid"
+        :param options (String): GlanceSync CLI options.
+        :return (String): Command output
+        """
+
+        command = "{}/{}".format(self.bin_path, COMMAND_SYNC) if self.bin_path is not None else "sync"
+        command = "{command} {options}".format(command=command, options=options) if options else command
+        command = "{command} {list_nodes}".format(command=command, list_nodes=list_nodes) if list_nodes else command
+        return self.fabric_utils.execute_command(command)

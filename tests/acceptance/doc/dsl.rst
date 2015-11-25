@@ -18,6 +18,7 @@ Given clauses
 -------------
 
 ::
+    >> the GlanceSync command line interface is installed
 
     >> a new image created in the Glance of master node with name "(?P<image_name>\w*)" and these properties
     >> a new image created in the Glance of master node with name "(?P<image_name>\w*)"
@@ -53,7 +54,7 @@ When clauses
     >> I sync the image
     >> I sync images on "(?P<nodes>[\w,: ]*)"
     >> I sync the image on "(?P<nodes>[\w,: ]*)"
-
+    >> I run the sync command with options "(?P<cli_options>[\w,\'=\-\.\s]*)"
 
 Then clauses
 ------------
@@ -62,6 +63,7 @@ Then clauses
 
     >> the image "(?P<image_name>\w*)" is synchronized
     >> all images are synchronized
+    >> all images are synchronized in "(?P<region>\w*)"
     >> the image "(?P<image_name>\w*)" is synchronized in target region "(?P<region>\w*)"
     >> the image "(?P<image_name>\w*)" is not synchronized again
     >> the image "(?P<image_name>\w*)" is not synchronized
@@ -107,3 +109,11 @@ Then clauses
     >> a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"
     >> a warning message is shown informing about not active status in the image "(?P<image_name>\w*)"
     >> a warning message is shown informing about different owner for image "(?P<image_name>\w*)"
+
+
+    >> I can see.*
+    >> configured regions are listed
+    >> the image "(?P<image_name>\w*)" is pending for synchronization
+    >> all images are pending for synchronization
+    >> the image "(?P<image_name>\w*)" has the status "(?P<status>\w*)" in all target regions
+    >> the image "(?P<image_name>\w*)" has the status "(?P<status>\w*)" on "(?P<region_name>[\w,: ]*)"

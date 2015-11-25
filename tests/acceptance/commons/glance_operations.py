@@ -134,29 +134,43 @@ class GlanceOperations():
             image.update(properties=custom_properties)
         return image.id
 
-    def update_image_properties(self, image_id, custom_properties):
+    def update_image_properties(self, image_id, **kwargs):
         """
         Update the image properties of the given image_id
         :param image_id: Image ID
-        :param custom_properties (dict): User properties to be added in the image metadata
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): Image name to be updated.
+            - is_public (boolean): Visibility of the image.
         :return: None
         """
 
-        __logger__.debug("Updating image with custom properties: '%s'", custom_properties)
-        self.glance_client.images.update(image_id, properties=custom_properties)
+        if "custom_properties" in kwargs:
+            __logger__.debug("Updating image with custom properties: '%s'", kwargs["custom_properties"])
+            self.glance_client.images.update(image_id, properties=kwargs["custom_properties"])
 
-    def update_image_properties_by_name(self, image_name, custom_properties):
+        if "name" in kwargs:
+            __logger__.debug("Updating image name to '%s'", kwargs['name'])
+            self.glance_client.images.update(image_id, name=kwargs['name'])
+
+        if "is_public" in kwargs:
+            __logger__.debug("Updating visibility of the image to '%s'", kwargs['is_public'])
+            self.glance_client.images.update(image_id, is_public=kwargs['is_public'])
+
+    def update_image_properties_by_name(self, image_name, **kwargs):
         """
         Update properties of all images found by the given name
         :param image_name: Name of the image to update (data)
-        :param custom_properties (dict): User properties to be added in the image metadata
-        :return:
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): New image name to be updated.
+            - is_public (boolean): Visibility of the image.
+        :return: None
         """
 
-        __logger__.debug("Updating properties of all images, by name '%s' and properties '%s'", image_name,
-                         custom_properties)
+        __logger__.debug("Updating all images by name '%s'. Props: '%s'", image_name, kwargs)
         for image in self.get_images(image_name):
-            self.update_image_properties(image.id, custom_properties)
+            self.update_image_properties(image.id, **kwargs)
 
     def remove_image(self, image_id):
         """

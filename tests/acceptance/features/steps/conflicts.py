@@ -26,15 +26,11 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_RENAMING
-
-# Use regular expressions for step param definition (Behave).
-behave.use_step_matcher("re")
 
 REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()

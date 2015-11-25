@@ -26,7 +26,6 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-import behave
 from behave import step
 from hamcrest import assert_that, greater_than, is_
 from qautils.dataset_utils import DatasetUtils
@@ -36,9 +35,6 @@ import logging
 
 # Get logger for Behave steps
 __logger__ = logger = logging.getLogger("order_steps")
-
-# Use regular expressions for step param definition (Behave).
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 
