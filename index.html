@@ -1,0 +1,2806 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FIWARE GlanceSync</title>
+    <link href="css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/idea.css">
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="js/toc-resize.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/api-specification.css"> 
+    
+
+
+    
+</head>
+<body id="respecDocument" class="h-entry">
+<div class="container">
+
+
+  <div id="TOC-container">
+    
+<div id="fiware-logo-container">
+    <div id="fiware-logo"></div>
+</div>
+<nav id="toc">
+
+        
+    <ul class="toc">
+
+        
+	        
+        
+	        
+		        <li><a href="#API-content">FIWARE-GlanceSync API v1 Specification</a></li>
+	        
+        
+	        
+        
+	        
+        
+	        
+        
+
+
+<li><a href="#api-summary">API Summary</a></li>
+
+
+    
+    
+
+
+
+
+
+
+
+<li><a href="#API_specification">API Specification</a>
+    <ul class="toc">
+    
+
+                        <li>
+                            
+                                <a href="#resource_group_glancesync-v1" title = "Group GlanceSync v1">Group GlanceSync v1</a>
+                            
+                            <ul class="toc">
+                              
+                                
+                                    <li>
+                                        <a href="#resource_api-version" title = "Resource API version">Resource API version</a>
+                                        <ul class="toc  ">
+                                        
+                                            
+                                                <li><a href="#action_get-information-about-glancesync-api" title ="GET - Get information about GlanceSync API">GET - Get information about GlanceSync API</a></li>
+                                            
+
+                                        
+                                        </ul>
+                                    </li>
+                                
+                              
+                                
+                                    <li>
+                                        <a href="#resource_region-synchronization" title = "Resource Region synchronization">Resource Region synchronization</a>
+                                        <ul class="toc  ">
+                                        
+                                            
+                                                <li><a href="#action_images-synchronization-status-in-a-region" title ="GET - Images synchronization status in a region">GET - Images synchronization status in a region</a></li>
+                                            
+
+                                        
+                                            
+                                                <li><a href="#action_synchronize-a-region" title ="POST - Synchronize a region">POST - Synchronize a region</a></li>
+                                            
+
+                                        
+                                        </ul>
+                                    </li>
+                                
+                              
+                                
+                                    <li>
+                                        <a href="#resource_regions-synchronization-tasks" title = "Resource Regions Synchronization tasks">Resource Regions Synchronization tasks</a>
+                                        <ul class="toc  ">
+                                        
+                                            
+                                                <li><a href="#action_get-the-status-of-a-synchronization-task" title ="GET - Get the status of a synchronization task">GET - Get the status of a synchronization task</a></li>
+                                            
+
+                                        
+                                            
+                                                <li><a href="#action_delete-a-synchronization-task" title ="DELETE - Delete a Synchronization task">DELETE - Delete a Synchronization task</a></li>
+                                            
+
+                                        
+                                        </ul>
+                                    </li>
+                                
+                              
+                            </ul>
+                        </li>
+                      
+    <li><a href="#examples">Examples</a></li>
+    </ul>
+</li>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <li><a href="#references">References</a></li>
+    
+   </ul>
+</nav>
+
+  </div>
+  
+
+
+  <div id="API-content">
+  
+    
+	
+
+	
+		<h1>FIWARE-GlanceSync API v1 Specification </h1>
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+		<span class="dateLabel">DATE:</span> <span class="dateValue"> 24 November 2015 </span>
+	
+
+	
+
+	
+
+
+
+
+
+	
+	
+	
+
+	
+	
+	
+
+	
+	
+	
+
+	
+	
+		
+	
+	
+
+	
+	
+	
+
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+    
+  
+  
+
+
+
+  <div id="top-source-buttons">
+  	
+    	<a target="_blank" href="http://docs.glancesync.apiary.io/#reference">View in Apiary</a>
+    
+    
+  </div>
+
+
+
+	
+		<h2 id="editors">Editors</h2>
+		<ul>
+<li>Fernando López Aguilar, Telefónica I+D</li>
+</ul>
+	
+
+	
+
+	
+
+
+
+	
+
+	
+		<h2 id="copyright">Copyright</h2>
+		<p>This specification is licensed under the
+<a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28essential_patents_license%29">FIWARE Open Specification License</a>.</p>
+	
+
+	
+
+
+<hr>
+
+
+	<h2 id="abstract">Abstract</h2>
+	<!--
+Copyright 2015 Telefónica I+D
+All Rights Reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this file except in compliance with the License. You may obtain
+a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+-->
+
+<p>The FIWARE GlanceSync tools is developed under the FIWARE Ops tool 
+and it is used to synchronise the glance images in the different 
+Glance servers connected in the FIWARE Lab.</p>
+<p>Although this component has been developed for FIWARE, the software 
+is highly configurable, do not have special requirements beyond 
+OpenStack libraries and may be used with any other project or as 
+a generic tool to synchronise images. Moreover, all the OpenStack 
+interface is in a module and it is possible to adapt the code to 
+support other platforms.</p>
+
+
+
+
+	
+
+	
+
+	
+		<h2 id="status">Status of this document</h2>
+		<p>Final version aligned with FIWARE Release 5.1.</p>
+	
+
+<hr>
+  
+
+
+    
+    
+<nav class="api-summary">
+<h1 id="api-summary"> API Summary </h1>
+    <ul>
+
+
+    
+
+        <li>
+            
+                <a href="#resource_group_glancesync-v1" title = "GlanceSync v1">GlanceSync v1</a>
+            
+            <ul>
+              
+                
+                    <li>
+                        <a href="#resource_api-version" title = "Resource API version">
+                        
+                            API version
+                        
+                        </a>
+                        <ul class="toc  ">
+                        
+                            
+                                <li>
+                                    <a href="#action_get-information-about-glancesync-api" title ="GET - Get information about GlanceSync API"><span class="actionMethod">GET</span> - Get information about GlanceSync API
+                                    
+                                        
+                                            [/]
+                                        
+                                    
+                                    </a>
+                                </li>
+                            
+
+                        
+                        </ul>
+                    </li>
+                
+              
+                
+                    <li>
+                        <a href="#resource_region-synchronization" title = "Resource Region synchronization">
+                        
+                            Region synchronization
+                        
+                        </a>
+                        <ul class="toc  ">
+                        
+                            
+                                <li>
+                                    <a href="#action_images-synchronization-status-in-a-region" title ="GET - Images synchronization status in a region"><span class="actionMethod">GET</span> - Images synchronization status in a region
+                                    
+                                        
+                                            [/regions/{regionId}?image={imageName}]
+                                        
+                                    
+                                    </a>
+                                </li>
+                            
+
+                        
+                            
+                                <li>
+                                    <a href="#action_synchronize-a-region" title ="POST - Synchronize a region"><span class="actionMethod">POST</span> - Synchronize a region
+                                    
+                                        
+                                            [/regions/{regionId}?image={imageName}]
+                                        
+                                    
+                                    </a>
+                                </li>
+                            
+
+                        
+                        </ul>
+                    </li>
+                
+              
+                
+                    <li>
+                        <a href="#resource_regions-synchronization-tasks" title = "Resource Regions Synchronization tasks">
+                        
+                            Regions Synchronization tasks
+                        
+                        </a>
+                        <ul class="toc  ">
+                        
+                            
+                                <li>
+                                    <a href="#action_get-the-status-of-a-synchronization-task" title ="GET - Get the status of a synchronization task"><span class="actionMethod">GET</span> - Get the status of a synchronization task
+                                    
+                                        
+                                            [/regions/{regionId}/tasks/{taskId}]
+                                        
+                                    
+                                    </a>
+                                </li>
+                            
+
+                        
+                            
+                                <li>
+                                    <a href="#action_delete-a-synchronization-task" title ="DELETE - Delete a Synchronization task"><span class="actionMethod">DELETE</span> - Delete a Synchronization task
+                                    
+                                        
+                                            [/regions/{regionId}/tasks/{taskId}]
+                                        
+                                    
+                                    </a>
+                                </li>
+                            
+
+                        
+                        </ul>
+                    </li>
+                
+              
+            </ul>
+        </li>
+      
+
+    </ul>
+</nav>
+
+    
+    
+
+
+
+
+		
+	
+	
+		
+	
+		
+	
+		
+	
+
+
+
+
+
+	
+		
+	
+		
+	
+		
+	
+
+
+
+    
+
+  
+  <section id="API_specification">
+      <h1>API Specification</h1>
+      
+
+
+
+
+        
+            <section id="resource_group_glancesync-v1" class="resourceGroup">
+            <h2 id="h-resource_group_glancesync-v1">GlanceSync v1</h2>
+        
+	<h2>API authentication</h2>
+<p>All the operations, except the information of the service, in the 
+GlanceSync API needs to have a valid token to access it. To obtain 
+the token, you need to have an account in FIWARE Lab 
+(<a href="http://account.lab.fi-ware.org">account.lab.fi-ware.org</a>). With the credentials (username, password 
+and tenantName) you can obtain a valid token.</p>
+<p>The GlanceSync API returns the 404 Not Found error code if you provide 
+a token that it is not validate or it is expired. Besides, GlanceSync 
+API returns the 401 Unauthorized error code if the role of the token 
+is not authorized to realize the operation.</p>
+<h2>Faults</h2>
+<p>The error code is returned in the body of the response for convenience. 
+The message section returns a human-readable message that is appropriate 
+for display to the end user. The details section is optional and may 
+contain information—for example, a stack trace—to assist in tracking 
+down an error. The detail section may or may not be appropriate for 
+display to an end user.</p>
+<table>
+    <tr><td><b>Fault Element</b></td><td><b>HTTP code</b></td><td><b>Description</b></td></tr>
+    <tr><td>Compute Fault</td><td>400, 500, other codes possible</td><td>Error in the operation</td></tr>
+    <tr><td>serviceUnavailable</td><td>503</td><td>The service is not available</td></tr>
+    <tr><td>badRequest</td><td>400</td><td>The request has not been done correctly</td></tr>
+    <tr><td>unauthorized</td><td>401</td><td>You are not authorized to access to that operation. The token is not correct.</td></tr>
+    <tr><td>itemNotFound</td><td>404</td><td>It is not exist</td></tr>
+    <tr><td>badMethod</td><td>405</td><td>Method not allowed</td></tr>
+    <tr><td>badRegion</td><td>410</td><td>Region does not exist</td></tr>
+</table>
+
+<h2>GlanceSync synchronization status</h2>
+<p>The synchronisation status can be classified in three categories: final status, error 
+status and pending synchronisation status. The different values can be shown in the
+following table:</p>
+<table>
+    <tr><td><b>GlanceSync Status</b></td><td><b>Description</b></td></tr>
+    <tr><td>ok</td><td>The image is fully synchronised.</td></tr>
+    <tr><td>ok_stalled_checksum</td><td>The image has a different checksum than master, but this 
+checksum is included in parameter 'dontupdate'. Therefore the image will not be 
+updated (content nor metadata)</td></tr>
+
+    <tr><td>error_checksum</td><td>There is an image, but with a different checksum and there is 
+not a matching dontupdate, rename or replace directive. Action required: fill 
+the checksum (or use any) with dontupdate or rename or replace.</td></tr>
+
+    <tr><td>error_ami</td><td>The image requires a kernel or ramdisk that is not in the list of 
+images to sync. Action required: ensure that the selection criteria include the 
+kernel/ramdisk images.</td></tr>
+
+    <tr><td>pending_metadata</td><td>There is an image with the right content (checksum), but 
+metadata must be updated (this may include ramdisk_id and kernel_id).</td></tr>
+
+    <tr><td>pending_upload</td><td>The image is not synchronised; it must be upload.</td></tr>
+
+    <tr><td>pending_replace</td><td>There is an image, but with different checksum. The image 
+will be replaced.</td></tr>
+
+    <tr><td>pending_rename</td><td>There is an image, but with different checksum. The image will 
+be replaced, but before this the old image will be renamed.</td></tr>
+
+    <tr><td>pending_ami</td><td>The image requires a kernel or ramdisk image that is in state 
+pending_upload, pending_replace or pending_rename.</td></tr>
+</table>
+
+<h2>GlanceSync tasks execution status</h2>
+<p>The result of the execution of a task has the following status:</p>
+<table>
+    <tr><td><b>GlanceSync tasks execution status</b></td><td><b>Description</b></td></tr>
+    <tr><td>synced</td><td>The images are synchronized.</td></tr>
+    <tr><td>syncing</td><td>The images are synchronizing.</td></tr>
+    <tr><td>failed</td><td>The images synchronization images has failed.</td></tr>
+</table>
+        
+            <section id="resource_api-version" class="resource">
+                 <div class= "header" >
+                 
+                    <h3 id="h-resource_api-version">API version</h3>
+                    <span class="extra-header">[/]</span>
+                 
+                 </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        <div id="action_get-information-about-glancesync-api" class="action GET">
+
+                        
+    <div class="header">
+        
+            <h4 id="h-action_get-information-about-glancesync-api">Get information about GlanceSync API </h4>
+            <span class="extra-header">
+		GET 
+                
+                    /
+                
+            </span>
+        
+
+    </div>
+
+        
+                            <div id="get-information-about-glancesync-api_body" class="">
+                                <p>Lists information about GlanceSync API version.</p>
+                                
+                                
+                                
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    <div>
+                                    <div class="goExample">
+                                        <a href="#action_get-information-about-glancesync-api_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                
+            
+            
+
+            
+                
+            
+            
+                <a target="_blank" href="http://docs.glancesync.apiary.io/#reference/glancesync-v1/api-version/get-information-about-glancesync-api">View in Apiary</a>
+            
+        
+    
+    </div>
+
+                                    
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_region-synchronization" class="resource">
+                 <div class= "header" >
+                 
+                    <h3 id="h-resource_region-synchronization">Region synchronization</h3>
+                    <span class="extra-header">[/regions/{regionId}?image={imageName}]</span>
+                 
+                 </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        <div id="action_images-synchronization-status-in-a-region" class="action GET">
+
+                        
+    <div class="header">
+        
+            <h4 id="h-action_images-synchronization-status-in-a-region">Images synchronization status in a region </h4>
+            <span class="extra-header">
+		GET 
+                
+                    /regions/{regionId}?image={imageName}
+                
+            </span>
+        
+
+    </div>
+
+        
+                            <div id="images-synchronization-status-in-a-region_body" class="">
+                                <p>Lists information the status of the synchronization of the images in the region 
+regionid. Keep in mind that regionId is the name of the regions.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				<span class="parameter-name">imageName</span> <span class="parameter-attributes">(Optional, string)</span>
+			</dt>
+			<dd>
+				A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
+				
+			</dd>
+		
+			<dt>
+				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Region name how you can obtain from the Keystone service.
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    <div>
+                                    <div class="goExample">
+                                        <a href="#action_images-synchronization-status-in-a-region_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                
+            
+            
+
+            
+                
+            
+            
+                <a target="_blank" href="http://docs.glancesync.apiary.io/#reference/glancesync-v1/region-synchronization/images-synchronization-status-in-a-region">View in Apiary</a>
+            
+        
+    
+    </div>
+
+                                    
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    
+                        <div id="action_synchronize-a-region" class="action POST">
+
+                        
+    <div class="header">
+        
+            <h4 id="h-action_synchronize-a-region">Synchronize a region </h4>
+            <span class="extra-header">
+		POST 
+                
+                    /regions/{regionId}?image={imageName}
+                
+            </span>
+        
+
+    </div>
+
+        
+                            <div id="synchronize-a-region_body" class="">
+                                <p>Synchronize the images of the corresponding region defined by its regionId. The 
+operation is asynchronous a response a taskId in order that you can follow the 
+execution of the process.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				<span class="parameter-name">imageName</span> <span class="parameter-attributes">(Optional, string)</span>
+			</dt>
+			<dd>
+				A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
+				
+			</dd>
+		
+			<dt>
+				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Region name how you can obtain from the Keystone service.
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    <div>
+                                    <div class="goExample">
+                                        <a href="#action_synchronize-a-region_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                
+            
+            
+
+            
+                
+            
+            
+                <a target="_blank" href="http://docs.glancesync.apiary.io/#reference/glancesync-v1/region-synchronization/synchronize-a-region">View in Apiary</a>
+            
+        
+    
+    </div>
+
+                                    
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+            <section id="resource_regions-synchronization-tasks" class="resource">
+                 <div class= "header" >
+                 
+                    <h3 id="h-resource_regions-synchronization-tasks">Regions Synchronization tasks</h3>
+                    <span class="extra-header">[/regions/{regionId}/tasks/{taskId}]</span>
+                 
+                 </div>
+                
+                
+                
+
+		        
+                
+                
+
+
+
+
+
+
+    
+
+
+                
+
+
+                    
+                        <div id="action_get-the-status-of-a-synchronization-task" class="action GET">
+
+                        
+    <div class="header">
+        
+            <h4 id="h-action_get-the-status-of-a-synchronization-task">Get the status of a synchronization task </h4>
+            <span class="extra-header">
+		GET 
+                
+                    /regions/{regionId}/tasks/{taskId}
+                
+            </span>
+        
+
+    </div>
+
+        
+                            <div id="get-the-status-of-a-synchronization-task_body" class="">
+                                <p>Get the status of a task to synchronize a region with name regionId. Keep in mind 
+that when the returned status is <em>synced</em> or <em>failed</em>, we have to execute the DELETE 
+operation of the task in order to delete the corresponding resources.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Region name how you can obtain from the Keystone service.
+				
+			</dd>
+		
+			<dt>
+				<span class="parameter-name">taskId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Task Id. of a synchronization process previously launched.
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 404</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    <div>
+                                    <div class="goExample">
+                                        <a href="#action_get-the-status-of-a-synchronization-task_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                
+            
+            
+
+            
+                
+            
+            
+                <a target="_blank" href="http://docs.glancesync.apiary.io/#reference/glancesync-v1/regions-synchronization-tasks/get-the-status-of-a-synchronization-task">View in Apiary</a>
+            
+        
+    
+    </div>
+
+                                    
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    
+                        <div id="action_delete-a-synchronization-task" class="action DELETE">
+
+                        
+    <div class="header">
+        
+            <h4 id="h-action_delete-a-synchronization-task">Delete a Synchronization task </h4>
+            <span class="extra-header">
+		DELETE 
+                
+                    /regions/{regionId}/tasks/{taskId}
+                
+            </span>
+        
+
+    </div>
+
+        
+                            <div id="delete-a-synchronization-task_body" class="">
+                                <p>Delete the information related to an executed task. This operation does not accept 
+a request body and does not return a response body.</p>
+                                
+                                
+                                
+
+	<span class="parameters-title">Parameters</span>
+	<dl>
+		
+			<dt>
+				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Region name how you can obtain from the Keystone service.
+				
+			</dd>
+		
+			<dt>
+				<span class="parameter-name">taskId</span> <span class="parameter-attributes">(Required, string)</span>
+			</dt>
+			<dd>
+				Task Id. of a synchronization process previously launched.
+				
+			</dd>
+		
+	</dl>
+			
+                                
+                                
+      
+                                    
+        	                            
+                                            
+                                            
+                                            
+                                            
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+     
+</div>
+        	                            
+    
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+        		                            
+                                        
+                                        
+                                        
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 404</span> 
+        
+            (application/json)
+        
+    
+            
+            
+     
+</div>
+        	                            
+                                    
+                                    <div>
+                                    <div class="goExample">
+                                        <a href="#action_delete-a-synchronization-task_examples">Go to example</a>
+                                    </div>
+                                    
+                                        
+    <div class="goApiary">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                
+            
+            
+
+            
+                
+            
+            
+                <a target="_blank" href="http://docs.glancesync.apiary.io/#reference/glancesync-v1/regions-synchronization-tasks/delete-a-synchronization-task">View in Apiary</a>
+            
+        
+    
+    </div>
+
+                                    
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    
+            </section>
+        
+    </section>
+
+<section id="examples">
+    <div class= "header" ><h2>Examples</h2> </div>
+    
+        
+            <section id="resource_group_glancesync-v1_example" class="resourceGroupExample">
+                <div class= "header" ><h3 id="h-resource_group_glancesync-v1_example">GlanceSync v1</h3> </div>
+        
+
+                
+                    <section id="resource_api-version_example" class="resourceExample">
+                         <div class= "header" >
+                         
+                            <h4 id="h-resource_api-version_example">API version</h4>
+                            <span class="extra-header">[/]</span>
+                         
+                         </div>
+
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                           
+
+                            
+                                <div id="action_get-information-about-glancesync-api_examples" class="actionExample GET">
+
+                                    
+    <div class="header">
+        
+            <h5 id="h-action_get-information-about-glancesync-api_examples">Get information about GlanceSync API </h5>
+            <span class="extra-header">
+		GET 
+                
+                    /
+                
+            </span>
+        
+
+    </div>
+
+                
+                                    <div id="action_get-information-about-glancesync-api_body" class=""> 
+                                        
+                                        
+                                        
+                                                 
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-information-about-glancesync-api_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>This operation does not accept a request body.
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-information-about-glancesync-api_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+"id": "v1.0",
+"owner": "Telefonica I+D",
+"status": "SUPPORTED",
+"version": "1.0",
+"updated": "2011-01-21T11:33:21Z",
+"runningfrom": "2011-01-21T11:33:21Z",
+"href": "https://github.com/telefonicaid/fiware-glancesync",
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-information-about-glancesync-api_Response_2_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad method",
+            "code": 405
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_get-information-about-glancesync-api">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_region-synchronization_example" class="resourceExample">
+                         <div class= "header" >
+                         
+                            <h4 id="h-resource_region-synchronization_example">Region synchronization</h4>
+                            <span class="extra-header">[/regions/{regionId}?image={imageName}]</span>
+                         
+                         </div>
+
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                           
+
+                            
+                                <div id="action_images-synchronization-status-in-a-region_examples" class="actionExample GET">
+
+                                    
+    <div class="header">
+        
+            <h5 id="h-action_images-synchronization-status-in-a-region_examples">Images synchronization status in a region </h5>
+            <span class="extra-header">
+		GET 
+                
+                    /regions/{regionId}?image={imageName}
+                
+            </span>
+        
+
+    </div>
+
+                
+                                    <div id="action_images-synchronization-status-in-a-region_body" class=""> 
+                                        
+                                        
+                                        
+                                                 
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_images-synchronization-status-in-a-region_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json
+X-Auth-Token: tokenId</code></pre>
+                
+
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+    <span class="payload-title">Payload</span>
+    
+        
+                        <dl class="action-parameters-table">
+                                    <dt><span class="parameter-name">id</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Image id corresponding to the Glance service in the region <regionId>.</dd>
+                                    <dt><span class="parameter-name">imageName1</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Name of the image in the master &#40;Spain2&#41; node.</dd>
+                                    <dt><span class="parameter-name">message</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Error message of the synchronization or null if all was ok.</dd>
+                                    <dt><span class="parameter-name">status</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Status of the synchronization of the images. See <a href="https://github.com/telefonicaid/fiware-glancesync#checking-status">https://github.com/telefonicaid/fiware-glancesync#checking-status</a></dd>
+                        </dl>
+        
+    
+        
+    
+
+
+
+ 
+            <div id="action_images-synchronization-status-in-a-region_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+    "images": [ {
+        "id": "3cfeaf3f0103b9637bb3fcfe691fce1e",
+        "name": "base_ubuntu_14.04",
+        "status": "ok",
+        "message": null,
+    },            
+    {
+        "id": "153605c208287ef06a3c84712955c1e9",
+        "name": "base_centos_7",
+        "status": "ok_stalled_checksum",
+        "message": "lorem ipsum",
+    },            
+    ]
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_images-synchronization-status-in-a-region_Response_2_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad region",
+            "code": 410
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_images-synchronization-status-in-a-region_Response_3_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad method",
+            "code": 405
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_images-synchronization-status-in-a-region">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                                <div id="action_synchronize-a-region_examples" class="actionExample POST">
+
+                                    
+    <div class="header">
+        
+            <h5 id="h-action_synchronize-a-region_examples">Synchronize a region </h5>
+            <span class="extra-header">
+		POST 
+                
+                    /regions/{regionId}?image={imageName}
+                
+            </span>
+        
+
+    </div>
+
+                
+                                    <div id="action_synchronize-a-region_body" class=""> 
+                                        
+                                        
+                                        
+                                                 
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_synchronize-a-region_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json
+X-Auth-Token: tokenId</code></pre>
+                
+
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+    <span class="payload-title">Payload</span>
+    
+        
+                        <dl class="action-parameters-table">
+                                    <dt><span class="parameter-name">taskId</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Image id corresponding to the Glance service in the region <regionId>.</dd>
+                        </dl>
+        
+    
+        
+    
+
+
+
+ 
+            <div id="action_synchronize-a-region_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+    "taskId": "aa5da84dc5107e4109611360d2915c6c",
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_synchronize-a-region_Response_2_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad region",
+            "code": 410
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_synchronize-a-region_Response_3_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad method",
+            "code": 405
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_synchronize-a-region">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+                    <section id="resource_regions-synchronization-tasks_example" class="resourceExample">
+                         <div class= "header" >
+                         
+                            <h4 id="h-resource_regions-synchronization-tasks_example">Regions Synchronization tasks</h4>
+                            <span class="extra-header">[/regions/{regionId}/tasks/{taskId}]</span>
+                         
+                         </div>
+
+                            
+                            
+                            
+
+                            
+                            
+                            
+
+                           
+
+                            
+                                <div id="action_get-the-status-of-a-synchronization-task_examples" class="actionExample GET">
+
+                                    
+    <div class="header">
+        
+            <h5 id="h-action_get-the-status-of-a-synchronization-task_examples">Get the status of a synchronization task </h5>
+            <span class="extra-header">
+		GET 
+                
+                    /regions/{regionId}/tasks/{taskId}
+                
+            </span>
+        
+
+    </div>
+
+                
+                                    <div id="action_get-the-status-of-a-synchronization-task_body" class=""> 
+                                        
+                                        
+                                        
+                                                 
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-the-status-of-a-synchronization-task_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json
+X-Auth-Token: tokenId</code></pre>
+                
+
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+    <span class="payload-title">Payload</span>
+    
+        
+                        <dl class="action-parameters-table">
+                                    <dt><span class="parameter-name">status</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Status of the synchronization task corresponding to the region regionId and task taskId.</dd>
+                                    <dt><span class="parameter-name">taskId</span>
+                                    <span class="parameter-attributes">(Not required,
+                                    string)</span>
+                                    </dt>
+                                    <dd>Task Id. of a synchronization process launched.</dd>
+                        </dl>
+        
+    
+        
+    
+
+
+
+ 
+            <div id="action_get-the-status-of-a-synchronization-task_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{
+    "taskId": "aa5da84dc5107e4109611360d2915c6c",
+    "status": "synced",
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-the-status-of-a-synchronization-task_Response_2_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad region",
+            "code": 410
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-the-status-of-a-synchronization-task_Response_3_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad method",
+            "code": 405
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 404</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_get-the-status-of-a-synchronization-task_Response_4_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Item not found",
+            "code": 404
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_get-the-status-of-a-synchronization-task">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                                <div id="action_delete-a-synchronization-task_examples" class="actionExample DELETE">
+
+                                    
+    <div class="header">
+        
+            <h5 id="h-action_delete-a-synchronization-task_examples">Delete a Synchronization task </h5>
+            <span class="extra-header">
+		DELETE 
+                
+                    /regions/{regionId}/tasks/{taskId}
+                
+            </span>
+        
+
+    </div>
+
+                
+                                    <div id="action_delete-a-synchronization-task_body" class=""> 
+                                        
+                                        
+                                        
+                                                 
+                                        
+                                            
+                                            
+                                                
+                                                    
+                                                    
+                                                    
+                                                    
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Request </span> 
+        
+            (application/json)
+        
+    
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-a-synchronization-task_Request_1_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json
+X-Auth-Token: tokenId</code></pre>
+                
+
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+            
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 200</span> 
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-a-synchronization-task_Response_1_body" class=" action-div-body">
+                <p></p>
+
+                
+
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 410</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-a-synchronization-task_Response_2_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad region",
+            "code": 410
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 405</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-a-synchronization-task_Response_3_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Bad method",
+            "code": 405
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                                    
+                                                
+                                                
+                                                
+
+<div class="rest-packet-div">
+
+            <span class="packetType">Response 404</span> 
+        
+            (application/json)
+        
+    
+            
+            
+            
+            
+
+
+
+ 
+            <div id="action_delete-a-synchronization-task_Response_4_body" class=" action-div-body">
+                <p></p>
+
+                
+        	         <div class= "header"><p>Headers</p></div>
+                    
+                    
+                        
+                    
+
+        	        <pre><code>Content-Type: application/json</code></pre>
+                
+
+                
+                    <div class= "header"><p>Body</p></div>
+                    <pre><code>{ "error":
+        {
+            "message": "Item not found",
+            "code": 404
+        }
+}
+</code></pre>
+                
+
+                
+            </div>
+            
+            
+     
+</div>
+                                                
+                                            
+                                            <div class="goActions">
+                                                <a href="#action_delete-a-synchronization-task">Go to specification</a>
+                                            </div>
+                                    </div>
+                                </div>
+                            
+                    </section>
+            
+        </section>
+    
+
+
+
+</section>
+  </section>
+  
+   
+
+
+
+	
+
+	
+
+	
+
+    
+    
+    
+      <section id="references">
+      <h1>References</h1>
+          <ul>
+              
+                  <li><a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28essential_patents_license%29">FIWARE Open Specification License</a></li>
+              
+                  <li><a href="http://account.lab.fi-ware.org">account.lab.fi-ware.org</a></li>
+              
+          </ul>
+      </section>
+    
+  </div>
+</div>
+</body>
+
+</html>
