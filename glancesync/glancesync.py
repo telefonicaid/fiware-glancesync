@@ -154,7 +154,8 @@ class GlanceSync(object):
         # previous step: manage obsolete images. Obsolete images are not
         # synchronisable.
         for image in obsolete:
-            self.log.info('updating obsolete image ' + image.name)
+            self.log.info(regionobj.fullname +
+                          ': updating obsolete image ' + image.name)
             facade.update_metadata(regionobj, image)
 
         master_images = regionobj.images_to_sync_dict(self.master_region_dict)
@@ -206,7 +207,7 @@ class GlanceSync(object):
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     facade.delete_image(regionobj, region_image.id,
                                         confirm=False)
-            elif tuple[0] == 'pending_rename_n_replace':
+            elif tuple[0] == 'pending_rename':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 self.log.info(
@@ -270,7 +271,7 @@ class GlanceSync(object):
         updated.
         *pending_replace: the image must be replaced, because the checksum is
         different.
-        *pending_rename_n_replace: the image must be replaced, but before this
+        *pending_rename: the image must be replaced, but before this
         the old image will be renamed.
         *pending_ami: the image has kernel_id or ramdisk_id and this value is
         pending because the image has not been uploaded yet.
