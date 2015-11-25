@@ -48,3 +48,5 @@ GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT = "(.*)Image {image_name} has a diff
 GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE = "{region_name}: updating obsolete image {image_name}"
 GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE = "WARNING:Ignore obsolete master image {image_name}_obsolete " \
                                             "because {image_name} exists and it is synchronisable."
+GLANCESYNC_OUTPUT_PENDING = "{region_name}: Pending: {image_name}"
+GLANCESYNC_OUTPUT_STATUS_REPORT ="{status},{region_name},{image_name}"
