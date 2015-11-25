@@ -23,7 +23,6 @@
 
 __author__ = 'fla'
 
-import behave
 from behave import when, then, given
 from hamcrest import assert_that, equal_to, is_, is_not
 from qautils.commandline_utils import execute_command as cmd
@@ -34,8 +33,6 @@ import logging
 
 # Get logger for Behave steps
 __logger__ = logging.getLogger("getnid_steps")
-
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 

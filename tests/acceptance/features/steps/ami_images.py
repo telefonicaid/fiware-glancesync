@@ -26,17 +26,12 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
 from commons.utils import get_real_value_of_image_property
 from qautils.dataset_utils import DatasetUtils
 from glancesync.output_constants import GLANCESYNC_OUTPUT_MISSING_KERNEL, GLANCESYNC_OUTPUT_MISSING_RAMDISK
 import logging
-
-
-# Use regular expressions for step param definition (Behave).
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 __logger__ = logging.getLogger("ami_images_steps")

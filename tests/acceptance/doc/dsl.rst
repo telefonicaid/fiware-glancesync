@@ -62,6 +62,7 @@ Then clauses
 
     >> the image "(?P<image_name>\w*)" is synchronized
     >> all images are synchronized
+    >> all images are synchronized in "(?P<region>\w*)"
     >> the image "(?P<image_name>\w*)" is synchronized in target region "(?P<region>\w*)"
     >> the image "(?P<image_name>\w*)" is not synchronized again
     >> the image "(?P<image_name>\w*)" is not synchronized

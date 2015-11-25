@@ -25,7 +25,7 @@ __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
-
+import behave
 from commons.constants import *
 from qautils.logger_utils import get_logger
 from commons.utils import load_project_properties
@@ -34,6 +34,8 @@ from glancesync.glancesync_client import GlanceSyncClient
 
 __logger__ = get_logger("qautils")
 
+# Use regular expressions for step param definition (Behave).
+behave.use_step_matcher("re")
 
 def before_all(context):
     """
@@ -139,6 +141,7 @@ def after_scenario(context, scenario):
         for image_name in context.created_images_list:
             context.glance_manager_list[region].remove_all_images_by_name(image_name)
             context.glance_manager_list[region].remove_all_images_by_name(image_name + ".old")
+            context.glance_manager_list[region].remove_all_images_by_name(image_name + "_obsolete")
 
 
 def after_all(context):

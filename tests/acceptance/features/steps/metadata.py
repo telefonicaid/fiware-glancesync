@@ -23,13 +23,11 @@
 
 __author__ = 'fla'
 
-import behave
 from behave import step, then
 from qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, equal_to, contains_string, is_not
 from glancesync.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
 from commons.utils import get_real_value_of_image_property
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 
@@ -164,14 +162,21 @@ def update_user_prop_image_master_node(context, image_name):
 
     # Process table data
     properties = dict()
+    is_public = None
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
             if 'param_name' in row.headings:
-                real_value = get_real_value_of_image_property(glance_ops, row['param_value'])
-                value = real_value if real_value is not None else row['param_value']
-                properties.update({row['param_name']: value})
+                if row['param_name'] == 'is_public':
+                    is_public = row['param_value']
+                else:
+                    real_value = get_real_value_of_image_property(glance_ops, row['param_value'])
+                    value = real_value if real_value is not None else row['param_value']
+                    properties.update({row['param_name']: value})
 
-    glance_ops.update_image_properties_by_name(image_name, custom_properties=properties)
+    if is_public:
+        glance_ops.update_image_properties_by_name(image_name, is_public=is_public, custom_properties=properties)
+    else:
+        glance_ops.update_image_properties_by_name(image_name, custom_properties=properties)
 
 
 @step(u'metadata of the image "(?P<image_name>\w*)" are updated')

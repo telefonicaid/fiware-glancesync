@@ -26,7 +26,6 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-import behave
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
 from commons.constants import IMAGES_DIR
@@ -41,10 +40,6 @@ import logging
 
 # Get logger for Behave steps
 __logger__ = logging.getLogger("synchronization_steps")
-
-
-# Use regular expressions for step param definition (Behave).
-behave.use_step_matcher("re")
 
 __dataset_utils__ = DatasetUtils()
 
@@ -285,7 +280,8 @@ def already_sync_images(context):
 def already_sync_images(context, nodes):
 
     sync_the_selected_image_on_nodes(context, nodes)
-    images_are_synchronized(context)
+    for node in nodes.split(","):
+        images_are_synchronized_in_region(context, node)
 
 
 @step(u'the image "(?P<image_name>\w*)" is synchronized')
@@ -327,6 +323,12 @@ def images_are_synchronized(context):
 
     for image_name in context.created_images_list:
         image_is_synchronized(context, image_name)
+
+@step(u'all images are synchronized in "(?P<region>\w*)"')
+def images_are_synchronized_in_region(context, region):
+
+    for image_name in context.created_images_list:
+        image_is_present_only_in_node(context, image_name, region)
 
 
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the expected data')
