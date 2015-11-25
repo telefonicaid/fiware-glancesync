@@ -91,17 +91,15 @@ Feature: Image sync between regions using GlanceSync in the same federation.
     And   the image "qatesting01" is present in all nodes with the expected data
 
 
-  @skip @bug @CLAUDIA-5188
-  Scenario: Sync two images with the same name uploaded to master node
+  Scenario: When there are two or more images with the same name in the master node, they are not synchronized.
     Given the following images created in the Glance of master node with name:
           | image_name  |
           | qatesting01 |
           | qatesting01 |
     And   GlanceSync configured to sync images without specifying any condition
     When  I sync images
-    Then  the image "qatesting01" is synchronized
     And   a warning message is shown informing about images with the same name "qatesting01"
-    And   the image "qatesting01" is present in all nodes with the expected data
+    Then  no images are synchronized
 
 
   Scenario: Sync an image with the same name that have changed its content (differente checksum)
