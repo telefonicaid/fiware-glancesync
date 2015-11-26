@@ -43,7 +43,8 @@ from a master region to each other region in a federation (or a subset of them).
 This feature works out of the box without configuration. It requires only the
 same set of environment variables, which are needed to contact the
 keystone server, than the glance tool. It is also possible to set these
-parameters in a file instead of using environment variables.
+parameters in a file instead of using environment variables. Furthermore, any
+option in the configuration file can be provided via command line, too.
 
 GlanceSync synchronisation algorithm (i.e. the method to determine if a master
 image must be synchronised to the other regions) is configurable. By default
@@ -105,7 +106,8 @@ with the same name. This is specially challenging, when there is more than one
 image in a destination target, with the name of the image to synchronise. In
 this situation, GlanceSync takes the first image that is found with the same checkum
 (or absolutely the first image that is found if there is not a checksum match)
-and prints a warning for each duplicated image detected.
+and prints a warning for each duplicated image detected. Master images
+with duplicated names are not synchronised and a warning is printed.
 
 Image names with duplicated names are easy to avoid, with one serious
 exception: when ordinary users can publish their images as public (shared), the
@@ -148,7 +150,7 @@ different, the following algorithm is applied:
 1) Is the checksum in the ``dontupdate`` list? Print a warning only
 2) Is the checksum in the ``rename`` list? Rename old image (adding the *.old*
    suffix), change it to private, and upload the master region's image
-3) Is the checksum in the replace list? Replace the old image with the master
+3) Is the checksum in the ``replace`` list? Replace the old image with the master
    region's image
 4) Does the parameter ``replace`` include the keyword *any*? Rename old image and
    upload the  master region's image
@@ -168,28 +170,30 @@ an option is to put this options in the *DEFAULT* section.
 
 This is the algorithm to determine if an image is synchronisable:
 
-1) images with the '_obsolete' suffix, are never synchronised
-2) if the UUID of the image is included in ``forcesync``, then it is synchronised
+1) images with the *_obsolete* suffix, are never synchronised
+2) images of other tenants are never synchronised
+3) images with duplicated names are never synchronised, to avoid ambiguity.
+4) if the UUID of the image is included in ``forcesync``, then it is synchronised
    unconditionally, even if the image is not public.
-3) if ``metadata_condition`` is defined, it contains python code that is evaluated
+5) if ``metadata_condition`` is defined, it contains python code that is evaluated
    to determine if the image is synchronised. The code can use two variables:
    image, with the information about the image and ``metadata_set``, with the content
    of that parameter. The more interesting field of image is ``user_properties``,
    that is a dictionary with the metadata of the image. Other properties are *id*,
    *name*, *owner*, *size*, *region*, *is_public*. The image may be synchronised
    even if it is not public, to avoid this, check ``image.is_public`` in the condition.
-4) if ``metadata_condition`` is not defined, the image is public, and
+6) if ``metadata_condition`` is not defined, the image is public, and
    ``metadata_set`` is defined, the image is synchronised if some of the
    properties of ``metadata_set`` is on ``image.user_properties``.
-5) if ``metadata_condition`` is not defined, the image is public, and
+7) if ``metadata_condition`` is not defined, the image is public, and
    ``metadata_set`` is not defined, the image is synchronised
-6) otherwise, the image is not synchronised.
+8) otherwise, the image is not synchronised.
 
 For example, to synchronise the images in FIWARE Lab, the best choice is
 setting ``metadata_set=nid, sdc_aware, type, nid_version``, because all the images to be
 synchronised has at least one of those properties.
 
-A trip to synchronise also the images especified in a white list is combine the
+A trip to synchronise also the images specified in a white list is combine the
 parameter *forcesyncs* with ``metadata_condition=False``
 
 The parameter ``metadata_set`` has another function. It is used to determine how
@@ -231,7 +235,7 @@ important to look out more about the security status of the image.
 The treatment of obsolete images can be disabled for a *target* with
 *support_obsolete_images=False*. This flag affects the image renaming and
 the metadata updating, but anyway images with '_obsolete' suffix are never
-synchronisable.
+synchronised.
 
 Top_
 
@@ -243,7 +247,8 @@ Requirements
 
 At the moment, GlanceSync is designed to run in the glance server of the master
 region, because it reads the images that are stored directly in the filesystem.
-This will be fixed in a future version.
+This will be fixed in a future version. But see below, in the running section,
+for a workaround.
 
 The following software must be installed (e.g. using apt-get on Debian and Ubuntu,
 or with yum in CentOS):
@@ -290,6 +295,21 @@ the *DEFAULT* section:
 .. code::
 
  ./sync.py --config main.master_region=Spain2 metadata_set=nid,type,sdc_aware,sdc_version
+
+It is important to note that *--config* parameter expect any number of parameters
+separated by spaces. This is a problem if the list of regions are specified
+ *after* the *--config* parameter, because then the regions are parsed as part
+of the *--config* parameter. The solution is passing the regions *before* the
+parameter or using the standard separator *--*:
+
+.. code::
+
+  # Wrong: region1 and region2 are interpreted as part of --config param
+  ./sync.py --config main.master_region=Spain2 region1 region2
+  # Ok
+  ./sync.py --config main.master_region=Spain2 -- region1 region2
+  # Ok
+  ./sync.py region1 region2 --config main.master_region
 
 The configuration file
 ----------------------
@@ -355,6 +375,11 @@ generated invoking *script/generated_config_file.py*
  # --parallel parameter.
  #
  max_children = 1
+
+ # The folder where the master images are (the filename is the UUID of the
+ # image in the master region). The default value is the folder where the
+ # Glance server stores the images.
+ images_dir = /var/lib/glance/images
 
  [DEFAULT]
 
@@ -450,7 +475,7 @@ Security consideration
 GlanceSync does not require *root* privileges. But at this version it requires
 read-only access to image directory ``/var/lib/glance/images`` (or making
 available a copy of all these files, or at least the subset that may be
-synchronised, in other path and then set the option *images_path*)
+synchronised, in other path and then set the option *images_dir*)
 
 It is strongly recommended:
 
@@ -633,7 +658,7 @@ Final status
 ____________
 
 GlanceSync consider that there is no pending operations: the image is
-synchronised of marked as 'dontupdate'.
+synchronised or marked as 'dontupdate'.
 
 * ok: the image is fully synchronised
 * ok_stalled_checksum: the image has a different checksum than master,
@@ -672,6 +697,8 @@ themselves.
   image will be replaced, but before this the old image will be renamed
 * pending_ami: the image requires a kernel or ramdisk image that is in state
   *pending_upload*, *pending_replace* or *pending_rename*.
+
+
 
 Top_
 
@@ -744,14 +771,14 @@ For a scenario 'new_scenario', the following folders must be created:
                 with *sync.py --make-backup*
 * new_scenario.result: there are files for each region with the backup of the
                        metadata AFTER invoking the synchronisation
-* new_scenario_pre: there are files with the status of each region BEFORE invoking
-                    the synchronisation. These files can be generated with the
-                    output of *sync.py --show-status*
-* new_scenario_post: there are files with the status of each region AFTER invoking
-                     the synchronisation. These files can be generated with the
-                     output of *sync.py --show-status*
+* new_scenario.status_pre: there are files with the status of each region BEFORE invoking
+                           the synchronisation. These files can be generated with the
+                           output of *sync.py --show-status*
+* new_scenario.status_post: there are files with the status of each region AFTER invoking
+                            the synchronisation. These files can be generated with the
+                            output of *sync.py --show-status*
 
-Inside the forlder *new_sceneario*, optionally a *config* file may be included.
+Inside the forlder *new_scenario*, optionally a *config* file may be included.
 If this file is not found, then the default configuration defined in the variable
 *config1* of the test file ´´tests/unit/test_glancesync.py´´ is used.
 
@@ -776,7 +803,7 @@ Top_
 Support
 =======
 
-Ask your thorough programmming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
+Ask your thorough programming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
 In both cases please use the tag *fiware-health*
 
 Top_
