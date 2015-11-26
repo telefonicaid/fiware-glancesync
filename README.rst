@@ -741,7 +741,7 @@ run the synchronisation:
  done
 
  # run synchronisation
- ./sync.py $* --config images_dir=$GLANCE_IMAGES $*
+ ./sync.py $* --config images_dir=$GLANCE_IMAGES
 
 
 Top_
