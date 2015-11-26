@@ -698,6 +698,50 @@ themselves.
 * pending_ami: the image requires a kernel or ramdisk image that is in state
   *pending_upload*, *pending_replace* or *pending_rename*.
 
+How use glancesync without access to images files
+-------------------------------------------------
+
+At the moment, GlanceSync is designed to run in the glance server of the master
+region, because it reads the images that are stored directly in the filesystem.
+
+This may be an inconvenience, but a real issue is when the Glance backed does not
+use plain files (e.g. the Cepth backend) and therefore GlanceSync cannot read
+the files even when it is running at the glance server.
+
+The following script can be used to pre-download the images required to
+synchronise the indicated regions to the folder specified by environment
+variable *GLANCE_IMAGES* (by default, ``/var/lib/glance/images``) and then
+run the synchronisation:
+
+.. code::
+
+ #!/bin/bash
+
+ print_required_images_names() {
+   ./sync.py --show-status $* | awk -v ORS=" " -F, \
+    '/^pending_(upload|rename)/ {words[$3]++}
+    END { for (i in words) print substr(i,1, length(i)-1) }'
+ }
+
+ get_id_from_name() {
+  glance image-show $1 | awk -F\| \
+  ' $2 ~ /^[ ]*id/ { sub(/[ ]+/,"",$3) ; print $3}'
+ }
+
+ GLANCE_IMAGES=${GLANCE_IMAGES:-/var/lib/glance/images}
+
+ # First, download the required images to $GLANCE_IMAGES
+ for name in $(print_required_images_names $*) ;
+ do
+   id=$(get_id_from_name $name)
+   echo $name $id
+   if [ ! -f $GLANCE_IMAGES/$id ] ; then
+     glance image-download --file $GLANCE_IMAGES/$id --progress $id
+   fi
+ done
+
+ # run synchronisation
+ ./sync.py $* --config images_dir=$GLANCE_IMAGES $*
 
 
 Top_
