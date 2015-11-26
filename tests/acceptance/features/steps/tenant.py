@@ -63,6 +63,10 @@ def create_new_image_in_glance_of_target_node_and_credential(context, image_name
     assert_that(context.target_credentials, is_not(None),
                 "Credential with type '{}' not found for target node".format(cred_type))
 
+    # Add the new created image name to the list if it is not already stored (to be cleaned when tearing down test)
+    if image_name not in context.created_images_list:
+        context.created_images_list.append(image_name)
+
 
 @step(u'a warning message is shown informing about different owner for image "(?P<image_name>\w*)"')
 def warning_message_images_with_different_owner(context, image_name):
