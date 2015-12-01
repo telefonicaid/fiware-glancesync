@@ -56,6 +56,7 @@ class TestGlanceServersFacade(unittest.TestCase):
         target['password'] = env['OS_PASSWORD']
         target['keystone_url'] = env['OS_AUTH_URL']
         target['tenant'] = env['OS_TENANT_NAME']
+        target['use_keystone_v3'] = False
         if 'OS_REGION_NAME' in env:
             target['region'] = env['OS_REGION_NAME']
         else:
@@ -85,11 +86,11 @@ class TestGlanceServersFacade(unittest.TestCase):
         """function to create_image, used by several tests; check that UUID
          is returned"""
 
-        image = GlanceSyncImage('imagetest', '01', self.region, False)
+        image = GlanceSyncImage('imagetest', '01', self.region, None, False)
         image.raw = dict()
         image.raw['disk_format'] = 'qcow2'
-        image.raw['is_public'] = 'False'
-        image.raw['protected'] = 'False'
+        image.raw['is_public'] = False
+        image.raw['protected'] = False
         image.raw['container_format'] = 'bare'
         image.raw['min_ram'] = '0'
         image.raw['min_disk'] = '0'
@@ -117,6 +118,7 @@ class TestGlanceServersFacade(unittest.TestCase):
         get_imagelist() before/after the call"""
         found = False
         self.create_image()
+
         for image in self.facade.get_imagelist(self.region_obj):
             if self.created == image.id:
                 image.user_properties['key'] = 'new value'
@@ -135,20 +137,46 @@ class TestGlanceServersFacade(unittest.TestCase):
             self.facade.delete_image(self.region_obj, self.created, False))
         self.created = None
 
-    def test_keystone_v2(self):
+    def test_keystone(self):
         """check that session object is created by default with V2 API,
         comparing the type of session.auth"""
         self.assertIsNotNone(self.facade.session)
         self.assertIsInstance(self.facade.session.auth, v2.Password)
 
-    def test_keystone_v3(self):
+    def test_get_tenant_id(self):
+        """check get_tenant_id method. Only check that a value is obtained"""
+        self.assertIsNotNone(self.facade.get_tenant_id())
+
+@unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
+class TestGlanceServersFacadeV3(TestGlanceServersFacade):
+    def setUp(self):
+        target = dict()
+        target['target_name'] = 'master'
+        target['user'] = env['OS_USERNAME']
+        target['password'] = env['OS_PASSWORD']
+        target['keystone_url'] = env['OS_AUTH_URL']
+        target['tenant'] = env['OS_TENANT_NAME']
+        target['use_keystone_v3'] = True
+        if 'OS_REGION_NAME' in env:
+            target['region'] = env['OS_REGION_NAME']
+        else:
+            target['region'] = 'regionOne'
+
+        self.region = target['region']
+        targets = dict()
+        targets['master'] = target
+        self.region_obj = GlanceSyncRegion(self.region, targets)
+        self.created = None
+        self.facade = ServersFacade(target)
+        self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
+        file_obj = open(self.facade.images_dir + '/01', 'w')
+        file_obj.write('test content')
+        file_obj.close()
+
+    def test_keystone(self):
         """check that session object is V3 when the option use_keystone_v3 is
         set. It checks the type of session.auth"""
         target = copy.deepcopy(self.facade.target)
         target['use_keystone_v3'] = True
         facade = ServersFacade(target)
         self.assertIsInstance(facade.session.auth, v3.Password)
-
-    def test_get_tenant_id(self):
-        """check get_tenant_id method. Only check that a value is obtained"""
-        self.assertIsNotNone(self.facade.get_tenant_id())
