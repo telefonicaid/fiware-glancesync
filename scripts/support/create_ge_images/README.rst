@@ -22,8 +22,8 @@ The software must be used from a Ubuntu 14.04 system with the following packages
 * libguestfs-tools
 
 The scripts should be copied to */opt/create_ge_images* to share the installation
-between several users. Also the module *osclients.py*, provided in the parent
-folder, must be copied.
+between several users. Also the module *osclients.py*, provided in the utils
+folder of the project, must be copied.
 
 Each user must create the folder *~/create_ge_images* and load the environment
 variables (``OS_USERNAME``, ``OS_PASSWORD``, ``OS_TENANT_NAME``, ``OS_AUTH_URI``) with its

@@ -45,6 +45,9 @@ the support account, encrypt the password and print the encrypted password to co
 Installation
 ============
 
+Some scripts of this folder use *osclients.py*. That file can be copied from
+*utils/osclients.py*.
+
 The file *activate_support_account.py* must be included in the image and it must be 
 executed at boot. This last may be accomplished in different ways depending of the Linux 
 distribution (e.g. adding a line to *rc.local* or using *systemd*, *upstart*...)
