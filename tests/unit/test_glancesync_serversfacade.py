@@ -33,10 +33,10 @@ from mock import patch, MagicMock, call, ANY
 from keystoneclient.auth.identity import v2, v3
 from multiprocessing import TimeoutError
 
-from glancesync.glancesync_serversfacade import ServersFacade
+from glancesync.glancesync_serversfacade import ServersFacade,\
+    GlanceFacadeException
 from glancesync.glancesync_image import GlanceSyncImage
 from glancesync.glancesync_region import GlanceSyncRegion
-from collections import defaultdict
 
 """This environment variable activates a pair of
 integration test to verify that the facade works correctly
@@ -132,7 +132,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         config = {'apply_async.return_value.get.side_effect': TimeoutError()}
         mock_pool.return_value.configure_mock(**config)
         msg = 'fakeregion: Timeout while retrieving image list.'
-        with self.assertRaisesRegexp(Exception, msg):
+        with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.get_imagelist(self.region_obj)
 
     @patch('glancesync.glancesync_serversfacade.Pool')
@@ -141,7 +141,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
                    Exception('not found')}
         mock_pool.return_value.configure_mock(**config)
         msg = 'fakeregion: Error retrieving image list. Cause: not found'
-        with self.assertRaisesRegexp(Exception, msg):
+        with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.get_imagelist(self.region_obj)
 
     def test_upload(self):
@@ -166,7 +166,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         file_obj.write('test content')
         file_obj.close()
         msg = 'fakeregion: Upload of imagetest Failed. Cause: not enough space'
-        with self.assertRaisesRegexp(Exception, msg):
+        with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.upload_image(self.region_obj, self.image)
 
 
@@ -178,7 +178,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         file_obj.close()
         self.image.id = '02'
         msg = 'fakeregion: Cannot open the image imagetest to upload. Cause: '
-        with self.assertRaisesRegexp(Exception, msg):
+        with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.upload_image(self.region_obj, self.image)
 
     def test_update(self):
@@ -195,7 +195,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             'update.side_effect': Exception('bad attribute')}
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Update of imagetest failed. Cause: bad attribute'
-        with self.assertRaisesRegexp(Exception, msg):
+        with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.update_metadata(self.region_obj, self.image)
 
     def test_delete(self):
@@ -212,7 +212,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Deletion of image 01 Failed. Cause: image is '\
             'protected'
-        with self.assertRaises(Exception) as cm:
+        with self.assertRaises(GlanceFacadeException) as cm:
             self.facade.delete_image(self.region_obj, self.image.id, False)
         self.assertEquals(str(cm.exception), msg)
 

@@ -103,7 +103,7 @@ class ServersFacade(object):
             msg = regionobj.fullname + \
                 ': Timeout while retrieving image list.'
             self.logger.error(msg)
-            raise Exception(msg)
+            raise GlanceFacadeException(msg)
         except Exception, e:
             cause = str(e)
             if not cause:
@@ -111,7 +111,7 @@ class ServersFacade(object):
             msg = regionobj.fullname + \
                 ': Error retrieving image list. Cause: ' + cause
             self.logger.error(msg)
-            raise Exception(msg)
+            raise GlanceFacadeException(msg)
 
         return image_list
 
@@ -138,7 +138,7 @@ class ServersFacade(object):
             msg = regionobj.fullname + ': Update of ' + image.name +\
                 ' failed. Cause: ' + str(e)
             self.logger.error(msg)
-            raise Exception(msg)
+            raise GlanceFacadeException(msg)
 
     def upload_image(self, regionobj, image):
         """Upload the image to the glance server on the specified region.
@@ -165,12 +165,12 @@ class ServersFacade(object):
                     msg = regionobj.fullname + ': Upload of ' + image.name +\
                         ' Failed. Cause: ' + str(e)
                     self.logger.error(msg)
-                    raise Exception(msg)
+                    raise GlanceFacadeException(msg)
         except IOError, e:
             msg = regionobj.fullname + ': Cannot open the image ' +\
                 image.name + ' to upload. Cause: ' + str(e)
             self.logger.error(msg)
-            raise Exception(msg)
+            raise GlanceFacadeException(msg)
 
     def delete_image(self, regionobj, id, confirm=True):
         """delete a image on the specified region.
@@ -197,7 +197,7 @@ class ServersFacade(object):
             msg = regionobj.fullname + ': Deletion of image ' + id \
                 + ' Failed. Cause: ' + str(e)
             self.logger.error(msg)
-            raise Exception(msg)
+            raise GlanceFacadeException(msg)
 
         return True
 
@@ -221,3 +221,9 @@ def _getrawimagelist(glance_client):
     """
     images = glance_client.images.list()
     return list(image.to_dict() for image in images)
+
+
+class GlanceFacadeException(Exception):
+    """exception type to use with relaunched exceptions"""
+    def __init__(self, message):
+        Exception.__init__(self, message)
