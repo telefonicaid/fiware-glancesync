@@ -26,7 +26,7 @@ __author__ = 'chema'
 
 import logging
 from utils.osclients import OpenStackClients
-from multiprocessing import Pool
+from multiprocessing import Pool, TimeoutError
 
 from glancesync_image import GlanceSyncImage
 
@@ -40,7 +40,7 @@ Current implementation works invoking the glance client through osclients.
 Formerly, it used to interact using a CLI wrapper.
 """
 
-# Default timeout to get image list
+# Default timeout to get image list (seconds)
 _default_timeout = 30
 
 
@@ -89,7 +89,7 @@ class ServersFacade(object):
                 timeout = _default_timeout
             pool = Pool(1)
             result = pool.apply_async(_getrawimagelist, (client,))
-            images = result.get(timeout=50)
+            images = result.get(timeout=timeout)
             image_list = list()
             for image in images:
                 i = GlanceSyncImage(
@@ -99,6 +99,11 @@ class ServersFacade(object):
 
                 image_list.append(i)
 
+        except TimeoutError:
+            msg = regionobj.fullname + \
+                ': Timeout while retrieving image list.'
+            self.logger.error(msg)
+            raise Exception(msg)
         except Exception, e:
             cause = str(e)
             if not cause:
@@ -130,8 +135,8 @@ class ServersFacade(object):
                               container_format=image.raw['container_format'],
                               properties=image.user_properties)
         except Exception, e:
-            msg = regionobj.fullname + ': update of ' + image.name +\
-                'failed:' + str(e)
+            msg = regionobj.fullname + ': Update of ' + image.name +\
+                ' failed. Cause: ' + str(e)
             self.logger.error(msg)
             raise Exception(msg)
 
@@ -144,23 +149,28 @@ class ServersFacade(object):
         :return: The UUID of the new image.
         """
         client = self._get_glanceclient(regionobj.region)
-        with open(self.images_dir + '/' + image.id, 'r') as file_obj:
-            try:
-                new_image = client.images.create(
-                    container_format=image.raw['container_format'],
-                    disk_format=image.raw['disk_format'],
-                    name=image.name, is_public=image.is_public,
-                    protected=image.raw['protected'],
-                    min_ram=image.raw['min_ram'],
-                    min_disk=image.raw['min_disk'],
-                    properties=image.user_properties, data=file_obj)
-                return new_image.id
-            except Exception, e:
-                raise
-                msg = 'Upload of ' + image.name + " to region " +\
-                      regionobj.region + ' Failed: ' + str(e)
-                self.logger.error(msg)
-                raise Exception(msg)
+        try:
+            with open(self.images_dir + '/' + image.id, 'r') as file_obj:
+                try:
+                    new_image = client.images.create(
+                        container_format=image.raw['container_format'],
+                        disk_format=image.raw['disk_format'],
+                        name=image.name, is_public=image.is_public,
+                        protected=image.raw['protected'],
+                        min_ram=image.raw['min_ram'],
+                        min_disk=image.raw['min_disk'],
+                        properties=image.user_properties, data=file_obj)
+                    return new_image.id
+                except Exception, e:
+                    msg = regionobj.fullname + ': Upload of ' + image.name +\
+                        ' Failed. Cause: ' + str(e)
+                    self.logger.error(msg)
+                    raise Exception(msg)
+        except IOError, e:
+            msg = regionobj.fullname + ': Cannot open the image ' +\
+                image.name + ' to upload. Cause: ' + str(e)
+            self.logger.error(msg)
+            raise Exception(msg)
 
     def delete_image(self, regionobj, id, confirm=True):
         """delete a image on the specified region.
@@ -184,8 +194,8 @@ class ServersFacade(object):
         try:
             client.images.get(id).delete()
         except Exception, e:
-            msg = regionobj.fullname + ': Failed the deletion of image ' + id \
-                + ' : ' + str(e)
+            msg = regionobj.fullname + ': Deletion of image ' + id \
+                + ' Failed. Cause: ' + str(e)
             self.logger.error(msg)
             raise Exception(msg)
 
@@ -211,12 +221,3 @@ def _getrawimagelist(glance_client):
     """
     images = glance_client.images.list()
     return list(image.to_dict() for image in images)
-
-
-def _getimagelist(regionobj, glance_client):
-    """return a image list from the glance of the specified region
-
-    :param regionobj: The GlanceSyncRegion object specifying the region to list
-    :return: a list of GlanceSyncImage objects
-    """
-

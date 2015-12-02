@@ -31,6 +31,7 @@ import unittest
 import copy
 from mock import patch, MagicMock, call, ANY
 from keystoneclient.auth.identity import v2, v3
+from multiprocessing import TimeoutError
 
 from glancesync.glancesync_serversfacade import ServersFacade
 from glancesync.glancesync_image import GlanceSyncImage
@@ -81,6 +82,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
         mock_osclients.reset_mock()
         self.facade = ServersFacade(self.target)
+        self.facade.images_dir = None
+
 
         image = GlanceSyncImage('imagetest', '01', self.region, None, False)
         image.raw = dict()
@@ -92,6 +95,11 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         image.raw['min_disk'] = '0'
 
         self.image = image
+
+    def tearDown(self):
+        if self.facade.images_dir:
+            os.unlink(self.facade.images_dir + '/01')
+            os.rmdir(self.facade.images_dir)
 
     def test_gettenantid(self):
         tenant_id = self.facade.get_tenant_id()
@@ -119,19 +127,59 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         mock_pool.return_value.apply_async.assert_called_once_with(
             ANY, (glance_client,))
 
+    @patch('glancesync.glancesync_serversfacade.Pool')
+    def test_list_ex_timeout(self, mock_pool):
+        config = {'apply_async.return_value.get.side_effect': TimeoutError()}
+        mock_pool.return_value.configure_mock(**config)
+        msg = 'fakeregion: Timeout while retrieving image list.'
+        with self.assertRaisesRegexp(Exception, msg):
+            self.facade.get_imagelist(self.region_obj)
+
+    @patch('glancesync.glancesync_serversfacade.Pool')
+    def test_list_ex(self, mock_pool):
+        config = {'apply_async.return_value.get.side_effect':
+                   Exception('not found')}
+        mock_pool.return_value.configure_mock(**config)
+        msg = 'fakeregion: Error retrieving image list. Cause: not found'
+        with self.assertRaisesRegexp(Exception, msg):
+            self.facade.get_imagelist(self.region_obj)
+
     def test_upload(self):
         config = {'get_glanceclient.return_value.images.create.return_value':
                   self.image}
-        mock_osclients.configure_mock(**config)
         self.facade.osclients.configure_mock(**config)
         self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
-
         file_obj = open(self.facade.images_dir + '/01', 'w')
         file_obj.write('test content')
         file_obj.close()
 
         result = self.facade.upload_image(self.region_obj, self.image)
         self.assertEquals(result, self.image.id)
+
+    def test_upload_ex(self):
+        config = {'get_glanceclient.return_value.images.create.side_effect':
+                  Exception('not enough space')}
+
+        self.facade.osclients.configure_mock(**config)
+        self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
+        file_obj = open(self.facade.images_dir + '/01', 'w')
+        file_obj.write('test content')
+        file_obj.close()
+        msg = 'fakeregion: Upload of imagetest Failed. Cause: not enough space'
+        with self.assertRaisesRegexp(Exception, msg):
+            self.facade.upload_image(self.region_obj, self.image)
+
+
+    def test_upload_ex2(self):
+        """Exception because the file does not exists"""
+        self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
+        file_obj = open(self.facade.images_dir + '/01', 'w')
+        file_obj.write('test content')
+        file_obj.close()
+        self.image.id = '02'
+        msg = 'fakeregion: Cannot open the image imagetest to upload. Cause: '
+        with self.assertRaisesRegexp(Exception, msg):
+            self.facade.upload_image(self.region_obj, self.image)
 
     def test_update(self):
         self.image.user_properties['new_property'] = 'new_value'
@@ -142,6 +190,14 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             properties={'new_property': 'new_value'})
         self.assertTrue(self.facade.osclients.mock_calls[-1] == expected_call)
 
+    def test_update_ex(self):
+        config = {'get_glanceclient.return_value.images.get.return_value.'
+            'update.side_effect': Exception('bad attribute')}
+        self.facade.osclients.configure_mock(**config)
+        msg = 'fakeregion: Update of imagetest failed. Cause: bad attribute'
+        with self.assertRaisesRegexp(Exception, msg):
+            self.facade.update_metadata(self.region_obj, self.image)
+
     def test_delete(self):
         test_call_delete_mock = MagicMock()
         config = {'get_glanceclient.return_value.images.get.return_value':
@@ -150,6 +206,15 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.facade.delete_image(self.region_obj, self.image.id, False)
         test_call_delete_mock.delete.assert_called_with()
 
+    def test_delete_ex(self):
+        config = {'get_glanceclient.return_value.images.get.return_value.'
+            'delete.side_effect': Exception('image is protected')}
+        self.facade.osclients.configure_mock(**config)
+        msg = 'fakeregion: Deletion of image 01 Failed. Cause: image is '\
+            'protected'
+        with self.assertRaises(Exception) as cm:
+            self.facade.delete_image(self.region_obj, self.image.id, False)
+        self.assertEquals(str(cm.exception), msg)
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
