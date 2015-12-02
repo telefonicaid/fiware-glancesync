@@ -29,22 +29,126 @@ import os
 import tempfile
 import unittest
 import copy
-
+from mock import patch, MagicMock, call, ANY
 from keystoneclient.auth.identity import v2, v3
 
 from glancesync.glancesync_serversfacade import ServersFacade
 from glancesync.glancesync_image import GlanceSyncImage
 from glancesync.glancesync_region import GlanceSyncRegion
+from collections import defaultdict
 
-
-"""This is an integration test to verify that the facade works correctly
+"""This environment variable activates a pair of
+integration test to verify that the facade works correctly
 using a real server.
 
-Don't activate this test unless you know what are you doing"""
+Don't activate these tests unless you know what are you doing"""
 
 testingFacadeReal = False
 if 'TESTING_FACADE' in env:
     testingFacadeReal = True
+
+
+class MyOpenStackClients(MagicMock):
+    def get_session(self):
+        return ""
+
+    def get_regions(self, service):
+        return ['fakeregion', 'fakeregion2']
+
+    def get_tenant_id(self):
+        return 'tenantid1'
+
+mock_osclients = MyOpenStackClients()
+
+class TestGlanceServersFacadeM(unittest.TestCase):
+    """Test the facade using a mock, that is, only checks that the right calls
+    to osclients are made"""
+    @patch('glancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
+    def setUp(self):
+        target = dict()
+        target['target_name'] = 'master'
+        target['user'] = 'fakeuser'
+        target['password'] = 'fakepassword'
+        target['keystone_url'] = 'http://127.0.0.1/'
+        target['tenant'] = 'faketenant'
+        target['use_keystone_v3'] = False
+        self.target = target
+
+        self.region = 'fakeregion'
+        targets = dict()
+        targets['master'] = target
+        self.region_obj = GlanceSyncRegion(self.region, targets)
+
+        mock_osclients.reset_mock()
+        self.facade = ServersFacade(self.target)
+
+        image = GlanceSyncImage('imagetest', '01', self.region, None, False)
+        image.raw = dict()
+        image.raw['disk_format'] = 'qcow2'
+        image.raw['is_public'] = False
+        image.raw['protected'] = False
+        image.raw['container_format'] = 'bare'
+        image.raw['min_ram'] = '0'
+        image.raw['min_disk'] = '0'
+
+        self.image = image
+
+    def test_gettenantid(self):
+        tenant_id = self.facade.get_tenant_id()
+        self.assertEquals(tenant_id, 'tenantid1')
+
+    def test_getregions2(self):
+        regions = self.facade.get_regions()
+        self.assertListEqual(regions, ['fakeregion', 'fakeregion2'])
+
+    def test_keystone_version(self):
+        # self.facade.osclients.set_keystone_version(True)
+
+        calls = [
+            call('http://127.0.0.1/'),
+            call().set_credential('fakeuser', 'fakepassword', 'faketenant'),
+            call().set_keystone_version(False)
+        ]
+        self.assertListEqual(mock_osclients.mock_calls, calls)
+
+    @patch('glancesync.glancesync_serversfacade.Pool')
+    def test_list(self, mock_pool):
+        # Check call to pool.apply_async(func, (glance_client,))
+        self.facade.get_imagelist(self.region_obj)
+        glance_client = mock_osclients.return_value.get_glanceclient()
+        mock_pool.return_value.apply_async.assert_called_once_with(
+            ANY, (glance_client,))
+
+    def test_upload(self):
+        config = {'get_glanceclient.return_value.images.create.return_value':
+                  self.image}
+        mock_osclients.configure_mock(**config)
+        self.facade.osclients.configure_mock(**config)
+        self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
+
+        file_obj = open(self.facade.images_dir + '/01', 'w')
+        file_obj.write('test content')
+        file_obj.close()
+
+        result = self.facade.upload_image(self.region_obj, self.image)
+        self.assertEquals(result, self.image.id)
+
+    def test_update(self):
+        self.image.user_properties['new_property'] = 'new_value'
+        self.facade.update_metadata(self.region_obj, self.image)
+        expected_call = call.get_glanceclient().images.get().update(
+            is_public=False, container_format='bare', disk_format='qcow2',
+            name='imagetest', protected=False,
+            properties={'new_property': 'new_value'})
+        self.assertTrue(self.facade.osclients.mock_calls[-1] == expected_call)
+
+    def test_delete(self):
+        test_call_delete_mock = MagicMock()
+        config = {'get_glanceclient.return_value.images.get.return_value':
+                  test_call_delete_mock}
+        self.facade.osclients.configure_mock(**config)
+        self.facade.delete_image(self.region_obj, self.image.id, False)
+        test_call_delete_mock.delete.assert_called_with()
 
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
@@ -149,6 +253,7 @@ class TestGlanceServersFacade(unittest.TestCase):
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacadeV3(TestGlanceServersFacade):
+    """The same tests, but with keystone v3"""
     def setUp(self):
         target = dict()
         target['target_name'] = 'master'

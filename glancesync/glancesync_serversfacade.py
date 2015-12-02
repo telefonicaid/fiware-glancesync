@@ -49,7 +49,7 @@ class ServersFacade(object):
         self.osclients = OpenStackClients(target['keystone_url'])
         self.osclients.set_credential(target['user'], target['password'],
                                       target['tenant'])
-        if target.get('use_keystone_v3'):
+        if target.get('use_keystone_v3', False):
             self.osclients.set_keystone_version(True)
         else:
             self.osclients.set_keystone_version(False)
@@ -57,6 +57,7 @@ class ServersFacade(object):
         self.session = self.osclients.get_session()
 
         self.target = target
+        # This is a default value
         self.images_dir = '/var/lib/glance/images'
         self.logger = logging.getLogger('glancesync')
 
