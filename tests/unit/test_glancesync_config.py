@@ -110,6 +110,9 @@ keystone_url = http://server:4730/v2.0
 # http://server:4730/v2.0,tenant1
 only_tenant_images = False
 
+list_images_timeout = 20
+use_keystone_v3 = True
+
 [experimental]
 credential = user2,\
   ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
@@ -203,6 +206,9 @@ class TestGlanceSyncStream(unittest.TestCase):
         self.assertFalse(experimental['support_obsolete_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
         self.assertEquals(experimental['tenant_id'], 'tenant2_id')
+        self.assertEquals(master['list_images_timeout'], 20)
+        self.assertTrue(master['use_keystone_v3'])
+        self.assertFalse(experimental['use_keystone_v3'])
 
     def test_override(self):
         """check overriding options passing a dictionary to constructor"""

@@ -83,8 +83,8 @@ class ServersFacade(object):
             target = regionobj.target
             # We need a Pool to implement a timeout. Unfortunately
             # setting client.images.client.timeout does nothing.
-            if 'timeout' in target:
-                timeout = target['timeout']
+            if 'list_images_timeout' in target:
+                timeout = target['list_images_timeout']
             else:
                 timeout = _default_timeout
             pool = Pool(1)

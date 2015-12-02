@@ -219,6 +219,16 @@ class GlanceSyncConfig(object):
                 else:
                     target['support_obsolete_images'] = True
 
+                if configparser.has_option(section, 'list_images_timeout'):
+                    target['list_images_timeout'] = configparser.getint(
+                        section, 'list_images_timeout')
+
+                if configparser.has_option(section, 'use_keystone_v3'):
+                    target['use_keystone_v3'] = configparser.getboolean(
+                        section, 'use_keystone_v3')
+                else:
+                    target['use_keystone_v3'] = False
+
         # Default configuration if it is not present
         if self.master_region is None:
             if 'OS_REGION_NAME' in os.environ:
