@@ -66,6 +66,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
     to osclients are made"""
     @patch('glancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
     def setUp(self):
+        """create self.facade, create also a GlanceSyncImage object and a
+        temporal file. Use a mock to replace osclients"""
         target = dict()
         target['target_name'] = 'master'
         target['user'] = 'fakeuser'
@@ -97,21 +99,24 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.image = image
 
     def tearDown(self):
+        """delete the tempfile use to test the upload method"""
         if self.facade.images_dir:
             os.unlink(self.facade.images_dir + '/01')
             os.rmdir(self.facade.images_dir)
 
     def test_gettenantid(self):
+        """call the method and check the return value of the osclients mock"""
         tenant_id = self.facade.get_tenant_id()
         self.assertEquals(tenant_id, 'tenantid1')
 
     def test_getregions2(self):
+        """call the method and check the return value of the osclients mock"""
         regions = self.facade.get_regions()
         self.assertListEqual(regions, ['fakeregion', 'fakeregion2'])
 
     def test_keystone_version(self):
-        # self.facade.osclients.set_keystone_version(True)
-
+        """check that osclients constructor is invoked, then the credential is
+        set and finally set_keystone_version is invoked with False"""
         calls = [
             call('http://127.0.0.1/'),
             call().set_credential('fakeuser', 'fakepassword', 'faketenant'),
@@ -121,6 +126,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
     @patch('glancesync.glancesync_serversfacade.Pool')
     def test_list(self, mock_pool):
+        """test list method. Check that apply_async method of the pool is
+        invoked passing the glance_client"""
         # Check call to pool.apply_async(func, (glance_client,))
         self.facade.get_imagelist(self.region_obj)
         glance_client = mock_osclients.return_value.get_glanceclient()
@@ -129,6 +136,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
     @patch('glancesync.glancesync_serversfacade.Pool')
     def test_list_ex_timeout(self, mock_pool):
+        """test TimeoutError exception with list operation"""
         config = {'apply_async.return_value.get.side_effect': TimeoutError()}
         mock_pool.return_value.configure_mock(**config)
         msg = 'fakeregion: Timeout while retrieving image list.'
@@ -137,6 +145,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
     @patch('glancesync.glancesync_serversfacade.Pool')
     def test_list_ex(self, mock_pool):
+        """test an exception with list operation"""
         config = {'apply_async.return_value.get.side_effect':
                    Exception('not found')}
         mock_pool.return_value.configure_mock(**config)
@@ -145,6 +154,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             self.facade.get_imagelist(self.region_obj)
 
     def test_upload(self):
+        """test the upload method: the id is the passed to the glancesync
+        mock"""
         config = {'get_glanceclient.return_value.images.create.return_value':
                   self.image}
         self.facade.osclients.configure_mock(**config)
@@ -157,6 +168,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.assertEquals(result, self.image.id)
 
     def test_upload_ex(self):
+        """test an exception in the upload method"""
         config = {'get_glanceclient.return_value.images.create.side_effect':
                   Exception('not enough space')}
 
@@ -171,7 +183,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
 
     def test_upload_ex2(self):
-        """Exception because the file does not exists"""
+        """test an exception because the file does not exists"""
         self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
         file_obj = open(self.facade.images_dir + '/01', 'w')
         file_obj.write('test content')
@@ -182,6 +194,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             self.facade.upload_image(self.region_obj, self.image)
 
     def test_update(self):
+        """test update metadata. Check that the last call is the update over
+        the image with the expected params"""
         self.image.user_properties['new_property'] = 'new_value'
         self.facade.update_metadata(self.region_obj, self.image)
         expected_call = call.get_glanceclient().images.get().update(
@@ -191,6 +205,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.assertTrue(self.facade.osclients.mock_calls[-1] == expected_call)
 
     def test_update_ex(self):
+        """test and exception during the update"""
         config = {'get_glanceclient.return_value.images.get.return_value.'
             'update.side_effect': Exception('bad attribute')}
         self.facade.osclients.configure_mock(**config)
@@ -199,6 +214,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             self.facade.update_metadata(self.region_obj, self.image)
 
     def test_delete(self):
+        """test that the delete method of osclients is called"""
         test_call_delete_mock = MagicMock()
         config = {'get_glanceclient.return_value.images.get.return_value':
                   test_call_delete_mock}
@@ -207,6 +223,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         test_call_delete_mock.delete.assert_called_with()
 
     def test_delete_ex(self):
+        """test and exception during the delete operation"""
         config = {'get_glanceclient.return_value.images.get.return_value.'
             'delete.side_effect': Exception('image is protected')}
         self.facade.osclients.configure_mock(**config)
@@ -218,7 +235,10 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
+    """Test to check the class against a real server"""
     def setUp(self):
+        """prepare the environment, with a real credential obtained from
+        environment variables"""
         target = dict()
         target['target_name'] = 'master'
         target['user'] = env['OS_USERNAME']
@@ -243,6 +263,8 @@ class TestGlanceServersFacade(unittest.TestCase):
         file_obj.close()
 
     def tearDown(self):
+        """clean the temporay file and delete the create image it was not
+        deleted before"""
         os.unlink(self.facade.images_dir + '/01')
         os.rmdir(self.facade.images_dir)
         if self.created:
