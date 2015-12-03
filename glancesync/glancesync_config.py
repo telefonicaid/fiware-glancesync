@@ -106,6 +106,11 @@ class GlanceSyncConfig(object):
         """
 
         logger = logging.getLogger('glancesync')
+
+        defaults = {'use_keystone_v3': 'False',
+                    'support_obsolete_images': 'True',
+                    'only_tenant_images': 'True', 'list_images_timeout': '30'}
+
         if not stream:
             if 'GLANCESYNC_CONFIG' in os.environ:
                 configuration_path = os.environ['GLANCESYNC_CONFIG']
@@ -120,7 +125,7 @@ class GlanceSyncConfig(object):
 
         # Read configuration if it exists
         if configuration_path is not None or stream is not None:
-            configparser = ConfigParser.SafeConfigParser()
+            configparser = ConfigParser.SafeConfigParser(defaults)
             if stream:
                 configparser.readfp(stream)
             else:
@@ -130,7 +135,7 @@ class GlanceSyncConfig(object):
 
         if override_d:
             if not configparser:
-                configparser = ConfigParser.SafeConfigParser()
+                configparser = ConfigParser.SafeConfigParser(defaults)
 
             for key in override_d.keys():
                 value = override_d[key]
@@ -198,13 +203,12 @@ class GlanceSyncConfig(object):
                     if len(cond.strip()):
                         target['metadata_condition'] = compile(
                             cond, 'metadata_condition', 'eval')
+
                 target['metadata_set'] = configparser.getset(
                     section, 'metadata_set')
-                if configparser.has_option(section, 'only_tenant_images'):
-                    target['only_tenant_images'] = configparser.getboolean(
+
+                target['only_tenant_images'] = configparser.getboolean(
                         section, 'only_tenant_images')
-                else:
-                    target['only_tenant_images'] = True
 
                 # This is only for the mock mode
                 if configparser.has_option(section, 'tenant_id'):
@@ -213,21 +217,15 @@ class GlanceSyncConfig(object):
                 target['obsolete_syncprops'] = configparser.getset(
                         section, 'obsolete_syncprops')
 
-                if configparser.has_option(section, 'support_obsolete_images'):
-                    target['support_obsolete_images'] = configparser.getboolean(
+                target['support_obsolete_images'] = configparser.getboolean(
                         section, 'support_obsolete_images')
-                else:
-                    target['support_obsolete_images'] = True
 
-                if configparser.has_option(section, 'list_images_timeout'):
-                    target['list_images_timeout'] = configparser.getint(
+
+                target['list_images_timeout'] = configparser.getint(
                         section, 'list_images_timeout')
 
-                if configparser.has_option(section, 'use_keystone_v3'):
-                    target['use_keystone_v3'] = configparser.getboolean(
-                        section, 'use_keystone_v3')
-                else:
-                    target['use_keystone_v3'] = False
+                target['use_keystone_v3'] = configparser.getboolean(
+                    section, 'use_keystone_v3')
 
         # Default configuration if it is not present
         if self.master_region is None:
