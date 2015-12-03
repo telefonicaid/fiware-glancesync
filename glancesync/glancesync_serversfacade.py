@@ -46,6 +46,8 @@ _default_timeout = 30
 
 class ServersFacade(object):
     def __init__(self, target):
+        """Create a new Facade for the specified target (a target is shared
+        between regions using the same credential)"""
         self.osclients = OpenStackClients(target['keystone_url'])
         self.osclients.set_credential(target['user'], target['password'],
                                       target['tenant'])
@@ -62,7 +64,7 @@ class ServersFacade(object):
         self.logger = logging.getLogger('glancesync')
 
     def _get_glanceclient(self, region):
-        self.osclients.set_region(region)
+        """helper method, to get a glanceclient for the region"""
         return self.osclients.get_glanceclient()
 
     def get_regions(self):
