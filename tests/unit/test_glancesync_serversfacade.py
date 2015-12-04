@@ -233,6 +233,17 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             self.facade.delete_image(self.region_obj, self.image.id, False)
         self.assertEquals(str(cm.exception), msg)
 
+def _unset_environment():
+    """Clean environment, to ensure that osclients get information from
+    setter methods. Environment is restored after the test
+    in tearDown method"""
+
+    del env['OS_REGION_NAME']
+    del env['OS_AUTH_URL']
+    del env['OS_PASSWORD']
+    del env['OS_USERNAME']
+    del env['OS_TENANT_NAME']
+
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):
     """Test to check the class against a real server"""
@@ -261,6 +272,8 @@ class TestGlanceServersFacade(unittest.TestCase):
         file_obj = open(self.facade.images_dir + '/01', 'w')
         file_obj.write('test content')
         file_obj.close()
+        self.target = target
+        _unset_environment()
 
     def tearDown(self):
         """clean the temporay file and delete the create image it was not
@@ -272,6 +285,13 @@ class TestGlanceServersFacade(unittest.TestCase):
                 self.facade.delete_image(self.region_obj, self.created, False)
             except Exception:
                 pass
+
+        # restore environment
+        env['OS_REGION_NAME'] = self.target['region']
+        env['OS_USERNAME'] = self.target['user']
+        env['OS_PASSWORD'] = self.target['password']
+        env['OS_TENANT_NAME'] = self.target['tenant']
+        env['OS_AUTH_URL'] = self.target['keystone_url']
 
     def create_image(self):
         """function to create_image, used by several tests; check that UUID
@@ -338,6 +358,7 @@ class TestGlanceServersFacade(unittest.TestCase):
         """check get_tenant_id method. Only check that a value is obtained"""
         self.assertIsNotNone(self.facade.get_tenant_id())
 
+
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacadeV3(TestGlanceServersFacade):
     """The same tests, but with keystone v3"""
@@ -364,6 +385,8 @@ class TestGlanceServersFacadeV3(TestGlanceServersFacade):
         file_obj = open(self.facade.images_dir + '/01', 'w')
         file_obj.write('test content')
         file_obj.close()
+
+        _unset_environment()
 
     def test_keystone(self):
         """check that session object is V3 when the option use_keystone_v3 is
