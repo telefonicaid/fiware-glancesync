@@ -65,13 +65,13 @@ class ServersFacade(object):
 
     def _get_glanceclient(self, region):
         """helper method, to get a glanceclient for the region"""
+        self.osclients.set_region(region)
         return self.osclients.get_glanceclient()
 
     def get_regions(self):
         """It returns the list of regions on the specified target.
         :return: a list of region names.
         """
-        self.osclients.set_region(self.target)
         return self.osclients.get_regions('image')
 
     def get_imagelist(self, regionobj):
