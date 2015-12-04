@@ -385,7 +385,7 @@ class TestGlanceServersFacadeV3(TestGlanceServersFacade):
         file_obj = open(self.facade.images_dir + '/01', 'w')
         file_obj.write('test content')
         file_obj.close()
-
+        self.target = target
         _unset_environment()
 
     def test_keystone(self):
