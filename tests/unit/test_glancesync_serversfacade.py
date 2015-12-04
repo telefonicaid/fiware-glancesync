@@ -50,13 +50,17 @@ if 'TESTING_FACADE' in env:
 
 
 class MyOpenStackClients(MagicMock):
+    """mock to use in the test"""
     def get_session(self):
+        """get an empy string"""
         return ""
 
     def get_regions(self, service):
+        """get a  list"""
         return ['fakeregion', 'fakeregion2']
 
     def get_tenant_id(self):
+        """get a tenant id"""
         return 'tenantid1'
 
 mock_osclients = MyOpenStackClients()
