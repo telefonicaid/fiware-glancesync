@@ -39,7 +39,7 @@ from glancesync.glancesync_image import GlanceSyncImage
 from glancesync.glancesync import GlanceSync
 
 from glancesync.glancesync_serverfacade_mock import ServersFacade
-
+from tests.unit.resources.config import RESOURCESPATH
 
 def create_images(region, count, prefix, tenant):
     """Helper function for creating a sequence or regions. The images are
@@ -351,7 +351,7 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/alreadysync'
+        self.path_test = path + RESOURCESPATH + '/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
     def setUp(self):
@@ -433,7 +433,7 @@ class TestGlanceSync_Empty(TestGlanceSync_Sync):
     """Test a environment where the destination region has no images"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/emptyregions'
+        self.path_test = path + RESOURCESPATH + '/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -442,7 +442,7 @@ class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     """
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/mixed'
+        self.path_test = path + RESOURCESPATH + '/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -451,7 +451,7 @@ class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     metadata different than the images on the master region"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/metadata'
+        self.path_test = path + RESOURCESPATH + '/metadata'
         self.regions = ['master:Burgos']
 
 
@@ -460,7 +460,7 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     than the master images"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/checksum'
+        self.path_test = path + RESOURCESPATH + '/checksum'
         self.regions = ['master:Burgos']
 
     def test_sync_warning(self):
@@ -489,14 +489,14 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/ami'
+        self.path_test = path + RESOURCESPATH + '/ami'
         self.regions = ['master:Burgos']
 
 class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
     """Test obsolete images support"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/obsolete'
+        self.path_test = path + RESOURCESPATH + '/obsolete'
         self.regions = ['other:Burgos', 'target2:Madrid']
 
 class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
@@ -504,7 +504,7 @@ class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
     owner differnt than the tenant, are ignored"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + '/tests/resources/master_filtered'
+        self.path_test = path + RESOURCESPATH + '/master_filtered'
         self.regions = ['Burgos']
 
     def test_sync_warning(self):

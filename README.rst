@@ -834,7 +834,7 @@ Then, a test class must be defined extending *TestGlanceSync_Sync*, for example:
         """Test a environment with AMI images (kernel_id/ramdisk_id)"""
         def config(self):
             path = os.path.abspath(os.curdir)
-            self.path_test = path + '/tests/resources/ami'
+            self.path_test = path + '/tests/unit/resources/ami'
             self.regions = ['master:Burgos']
 
 This class is provided in ´´tests/unit/test_glancesync.py´´.
