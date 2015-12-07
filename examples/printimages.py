@@ -22,10 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-import sys
 
+import sys
 from glancesync.glancesync import GlanceSync
+
+__author__ = 'chema'
+
 
 def _print_images_group(images, properties, comparewith):
     """
@@ -41,11 +43,11 @@ def _print_images_group(images, properties, comparewith):
         line = image.csv_userproperties(properties)
         if line is not None:
             if comparewith is not None:
-                print(image.compare_with_masterregion(comparewith, properties)
-                      + line)
+                print(image.compare_with_masterregion(comparewith, properties) + line)
             else:
                 print(line)
     print("---")
+
 
 def _printimages(imagesregion, comparewith=None):
     """ print a report about the images present on the specified region

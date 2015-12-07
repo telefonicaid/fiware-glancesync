@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-
 import unittest
 import StringIO
 import copy
@@ -34,12 +32,12 @@ import tempfile
 import logging
 
 from glancesync.glancesync_image import GlanceSyncImage
-
-
 from glancesync.glancesync import GlanceSync
-
 from glancesync.glancesync_serverfacade_mock import ServersFacade
 from tests.unit.resources.config import RESOURCESPATH
+
+__author__ = 'chema'
+
 
 def create_images(region, count, prefix, tenant):
     """Helper function for creating a sequence or regions. The images are
@@ -485,6 +483,7 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
                ', fill either dontupdate, replace or rename with the checksum.'
         self.assertTrue(warnings[0].startswith(msg1))
 
+
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
@@ -492,12 +491,14 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
         self.path_test = path + RESOURCESPATH + '/ami'
         self.regions = ['master:Burgos']
 
+
 class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
     """Test obsolete images support"""
     def config(self):
         path = os.path.abspath(os.curdir)
         self.path_test = path + RESOURCESPATH + '/obsolete'
         self.regions = ['other:Burgos', 'target2:Madrid']
+
 
 class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
     """Test that master images with duplicated name, status != active, and

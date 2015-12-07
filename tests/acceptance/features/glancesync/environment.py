@@ -21,10 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
 import behave
 from tests.acceptance.commons.constants import *
 from tests.acceptance.qautils.logger_utils import get_logger
@@ -32,10 +28,15 @@ from tests.acceptance.commons.utils import load_project_properties
 from tests.acceptance.commons.glance_operations import GlanceOperations
 from tests.acceptance.glancesync.glancesync_client import GlanceSyncClient
 
+__author__ = "Javier Fernández"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
+
 __logger__ = get_logger("qautils")
 
 # Use regular expressions for step param definition (Behave).
 behave.use_step_matcher("re")
+
 
 def before_all(context):
     """

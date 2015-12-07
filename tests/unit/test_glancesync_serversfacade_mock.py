@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-
 import unittest
 import copy
 import os
@@ -33,6 +31,9 @@ import tempfile
 from glancesync.glancesync_serverfacade_mock import ServersFacade
 from glancesync.glancesync_region import GlanceSyncRegion
 from tests.unit.resources.config import RESOURCESPATH
+
+__author__ = 'chema'
+
 
 class TestGlanceServersFacadeMock(unittest.TestCase):
     def setUp(self):
