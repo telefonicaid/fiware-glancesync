@@ -21,11 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
-
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
 from tests.acceptance.commons.constants import IMAGES_DIR
@@ -37,7 +32,11 @@ from tests.acceptance.glancesync.output_constants import \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
 import re
 import logging
+import os
 
+__author__ = "Javier Fernández"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
 
 # Get logger for Behave steps
 __logger__ = logging.getLogger("synchronization_steps")
@@ -121,7 +120,16 @@ def __image_is_present_in_nodes__(context, region, image_name, filename_content=
 
     filename_content = image_name if filename_content is None else filename_content
     expected_img_content = ""
-    image_path = "{}/{}".format(IMAGES_DIR, filename_content)
+
+    current = os.getcwd()
+
+    if "tests/acceptance" in current:
+        image_path = "{}/{}".format(IMAGES_DIR, filename_content)
+    else:
+        image_path = "tests/acceptance/{}/{}".format(IMAGES_DIR, filename_content)
+
+
+
     file = open(image_path)
     for line in file:
         expected_img_content += line

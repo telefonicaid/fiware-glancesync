@@ -20,18 +20,18 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__email__ = "jfernandez@tcpsi.es"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-__version__ = "1.0.0"
-
-
 from logger_utils import get_logger
 from fabric.api import env, hide, run, get
 from fabric.tasks import execute
 from fabric.contrib import files
 from StringIO import StringIO
+import os
+
+__author__ = "Javier Fernández"
+__email__ = "jfernandez@tcpsi.es"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
+__version__ = "1.0.0"
 
 __logger__ = get_logger("qautils")
 
@@ -86,7 +86,13 @@ class FabricUtils():
         env.host_string = host_name
         env.user = host_username
         env.password = host_password
-        env.key_filename = host_ssh_key
+
+        current = os.getcwd()
+
+        if "tests/acceptance" in current:
+            env.key_filename = host_ssh_key
+        else:
+            env.key_filename = "tests/acceptance/{}".format(host_ssh_key)
 
         self.fabric_assertions = FabricAssertions()
 
