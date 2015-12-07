@@ -28,7 +28,7 @@ __license__ = " Apache License, Version 2.0"
 
 from behave import step, then
 from hamcrest import assert_that, contains_string, is_not
-from glancesync.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
+from tests.acceptance.glancesync.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
 import re
 
 

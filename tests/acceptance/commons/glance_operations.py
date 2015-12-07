@@ -26,8 +26,8 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-from commons.constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
-from qautils.logger_utils import get_logger
+from tests.acceptance.commons.constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
+from tests.acceptance.qautils.logger_utils import get_logger
 from glanceclient.client import Client as GlanceClient
 from keystoneclient.v2_0.client import Client as KeystoneClient
 

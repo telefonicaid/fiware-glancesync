@@ -27,10 +27,10 @@ __license__ = " Apache License, Version 2.0"
 
 
 from behave import step
-from qautils.dataset_utils import DatasetUtils
+from tests.acceptance.qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, is_not, is_, contains_string
-from glancesync.output_constants import GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, \
-    GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
+from tests.acceptance.glancesync.output_constants import \
+    GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
 import logging
 
 

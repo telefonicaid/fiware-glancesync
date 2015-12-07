@@ -28,10 +28,11 @@ __license__ = " Apache License, Version 2.0"
 
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
-from commons.constants import IMAGES_DIR
-from commons.utils import get_real_value_of_image_property
-from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+from tests.acceptance.commons.constants import IMAGES_DIR
+from tests.acceptance.commons.utils import get_real_value_of_image_property
+from tests.acceptance.qautils.dataset_utils import DatasetUtils
+from tests.acceptance.glancesync.output_constants import \
+    GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
 import re

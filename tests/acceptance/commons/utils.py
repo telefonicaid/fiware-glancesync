@@ -26,10 +26,11 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-from commons.constants import PROPERTIES_FILE
-from qautils.logger_utils import get_logger
+from tests.acceptance.commons.constants import PROPERTIES_FILE
+from tests.acceptance.qautils.logger_utils import get_logger
 import json
 import re
+import os
 
 __logger__ = get_logger("qautils")
 
@@ -46,11 +47,18 @@ def load_project_properties():
     __logger__.debug("Loading test settings...")
     global config
 
-    with open(PROPERTIES_FILE) as config_file:
+    path_file = os.getcwd()
+
+    if "tests/acceptance" in path_file:
+        path_file = PROPERTIES_FILE
+    else:
+        path_file = path_file + "/tests/acceptance/" + PROPERTIES_FILE
+
+    with open(path_file) as config_file:
         try:
             config = json.load(config_file)
         except Exception as e:
-            assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
+            assert False, "Error parsing config file '{}': {}".format(path_file, e)
 
     __logger__.debug("Properties loaded: %s", config)
 

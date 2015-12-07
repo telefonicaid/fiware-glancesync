@@ -23,5 +23,3 @@
 # contact with opensource@tid.es
 #
 __author__ = 'fla'
-
-RESOURCESPATH = '/tests/unit/resources'
