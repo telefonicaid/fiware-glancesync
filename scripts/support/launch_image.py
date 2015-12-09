@@ -28,7 +28,7 @@ import sys
 import os
 import yaml
 
-from osclients import osclients
+from utils.osclients import osclients
 
 images = {
    'centos6': ('centos6_rc', 'm1.small'),

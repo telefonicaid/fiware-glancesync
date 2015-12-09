@@ -24,7 +24,7 @@
 #
 
 
-from osclients import osclients
+from utils.osclients import osclients
 import sys
 
 

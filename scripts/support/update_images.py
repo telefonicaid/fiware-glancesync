@@ -22,7 +22,7 @@
 # contact with opensource@tid.es
 #
 
-from osclients import osclients
+from utils.osclients import osclients
 import time
 from subprocess import check_call
 import os

@@ -439,6 +439,14 @@ generated invoking *script/generated_config_file.py*
  # and the name) in obsolete images, when support_obsolete_images is True.
  obsolete_syncprops = sdc_aware
 
+ # Timeout to get the image list from a glance server, in seconds. Default
+ # value is 30 seconds.
+ list_images_timeout = 30
+
+ # API required to contact with the keystone server. If this parameter is True,
+ # then version 3 of the API is used. Otherwise, the version 2 is used
+ use_keystone_v3 = False
+
  [master]
 
  # This is the only mandatory target: it includes all the regions registered
