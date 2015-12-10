@@ -23,7 +23,7 @@
 
 from behave import step, then
 from hamcrest import assert_that, contains_string, is_not
-from tests.acceptance.glancesync.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
+from glancesync_client.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
 import re
 
 __author__ = "jframos"

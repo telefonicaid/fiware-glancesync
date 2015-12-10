@@ -22,11 +22,11 @@
 # contact with opensource@tid.es
 
 import behave
-from tests.acceptance.commons.constants import *
-from tests.acceptance.qautils.logger_utils import get_logger
-from tests.acceptance.commons.utils import load_project_properties
-from tests.acceptance.commons.glance_operations import GlanceOperations
-from tests.acceptance.glancesync.glancesync_client import GlanceSyncClient
+from commons.constants import *
+from qautils.logger_utils import get_logger
+from commons.utils import load_project_properties
+from commons.glance_operations import GlanceOperations
+from glancesync_client.glancesync_client import GlanceSyncClient
 
 __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"

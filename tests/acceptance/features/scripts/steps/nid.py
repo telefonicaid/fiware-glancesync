@@ -20,10 +20,11 @@
 #
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
+
 from behave import when, then, given
-from hamcrest import assert_that, equal_to, is_, is_not
-from tests.acceptance.qautils.commandline_utils import execute_command as cmd
-from tests.acceptance.qautils.dataset_utils import DatasetUtils
+from hamcrest import assert_that, equal_to, is_
+from qautils.commandline_utils import execute_command as cmd
+from qautils.dataset_utils import DatasetUtils
 import urllib
 import os
 import logging

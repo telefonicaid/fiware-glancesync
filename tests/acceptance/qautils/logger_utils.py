@@ -32,18 +32,18 @@ This code is based on:
      https://pdihub.hi.inet/fiware/fiware-iotqaUtils/raw/develop/iotqautils/iotqaLogger.py
 """
 
-__author__ = "Javier Fernández"
-__email__ = "jfernandez@tcpsi.es"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-__version__ = "1.0.0"
-
 
 import logging
 import logging.config
 from xml.dom.minidom import parseString
 import json
 import os
+
+__author__ = "Javier Fernández"
+__email__ = "jfernandez@tcpsi.es"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
+__version__ = "1.0.0"
 
 HEADER_CONTENT_TYPE = u'content-type'
 HEADER_REPRESENTATION_JSON = u'application/json'
