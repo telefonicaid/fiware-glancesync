@@ -26,6 +26,11 @@ __author__ = 'chema'
 
 from mock import MagicMock, patch, call, ANY
 import unittest
+import datetime
+import os
+import logging
+import time
+
 from sync import Sync
 
 class TestSync(unittest.TestCase):
@@ -121,3 +126,77 @@ class TestSyncConstr(unittest.TestCase):
         glancesync.configure_mock(**self.config)
         sync = Sync(['r1', 'r2', 'other:r1'])
         self.assertEqual(['r1', 'r2', 'other:r1'], sync.regions)
+
+class TestSyncParallel(unittest.TestCase):
+    """Test the parallel functionality"""
+    @patch('sync.GlanceSync', auto_spec=True)
+    def setUp(self, glancesync):
+        """create constructor, mock with glancesync, Set a master region"""
+        regions = ['region1', 'region2']
+        self.sync = Sync(regions)
+        self.glancesync = glancesync
+        self.log = logging.getLogger('glancesync')
+        config = {
+            'return_value.master_region': 'MasterRegion',
+            'return_value.log': self.log,
+            'return_value.sync_region.side_effect': lambda region:
+                time.sleep(1.5) or
+                self.log.info('Sync ' + region + ' ' + str(time.time()))
+        }
+        self.glancesync.configure_mock(**config)
+        self.dir_name = 'sync_20200206_2357'
+        self.tearDown()
+
+    def tearDown(self):
+        """clean directory and files created during the test"""
+        if os.path.exists(self.dir_name):
+            for name in os.listdir(self.dir_name):
+                os.unlink(os.path.join(self.dir_name, name))
+            os.rmdir(self.dir_name)
+
+    def _check_sync_invoked(self, datetime_mock):
+        """Check that the files indicating than the regions are synchronised
+        are invoked and return the difference of the timestamp where each file
+        is printed. This way is possible to determine if both process are
+        invoked at the some time or not.
+
+        :param datetime_mock: the absolute difference time, in seconds (float)
+        :return:
+        """
+        dt = datetime.datetime(2020, 2, 6, 23, 57)
+        config = {'datetime.now.return_value': dt}
+        datetime_mock.configure_mock(**config)
+        self.sync.parallel_sync()
+        file1 = os.path.join(self.dir_name, 'region1.txt')
+        file2 = os.path.join(self.dir_name, 'region2.txt')
+        assert(os.path.exists(file1))
+        assert(os.path.exists(file2))
+        data1 = open(file1).read()
+        assert(data1.startswith('Sync region1'))
+        data2 = open(file2).read()
+        assert(data2.startswith('Sync region2'))
+        time1 = float(data1.split(' ')[2])
+        time2 = float(data2.split(' ')[2])
+        return abs(time1-time2)
+
+    @patch('sync.datetime')
+    def test_parallel_sync(self, datetime_mock):
+        """test with support for two clients, so both processes run at the
+        some time"""
+        config = {
+            'return_value.max_children': 2,
+        }
+        self.glancesync.configure_mock(**config)
+        diff = self._check_sync_invoked(datetime_mock)
+        assert(diff <= 1)
+
+    @patch('sync.datetime')
+    def test_noparallel_sync(self, datetime_mock):
+        """test with support for only one client, so one process run first
+        and then the other one"""
+        config = {
+            'return_value.max_children': 1,
+        }
+        self.glancesync.configure_mock(**config)
+        diff = self._check_sync_invoked(datetime_mock)
+        assert(diff > 1)
