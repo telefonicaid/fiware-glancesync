@@ -91,7 +91,6 @@ class Sync(object):
 
         msg = '======Master is ' + self.glancesync.master_region
         print(msg)
-        self.glancesync.print_images_master_region()
         sys.stdout.flush()
         os.mkdir('sync_' + datestr)
         children = dict()
@@ -122,7 +121,9 @@ class Sync(object):
                     logger.propagate = 0
 
                     self.glancesync.sync_region(region)
-                    sys.exit(0)
+                    print pid
+                    # After a fork, os_exit() and not sys.exit() must be used.
+                    os._exit(0)
             except Exception:
                 raise
                 sys.stderr.flush()
