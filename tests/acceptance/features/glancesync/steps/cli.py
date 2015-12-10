@@ -21,15 +21,14 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+from behave import step, then
+from hamcrest import assert_that, contains_string, is_not
+from glancesync_client.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
+import re
+
 __author__ = "jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
-
-
-from behave import step, then
-from hamcrest import assert_that, contains_string, is_not
-from glancesync.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
-import re
 
 
 def _strip_multiline(multiline):
@@ -57,6 +56,7 @@ def run_sync_command_with_options(context, cli_options):
 
     context.glancesync_result = context.glancesync_client.sync(options=cli_options)
 
+
 @then(u'I can see.*')
 def i_can_see(context):
 
@@ -64,8 +64,8 @@ def i_can_see(context):
                 "Problem when executing Sync command")
 
     assert_that(_strip_multiline(context.glancesync_result),
-                        contains_string(_strip_multiline(context.text)),
-                        "The output of the command does not contain the expected one")
+                contains_string(_strip_multiline(context.text)),
+                "The output of the command does not contain the expected one")
 
 
 @then(u'configured regions are listed')

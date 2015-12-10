@@ -22,11 +22,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 import sys
 import logging
-
 from glancesync.glancesync import GlanceSync
+
+__author__ = 'chema'
 
 """This code renames an image in all the regions. The image must exist in
 the master region (it is OK if the image has been already renamed). If the
@@ -49,6 +49,7 @@ updated.
 
 sync_properties = ['sdc_aware']
 
+
 def update_image(image, image_master):
     """
     Update the image with the name and contents of image_master
@@ -65,6 +66,7 @@ def update_image(image, image_master):
             del image.user_properties[prop]
 
     glancesync.update_metadata_image(image.region, image)
+
 
 def metadata_outdated(image, image_master):
     """Compare metadata of image and image_master; return

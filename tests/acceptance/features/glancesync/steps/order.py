@@ -21,16 +21,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
-
 from behave import step
 from hamcrest import assert_that, greater_than, is_
 from qautils.dataset_utils import DatasetUtils
 from datetime import datetime
 import logging
+
+__author__ = "Javier Fernández"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
 
 
 # Get logger for Behave steps

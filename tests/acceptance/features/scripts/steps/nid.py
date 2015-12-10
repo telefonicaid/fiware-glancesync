@@ -21,15 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'fla'
-
 from behave import when, then, given
-from hamcrest import assert_that, equal_to, is_, is_not
+from hamcrest import assert_that, equal_to, is_
 from qautils.commandline_utils import execute_command as cmd
 from qautils.dataset_utils import DatasetUtils
 import urllib
 import os
 import logging
+
+
+__author__ = 'fla'
 
 # Get logger for Behave steps
 __logger__ = logging.getLogger("getnid_steps")
@@ -44,11 +45,17 @@ def __load_response__(filename, reduce=True):
     :param filename: The name of the filename to be loaded
     :return: The content of the file in string unicode format without whitespaces and carriage returns.
     """
-    relativepath = "./resources/nids"
+    relativepath = "/resources/nids"
 
     # Load the corresponding file from the resources directory
     current = os.getcwd()
-    os.chdir(relativepath)
+
+    if "tests/acceptance" in current:
+        path = current + relativepath
+    else:
+        path = current + "/tests/acceptance" + relativepath
+
+    os.chdir(path)
 
     # Open de file and get data
     f = open(filename, 'r')
@@ -62,6 +69,18 @@ def __load_response__(filename, reduce=True):
         str = str.replace('\n', '').replace('\r', '').replace(" ", "")
 
     return str
+
+
+def __getbinpath__(context):
+    BIN_PATH = context.config['getnid']['bin_path']
+
+    current = os.getcwd()
+    if "tests/acceptance" in current:
+        BIN_PATH = current + "/../.." + BIN_PATH
+    else:
+        BIN_PATH = current + BIN_PATH
+
+    return BIN_PATH
 
 
 def __check_version__(version1, version2):
@@ -109,7 +128,8 @@ def step_obtain_list_ge_nids(context):
     __logger__.info("Obtaining the list of Generic Enabler NIDs")
 
     context.value = dict()
-    BIN_PATH = context.config['getnid']['bin_path']
+
+    BIN_PATH = __getbinpath__(context)
 
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):
@@ -147,14 +167,14 @@ def step_impl_check_application_installed(context):
     __logger__.info("Checking the availability of the getnid.py")
 
     # Check the availability of the getnid.py code
-    result = os.path.isfile(context.config['getnid']['bin_path'])
+    result = os.path.isfile(__getbinpath__(context))
 
-    assert_that(result, equal_to(True), "The python scripts does not exist in the folder ../../glancesync/getnid.py")
+    assert_that(result, equal_to(True), "The python scripts does not exist in the folder /scripts/getnids/getnid.py")
 
 
 @when(u'I execute the getnid application with the option')
 def step_impl_execute_with_options(context):
-    BIN_PATH = context.config['getnid']['bin_path']
+    BIN_PATH = __getbinpath__(context)
 
     if context.table is not None:
         for row in __dataset_utils__.prepare_data(context.table):

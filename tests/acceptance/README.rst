@@ -1,6 +1,12 @@
-=============================================
+.. _Top:
+
 FIWARE | GLANCESYNC | Acceptance test project
-=============================================
+*********************************************
+
+.. contents:: :local:
+
+Introduction
+============
 
 This project contains the GlanceSync acceptance tests (component, integration and E2E testing).
 All test cases have been defined using Gherkin that it is a Business Readable, Domain Specific Language that lets you
@@ -11,19 +17,31 @@ Gherkin has the purpose of serving documentation of test cases.
 Test case implementation has been performed using `Python <http://www.python.org/>`_ and the BDD framework
 `Behave <http://pythonhosted.org/behave/>`_.
 
+Top_
+
+
 Acceptance Project Structure
 ----------------------------
  :: 
  
     ├───acceptance
     │   ├───commons
+    │   ├───doc
     │   ├───features
-    │   │   ├───steps
-    │   │   │   ├───synchronization.py
+    │   │   ├───glancesync
+    │   │   │   ├───steps
+    │   │   │   │   ├───synchronization.py
+    │   │   │   │   └───...
+    │   │   │   ├───environment.py
+    │   │   │   ├───synchronization_image.feature
     │   │   │   └───...
-    │   │   ├───environment.py
-    │   │   ├───synchronization_image.feature
-    │   │   └───...
+    │   │   └───scripts
+    │   │       ├───steps
+    │   │       │   ├───nid.py
+    │   │       │   └───...
+    │   │       ├───environment.py
+    │   │       ├───nid.feature
+    │   │       └───...
     │   ├───resources
     │   │   ├───settings.json
     │   │   └───images
@@ -31,6 +49,8 @@ Acceptance Project Structure
     │   ├───qautils
     │   └───glancesync
     │
+
+Top_
 
 
 FIWARE GlanceSync Automation Framework
@@ -49,60 +69,31 @@ Features:
 
 Domain specific language implemented for building features: `GlanceSync Acceptance DSL <doc/dsl.rst>`_
 
+Top_
 
-Acceptance test execution
--------------------------
 
-Execute the following command in the test project root directory:
+Acceptance test preparation
+===========================
 
-::
-
-  $> cd $GLANCESYNC_HOME/tests/acceptance
-  $> behave features/ --tags ~@skip
-
-With this command, you will execute:
-
-- Test Cases in the environment configured in `resources/settings.json`.
-- all *.features implemented.
-- Skipping all Scenarios tagged with "skip".
-
-For more options, execute *behave --help*.
-
-**Prerequisites**
+Prerequisites
+-------------
 
 - Python 2.7 or newer (2.x) (https://www.python.org/downloads/).
 - pip (https://pypi.python.org/pypi/pip).
 - virtualenv (https://pypi.python.org/pypi/virtualenv).
 - GlanceSync (https://pdihub.hi.inet/fiware/fiware-glancesync/).
 
-**Test case execution using virtualenv**
+Top_
 
-1. Create a virtual environment somewhere *(virtualenv $WORKON_HOME/venv)*.
-#. Activate the virtual environment *(source $WORKON_HOME/venv/bin/activate)*.
-#. Go to *$GLANCESYNC_HOME/tests/acceptance* folder in the project.
-#. Install the requirements for the acceptance tests in the virtual environment *(pip install -r requirements.txt --allow-all-external)*.
 
-**Test case execution using Vagrant (optional)**
-
-Instead of using virtualenv, you can use the provided Vagrantfile to deploy a local VM using `Vagrant <https://www.vagrantup.com/>`_,
-that will provide all environment configurations for launching test cases.
-
-1. Download and install Vagrant (https://www.vagrantup.com/downloads.html).
-#. Go to *ngsi_adapter/src/test/acceptance* folder in the project.
-#. Execute *vagrant up* to launch a VM based on Vagrantfile provided.
-#. After Vagrant provision, your VM is properly configured to launch acceptance tests. You have to access to the VM using *vagrant ssh* and change to */vagrant* directory that will have mounted your workspace *(test/acceptance)*.
-
-If you need more information about how to use Vagrant, you can see
-`Vagrant Getting Started <https://docs.vagrantup.com/v2/getting-started/index.html>`_.
-
-**Settings**
+Settings
+--------
 
 Before executing the acceptance tests, you will need configure the properties file. To execute acceptance test on the
 experimentation environment, you will have to configured the file `resources/settings.json` properly:
 
 - You will have to configure two nodes in the same federation (same IdM/Keystone) at least.
 - For multi-target testing, you will have to configure two nodes in the same federation and another one in other federation.
-
 
 You will need a valid private key (*host_key*) to connect to master node by SSH (remote GlanceSync execution)
 and a valid OpenStack credentials for E2E validation against Glance servers on each node.
@@ -129,8 +120,10 @@ Configuration parameters (settings):
 - **host_password**: Password for the previous user.
 - **host_key**: RSA key for ssh connections instead of previous user/password. If protected, _host_password_ should be set with the correct value to decrypt.
 
+Top_
 
-**Images for testing purpose**
+Images for testing purpose
+--------------------------
 
 Different 'fake' image files have been provided. These ones are located in `resources/images`.
 Each image has got different size to be used following GlanceSync algorithm: smallest images are synchronized
@@ -143,3 +136,59 @@ before the biggest ones:
 - qatesting03
 - qatesting03b
 - qatesting10meg
+
+Top_
+
+
+Test Cases execution
+====================
+
+Execute the following command in the test project root directory:
+
+::
+
+  $> cd $GLANCESYNC_HOME/tests/acceptance
+  $> behave features/glancesync --tags ~@skip
+
+With this command, you will execute:
+
+- Test Cases in the environment configured in `resources/settings.json`.
+- all *.features implemented under glancesync folder.
+- Skipping all Scenarios tagged with "skip".
+
+For more options, execute *behave --help*.
+
+If you want to execute the features implemented in scripts folder, just execute:
+::
+
+  $> behave features/scripts --tags ~@skip
+
+Top_
+
+Test case execution using virtualenv
+------------------------------------
+1. Create a virtual environment somewhere *(virtualenv $WORKON_HOME/venv)*.
+#. Activate the virtual environment *(source $WORKON_HOME/venv/bin/activate)*.
+#. Go to *$GLANCESYNC_HOME/tests/acceptance* folder in the project.
+#. Install the requirements for the acceptance tests in the virtual environment *(pip install -r requirements.txt --allow-all-external)*.
+#. For scripts acceptance tests, install the requirements of the clients in the virtual environment.
+    # Go to scripts directory cd *$GLANCESYNC_HOME/scripts/getnids* folder in the project.
+    # Install the requirements for the script in the virtual environment *(pip install -r requirements.txt --allow-all-external)*.
+    # Return to *$GLANCESYNC_HOME/tests/acceptance* folder.
+
+Top_
+
+Test case execution using Vagrant (optional)
+--------------------------------------------
+Instead of using virtualenv, you can use the provided Vagrantfile to deploy a local VM using `Vagrant <https://www.vagrantup.com/>`_,
+that will provide all environment configurations for launching test cases.
+
+1. Download and install Vagrant (https://www.vagrantup.com/downloads.html).
+#. Go to *ngsi_adapter/src/test/acceptance* folder in the project.
+#. Execute *vagrant up* to launch a VM based on Vagrantfile provided.
+#. After Vagrant provision, your VM is properly configured to launch acceptance tests. You have to access to the VM using *vagrant ssh* and change to */vagrant* directory that will have mounted your workspace *(test/acceptance)*.
+
+If you need more information about how to use Vagrant, you can see
+`Vagrant Getting Started <https://docs.vagrantup.com/v2/getting-started/index.html>`_.
+
+Top_

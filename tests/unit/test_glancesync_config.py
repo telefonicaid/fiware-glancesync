@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-
 import unittest
 import tempfile
 import os
@@ -33,6 +31,8 @@ import copy
 
 from glancesync import glancesync_config
 from glancesync.glancesync_config import GlanceSyncConfig
+
+__author__ = 'chema'
 
 configuration_content = """
 [main]
@@ -216,6 +216,7 @@ class TestGlanceSyncStream(unittest.TestCase):
         config = GlanceSyncConfig(stream=self.stream, override_d=override)
         self.assertEquals(config.targets['master']['user'], 'otheruser')
         self.assertFalse(config.targets['experimental']['only_tenant_images'])
+
 
 class TestGlanceSyncConfigFile(unittest.TestCase):
     """Class to test that is possible to provide the configuration using a

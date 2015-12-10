@@ -21,16 +21,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+from qautils.logger_utils import get_logger
+import subprocess
+from subprocess import CalledProcessError
+
 __author__ = "Javier Fernández"
 __email__ = "jfernandez@tcpsi.es"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 __version__ = "1.0.0"
-
-
-from qautils.logger_utils import get_logger
-import subprocess
-from subprocess import CalledProcessError
 
 __logger__ = get_logger("qautils")
 
@@ -44,6 +43,7 @@ def execute_command(command):
     __logger__.debug("Executing command: '%s'", command)
 
     result = None
+
     try:
         result = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     except CalledProcessError, e:

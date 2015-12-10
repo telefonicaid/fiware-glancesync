@@ -30,6 +30,7 @@ import os
 import requests_mock
 
 from scripts.getnids.getnid import NID, processingnid
+from tests.unit.resources.config import RESOURCESPATH
 
 
 @requests_mock.Mocker()
@@ -41,21 +42,23 @@ class TestGlanceSyncNIDOperations(unittest.TestCase):
         # Load the file content
         self.nid = NID()
 
+        resourceNIDPath = RESOURCESPATH + '/nid'
+
         # Load the text content file to execute the tests
-        self.responsedata = self.loadfile("/tests/resources/nid", "catalogdata.request")
-        self.responseiot = self.loadfile("/tests/resources/nid", "catalogiot.request")
-        self.responseapps = self.loadfile("/tests/resources/nid", "catalogapps.request")
-        self.responsecloud = self.loadfile("/tests/resources/nid", "catalogcloud.request")
-        self.responsei2nd = self.loadfile("/tests/resources/nid", "catalogi2nd.request")
-        self.responsesec = self.loadfile("/tests/resources/nid", "catalogsecurity.request")
-        self.responseuserinterface = self.loadfile("/tests/resources/nid", "cataloguserinterface.request")
+        self.responsedata = self.loadfile(resourceNIDPath, "catalogdata.request")
+        self.responseiot = self.loadfile(resourceNIDPath, "catalogiot.request")
+        self.responseapps = self.loadfile(resourceNIDPath, "catalogapps.request")
+        self.responsecloud = self.loadfile(resourceNIDPath, "catalogcloud.request")
+        self.responsei2nd = self.loadfile(resourceNIDPath, "catalogi2nd.request")
+        self.responsesec = self.loadfile(resourceNIDPath, "catalogsecurity.request")
+        self.responseuserinterface = self.loadfile(resourceNIDPath, "cataloguserinterface.request")
 
-        self.responsedictdata = eval(self.loadfile("/tests/resources/nid", "catalogdata.response"))
-        self.responsedictiot = eval(self.loadfile("/tests/resources/nid", "catalogiot.response"))
+        self.responsedictdata = eval(self.loadfile(resourceNIDPath, "catalogdata.response"))
+        self.responsedictiot = eval(self.loadfile(resourceNIDPath, "catalogiot.response"))
 
-        self.responseiotnid = eval(self.loadfile("/tests/resources/nid", "catalogiot.nid"))
-        self.responsetotalnid = eval(self.loadfile("/tests/resources/nid", "catalogtotal.nid"))
-        self.responsetotalwiki = self.loadfile("/tests/resources/nid", "catalogtotal.wiki")
+        self.responseiotnid = eval(self.loadfile(resourceNIDPath, "catalogiot.nid"))
+        self.responsetotalnid = eval(self.loadfile(resourceNIDPath, "catalogtotal.nid"))
+        self.responsetotalwiki = self.loadfile(resourceNIDPath, "catalogtotal.wiki")
 
     def loadfile(self, relativepath, filename):
         """ Load the resources file that contain information needed to execute some
