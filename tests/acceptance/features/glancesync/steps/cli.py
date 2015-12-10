@@ -23,7 +23,7 @@
 
 from behave import step, then
 from hamcrest import assert_that, contains_string, is_not
-from glancesync_client.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
+from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
 import re
 
 __author__ = "jframos"
@@ -54,7 +54,7 @@ def glancesync_cli_installed(context):
 @step(u'I run the sync command with options "(?P<cli_options>[\w,\'=\-\.\s]*)"')
 def run_sync_command_with_options(context, cli_options):
 
-    context.glancesync_result = context.glancesync_client.sync(options=cli_options)
+    context.glancesync_result = context.glancesync_cmd_client.sync(options=cli_options)
 
 
 @then(u'I can see.*')

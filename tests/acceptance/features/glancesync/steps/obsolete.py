@@ -24,7 +24,7 @@
 from behave import step
 from qautils.dataset_utils import DatasetUtils
 from hamcrest import assert_that, is_not, is_, contains_string
-from glancesync_client.output_constants import \
+from glancesync_cmd_client.output_constants import \
     GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
 import logging
 

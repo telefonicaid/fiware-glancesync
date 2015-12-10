@@ -26,7 +26,7 @@ from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greate
 from commons.constants import IMAGES_DIR
 from commons.utils import get_real_value_of_image_property
 from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import \
+from glancesync_cmd_client.output_constants import \
     GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
@@ -243,9 +243,9 @@ def glancesync_configured_to_sync_images_parameters(context):
                 value = value.replace(config_value, real_config_value) if real_config_value is not None else value
 
         __logger__.info("The config values for '%s'(after replacing) are %s", row['config_key'], value)
-        result = context.glancesync_client.change_configuration_file(section=row['config_section'],
-                                                                     key=row['config_key'],
-                                                                     value=value)
+        result = context.glancesync_cmd_client.change_configuration_file(section=row['config_section'],
+                                                                         key=row['config_key'],
+                                                                         value=value)
         assert_that(result, is_not(None),
                     "GlanceSyn has NOT been configured due to some problem executing command")
 
@@ -255,9 +255,9 @@ def glancesync_configured_to_sync_images_default(context):
 
     for row in [{'config_key': 'metadata_condition', 'config_value': ''},
                 {'config_key': 'metadata_set', 'config_value': ''}]:
-        result = context.glancesync_client.change_configuration_file(section='DEFAULT',
-                                                                     key=row['config_key'],
-                                                                     value=row['config_value'])
+        result = context.glancesync_cmd_client.change_configuration_file(section='DEFAULT',
+                                                                         key=row['config_key'],
+                                                                         value=row['config_value'])
         assert_that(result, is_not(None),
                     "GlanceSync has NOT been configured due to some problem executing command")
 
@@ -266,14 +266,14 @@ def glancesync_configured_to_sync_images_default(context):
 @step(u'I sync images')
 def sync_the_selected_image(context):
 
-    context.glancesync_result = context.glancesync_client.sync()
+    context.glancesync_result = context.glancesync_cmd_client.sync()
 
 
 @step(u'I sync the image on "(?P<nodes>[\w,: ]*)"')
 @step(u'I sync images on "(?P<nodes>[\w,: ]*)"')
 def sync_the_selected_image_on_nodes(context, nodes):
 
-    context.glancesync_result = context.glancesync_client.sync(nodes)
+    context.glancesync_result = context.glancesync_cmd_client.sync(nodes)
 
 
 @step(u'already synchronized images')

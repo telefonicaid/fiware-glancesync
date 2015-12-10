@@ -26,7 +26,7 @@ from commons.constants import *
 from qautils.logger_utils import get_logger
 from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
-from glancesync_client.glancesync_client import GlanceSyncClient
+from glancesync_cmd_client.remote_client import GlanceSyncRemoteCmdClient
 
 __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
@@ -74,7 +74,7 @@ def before_all(context):
 
     # Init GlanceSync client (master node)
     __logger__.info("Initiating GlanceSync client")
-    context.glancesync_client = None
+    context.glancesync_cmd_client = None
     for cred in context.config[PROPERTIES_CONFIG_CRED]:
         region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
         if region_name == context.master_region_name:
@@ -88,14 +88,14 @@ def before_all(context):
             glancesyc_bin_path = \
                 context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_BIN_PATH]
 
-            context.glancesync_client = GlanceSyncClient(hostname, username, password,
-                                                         configuration_file_path=config_file_path,
-                                                         glancesyc_bin_path=glancesyc_bin_path,
-                                                         master_keyfile=key)
+            context.glancesync_cmd_client = GlanceSyncRemoteCmdClient(hostname, username, password,
+                                                                      configuration_file_path=config_file_path,
+                                                                      glancesyc_bin_path=glancesyc_bin_path,
+                                                                      master_keyfile=key)
             break
 
-    if context.glancesync_client is None:
-        assert context.glancesync_client, \
+    if context.glancesync_cmd_client is None:
+        assert context.glancesync_cmd_client, \
             "GlanceSync configuration for '%s' not found".format(context.master_region_name)
 
     __logger__.debug("GlanceSync client created for master region '%s'", context.master_region_name)
@@ -117,7 +117,7 @@ def before_scenario(context, scenario):
 
     # Backup configuration file
     __logger__.info("Backup of GlanceSync config file")
-    context.glancesync_client.backup_glancesync_config_file("/tmp")
+    context.glancesync_cmd_client.backup_glancesync_config_file("/tmp")
 
 
 def after_scenario(context, scenario):
@@ -132,7 +132,7 @@ def after_scenario(context, scenario):
 
     # Restore backup of GlanceSync configuration file
     __logger__.info("Restoring backup of GlanceSync config file")
-    context.glancesync_client.restore_backup()
+    context.glancesync_cmd_client.restore_backup()
 
     # Clean images for testing from Glance servers
     __logger__.info("Deleting all created images in each Glance server")

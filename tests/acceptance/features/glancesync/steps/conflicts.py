@@ -24,7 +24,7 @@
 from behave import step
 from hamcrest import assert_that, is_not, contains_string
 from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import \
+from glancesync_cmd_client.output_constants import \
     GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, GLANCESYNC_OUTPUT_RENAMING
 
 __author__ = "Javier Fernández"
