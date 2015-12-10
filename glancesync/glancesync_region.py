@@ -345,4 +345,3 @@ class GlanceSyncRegion(object):
                     images_to_obsolete.append(image)
 
         return images_to_obsolete
-

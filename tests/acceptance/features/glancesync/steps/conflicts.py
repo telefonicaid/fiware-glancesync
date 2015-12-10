@@ -28,9 +28,9 @@ __license__ = " Apache License, Version 2.0"
 
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to
-from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
-    GLANCESYNC_OUTPUT_RENAMING
+from tests.acceptance.qautils.dataset_utils import DatasetUtils
+from tests.acceptance.glancesync.output_constants import \
+    GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, GLANCESYNC_OUTPUT_RENAMING
 
 REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()

@@ -21,22 +21,22 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
-
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
-from commons.constants import IMAGES_DIR
-from commons.utils import get_real_value_of_image_property
-from qautils.dataset_utils import DatasetUtils
-from glancesync.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
+from tests.acceptance.commons.constants import IMAGES_DIR
+from tests.acceptance.commons.utils import get_real_value_of_image_property
+from tests.acceptance.qautils.dataset_utils import DatasetUtils
+from tests.acceptance.glancesync.output_constants import \
+    GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
 import re
 import logging
+import os
 
+__author__ = "Javier Fernández"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
 
 # Get logger for Behave steps
 __logger__ = logging.getLogger("synchronization_steps")
@@ -120,7 +120,14 @@ def __image_is_present_in_nodes__(context, region, image_name, filename_content=
 
     filename_content = image_name if filename_content is None else filename_content
     expected_img_content = ""
-    image_path = "{}/{}".format(IMAGES_DIR, filename_content)
+
+    current = os.getcwd()
+
+    if "tests/acceptance" in current:
+        image_path = "{}/{}".format(IMAGES_DIR, filename_content)
+    else:
+        image_path = "tests/acceptance/{}/{}".format(IMAGES_DIR, filename_content)
+
     file = open(image_path)
     for line in file:
         expected_img_content += line
@@ -324,6 +331,7 @@ def images_are_synchronized(context):
     for image_name in context.created_images_list:
         image_is_synchronized(context, image_name)
 
+
 @step(u'all images are synchronized in "(?P<region>\w*)"')
 def images_are_synchronized_in_region(context, region):
 
@@ -421,9 +429,9 @@ def warning_message_images_with_same_name(context, image_name):
                 "Problem when executing Sync command")
 
     assert_that(context.glancesync_result,
-                        is_(contains_string(
-                            GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME.format(image_name=image_name))),
-                        "WARNING message for '{}' is not shown in results".format(image_name))
+                is_(contains_string(
+                    GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME.format(image_name=image_name))),
+                "WARNING message for '{}' is not shown in results".format(image_name))
 
 
 @step(u'a warning message is shown informing about checksum conflict with "(?P<image_name>\w*)"')
@@ -444,8 +452,8 @@ def warning_message_checksum_confilc(context, image_name):
             __logger__.info("Result: %s", str(re_match))
 
             assert_that(re_match, has_length(greater_than(0)),
-                                "WARNING message with patern '{}' "
-                                "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
+                        "WARNING message with patern '{}' "
+                        "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
 
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')
@@ -457,9 +465,9 @@ def warning_message_duplicated(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             assert_that(context.glancesync_result,
-                                is_(contains_string(
-                                    GLANCESYNC_OUTPUT_DUPLICATED.format(region_name=region, image_name=image_name))),
-                                "WARNING message for '{}' is not shown in results".format(image_name))
+                        is_(contains_string(
+                            GLANCESYNC_OUTPUT_DUPLICATED.format(region_name=region, image_name=image_name))),
+                        "WARNING message for '{}' is not shown in results".format(image_name))
 
 
 @step(u'the image "(?P<image_name>\w*)" is deleted from the Glance of master node')
@@ -484,5 +492,5 @@ def warning_message_not_active(context, image_name):
             __logger__.info("Result: %s", str(re_match))
 
             assert_that(re_match, has_length(greater_than(0)),
-                                "WARNING message with patern '{}' "
-                                "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
+                        "WARNING message with patern '{}' "
+                        "is not shown in results: '{}'".format(regex_message, context.glancesync_result))

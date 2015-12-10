@@ -493,7 +493,6 @@ class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
         self.master_region = GlanceSyncRegion('Valladolid', self.targets)
         self.region = GlanceSyncRegion('other:Burgos', self.targets)
 
-
     def test_images_list_to_obsolete_notfound(self):
         """No images with _obsolete suffix in master"""
         (image1, image2) = self._create_images('image1')

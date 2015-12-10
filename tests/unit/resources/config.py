@@ -22,19 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+__author__ = 'fla'
 
-lines = open('README.rst').read().splitlines()
-
-state = 0
-lines_iter = iter(lines)
-
-while lines_iter.next() != '.. glancesync_conf_begin':
-    pass
-
-# Discard .. code::
-lines_iter.next()
-
-line = lines_iter.next()
-while line != '.. glancesync_conf_end':
-    print(line[1:])
-    line = lines_iter.next()
+RESOURCESPATH = '/tests/unit/resources'

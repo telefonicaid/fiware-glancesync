@@ -28,7 +28,7 @@ __license__ = " Apache License, Version 2.0"
 
 from behave import step
 from hamcrest import assert_that, greater_than, is_
-from qautils.dataset_utils import DatasetUtils
+from tests.acceptance.qautils.dataset_utils import DatasetUtils
 from datetime import datetime
 import logging
 

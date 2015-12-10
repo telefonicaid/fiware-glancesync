@@ -26,10 +26,11 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-from commons.constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
-from qautils.logger_utils import get_logger
+from tests.acceptance.commons.constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
+from tests.acceptance.qautils.logger_utils import get_logger
 from glanceclient.client import Client as GlanceClient
 from keystoneclient.v2_0.client import Client as KeystoneClient
+import os
 
 __logger__ = get_logger("qautils")
 
@@ -58,6 +59,16 @@ class GlanceOperations():
 
             __logger__.info("Glance public URL: %s", glance_public_url)
             self.glance_client = GlanceClient(endpoint=glance_public_url, version='1', token=self.auth_token)
+
+    def __get_resource_path__(self, image_filename):
+        current = os.getcwd()
+
+        if "tests/acceptance" in current:
+            image_path = "{}/{}".format(IMAGES_DIR, image_filename)
+        else:
+            image_path = "tests/acceptance/{}/{}".format(IMAGES_DIR, image_filename)
+
+        return image_path
 
     def __get_glance_endpoint_from_keystone__(self, region_name):
         """
@@ -122,7 +133,7 @@ class GlanceOperations():
         __logger__.debug("Image created: %s", str(image))
 
         if image_filename:
-            image_path = "{}/{}".format(IMAGES_DIR, image_filename)
+            image_path = self.__get_resource_path__(image_filename)
             __logger__.debug("Updating image with content from file '%s'", image_path)
             image.update(data=open(image_path, 'rb'))
 

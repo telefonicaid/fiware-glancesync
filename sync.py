@@ -240,8 +240,8 @@ if __name__ == '__main__':
     group.add_argument('--show-regions', action='store_true',
                        help='don not sync, only show the available regions')
 
-    group.add_argument('--make-backup', action='store_true', help=
-                       "do no sync, make a backup of the regions' metadata")
+    group.add_argument('--make-backup', action='store_true',
+                       help="do no sync, make a backup of the regions' metadata")
     meta = parser.parse_args()
     options = dict()
 

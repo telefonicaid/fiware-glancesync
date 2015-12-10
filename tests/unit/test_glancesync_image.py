@@ -22,12 +22,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-
 import unittest
 import copy
-
 from glancesync.glancesync_image import GlanceSyncImage
+
+__author__ = 'chema'
 
 
 class TestGlanceSyncImageRegion(unittest.TestCase):
@@ -197,6 +196,7 @@ class TestGlanceSyncImageRegion(unittest.TestCase):
         self.assertTrue(self.image1.is_synchronisable(set(), force_sync))
         self.image1.name += '_obsolete'
         self.assertFalse(self.image1.is_synchronisable(set(), force_sync))
+
 
 class TestGlanceSyncImageCompare(unittest.TestCase):
     """Class to test compare_with_masterregion under different conditions"""
