@@ -1,5 +1,9 @@
+.. _Top:
+
 GlanceSync - How to obtain the NID of the different Generic Enabler
 *******************************************************************
+
+.. contents:: :local:
 
 
 Overview
@@ -13,6 +17,45 @@ there is implemented a specific Command-line Interface to execute the process. Y
 
 The result obtained in the execution of the script, specially with the --wikitext option activated,
 will be used to generate the corresponding `FIWARE GE identification page`_.
+
+Top_
+
+
+Build and Install
+=================
+
+Requirements
+------------
+
+The following software must be installed (e.g. using apt-get on Debian and Ubuntu,
+or with yum in CentOS):
+
+- Python 2.7
+- pip
+- virtualenv
+
+Top_
+
+Installation
+------------
+
+The recommend installation method is using a virtualenv. Actually, the installation
+process is only about the python dependencies, because the python code do not need
+installation.
+
+1) Create a virtualenv 'scriptsNIDENV' invoking *virtualenv scriptsNIDENV*
+2) Activate the virtualenv with *source scriptsNIDENV/bin/activate*
+3) Install the requirements running *pip install -r requirements.txt*
+
+Now the system is ready to use. For future sessions, only the step2 is required.
+
+Top_
+
+Running
+=======
+
+To run the process just follow the indications provided by the client component.
+Just execute the following command:
 
 .. code::
 
@@ -45,11 +88,16 @@ The type value corresponding to each of the chapter that we have in FIWARE and a
 - data: `Data/Context Management`_.
 - apps: `Architecture of Applications/Services Ecosystem and Delivery Framework`_.
 
+Top_
+
 
 License
 =======
 
 The scripts are licensed under Apache v2.0 license.
+
+Top_
+
 
 .. REFERENCES
 
