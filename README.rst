@@ -3,7 +3,7 @@
 GlanceSync - Glance Synchronization Component
 *********************************************
 
-| |Build Status| |StackOverflow|
+| |Build Status| |Coveralls| |StackOverflow|
 
 .. contents:: :local:
 
@@ -877,6 +877,9 @@ Top_
 .. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
    :target: https://stackoverflow.com/questions/tagged/fiware-glancesync
    :alt: Help? Ask questions
+.. |Coveralls| image:: https://coveralls.io/repos/telefonicaid/fiware-glancesync/badge.svg?branch=develop&service=github
+   :target: https://coveralls.io/github/telefonicaid/fiware-glancesync?branch=develop
+   :alt: Unit Tests coverage
 
 .. REFERENCES
 
