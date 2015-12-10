@@ -21,17 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+from behave import step
+from qautils.dataset_utils import DatasetUtils
+from hamcrest import assert_that, is_not, is_, contains_string
+from glancesync_client.output_constants import \
+    GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
+import logging
+
 __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
-
-
-from behave import step
-from tests.acceptance.qautils.dataset_utils import DatasetUtils
-from hamcrest import assert_that, is_not, is_, contains_string
-from tests.acceptance.glancesync.output_constants import \
-    GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
-import logging
 
 
 # Get logger for Behave steps

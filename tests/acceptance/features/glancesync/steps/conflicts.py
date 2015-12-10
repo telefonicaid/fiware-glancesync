@@ -21,16 +21,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+from behave import step
+from hamcrest import assert_that, is_not, contains_string
+from qautils.dataset_utils import DatasetUtils
+from glancesync_client.output_constants import \
+    GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, GLANCESYNC_OUTPUT_RENAMING
+
 __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
-
-
-from behave import step
-from hamcrest import assert_that, is_not, contains_string, is_, equal_to
-from tests.acceptance.qautils.dataset_utils import DatasetUtils
-from tests.acceptance.glancesync.output_constants import \
-    GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, GLANCESYNC_OUTPUT_RENAMING
 
 REPLACE_CONFIG_VALUE_PATTER = "(\w*)\((\w*)\)"
 __dataset_utils__ = DatasetUtils()

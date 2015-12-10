@@ -21,11 +21,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-
 import behave
-from tests.acceptance.commons.constants import *
-from tests.acceptance.qautils.logger_utils import get_logger
-from tests.acceptance.commons.utils import load_project_properties
+from commons.constants import *
+from qautils.logger_utils import get_logger
+from commons.utils import load_project_properties
 
 __author__ = "fla"
 __copyright__ = "Copyright 2015"
