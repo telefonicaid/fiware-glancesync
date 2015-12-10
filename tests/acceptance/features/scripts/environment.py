@@ -40,8 +40,7 @@ def before_all(context):
     """
     HOOK: To be executed before all:
         - Load project properties
-        - Init Glance Clients to each region
-        - Init GlanceSync client
+        - Write information into log file
     """
 
     __logger__.info("SetUp execution")
@@ -56,8 +55,7 @@ def before_all(context):
 def before_scenario(context, scenario):
     """
     HOOK: To be executed before each Scenario:
-        - Init test variables
-        - Backup GlanceSync configuration file
+        - Write information into log file
     """
 
     __logger__.info("Starting execution of scenario")
@@ -68,7 +66,7 @@ def before_scenario(context, scenario):
 def after_scenario(context, scenario):
     """
     HOOK: To be executed after each Scenario:
-        - Restore backup of GlanceSync configuration file
+        - Write information into log file
     """
 
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
@@ -79,7 +77,7 @@ def after_scenario(context, scenario):
 def after_all(context):
     """
     HOOK: To be executed after all:
-        - None (so far)
+        - Write information into log file
     """
 
     __logger__.info("Teardown")

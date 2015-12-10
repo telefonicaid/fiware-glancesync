@@ -21,17 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
-
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, equal_to
 from commons.utils import get_real_value_of_image_property
 from qautils.dataset_utils import DatasetUtils
 from glancesync_client.output_constants import GLANCESYNC_OUTPUT_MISSING_KERNEL, GLANCESYNC_OUTPUT_MISSING_RAMDISK
 import logging
+
+__author__ = "Javier Fernández"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
 
 __dataset_utils__ = DatasetUtils()
 __logger__ = logging.getLogger("ami_images_steps")
