@@ -121,7 +121,6 @@ class Sync(object):
                     logger.propagate = 0
 
                     self.glancesync.sync_region(region)
-                    print pid
                     # After a fork, os_exit() and not sys.exit() must be used.
                     os._exit(0)
             except Exception:
@@ -168,11 +167,11 @@ class Sync(object):
             else:
                 finish_direct_child = True
                 if status == 0:
-                    msg = 'Region {0} finish'.format(children[pid])
+                    msg = 'Region {0} has finished'.format(children[pid])
                     print(msg)
                 else:
-                    msg = 'Region {0} finish with errors'.format(children[pid])
-                    print(msg)
+                    msg = 'Region {0} has finished with errors'
+                    print(msg.format(children[pid]))
                 del children[pid]
                 sys.stdout.flush()
 
