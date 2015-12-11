@@ -28,7 +28,7 @@ from glancesync_client.output_constants import \
     GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE, GLANCESYNC_OUTPUT_UPLOADING_OBSOLETE
 import logging
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 

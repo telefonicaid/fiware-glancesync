@@ -22,19 +22,15 @@
 # contact with opensource@tid.es
 
 from behave import step
-from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
+from hamcrest import assert_that, is_not, is_, equal_to
+import commons.glancesync_output_assertions as glancesync_assertions
 from commons.constants import IMAGES_DIR
 from commons.utils import get_real_value_of_image_property
 from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import \
-    GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
-    GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
-    GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE
-import re
 import logging
 import os
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
@@ -299,14 +295,7 @@ def image_is_synchronized(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_UPLOADING.format(region_name=region,
-                                                                           image_name=image_name)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
-
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
+            glancesync_assertions.image_is_synchronized_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is synchronized in target node "(?P<region>\w*)"')
@@ -315,14 +304,7 @@ def image_is_synchronized_in_target_region(context, image_name, region):
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
-    assert_that(context.glancesync_result,
-                contains_string(GLANCESYNC_OUTPUT_UPLOADING.format(region_name=region,
-                                                                   image_name=image_name)),
-                "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
-
-    assert_that(context.glancesync_result,
-                contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
+    glancesync_assertions.image_is_synchronized_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'all images are synchronized')
@@ -399,10 +381,7 @@ def image_is_not_sync(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        is_not(contains_string(GLANCESYNC_OUTPUT_UPLOADING.format(region_name=region,
-                                                                                  image_name=image_name))),
-                        "Image '{}' is 'uploading' to region '{}' and it shouldn't".format(image_name, region))
+            glancesync_assertions.image_is_not_sync_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'no images are synchronized')
@@ -413,13 +392,7 @@ def no_images_are_sync(context):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        is_not(contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region))),
-                        "There was any synchronization in '{}' and it shouldn't".format(region))
-
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_REGION_SYNC.format(region_name=region)),
-                        "Region '{}' is not synchronized".format(region))
+            glancesync_assertions.no_images_are_sync_assertion(context.glancesync_result, region)
 
 
 @step(u'a warning message is shown informing about images with the same name "(?P<image_name>\w*)"')
@@ -428,32 +401,19 @@ def warning_message_images_with_same_name(context, image_name):
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
-    assert_that(context.glancesync_result,
-                is_(contains_string(
-                    GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME.format(image_name=image_name))),
-                "WARNING message for '{}' is not shown in results".format(image_name))
+    glancesync_assertions.warning_message_images_with_same_name_assertion(context.glancesync_result, image_name)
 
 
 @step(u'a warning message is shown informing about checksum conflict with "(?P<image_name>\w*)"')
-def warning_message_checksum_confilc(context, image_name):
+def warning_message_checksum_conflict(context, image_name):
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-
-            regex_message = GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT.format(image_name=image_name,
-                                                                               region_name=region)
-            __logger__.info("Regex pattern for message: '%s'", regex_message)
-
-            pattern = re.compile(regex_message)
-            re_match = re.findall(pattern, context.glancesync_result)
-            __logger__.info("Result: %s", str(re_match))
-
-            assert_that(re_match, has_length(greater_than(0)),
-                        "WARNING message with patern '{}' "
-                        "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
+            glancesync_assertions.warning_message_checksum_conflict_assertion(context.glancesync_result,
+                                                                             region, image_name)
 
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')
@@ -464,10 +424,7 @@ def warning_message_duplicated(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        is_(contains_string(
-                            GLANCESYNC_OUTPUT_DUPLICATED.format(region_name=region, image_name=image_name))),
-                        "WARNING message for '{}' is not shown in results".format(image_name))
+            glancesync_assertions.warning_message_duplicated_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is deleted from the Glance of master node')
@@ -484,13 +441,4 @@ def warning_message_not_active(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            regex_message = GLANCESYNC_OUTPUT_NOT_ACTIVE.format(region_name=region, image_name=image_name)
-            __logger__.info("Regex pattern for NOT ACTIVE message: '%s'", regex_message)
-
-            pattern = re.compile(regex_message)
-            re_match = re.findall(pattern, context.glancesync_result)
-            __logger__.info("Result: %s", str(re_match))
-
-            assert_that(re_match, has_length(greater_than(0)),
-                        "WARNING message with patern '{}' "
-                        "is not shown in results: '{}'".format(regex_message, context.glancesync_result))
+            glancesync_assertions.warning_message_not_active_assertion(context.glancesync_result, region, image_name)

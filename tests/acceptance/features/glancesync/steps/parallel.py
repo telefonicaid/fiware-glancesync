@@ -29,11 +29,9 @@ __license__ = " Apache License, Version 2.0"
 from behave import step
 from hamcrest import assert_that, is_not, is_, greater_than, equal_to, contains_string, has_length
 from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
-    GLANCESYNC_OUTPUT_PARALLEL_FINISHED, GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, \
-    GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_RENAMING
+from glancesync_client.output_constants import GLANCESYNC_OUTPUT_PARALLEL_FINISHED
+import commons.glancesync_output_assertions as glancesync_assertions
 import logging
-import re
 
 
 # Get logger for Behave steps
@@ -89,15 +87,7 @@ def image_is_synchronized_parallel(context, image_name):
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
             file_content = context.glancesync_client.get_output_log_content(output_files[0])
-
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_UPLOADING.format(region_name=region,
-                                                                           image_name=image_name)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
-
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Image '{}' has not been 'uploaded' to region '{}'".format(image_name, region))
+            glancesync_assertions.image_is_synchronized_assertion(file_content, region, image_name)
 
 
 @step(u'all images are synchronized in a parallel execution')
@@ -117,14 +107,7 @@ def no_images_are_sync_parallel(context):
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
             file_content = context.glancesync_client.get_output_log_content(output_files[0])
-
-            assert_that(file_content,
-                        is_not(contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region))),
-                        "There was any synchronization in '{}' and it shouldn't".format(region))
-
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_REGION_SYNC.format(region_name=region)),
-                        "Region '{}' is not synchronized".format(region))
+            glancesync_assertions.no_images_are_sync_assertion(file_content, region)
 
 
 @step(u'a warning message is logged informing about checksum conflict '
@@ -138,22 +121,11 @@ def warning_message_checksum_conflict_parallel(context, image_name):
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
             file_content = context.glancesync_client.get_output_log_content(output_files[0])
-
-            regex_message = GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT.format(image_name=image_name,
-                                                                               region_name=region)
-            __logger__.info("Regex pattern for message: '%s'", regex_message)
-
-            pattern = re.compile(regex_message)
-            re_match = re.findall(pattern, file_content)
-            __logger__.info("Result: %s", str(re_match))
-
-            assert_that(re_match, has_length(greater_than(0)),
-                        "WARNING message with patern '{}' "
-                        "is not shown in results: '{}'".format(regex_message, file_content))
+            glancesync_assertions.warning_message_checksum_conflict_assertion(file_content, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is replaced in a parallel execution')
-def image_is_replaced(context, image_name):
+def image_is_replaced_parallel(context, image_name):
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -162,14 +134,7 @@ def image_is_replaced(context, image_name):
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
             file_content = context.glancesync_client.get_output_log_content(output_files[0])
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_REPLACING.format(region_name=region,
-                                                                                 image_name=image_name)),
-                        "Image '{}' is not 'replacing' to region '{}'".format(image_name, region))
-
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+            glancesync_assertions.image_is_replaced_assertion(file_content, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is renamed and replaced in a parallel execution')
@@ -182,8 +147,4 @@ def image_is_renamed_replaced(context, image_name):
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
             file_content = context.glancesync_client.get_output_log_content(output_files[0])
-            assert_that(file_content,
-                        contains_string(GLANCESYNC_OUTPUT_RENAMING.format(region_name=region,
-                                                                          image_name=image_name)),
-                        "Image '{}' is not 'Renaming and Replacing' another one in region '{}'".format(image_name,
-                                                                                                       region))
+            glancesync_assertions.image_is_renamed_replaced_assertion(file_content, region, image_name)

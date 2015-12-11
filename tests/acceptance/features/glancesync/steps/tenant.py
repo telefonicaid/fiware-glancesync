@@ -30,7 +30,7 @@ from qautils.dataset_utils import DatasetUtils
 from glancesync_client.output_constants import GLANCESYNC_OUTPUT_OWNER
 from commons.glance_operations import GlanceOperations
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 

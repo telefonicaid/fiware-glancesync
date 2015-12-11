@@ -83,10 +83,10 @@ class GlanceSyncClient:
         Restore backup of the configuration file.
         :return: None
         """
-
-        command = "cp -f {backup_file} {config_file}".format(backup_file=self.conf_file_backup_path,
-                                                             config_file=self.conf_file_path)
-        self.fabric_utils.execute_command(command)
+        if self.conf_file_backup_path:
+            command = "cp -f {backup_file} {config_file}".format(backup_file=self.conf_file_backup_path,
+                                                                 config_file=self.conf_file_path)
+            self.fabric_utils.execute_command(command)
 
     def clean_all_parallel_output_logs(self):
         """

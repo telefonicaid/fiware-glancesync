@@ -28,7 +28,7 @@ from qautils.dataset_utils import DatasetUtils
 from glancesync_client.output_constants import GLANCESYNC_OUTPUT_MISSING_KERNEL, GLANCESYNC_OUTPUT_MISSING_RAMDISK
 import logging
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
