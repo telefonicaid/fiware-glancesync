@@ -33,6 +33,7 @@ import time
 
 from sync import Sync
 
+
 class TestSync(unittest.TestCase):
     """Class to test all methods but constructor and parallel sync"""
     @patch('sync.GlanceSync', auto_spec=True)
@@ -83,6 +84,7 @@ class TestSync(unittest.TestCase):
         self.glancesync.return_value.backup_glancemetadata_region.\
             assert_called_with('MasterRegion', dir_name)
 
+
 class TestSyncConstr(unittest.TestCase):
     """tests to check constructor, the expansion of the target and the
     configuration parameter preferable_order"""
@@ -126,6 +128,7 @@ class TestSyncConstr(unittest.TestCase):
         glancesync.configure_mock(**self.config)
         sync = Sync(['r1', 'r2', 'other:r1'])
         self.assertEqual(['r1', 'r2', 'other:r1'], sync.regions)
+
 
 class TestSyncParallel(unittest.TestCase):
     """Test the parallel functionality"""
