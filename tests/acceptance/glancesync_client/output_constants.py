@@ -50,3 +50,4 @@ GLANCESYNC_OUTPUT_WARNING_OBSOLETE_IGNORE = "WARNING:Ignore obsolete master imag
                                             "because {image_name} exists and it is synchronisable."
 GLANCESYNC_OUTPUT_PENDING = "{region_name}: Pending: {image_name}"
 GLANCESYNC_OUTPUT_STATUS_REPORT = "{status},{region_name},{image_name}"
+GLANCESYNC_OUTPUT_PARALLEL_FINISHED = "Region {region_name} has finished"
