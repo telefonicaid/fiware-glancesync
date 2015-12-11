@@ -91,8 +91,8 @@ class TestSyncConstr(unittest.TestCase):
 
     def setUp(self):
         """prepare configuration for the mock: there are two targets, master
-        with regions r1 and r2 y other with other:r1. The preferable order
-        is other:r1, r2, r1."""
+        with regions r1 and r2 and another one with region other:r1. The
+        preferable order is other:r1, r2, r1."""
         regions = {'master': ['r1', 'r2'], 'other': ['other:r1']}
         self.config = {
             'return_value.get_regions.side_effect': lambda target='master':
