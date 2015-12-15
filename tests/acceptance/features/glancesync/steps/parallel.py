@@ -42,6 +42,9 @@ __dataset_utils__ = DatasetUtils()
 
 @step(u'files are created with output logs')
 def file_created_output_logger(context):
+    """
+    Step: Check that generated output files by the parallel process have been created.
+    """
     result = context.glancesync_client.get_output_log_list()
 
     assert_that(result, is_not(None),
@@ -65,7 +68,9 @@ def file_created_output_logger(context):
 
 @step(u'parallel process is executed for all nodes')
 def parallel_process_is_execute_in_all_nodes(context):
-
+    """
+    Step: Check that parallel process have been executed for all nodes.
+    """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
@@ -79,7 +84,9 @@ def parallel_process_is_execute_in_all_nodes(context):
 
 @step(u'the image "(?P<image_name>\w*)" is synchronized in a parallel way')
 def image_is_synchronized_parallel(context, image_name):
-
+    """
+    Step: Check that the image has been synchronized in the parallel process.
+    """
     if not context.output_file_list:
         file_created_output_logger(context)
 
@@ -92,14 +99,18 @@ def image_is_synchronized_parallel(context, image_name):
 
 @step(u'all images are synchronized in a parallel execution')
 def images_are_synchronized(context):
-
+    """
+    Step: Check that all images have been synchronized in the parallel process.
+    """
     for image_name in context.created_images_list:
         image_is_synchronized_parallel(context, image_name)
 
 
 @step(u'no images are synchronized in a parallel execution')
 def no_images_are_sync_parallel(context):
-
+    """
+    Step: No images have been synchronized in the parallel process.
+    """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
@@ -113,7 +124,9 @@ def no_images_are_sync_parallel(context):
 @step(u'a warning message is logged informing about checksum conflict '
       u'with "(?P<image_name>\w*)" in a parallel execution')
 def warning_message_checksum_conflict_parallel(context, image_name):
-
+    """
+    Step: Warning messages are printed in logs, result of the parallel process execution: Conflicts
+    """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
@@ -126,7 +139,9 @@ def warning_message_checksum_conflict_parallel(context, image_name):
 
 @step(u'the image "(?P<image_name>\w*)" is replaced in a parallel execution')
 def image_is_replaced_parallel(context, image_name):
-
+    """
+    Step: Warning messages are printed in logs, result of the parallel process execution: Conflict - Replace
+    """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
@@ -139,7 +154,9 @@ def image_is_replaced_parallel(context, image_name):
 
 @step(u'the image "(?P<image_name>\w*)" is renamed and replaced in a parallel execution')
 def image_is_renamed_replaced(context, image_name):
-
+    """
+    Step: Warning messages are printed in logs, result of the parallel process execution: Conflict - Rename and Replace
+    """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
