@@ -117,3 +117,14 @@ Then clauses
     >> all images are pending for synchronization
     >> the image "(?P<image_name>\w*)" has the status "(?P<status>\w*)" in all target regions
     >> the image "(?P<image_name>\w*)" has the status "(?P<status>\w*)" on "(?P<region_name>[\w,: ]*)"
+
+
+    (parallel execution: --parallel)
+    >> files are created with output logs
+    >> parallel process is executed for all nodes
+    >> the image "(?P<image_name>\w*)" is synchronized in a parallel way
+    >> all images are synchronized in a parallel execution
+    >> no images are synchronized in a parallel execution
+    >> a warning message is logged informing about checksum conflict with "(?P<image_name>\w*)" in a parallel execution
+    >> the image "(?P<image_name>\w*)" is replaced in a parallel execution
+    >> the image "(?P<image_name>\w*)" is renamed and replaced in a parallel execution
