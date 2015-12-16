@@ -170,6 +170,7 @@ def __get_real_att_value_image_in_master__(context, value_pattern):
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)"')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and these properties')
 def a_new_image_created_in_glance_of_master(context, image_name):
+    """Create New image in the Glance of Master Node"""
 
     __create_new_image__(context, context.master_region_name, image_name)
 
@@ -181,12 +182,14 @@ def a_new_image_created_in_glance_of_master(context, image_name):
       u'file "(?P<file>\w*)" and these properties')
 @step(u'other new image created in the Glance of master node with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
 def other_new_image_created_in_glance_of_master(context, image_name, file):
+    """Create new image in the Glance of Master Node with the content of the given file"""
 
     __create_new_image__(context, context.master_region_name, image_name, file)
 
 
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"')
 def a_new_image_created_in_glance_of_target(context, image_name):
+    """Create new image in the Glance of all target nodes"""
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
@@ -195,6 +198,7 @@ def a_new_image_created_in_glance_of_target(context, image_name):
 
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
 def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
+    """Create new image in the Glance of all target nodes with the content of the given file"""
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
@@ -204,6 +208,7 @@ def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
 @step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)"'
       u' and without upload an image file')
 def a_new_image_created_in_glance_of_target_no_upload_file(context, image_name):
+    """Create new image in the Glance of all target nodes but no upload any content for that image (empty)"""
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
@@ -214,6 +219,7 @@ def a_new_image_created_in_glance_of_target_no_upload_file(context, image_name):
 
 @step(u'the following images created in the Glance of master node with name')
 def following_images_created_in_glance_of_master(context):
+    """Create the given images in the dataset of the step in the Glance of Master node"""
 
     for row in __dataset_utils__.prepare_data(context.table):
         __create_new_image__(context, context.master_region_name, row['image_name'])
@@ -221,6 +227,7 @@ def following_images_created_in_glance_of_master(context):
 
 @step(u'GlanceSync configured to sync images using these configuration parameters')
 def glancesync_configured_to_sync_images_parameters(context):
+    """Configure GlanceSync (configuration file) with the given values in the datase of the step"""
 
     for row in __dataset_utils__.prepare_data(context.table):
 
@@ -248,6 +255,7 @@ def glancesync_configured_to_sync_images_parameters(context):
 
 @step(u'GlanceSync configured to sync images without specifying any condition')
 def glancesync_configured_to_sync_images_default(context):
+    """Configure GlanceSync with 'default' values"""
 
     for row in [{'config_key': 'metadata_condition', 'config_value': ''},
                 {'config_key': 'metadata_set', 'config_value': ''}]:
@@ -261,6 +269,7 @@ def glancesync_configured_to_sync_images_default(context):
 @step(u'I sync the image')
 @step(u'I sync images')
 def sync_the_selected_image(context):
+    """Sync images"""
 
     context.glancesync_result = context.glancesync_client.sync()
 
@@ -268,12 +277,14 @@ def sync_the_selected_image(context):
 @step(u'I sync the image on "(?P<nodes>[\w,: ]*)"')
 @step(u'I sync images on "(?P<nodes>[\w,: ]*)"')
 def sync_the_selected_image_on_nodes(context, nodes):
+    """Sync images only in the given list of nodes"""
 
     context.glancesync_result = context.glancesync_client.sync(nodes)
 
 
 @step(u'already synchronized images')
 def already_sync_images(context):
+    """Sync images and check that they have been synchronized (hight level step)"""
 
     sync_the_selected_image(context)
     images_are_synchronized(context)
@@ -281,6 +292,7 @@ def already_sync_images(context):
 
 @step(u'already synchronized images on "(?P<nodes>[\w,: ]*)"')
 def already_sync_images(context, nodes):
+    """Sync images in the given list of nodes and and check that they have been synchronized (hight level step)"""
 
     sync_the_selected_image_on_nodes(context, nodes)
     for node in nodes.split(","):
@@ -289,6 +301,7 @@ def already_sync_images(context, nodes):
 
 @step(u'the image "(?P<image_name>\w*)" is synchronized')
 def image_is_synchronized(context, image_name):
+    """Check that the given image has been synchronized"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -300,6 +313,7 @@ def image_is_synchronized(context, image_name):
 
 @step(u'the image "(?P<image_name>\w*)" is synchronized in target node "(?P<region>\w*)"')
 def image_is_synchronized_in_target_region(context, image_name, region):
+    """Check that the given image has been synchronized in the target node"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -309,6 +323,7 @@ def image_is_synchronized_in_target_region(context, image_name, region):
 
 @step(u'all images are synchronized')
 def images_are_synchronized(context):
+    """Check that all images have been synchronized"""
 
     for image_name in context.created_images_list:
         image_is_synchronized(context, image_name)
@@ -316,6 +331,7 @@ def images_are_synchronized(context):
 
 @step(u'all images are synchronized in "(?P<region>\w*)"')
 def images_are_synchronized_in_region(context, region):
+    """Check that all images have been synchronized in the given node"""
 
     for image_name in context.created_images_list:
         image_is_present_only_in_node(context, image_name, region)
@@ -323,6 +339,7 @@ def images_are_synchronized_in_region(context, region):
 
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the expected data')
 def image_is_present_in_all_nodes(context, image_name):
+    """Check that the image is present in all nodes with the expected data"""
 
     # Get Glance Manager for each region
     for region in context.glance_manager_list:
@@ -331,6 +348,7 @@ def image_is_present_in_all_nodes(context, image_name):
 
 @step(u'the image "(?P<image_name>\w*)" is only present in target node "(?P<region_name>\w*)"')
 def image_is_present_only_in_node(context, image_name, region_name):
+    """Check that the image is only present in the given node"""
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
@@ -342,6 +360,7 @@ def image_is_present_only_in_node(context, image_name, region_name):
 
 @step(u'all synchronized images are present in all nodes with the expected data')
 def all_images_are_present_in_all_nodes(context):
+    """Check that all images are present in all nodes with the expected data"""
 
     for image_name in context.created_images_list:
         image_is_present_in_all_nodes(context, image_name)
@@ -349,6 +368,7 @@ def all_images_are_present_in_all_nodes(context):
 
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the content of file "(?P<file_name>\w*)"')
 def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
+    """Check that the image is present in all nodes with the content of the given file"""
 
     # Get Glance Manager for each region
     for region in context.glance_manager_list:
@@ -358,6 +378,7 @@ def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
 @step(u'the image "(?P<image_name>[\w\.]*)" is present in '
       u'all target nodes with the content of file "(?P<file_name>\w*)"')
 def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
+    """Check that the image is present in all target nodes with the content of the given file"""
 
     # Get Glance Manager for each region
     for region in context.glance_manager_list:
@@ -366,6 +387,7 @@ def image_is_present_in_all_nodes_with_content(context, image_name, file_name):
 
 @step(u'the image "(?P<image_name>[\w\.]*)" is not present in target nodes')
 def image_is_not_present_in_nodes(context, image_name):
+    """Check that the image is not present in all target nodes"""
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
@@ -375,6 +397,7 @@ def image_is_not_present_in_nodes(context, image_name):
 @step(u'the image "(?P<image_name>\w*)" is not synchronized')
 @step(u'the image "(?P<image_name>\w*)" is not synchronized again')
 def image_is_not_sync(context, image_name):
+    """Check that the image has not been synchronized"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -386,6 +409,7 @@ def image_is_not_sync(context, image_name):
 
 @step(u'no images are synchronized')
 def no_images_are_sync(context):
+    """Check that there aren't synchronized images in the execution of GlanceSync"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -397,6 +421,7 @@ def no_images_are_sync(context):
 
 @step(u'a warning message is shown informing about images with the same name "(?P<image_name>\w*)"')
 def warning_message_images_with_same_name(context, image_name):
+    """Check that warning messages are shown in the result of the GlanceSync execution"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -406,6 +431,7 @@ def warning_message_images_with_same_name(context, image_name):
 
 @step(u'a warning message is shown informing about checksum conflict with "(?P<image_name>\w*)"')
 def warning_message_checksum_conflict(context, image_name):
+    """Check that warning messages are shown in the result of the GlanceSync execution"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -418,6 +444,7 @@ def warning_message_checksum_conflict(context, image_name):
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')
 def warning_message_duplicated(context, image_name):
+    """Check that warning messages are shown in the result of the GlanceSync execution"""
 
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
@@ -429,6 +456,7 @@ def warning_message_duplicated(context, image_name):
 
 @step(u'the image "(?P<image_name>\w*)" is deleted from the Glance of master node')
 def image_is_deleted_from_glance_master(context, image_name):
+    """Remove all images with the given name from the Glance of Master node"""
 
     glance_ops = context.glance_manager_list[context.master_region_name]
     glance_ops.remove_all_images_by_name(image_name)
@@ -436,6 +464,8 @@ def image_is_deleted_from_glance_master(context, image_name):
 
 @step(u'a warning message is shown informing about not active status in the image "(?P<image_name>\w*)"')
 def warning_message_not_active(context, image_name):
+    """Check that warning messages are shown in the result of the GlanceSync execution"""
+
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
 
