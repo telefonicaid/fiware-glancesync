@@ -86,12 +86,11 @@ class Sync(object):
         max_children = self.glancesync.max_children
         now = datetime.datetime.now()
         datestr = str(now.year) + str(now.month).zfill(2) + \
-                  str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
-                  str(now.minute).zfill(2)
+            str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
+            str(now.minute).zfill(2)
 
         msg = '======Master is ' + self.glancesync.master_region
         print(msg)
-        self.glancesync.print_images_master_region()
         sys.stdout.flush()
         os.mkdir('sync_' + datestr)
         children = dict()
@@ -122,7 +121,8 @@ class Sync(object):
                     logger.propagate = 0
 
                     self.glancesync.sync_region(region)
-                    sys.exit(0)
+                    # After a fork, os_exit() and not sys.exit() must be used.
+                    os._exit(0)
             except Exception:
                 raise
                 sys.stderr.flush()
@@ -167,11 +167,11 @@ class Sync(object):
             else:
                 finish_direct_child = True
                 if status == 0:
-                    msg = 'Region {0} finish'.format(children[pid])
+                    msg = 'Region {0} has finished'.format(children[pid])
                     print(msg)
                 else:
-                    msg = 'Region {0} finish with errors'.format(children[pid])
-                    print(msg)
+                    msg = 'Region {0} has finished with errors'
+                    print(msg.format(children[pid]))
                 del children[pid]
                 sys.stdout.flush()
 
@@ -234,13 +234,15 @@ if __name__ == '__main__':
                        help='do not upload actually the images')
 
     group.add_argument('--show-status', action='store_true',
-                        help='do not sync, but show the synchronisation status')
+                       help='do not sync, but show the synchronisation status')
 
     group.add_argument('--show-regions', action='store_true',
                        help='don not sync, only show the available regions')
 
-    group.add_argument('--make-backup', action='store_true',
-                       help="do no sync, make a backup of the regions' metadata")
+    group.add_argument(
+        '--make-backup', action='store_true',
+        help="do no sync, make a backup of the regions' metadata")
+
     meta = parser.parse_args()
     options = dict()
 

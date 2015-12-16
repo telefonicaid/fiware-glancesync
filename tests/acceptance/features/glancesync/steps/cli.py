@@ -26,7 +26,7 @@ from hamcrest import assert_that, contains_string, is_not
 from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_PENDING, GLANCESYNC_OUTPUT_STATUS_REPORT
 import re
 
-__author__ = "jframos"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 

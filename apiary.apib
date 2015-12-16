@@ -38,6 +38,8 @@ support other platforms.
 
 ## Copyright
 
+Copyright (c) 2015 Telefónica Investigación y Desarrollo.
+
 This specification is licensed under the
 [FIWARE Open Specification License](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_%28essential_patents_license%29).
 
@@ -146,7 +148,7 @@ Lists information about GlanceSync API version.
         "version": "1.0",
         "updated": "2011-01-21T11:33:21Z",
         "runningfrom": "2011-01-21T11:33:21Z",
-        "href": "https://github.com/telefonicaid/fiware-glancesync",
+        "href": "https://github.com/telefonicaid/fiware-glancesync"
         }
 
 + Response 405 (application/json)
@@ -178,7 +180,7 @@ regionid. Keep in mind that regionId is the name of the regions.
 + Response 200 (application/json)
     + Attributes (object)
         + imageName1: base_ubuntu_14.04 (string) - Name of the image in the master (Spain2) node.
-        + id: 3cfeaf3f0103b9637bb3fcfe691fce1e (string) - Image id corresponding to the Glance service in the region <regionId>.
+        + id: 3cfeaf3f0103b9637bb3fcfe691fce1e (string) - Image id corresponding to the Glance service in the region {regionId}.
         + status: ok (string) - Status of the synchronization of the images. See https://github.com/telefonicaid/fiware-glancesync#checking-status
         + message: lorem ipsum (string) - Error message of the synchronization or null if all was ok.
 
@@ -189,14 +191,14 @@ regionid. Keep in mind that regionId is the name of the regions.
                     "id": "3cfeaf3f0103b9637bb3fcfe691fce1e",
                     "name": "base_ubuntu_14.04",
                     "status": "ok",
-                    "message": null,
+                    "message": null
                 },            
                 {
                     "id": "153605c208287ef06a3c84712955c1e9",
                     "name": "base_centos_7",
                     "status": "ok_stalled_checksum",
-                    "message": "lorem ipsum",
-                },            
+                    "message": "lorem ipsum"
+                }            
                 ]
             }
 
@@ -238,12 +240,12 @@ execution of the process.
 
 + Response 200 (application/json)
     + Attributes (object)
-        + taskId: aa5da84dc5107e4109611360d2915c6c (string) - Image id corresponding to the Glance service in the region <regionId>.
+        + taskId: aa5da84dc5107e4109611360d2915c6c (string) - Id of the task in order to check that it is the same that we send in the request.
 
     + Body
     
             {
-                "taskId": "aa5da84dc5107e4109611360d2915c6c",
+                "taskId": "aa5da84dc5107e4109611360d2915c6c"
             }
 
 + Response 410 (application/json)
@@ -292,7 +294,7 @@ operation of the task in order to delete the corresponding resources.
     
             {
                 "taskId": "aa5da84dc5107e4109611360d2915c6c",
-                "status": "synced",
+                "status": "synced"
             }
 
 + Response 200 (application/json)

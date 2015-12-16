@@ -28,7 +28,7 @@ from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
 from glancesync_cmd_client.remote_client import GlanceSyncRemoteCmdClient
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
@@ -124,6 +124,8 @@ def after_scenario(context, scenario):
     """
     HOOK: To be executed after each Scenario:
         - Restore backup of GlanceSync configuration file
+        - Remove generated out files (parallel executions)
+        - Clean all created images in each Glance server.
     """
 
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
@@ -133,6 +135,10 @@ def after_scenario(context, scenario):
     # Restore backup of GlanceSync configuration file
     __logger__.info("Restoring backup of GlanceSync config file")
     context.glancesync_cmd_client.restore_backup()
+
+    # Removing all generated output files
+    __logger__.info("Removing generated output files if they are present")
+    context.glancesync_cmd_client.clean_all_parallel_output_logs()
 
     # Clean images for testing from Glance servers
     __logger__.info("Deleting all created images in each Glance server")
@@ -148,7 +154,17 @@ def after_scenario(context, scenario):
 def after_all(context):
     """
     HOOK: To be executed after all:
-        - None (so far)
+        - Restore the Backup to avoid problems if the execution is aborted in the middle.
+        - Remove all output files (parallel execution) if they are present,
+          to avoid problems if the execution is aborted in the middle.
     """
 
     __logger__.info("Teardown")
+
+    # Restore backup of GlanceSync configuration file
+    __logger__.info("Restoring backup of GlanceSync config file")
+    context.glancesync_cmd_client.restore_backup()
+
+    # Removing all generated output files
+    __logger__.info("Removing generated output files if they are present")
+    context.glancesync_cmd_client.clean_all_parallel_output_logs()

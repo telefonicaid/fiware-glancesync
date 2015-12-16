@@ -21,13 +21,14 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-from behave import step
-from hamcrest import assert_that, is_not, contains_string
-from qautils.dataset_utils import DatasetUtils
-from glancesync_cmd_client.output_constants import \
-    GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, GLANCESYNC_OUTPUT_RENAMING
 
-__author__ = "Javier Fernández"
+from behave import step
+from hamcrest import assert_that, is_not
+from qautils.dataset_utils import DatasetUtils
+import commons.glancesync_output_assertions as glancesync_assertions
+
+
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
@@ -43,14 +44,7 @@ def image_is_replaced(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_REPLACING.format(region_name=region,
-                                                                                 image_name=image_name)),
-                        "Image '{}' is not 'replacing' to region '{}'".format(image_name, region))
-
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_IMAGE_UPLOADED.format(region_name=region)),
-                        "Image '{}' is not 'uploading' to region '{}'".format(image_name, region))
+            glancesync_assertions.image_is_replaced_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is not replaced')
@@ -61,12 +55,7 @@ def image_is_not_replaced(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        is_not(
-                            contains_string(GLANCESYNC_OUTPUT_IMAGE_REPLACING.format(region_name=region,
-                                                                                     image_name=image_name))),
-                        "Image '{}' is 'replacing' another one in region '{}' and it shouldn't".format(image_name,
-                                                                                                       region))
+            glancesync_assertions.image_is_not_replaced_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'all images are replaced')
@@ -84,11 +73,7 @@ def image_is_renamed_replaced(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        contains_string(GLANCESYNC_OUTPUT_RENAMING.format(region_name=region,
-                                                                          image_name=image_name)),
-                        "Image '{}' is not 'Renaming and Replacing' another one in region '{}'".format(image_name,
-                                                                                                       region))
+            glancesync_assertions.image_is_renamed_replaced_assertion(context.glancesync_result, region, image_name)
 
 
 @step(u'the image "(?P<image_name>\w*)" is neither renamed nor replaced')
@@ -99,12 +84,8 @@ def image_is_not_renamed_replaced(context, image_name):
 
     for region in context.glance_manager_list:
         if region != context.master_region_name:
-            assert_that(context.glancesync_result,
-                        is_not(
-                            contains_string(GLANCESYNC_OUTPUT_RENAMING.format(region_name=region,
-                                                                              image_name=image_name))),
-                        "Image '{}' is 'Renaming and Replacing' another one "
-                        "in region '{}', and it shouldn't".format(image_name, region))
+            glancesync_assertions.image_is_not_renamed_replaced_assertion(context.glancesync_result,
+                                                                          region, image_name)
 
 
 @step(u'all images are renamed and replaced')
