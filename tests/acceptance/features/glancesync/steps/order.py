@@ -27,7 +27,7 @@ from qautils.dataset_utils import DatasetUtils
 from datetime import datetime
 import logging
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
