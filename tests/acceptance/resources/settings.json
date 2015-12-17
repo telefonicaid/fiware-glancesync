@@ -1,5 +1,9 @@
 {
   "environment": "experimentation",
+  "resources": [
+    {"name": "qatesting10meg", "url": "http://repositories.testbed.fiware.org/webdav/glancesync/qatesting10meg"},
+    {"name": "qatesting20meg", "url": "http://repositories.testbed.fiware.org/webdav/glancesync/qatesting20meg"}
+  ],
   "credentials": [
     {
       "credential_type": "base_admin|host",
