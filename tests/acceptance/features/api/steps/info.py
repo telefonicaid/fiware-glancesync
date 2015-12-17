@@ -44,7 +44,7 @@ def api_running(context):
     pass
 
 
-@given(u'the user is successfully authenticate')
+@given(u'the user is successfully authenticated')
 def user_authenticate(context):
     """User is authenticate"""
 

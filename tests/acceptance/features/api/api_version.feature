@@ -11,7 +11,7 @@ Feature: Get information about GlanceSync API
 
   Scenario: Request API information when user is authenticate.
     Given the API running properly
-    And   the user is successfully authenticate
+    And   the user is successfully authenticated
     When  I request the API version
     Then  the request finishes with status HTTP "200" OK
     And   I receive the API information with these attributes:
@@ -25,7 +25,7 @@ Feature: Get information about GlanceSync API
            | href           | [NOT_EMPTY]    |
 
 
-  Scenario Outline: Request API information when user is not authenticate (invalid/empty/missing X-Auth-Token).
+  Scenario Outline: Request API information when user is not authenticated (invalid/empty/missing X-Auth-Token).
     Given the API running properly
     And   the X-Auth-Token "<token>"
     When  I request the API version
@@ -47,6 +47,7 @@ Feature: Get information about GlanceSync API
       | abcde-fgh       |
 
 
+  @skip # GlanceSync Mock is not returning the body as JSON format.
   Scenario Outline: Request API information with invalid HTTP operations.
     Given the API running properly
     When  I send a HTTP "<verb>" request to the API version resource
