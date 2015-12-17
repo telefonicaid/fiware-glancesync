@@ -34,7 +34,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
             | main            | preferable_order    | <preferable_order>     |
     When  I sync images on "master:Burgos federation2:Madrid"
     Then  all images are synchronized
-    And   the timestamp of image "qatesting10meg" in "<node_greater>" is greater than the image in "<node_lesser>"
+    And   the timestamp of image "qatesting20meg" in "<node_greater>" is greater than the image in "<node_lesser>"
 
     Examples:
             | preferable_order             | node_greater | node_lesser |

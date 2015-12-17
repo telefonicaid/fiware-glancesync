@@ -27,6 +27,9 @@ from qautils.logger.logger_utils import get_logger
 from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
 from glancesync_cmd_client.remote_client import GlanceSyncRemoteCmdClient
+import urllib2
+import os
+
 
 __author__ = "@jframos"
 __copyright__ = "Copyright 2015"
@@ -53,6 +56,19 @@ def before_all(context):
     context.config = load_project_properties()
     context.master_region_name = \
         context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_MASTER_REGION_NAME]
+
+    # Download external resources
+    __logger__.info("Downloading external resources defined in properties")
+    resource_list = context.config[PROPERTIES_CONFIG_RES]
+    for resource in resource_list:
+        path = os.path.join(IMAGES_DIR, resource[PROPERTIES_CONFIG_RES_NAME])
+        if os.path.isfile(path):
+            __logger__.debug("Resource file '%s' already available", resource[PROPERTIES_CONFIG_RES_NAME])
+        else:
+            resource_file = urllib2.urlopen(resource[PROPERTIES_CONFIG_RES_url])
+            with open(path, 'wb') as output_file:
+                output_file.write(resource_file.read())
+                __logger__.debug("New resource downloaded '%s'", path)
 
     # Init Glance operation managers. Only 'base' managers relative to "CREDENTIAL_TYPE_BASE_ADMIN" credential type
     # Format: {Spain: GlanceOperations, Trento: GlanceOperations}
