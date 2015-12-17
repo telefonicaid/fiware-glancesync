@@ -158,8 +158,8 @@ def step_check_data_recover(context):
         # Load the content expected from file
         expected_value = __load_response__(resource)
 
-    assert_that(context.value[context.type], equal_to(expected_value), "Response obtained from FIWARE Catalogue is not "
-                                                                       "the expected one.")
+    assert_that(context.value[context.type], equal_to(expected_value), "Response obtained from FIWARE Catalogue "
+                                                                       "is not the expected one.")
 
 
 @given(u'the getnid application installed')

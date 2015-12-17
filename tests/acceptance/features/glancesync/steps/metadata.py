@@ -87,7 +87,7 @@ def __compare_dict__(dictA, dictB):
         else:
             diff[key] = "{}"
 
-    #delete empty_values due to they are equals
+    # delete empty_values due to they are equals
     empty_values = [k for k, v in diff.iteritems() if v == '{}']
     for v in empty_values:
         del diff[v]
@@ -150,8 +150,8 @@ def step_impl_check_metadata_some_values(context, image_name):
 
         message = __compare_dict__(sync_properties, properties)
 
-        assert_that(message, equal_to({}), "GlanceSync has NOT synchronized the images with"
-                                                           " the metadata values.")
+        assert_that(message, equal_to({}), "GlanceSync has NOT synchronized the images with "
+                                           "the metadata values.")
 
 
 @step(u'the user properties of the image "(?P<image_name>\w*)" are updated in the Glance of master node')

@@ -62,9 +62,10 @@ class GlanceSyncApiClient(RestClient):
         super(GlanceSyncApiClient, self).__init__(api_protocol, api_host, api_port, api_base_resource)
 
         __logger__.info("Init GlanceSync API Client")
-        __logger__.debug("Client parameters: Username: %s, Password: %s, TenantId: %s, API protocol: %s, API host: %s, "
-                         "API port: %s, Base resource: %s", username, password, tenant_id, api_protocol, api_host,
-                         api_port, api_base_resource)
+        __logger__.debug("Client parameters: Username: %s, Password: %s, TenantId: %s, "
+                         "API protocol: %s, API host: %s, "
+                         "API port: %s, Base resource: %s",
+                         username, password, tenant_id, api_protocol, api_host, api_port, api_base_resource)
 
         self.headers = dict()
         set_representation_headers(self.headers,

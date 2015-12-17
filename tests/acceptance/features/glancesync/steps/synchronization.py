@@ -196,7 +196,8 @@ def a_new_image_created_in_glance_of_target(context, image_name):
             __create_new_image__(context, region, image_name)
 
 
-@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" '
+      u'and file "(?P<file>\w*)"')
 def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
     """Create new image in the Glance of all target nodes with the content of the given file"""
 
@@ -439,7 +440,7 @@ def warning_message_checksum_conflict(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             glancesync_assertions.warning_message_checksum_conflict_assertion(context.glancesync_result,
-                                                                             region, image_name)
+                                                                              region, image_name)
 
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')

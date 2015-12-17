@@ -21,17 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "@jframos"
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
-
 from behave import step
 from hamcrest import assert_that, is_not, is_, greater_than, equal_to, contains_string, has_length
 from qautils.dataset.dataset_utils import DatasetUtils
 from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_PARALLEL_FINISHED
 import commons.glancesync_output_assertions as glancesync_assertions
 import logging
+
+__author__ = "@jframos"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
 
 
 # Get logger for Behave steps

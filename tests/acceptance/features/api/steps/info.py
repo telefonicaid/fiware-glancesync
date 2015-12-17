@@ -46,6 +46,8 @@ def api_running(context):
 
 @given(u'the user is successfully authenticate')
 def user_authenticate(context):
+    """User is authenticate"""
+
     # This is the default behaviour for GlanceSync API Client.
     # Syntactic sugar
     pass
@@ -53,17 +55,22 @@ def user_authenticate(context):
 
 @step(u'I request the API version')
 def request_api_version(context):
+    """Execute request to API version resource"""
+
     context.body, context.response = context.glancesync_api_client.get_api_version()
 
 
 @step(u'the request finishes with status HTTP "(?P<status>\d*)" .*')
 def request_finishes_with_status(context, status):
+    """Check that HTTP response code is the given one"""
+
     assert_that(str(context.response.status_code), is_(equal_to(status)),
                 "Response HTTP status is not the excepted one")
 
 
 @step(u'I receive the API information with these attributes')
 def the_api_information_has_these_attributes(context):
+    """Check that the response of the request has the given values"""
 
     for element in context.table.rows:
         attribute_key = element['attribute_name']
@@ -81,6 +88,8 @@ def the_api_information_has_these_attributes(context):
 
 @given(u'the X-Auth-Token "(?P<token>.*)"')
 def the_x_auth_token_is(context, token):
+    """Add the given token as X-Auth-Token header"""
+
     context.glancesync_api_client.headers.update({HEADER_X_AUTH_TOKEN: token})
     context.glancesync_api_client.headers = _dataset_utils.remove_missing_params(context.glancesync_api_client.headers)
     __logger__.debug("Headers updated by the step. New headers: %s", context.glancesync_api_client.headers)
@@ -88,6 +97,8 @@ def the_x_auth_token_is(context, token):
 
 @step(u'I send a HTTP "(?P<http_verb>get|post|delete|put)" request to the API version resource')
 def send_raw_http_request_api_version(context, http_verb):
+    """Execute a HTTP request with the given HTTP verb"""
+
     context.body, context.response = context.glancesync_api_client.\
         glancesync_api_raw_request(uri=API_GLANCESYNC_BASE_URI,
                                    body=None,
@@ -97,11 +108,12 @@ def send_raw_http_request_api_version(context, http_verb):
 
 @then(u'I receive an error response with these data')
 def receive_an_error_with_data(context):
+    """Check that response contains the given error data"""
 
     expected_error_response = dict()
     for element in context.table.rows:
-         data = element.as_dict()
-         expected_error_response.update(data)
+        data = element.as_dict()
+        expected_error_response.update(data)
 
     assert_that(context.body, is_(equal_to(expected_error_response)),
                 "Error response is not the expected one")
