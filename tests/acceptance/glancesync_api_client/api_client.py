@@ -22,11 +22,11 @@
 # contact with opensource@tid.es
 
 
-from qautils.rest_utils.headers_utils import set_representation_headers, HEADER_REPRESENTATION_JSON
-from qautils.rest_utils.rest_client_utils import RestClient, API_ROOT_URL_ARG_NAME
-from qautils.rest_utils.body_model_utils import response_body_to_dict
+from qautils.http.headers_utils import set_representation_headers, HEADER_REPRESENTATION_JSON
+from qautils.http.rest_client_utils import RestClient, API_ROOT_URL_ARG_NAME
+from qautils.http.body_model_utils import response_body_to_dict
 from glancesync_api_client.region_api_client import RegionApiClient
-from qautils.logger_utils import get_logger
+from qautils.logger.logger_utils import get_logger
 from keystoneclient.v2_0 import Client as KeystoneClient
 
 __author__ = "@jframos"

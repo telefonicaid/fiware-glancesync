@@ -23,7 +23,7 @@
 
 
 from constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
-from qautils.logger_utils import get_logger
+from qautils.logger.logger_utils import get_logger
 from glanceclient.client import Client as GlanceClient
 from keystoneclient.v2_0.client import Client as KeystoneClient
 import os

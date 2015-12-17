@@ -23,8 +23,8 @@
 
 from behave import when, then, given
 from hamcrest import assert_that, equal_to, is_
-from qautils.commandline_utils import execute_command as cmd
-from qautils.dataset_utils import DatasetUtils
+from qautils.commandline.commandline_utils import execute_command as cmd
+from qautils.dataset.dataset_utils import DatasetUtils
 import urllib
 import os
 import logging

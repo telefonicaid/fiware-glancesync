@@ -22,9 +22,9 @@
 # contact with opensource@tid.es
 
 
-from qautils.rest_utils.rest_client_utils import RestClient
-from qautils.rest_utils.headers_utils import HEADER_REPRESENTATION_JSON
-from qautils.rest_utils.body_model_utils import response_body_to_dict
+from qautils.http.rest_client_utils import RestClient
+from qautils.http.headers_utils import HEADER_REPRESENTATION_JSON
+from qautils.http.body_model_utils import response_body_to_dict
 
 
 __author__ = "@jframos"

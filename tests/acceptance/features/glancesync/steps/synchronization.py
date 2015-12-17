@@ -26,7 +26,7 @@ from hamcrest import assert_that, is_not, is_, equal_to
 import commons.glancesync_output_assertions as glancesync_assertions
 from commons.constants import IMAGES_DIR
 from commons.utils import get_real_value_of_image_property
-from qautils.dataset_utils import DatasetUtils
+from qautils.dataset.dataset_utils import DatasetUtils
 import logging
 import os
 

@@ -8,7 +8,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
 
   @happy_path @env_dependant @experimentation
   Scenario Outline: Sync images following a preferable order (default behaviour).
-    Given a new image created in the Glance of master node with name "qatesting10meg"
+    Given a new image created in the Glance of master node with name "qatesting20meg"
     And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value           |
             | DEFAULT         | metadata_condition  | 'image.is_public'      |
@@ -16,7 +16,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
             | main            | preferable_order    | <preferable_order>     |
     When  I sync images
     Then  all images are synchronized
-    And   the timestamp of image "qatesting10meg" in "<node_greater>" is greater than the image in "<node_lesser>"
+    And   the timestamp of image "qatesting20meg" in "<node_greater>" is greater than the image in "<node_lesser>"
 
     Examples:
             | preferable_order       | node_greater | node_lesser |
@@ -26,7 +26,7 @@ Feature: Image sync between regions, choosing the preferable order or regions fo
 
   @skip @bug @CLAUDIA-5323 @env_dependant @experimentation
   Scenario Outline: Sync images between different targets, following a preferable order.
-    Given a new image created in the Glance of master node with name "qatesting10meg"
+    Given a new image created in the Glance of master node with name "qatesting20meg"
     And   GlanceSync configured to sync images using these configuration parameters:
             | config_section  | config_key          | config_value           |
             | DEFAULT         | metadata_condition  | 'image.is_public'      |

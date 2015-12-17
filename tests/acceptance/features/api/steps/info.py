@@ -26,8 +26,8 @@ from behave import step, given, then
 from hamcrest import assert_that, is_, equal_to, has_key, has_length, greater_than
 from commons.constants import FEATURES_NOT_EMPTY_VALUE
 from glancesync_api_client.api_client import HEADER_X_AUTH_TOKEN, API_GLANCESYNC_BASE_URI
-from qautils.dataset_utils import DatasetUtils
-from qautils.logger_utils import get_logger
+from qautils.dataset.dataset_utils import DatasetUtils
+from qautils.logger.logger_utils import get_logger
 
 
 __author__ = "@jframos"

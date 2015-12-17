@@ -23,7 +23,7 @@
 
 from behave import step
 from hamcrest import assert_that, greater_than, is_
-from qautils.dataset_utils import DatasetUtils
+from qautils.dataset.dataset_utils import DatasetUtils
 from datetime import datetime
 import logging
 

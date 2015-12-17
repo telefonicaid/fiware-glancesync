@@ -23,7 +23,7 @@
 
 import behave
 from commons.constants import *
-from qautils.logger_utils import get_logger
+from qautils.logger.logger_utils import get_logger
 from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
 from glancesync_api_client.api_client import GlanceSyncApiClient
