@@ -135,7 +135,13 @@ before the biggest ones:
 - qatesting02b
 - qatesting03
 - qatesting03b
-- qatesting10meg
+
+Some needed images are stored as external resources, because they are big binary files.
+That images are downloaded automatically using the information configured in the
+property **resources** of `resources/settings.json`:
+
+- qatesting10meg: http://repositories.testbed.fiware.org/webdav/glancesync/qatesting10meg
+- qatesting20meg: http://repositories.testbed.fiware.org/webdav/glancesync/qatesting20meg
 
 Top_
 
