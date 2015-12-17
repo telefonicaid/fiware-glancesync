@@ -26,7 +26,7 @@ from hamcrest import assert_that, is_not, is_, equal_to
 import commons.glancesync_output_assertions as glancesync_assertions
 from commons.constants import IMAGES_DIR
 from commons.utils import get_real_value_of_image_property
-from qautils.dataset_utils import DatasetUtils
+from qautils.dataset.dataset_utils import DatasetUtils
 import logging
 import os
 
@@ -196,7 +196,8 @@ def a_new_image_created_in_glance_of_target(context, image_name):
             __create_new_image__(context, region, image_name)
 
 
-@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" and file "(?P<file>\w*)"')
+@step(u'a new image created in the Glance of all target nodes with name "(?P<image_name>\w*)" '
+      u'and file "(?P<file>\w*)"')
 def a_new_image_created_in_glance_of_target_and_file(context, image_name, file):
     """Create new image in the Glance of all target nodes with the content of the given file"""
 
@@ -246,9 +247,9 @@ def glancesync_configured_to_sync_images_parameters(context):
                 value = value.replace(config_value, real_config_value) if real_config_value is not None else value
 
         __logger__.info("The config values for '%s'(after replacing) are %s", row['config_key'], value)
-        result = context.glancesync_client.change_configuration_file(section=row['config_section'],
-                                                                     key=row['config_key'],
-                                                                     value=value)
+        result = context.glancesync_cmd_client.change_configuration_file(section=row['config_section'],
+                                                                         key=row['config_key'],
+                                                                         value=value)
         assert_that(result, is_not(None),
                     "GlanceSyn has NOT been configured due to some problem executing command")
 
@@ -259,9 +260,9 @@ def glancesync_configured_to_sync_images_default(context):
 
     for row in [{'config_key': 'metadata_condition', 'config_value': ''},
                 {'config_key': 'metadata_set', 'config_value': ''}]:
-        result = context.glancesync_client.change_configuration_file(section='DEFAULT',
-                                                                     key=row['config_key'],
-                                                                     value=row['config_value'])
+        result = context.glancesync_cmd_client.change_configuration_file(section='DEFAULT',
+                                                                         key=row['config_key'],
+                                                                         value=row['config_value'])
         assert_that(result, is_not(None),
                     "GlanceSync has NOT been configured due to some problem executing command")
 
@@ -271,7 +272,7 @@ def glancesync_configured_to_sync_images_default(context):
 def sync_the_selected_image(context):
     """Sync images"""
 
-    context.glancesync_result = context.glancesync_client.sync()
+    context.glancesync_result = context.glancesync_cmd_client.sync()
 
 
 @step(u'I sync the image on "(?P<nodes>[\w,: ]*)"')
@@ -279,7 +280,7 @@ def sync_the_selected_image(context):
 def sync_the_selected_image_on_nodes(context, nodes):
     """Sync images only in the given list of nodes"""
 
-    context.glancesync_result = context.glancesync_client.sync(nodes)
+    context.glancesync_result = context.glancesync_cmd_client.sync(nodes)
 
 
 @step(u'already synchronized images')
@@ -439,7 +440,7 @@ def warning_message_checksum_conflict(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             glancesync_assertions.warning_message_checksum_conflict_assertion(context.glancesync_result,
-                                                                             region, image_name)
+                                                                              region, image_name)
 
 
 @step(u'a warning message is shown informing about image duplicity for "(?P<image_name>\w*)"')

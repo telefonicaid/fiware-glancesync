@@ -21,17 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+from behave import step
+from hamcrest import assert_that, is_not, is_, greater_than, equal_to, contains_string, has_length
+from qautils.dataset.dataset_utils import DatasetUtils
+from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_PARALLEL_FINISHED
+import commons.glancesync_output_assertions as glancesync_assertions
+import logging
+
 __author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
-
-
-from behave import step
-from hamcrest import assert_that, is_not, is_, greater_than, equal_to, contains_string, has_length
-from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import GLANCESYNC_OUTPUT_PARALLEL_FINISHED
-import commons.glancesync_output_assertions as glancesync_assertions
-import logging
 
 
 # Get logger for Behave steps
@@ -45,7 +44,7 @@ def file_created_output_logger(context):
     """
     Step: Check that generated output files by the parallel process have been created.
     """
-    result = context.glancesync_client.get_output_log_list()
+    result = context.glancesync_cmd_client.get_output_log_list()
 
     assert_that(result, is_not(None),
                 "Problem when executing 'ls' command")
@@ -93,7 +92,7 @@ def image_is_synchronized_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
             glancesync_assertions.image_is_synchronized_assertion(file_content, region, image_name)
 
 
@@ -117,7 +116,7 @@ def no_images_are_sync_parallel(context):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
             glancesync_assertions.no_images_are_sync_assertion(file_content, region)
 
 
@@ -133,7 +132,7 @@ def warning_message_checksum_conflict_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
             glancesync_assertions.warning_message_checksum_conflict_assertion(file_content, region, image_name)
 
 
@@ -148,7 +147,7 @@ def image_is_replaced_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
             glancesync_assertions.image_is_replaced_assertion(file_content, region, image_name)
 
 
@@ -163,5 +162,5 @@ def image_is_renamed_replaced(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
             glancesync_assertions.image_is_renamed_replaced_assertion(file_content, region, image_name)

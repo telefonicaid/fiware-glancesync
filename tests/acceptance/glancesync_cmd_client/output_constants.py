@@ -21,7 +21,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 

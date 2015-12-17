@@ -22,9 +22,9 @@
 # contact with opensource@tid.es
 
 from behave import step, then
-from qautils.dataset_utils import DatasetUtils
+from qautils.dataset.dataset_utils import DatasetUtils
 from hamcrest import assert_that, equal_to, contains_string, is_not
-from glancesync_client.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
+from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_METADATA_UPDATING
 from commons.utils import get_real_value_of_image_property
 
 __author__ = 'fla'
@@ -87,7 +87,7 @@ def __compare_dict__(dictA, dictB):
         else:
             diff[key] = "{}"
 
-    #delete empty_values due to they are equals
+    # delete empty_values due to they are equals
     empty_values = [k for k, v in diff.iteritems() if v == '{}']
     for v in empty_values:
         del diff[v]
@@ -150,8 +150,8 @@ def step_impl_check_metadata_some_values(context, image_name):
 
         message = __compare_dict__(sync_properties, properties)
 
-        assert_that(message, equal_to({}), "GlanceSync has NOT synchronized the images with"
-                                                           " the metadata values.")
+        assert_that(message, equal_to({}), "GlanceSync has NOT synchronized the images with "
+                                           "the metadata values.")
 
 
 @step(u'the user properties of the image "(?P<image_name>\w*)" are updated in the Glance of master node')

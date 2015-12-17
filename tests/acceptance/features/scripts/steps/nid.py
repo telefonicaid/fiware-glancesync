@@ -23,8 +23,8 @@
 
 from behave import when, then, given
 from hamcrest import assert_that, equal_to, is_
-from qautils.commandline_utils import execute_command as cmd
-from qautils.dataset_utils import DatasetUtils
+from qautils.commandline.commandline_utils import execute_command as cmd
+from qautils.dataset.dataset_utils import DatasetUtils
 import urllib
 import os
 import logging
@@ -158,8 +158,8 @@ def step_check_data_recover(context):
         # Load the content expected from file
         expected_value = __load_response__(resource)
 
-    assert_that(context.value[context.type], equal_to(expected_value), "Response obtained from FIWARE Catalogue is not "
-                                                                       "the expected one.")
+    assert_that(context.value[context.type], equal_to(expected_value), "Response obtained from FIWARE Catalogue "
+                                                                       "is not the expected one.")
 
 
 @given(u'the getnid application installed')

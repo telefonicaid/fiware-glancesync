@@ -22,7 +22,7 @@
 # contact with opensource@tid.es
 
 from constants import PROPERTIES_FILE
-from qautils.logger_utils import get_logger
+from qautils.logger.logger_utils import get_logger
 import json
 import re
 import os

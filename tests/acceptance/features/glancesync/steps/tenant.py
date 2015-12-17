@@ -23,11 +23,11 @@
 
 from behave import step
 from hamcrest import assert_that, is_not, contains_string, is_
-from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_TYPE, \
-    PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, \
-    PROPERTIES_CONFIG_CRED_KEYSTONE_URL
-from qautils.dataset_utils import DatasetUtils
-from glancesync_client.output_constants import GLANCESYNC_OUTPUT_OWNER
+from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CONFIG_CRED, \
+    PROPERTIES_CONFIG_CRED_TYPE, PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, \
+    PROPERTIES_CONFIG_CRED_TENANT_ID, PROPERTIES_CONFIG_CRED_KEYSTONE_URL
+from qautils.dataset.dataset_utils import DatasetUtils
+from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_OWNER
 from commons.glance_operations import GlanceOperations
 
 __author__ = "@jframos"

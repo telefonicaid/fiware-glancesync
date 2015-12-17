@@ -21,9 +21,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+
 from behave import step
 from hamcrest import assert_that, is_not
-from qautils.dataset_utils import DatasetUtils
+from qautils.dataset.dataset_utils import DatasetUtils
 import commons.glancesync_output_assertions as glancesync_assertions
 
 

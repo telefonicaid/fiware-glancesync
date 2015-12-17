@@ -25,7 +25,7 @@
 from hamcrest import assert_that, is_not, contains_string, is_, equal_to, greater_than, has_length
 import logging
 import re
-from glancesync_client.output_constants import \
+from glancesync_cmd_client.output_constants import \
     GLANCESYNC_OUTPUT_UPLOADING, GLANCESYNC_OUTPUT_IMAGE_UPLOADED, \
     GLANCESYNC_OUTPUT_REGION_SYNC, GLANCESYNC_OUTPUT_WARNING_IMAGES_SAME_NAME, \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE, \

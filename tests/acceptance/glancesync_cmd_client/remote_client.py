@@ -21,9 +21,9 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-from qautils.fabric_utils import FabricUtils
+from qautils.remote.fabric_utils import FabricUtils
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
@@ -31,7 +31,7 @@ COMMAND_SYNC = "sync.py"
 OUTPUT_PARALLEL_LOGS = "sync_*"
 
 
-class GlanceSyncClient:
+class GlanceSyncRemoteCmdClient:
 
     """ Remote GlanceSync client for testing purposes """
 
@@ -88,16 +88,6 @@ class GlanceSyncClient:
                                                                  config_file=self.conf_file_path)
             self.fabric_utils.execute_command(command)
 
-    def clean_all_parallel_output_logs(self):
-        """
-        Remove all output files coming from a parallel execution
-        :return (String): Command output
-        """
-
-        command = "rm -rf {output_files_pater}".format(bin_path=self.bin_path,
-                                                       output_files_pater=OUTPUT_PARALLEL_LOGS)
-        return self.fabric_utils.execute_command(command)
-
     def get_output_log_list(self):
         """
         This method return the content of executing a 'ls' command filtering by output parallel logs dir name
@@ -116,6 +106,16 @@ class GlanceSyncClient:
         """
 
         command = "cat {file_absolute_path}".format(file_absolute_path=file_absolute_path)
+        return self.fabric_utils.execute_command(command)
+
+    def clean_all_parallel_output_logs(self):
+        """
+        Remove all output files coming from a parallel execution
+        :return (String): Command output
+        """
+
+        command = "rm -rf {output_files_pater}".format(bin_path=self.bin_path,
+                                                       output_files_pater=OUTPUT_PARALLEL_LOGS)
         return self.fabric_utils.execute_command(command)
 
     def sync(self, list_nodes=None, options=None):
