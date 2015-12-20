@@ -40,6 +40,7 @@ _dataset_utils = DatasetUtils()
 
 @given(u'the API running properly')
 def api_running(context):
+    """API is running"""
     # Nothing to do so far.
     pass
 

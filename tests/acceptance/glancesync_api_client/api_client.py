@@ -26,6 +26,7 @@ from qautils.http.headers_utils import set_representation_headers, HEADER_REPRES
 from qautils.http.rest_client_utils import RestClient, API_ROOT_URL_ARG_NAME
 from qautils.http.body_model_utils import response_body_to_dict
 from glancesync_api_client.region_api_client import RegionApiClient
+from glancesync_api_client.task_api_client import TaskApiClient
 from qautils.logger.logger_utils import get_logger
 from keystoneclient.v2_0 import Client as KeystoneClient
 
@@ -78,6 +79,11 @@ class GlanceSyncApiClient(RestClient):
 
         self.headers.update({HEADER_X_AUTH_TOKEN: self.token})
         __logger__.debug("Headers with OpenStack credentials: %s", self.headers)
+
+        self.protocol = api_protocol
+        self.host = api_host
+        self.port = api_port
+        self.base_resource = api_base_resource
 
     def _init_keystone_client(self, username, password, tenant_id, auth_url):
         """
@@ -135,7 +141,16 @@ class GlanceSyncApiClient(RestClient):
     def get_region_api_client(self):
         """
         Return the API Client for 'Region Synchronization' resource
-        :return:
+        :return: REST API Client.
         """
 
         return RegionApiClient(self.protocol, self.host, self.port, self.headers, self.base_resource)
+
+    def get_task_api_client(self, region_id):
+        """
+        Return the API Client for 'tasks' resource.
+        :param (string):
+        :return: REST API Client.
+        """
+
+        return TaskApiClient(self.protocol, self.host, self.port, self.headers, region_id, self.base_resource)

@@ -32,7 +32,7 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-BASE_URI_REGION = "{api_root_url}/region"
+BASE_URI_REGION = "{api_root_url}/regions"
 BASE_URI_REGION_DETAILS = BASE_URI_REGION + "/{region_id}"
 
 
