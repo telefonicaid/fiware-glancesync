@@ -23,11 +23,12 @@
 
 from constants import PROPERTIES_FILE
 from qautils.logger.logger_utils import get_logger
+
 import json
 import re
 import os
 
-__author__ = "Javier Fernández"
+__author__ = "@jframos"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 

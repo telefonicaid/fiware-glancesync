@@ -31,7 +31,7 @@ __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
 
 
-BASE_URI_TASK = "{api_root_url}/region/{region_id}/task"
+BASE_URI_TASK = "{api_root_url}/regions/{region_id}/tasks"
 BASE_URI_TASK_DETAILS = BASE_URI_TASK + "/{task_id}"
 
 
@@ -99,9 +99,8 @@ class TaskApiClient(RestClient):
         :return (Requests): The whole Requests-lib response.
         """
 
-        response = super(TaskApiClient, self).post(uri_pattern=BASE_URI_TASK_DETAILS,
-                                                   body=None,
-                                                   headers=self.headers,
-                                                   region_id=self.region_id,
-                                                   task_id=task_id)
+        response = super(TaskApiClient, self).delete(uri_pattern=BASE_URI_TASK_DETAILS,
+                                                     headers=self.headers,
+                                                     region_id=self.region_id,
+                                                     task_id=task_id)
         return response
