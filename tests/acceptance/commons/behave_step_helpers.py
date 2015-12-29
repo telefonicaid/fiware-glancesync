@@ -25,6 +25,7 @@ from commons.constants import IMAGES_DIR
 from hamcrest import assert_that, is_not, is_, equal_to
 from qautils.dataset.dataset_utils import DatasetUtils
 from qautils.logger.logger_utils import get_logger
+from commons.utils import get_real_value_of_image_property
 import os
 
 __author__ = "@jframos"
