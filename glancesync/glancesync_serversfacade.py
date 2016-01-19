@@ -135,6 +135,7 @@ class ServersFacade(object):
                               disk_format=image.raw['disk_format'],
                               protected=image.raw['protected'],
                               container_format=image.raw['container_format'],
+                              purge_props=True,
                               properties=image.user_properties)
         except Exception, e:
             msg = regionobj.fullname + ': Update of ' + image.name +\
