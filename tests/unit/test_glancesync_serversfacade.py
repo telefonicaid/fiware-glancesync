@@ -204,8 +204,9 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         self.facade.update_metadata(self.region_obj, self.image)
         expected_call = call.get_glanceclient().images.get().update(
             is_public=False, container_format='bare', disk_format='qcow2',
-            name='imagetest', protected=False,
+            name='imagetest', protected=False, purge_props=True,
             properties={'new_property': 'new_value'})
+        print self.facade.osclients.mock_calls[-1]
         self.assertTrue(self.facade.osclients.mock_calls[-1] == expected_call)
 
     def test_update_ex(self):
@@ -309,6 +310,7 @@ class TestGlanceServersFacade(unittest.TestCase):
         image.raw['container_format'] = 'bare'
         image.raw['min_ram'] = '0'
         image.raw['min_disk'] = '0'
+        image.user_properties['key'] = 'original_value'
 
         self.created = self.facade.upload_image(self.region_obj, image)
         self.assertIsNotNone(self.created)
@@ -342,6 +344,23 @@ class TestGlanceServersFacade(unittest.TestCase):
             if self.created == image.id:
                 self.assertIn('key', image.user_properties)
                 self.assertEquals(image.user_properties['key'], 'new value')
+                found = True
+        self.assertTrue(found)
+
+    def test_updatemetadata_purge(self):
+        """test that if an old property is not included in user_properties,
+        it is removed"""
+        found = False
+        self.create_image()
+        for image in self.facade.get_imagelist(self.region_obj):
+            if self.created == image.id:
+                image.user_properties['key2'] = 'value2'
+                del image.user_properties['key']
+                self.facade.update_metadata(self.region_obj, image)
+        for image in self.facade.get_imagelist(self.region_obj):
+            if self.created == image.id:
+                self.assertIn('key2', image.user_properties)
+                self.assertNotIn('key', image.user_properties)
                 found = True
         self.assertTrue(found)
 

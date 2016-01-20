@@ -253,7 +253,6 @@ Feature: Image sync between regions using GlanceSync in the same federation but
               | new_att         | qa-test             |
 
 
-    @skip @bug @CLAUDIA-5315
     Scenario: 09a: Sync already existent images when its metadata have changed. Remove attribute. Same configuration properties.
       Given a new image created in the Glance of master node with name "qatesting01" and these properties:
               | param_name      | param_value         |
@@ -279,7 +278,6 @@ Feature: Image sync between regions using GlanceSync in the same federation but
               | sdc_aware       | True                |
 
 
-    @skip @bug @CLAUDIA-5315
     Scenario: 09b: Sync already existent images when its metadata have changed. Remove and edit attributes. Same configuration properties.
       Given a new image created in the Glance of master node with name "qatesting01" and these properties:
               | param_name      | param_value         |
