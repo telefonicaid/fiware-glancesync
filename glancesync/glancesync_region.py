@@ -25,7 +25,8 @@
 #
 __author__ = 'chema'
 
-import logging
+# import logging
+from app.settings.log import logger
 
 """This module includes code supporting the glancesync functionality, but
 users should not use this class in their code, because it is internal and its
@@ -41,7 +42,8 @@ class GlanceSyncRegion(object):
     """This class supports the concept of region with a target namespace"""
 
     def __init__(self, fullname, targets):
-        self.log = logging.getLogger('glancesync')
+        # self.log = logging.getLogger('glancesync')
+        self.log = logger
         """Create a new region object.
 
         :param fullname: It is specified as 'target:region_name'. A target is

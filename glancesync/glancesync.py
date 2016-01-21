@@ -25,7 +25,7 @@
 __author__ = 'chema'
 
 import os
-import logging
+from app.settings.log import logger
 import csv
 import copy
 
@@ -54,12 +54,15 @@ class GlanceSync(object):
     def __init__(self, config_stream=None, options_dict=None):
         """Constructor of the object
         """
-        self.log = logging.getLogger('glancesync')
+        # self.log = logging.getLogger('glancesync')
+        self.log = logger
+
         if config_stream is None:
             glancesyncconfig = GlanceSyncConfig(override_d=options_dict)
         else:
             glancesyncconfig = GlanceSyncConfig(
                 stream=config_stream, override_d=options_dict)
+
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
         self.images_dir = glancesyncconfig.images_dir
@@ -415,12 +418,17 @@ class GlanceSync(object):
         :return:
         """
 
+        '''
+        We do not need to create a new logger just import it from app.settings.log.py
+
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(levelname)s:%(message)s'))
         logger = logging.getLogger('glancesync')
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
         logger.propagate = 0
+        '''
+        pass
 
     def __upload_image(self, master_image, images_dict, regionobj):
         new_image = copy.deepcopy(master_image)

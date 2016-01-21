@@ -27,7 +27,7 @@ __author__ = 'chema'
 import ConfigParser
 import os
 import base64
-import logging
+from app.settings.log import logger
 
 import sys
 
@@ -105,7 +105,7 @@ class GlanceSyncConfig(object):
         :return: nothing
         """
 
-        logger = logging.getLogger('glancesync')
+        # logger = logging.getLogger('glancesync')
 
         defaults = {'use_keystone_v3': 'False',
                     'support_obsolete_images': 'True',
