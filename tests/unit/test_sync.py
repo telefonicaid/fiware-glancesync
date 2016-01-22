@@ -147,7 +147,10 @@ class TestSyncParallel(unittest.TestCase):
                 self.log.info('Sync ' + region + ' ' + str(time.time()))
         }
         self.glancesync.configure_mock(**config)
-        self.dir_name = 'sync_20200206_2357'
+
+        path = os.path.abspath(os.curdir)
+        self.dir_name = os.path.join(path, 'sync_20200206_2357')
+
         self.tearDown()
 
     def tearDown(self):
@@ -175,9 +178,9 @@ class TestSyncParallel(unittest.TestCase):
         assert(os.path.exists(file1))
         assert(os.path.exists(file2))
         data1 = open(file1).read()
-        assert(data1.startswith('Sync region1'))
+        assert(data1.startswith('INFO:Sync region1'))
         data2 = open(file2).read()
-        assert(data2.startswith('Sync region2'))
+        assert(data2.startswith('INFO:Sync region2'))
         time1 = float(data1.split(' ')[2])
         time2 = float(data2.split(' ')[2])
         return abs(time1-time2)

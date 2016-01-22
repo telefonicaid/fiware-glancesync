@@ -25,7 +25,8 @@
 #
 __author__ = 'chema'
 
-from app.settings.log import logger
+#from app.settings.log import logger
+import logging
 """This internal module check and update the kernel_id and ramdisk_id of
 AMI images. This metadata points to the UUID of two auxiliary images: the
 kernel and the ramdisk.
@@ -39,7 +40,7 @@ ramdisk_id.
 """
 
 
-# _logger = logging.getLogger('glancesync')
+_logger = logging.getLogger('glancesync')
 
 
 def clean_ami_ids(image_dict):
@@ -129,7 +130,7 @@ def _update_auximg_id(property_id, image, master_image, images_region):
             # replaced by a more recent one)
             # In this case, print a warning
             msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
-            logger.warning(msg.format(aux_image_name, image.region,
+            _logger.warning(msg.format(aux_image_name, image.region,
                                        property_id, image.name))
             # Put the aux image name; this provides information to the caller
             # about the missing image. Put '__' as prefix.

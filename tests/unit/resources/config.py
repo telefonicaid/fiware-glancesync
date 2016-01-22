@@ -24,4 +24,4 @@
 #
 __author__ = 'fla'
 
-RESOURCESPATH = '/tests/unit/resources'
+RESOURCESPATH = 'tests/unit/resources'

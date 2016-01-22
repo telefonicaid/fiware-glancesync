@@ -24,7 +24,7 @@
 #
 __author__ = 'chema'
 
-from app.settings.log import logger
+import logging
 from utils.osclients import OpenStackClients
 from multiprocessing import Pool, TimeoutError
 
@@ -61,8 +61,7 @@ class ServersFacade(object):
         self.target = target
         # This is a default value
         self.images_dir = '/var/lib/glance/images'
-        # self.logger = logging.getLogger('glancesync')
-        self.logger = logger
+        self.logger = logging.getLogger('glancesync')
 
     def _get_glanceclient(self, region):
         """helper method, to get a glanceclient for the region"""

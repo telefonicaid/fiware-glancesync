@@ -31,6 +31,7 @@ import tempfile
 from glancesync.glancesync_serverfacade_mock import ServersFacade
 from glancesync.glancesync_region import GlanceSyncRegion
 from tests.unit.resources.config import RESOURCESPATH
+from tests.unit.test_getnid import get_path
 
 __author__ = 'chema'
 
@@ -149,7 +150,8 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
     def test_add_images_from_csv_to_mock(self):
         """test method add_images_from_cvs_to_mock. Check regions and images
         present"""
-        path = os.path.abspath(os.curdir) + RESOURCESPATH + '/basictest/'
+        tmp = get_path(os.path.abspath(os.curdir), RESOURCESPATH)
+        path = os.path.join(tmp, 'basictest')
         ServersFacade.add_images_from_csv_to_mock(path)
         region = GlanceSyncRegion('other:Santander', self.targets)
         self.assertIn('Santander', self.mock_other.get_regions())
