@@ -85,6 +85,7 @@ def get_status(regionid):
 }
 '''
 
+
 @mod_auth.route('/<regionid>', methods=['POST'])
 def synchronize(regionid):
     return "hola synchronize\n"

@@ -38,7 +38,6 @@ ID = 'v' + VERSION
 RUNNINGFROM = datetime.datetime.now()
 
 
-
 # Set the route and accepted methods
 @mod_info.route('/', methods=['GET'])
 def get_info():

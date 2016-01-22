@@ -27,6 +27,7 @@ __author__ = 'fla'
 from unittest import TestCase
 from tests.unit.test_getnid import get_path
 
+
 class TestGlanceSyncNIDOperations(TestCase):
     relativepath = 'tests/unit/resources/nid'
     path1 = '/Users/fla/Documents/workspace/python/fiware-glancesync'

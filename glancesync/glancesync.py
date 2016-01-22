@@ -25,7 +25,7 @@
 __author__ = 'chema'
 
 import os
-#from app.settings.log import logger
+import logging
 import csv
 import copy
 
@@ -35,7 +35,6 @@ from glancesync_image import GlanceSyncImage
 import glancesync_ami
 from glancesync_serversfacade import ServersFacade
 from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
-import logging
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
@@ -55,7 +54,6 @@ class GlanceSync(object):
         """Constructor of the object
         """
         self.log = logging.getLogger('glancesync')
-        #self.log = logger
 
         if config_stream is None:
             glancesyncconfig = GlanceSyncConfig(override_d=options_dict)
@@ -420,6 +418,7 @@ class GlanceSync(object):
 
         '''
         We do not need to create a new logger just import it from app.settings.log.py
+        TO BE CHECKED
 
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(levelname)s:%(message)s'))

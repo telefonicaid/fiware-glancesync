@@ -25,7 +25,6 @@
 #
 __author__ = 'chema'
 
-#from app.settings.log import logger
 import logging
 """This internal module check and update the kernel_id and ramdisk_id of
 AMI images. This metadata points to the UUID of two auxiliary images: the

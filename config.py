@@ -23,4 +23,3 @@ CSRF_ENABLED = True
 # Use a secure, unique and absolutely secret key for
 # signing the data
 CSRF_SESSION_KEY = "secret"
-

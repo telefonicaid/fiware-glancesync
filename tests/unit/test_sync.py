@@ -177,13 +177,21 @@ class TestSyncParallel(unittest.TestCase):
         file2 = os.path.join(self.dir_name, 'region2.txt')
         assert(os.path.exists(file1))
         assert(os.path.exists(file2))
+
         data1 = open(file1).read()
-        assert(data1.startswith('INFO:Sync region1'))
+        if logging.Logger.manager.emittedNoHandlerWarning == 1:
+            text = 'Sync region'
+        else:
+            text = 'INFO:Sync region'
+
+        assert(data1.startswith(text + '1'))
+
         data2 = open(file2).read()
-        assert(data2.startswith('INFO:Sync region2'))
+        assert(data2.startswith(text + '2'))
+
         time1 = float(data1.split(' ')[2])
         time2 = float(data2.split(' ')[2])
-        return abs(time1-time2)
+        return abs(time1 - time2)
 
     @patch('sync.datetime')
     def test_parallel_sync(self, datetime_mock):

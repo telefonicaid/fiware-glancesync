@@ -221,7 +221,6 @@ class GlanceSyncConfig(object):
                 target['support_obsolete_images'] = configparser.getboolean(
                         section, 'support_obsolete_images')
 
-
                 target['list_images_timeout'] = configparser.getint(
                         section, 'list_images_timeout')
 

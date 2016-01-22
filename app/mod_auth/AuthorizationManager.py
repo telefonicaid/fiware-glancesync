@@ -40,6 +40,7 @@ __author__ = 'fla'
 DEFAULT_REQUEST_TIMEOUT = 100
 HTTP_RESPONSE_CODE_OK = 200
 
+
 class AuthorizationManager():
     """This class provides methods to manage authorization.
     """
@@ -61,7 +62,6 @@ class AuthorizationManager():
         self.myClient = keystone_client
         self.api_version = api_version
         self.identity_url = identity_url
-
 
     def get_auth_token(self, username, password, tenant_id, **kwargs):
         """
@@ -102,7 +102,6 @@ class AuthorizationManager():
             except (KeystoneClientException, KeystoneConnectionRefused) as e:
                 logger.error("No auth token (%s)", e.message)
                 raise e
-
 
         return AuthorizationManager.auth_token
 
@@ -172,4 +171,3 @@ class AuthorizationManager():
             my_token = TokenModel(expires=tmp["expires_at"], id=tmp["id"], tenant=tmp["project"])
 
         return my_token
-
