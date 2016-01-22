@@ -30,6 +30,7 @@ import datetime
 import os
 import logging
 import time
+import re
 
 from sync import Sync
 
@@ -169,6 +170,9 @@ class TestSyncParallel(unittest.TestCase):
         :param datetime_mock: the absolute difference time, in seconds (float)
         :return:
         """
+        match_obj1 = None
+        match_obj2 = None
+
         dt = datetime.datetime(2020, 2, 6, 23, 57)
         config = {'datetime.now.return_value': dt}
         datetime_mock.configure_mock(**config)
@@ -179,18 +183,16 @@ class TestSyncParallel(unittest.TestCase):
         assert(os.path.exists(file2))
 
         data1 = open(file1).read()
-        if logging.Logger.manager.emittedNoHandlerWarning == 1:
-            text = 'Sync region'
-        else:
-            text = 'INFO:Sync region'
-
-        assert(data1.startswith(text + '1'))
-
         data2 = open(file2).read()
-        assert(data2.startswith(text + '2'))
 
-        time1 = float(data1.split(' ')[2])
-        time2 = float(data2.split(' ')[2])
+        match_obj1 = re.match( r'.*Sync region(.*) (.*)', data1, re.M|re.I)
+        assert(match_obj1 is not None), 'The file {} does not contain the expected value'.format(file1)
+
+        match_obj2 = re.match( r'.*Sync region(.*) (.*)', data2, re.M|re.I)
+        assert(match_obj2 is not None), 'The file {} does not contain the expected value'.format(file2)
+
+        time1 = float(match_obj1.group(2))
+        time2 = float(match_obj2.group(2))
         return abs(time1 - time2)
 
     @patch('sync.datetime')

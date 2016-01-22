@@ -31,10 +31,6 @@ from flask import Flask
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
-# Import a module / component using its blueprint handler variable (mod_auth)
-from app.mod_auth.controllers import mod_auth as auth_module
-from app.mod_info.controllers import mod_info as info_module
-
 # Defile the WGSI application object
 app = Flask(__name__)
 
@@ -44,6 +40,10 @@ app.config.from_object('config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+
+# Import a module / component using its blueprint handler variable (mod_auth)
+from app.mod_auth.controllers import mod_auth as auth_module
+from app.mod_info.controllers import mod_info as info_module
 
 
 # Sample HTTP error handling (401)

@@ -27,7 +27,6 @@ __author__ = 'chema'
 import ConfigParser
 import os
 import base64
-#from app.settings.log import logger
 import logging
 
 import sys

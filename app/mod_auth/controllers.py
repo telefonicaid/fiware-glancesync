@@ -27,9 +27,6 @@
 from flask import Blueprint, Response, request, flash, g, session, redirect, url_for
 import httplib
 
-# Import password / encryption helper tools: TBChecked
-from werkzeug import check_password_hash, generate_password_hash
-
 # Import the database object from the main app module
 from app import db
 
