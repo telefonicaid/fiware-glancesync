@@ -22,13 +22,14 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+from setuptools import setup, find_packages
 from distutils.core import setup
 
 __version__ = '1.2.0'
 
 setup(
 name='fiware-glancesync',
-packages=['glancesync'],  # this must be the same as the name above
+packages=find_packages(exclude=['*tests*']),
 version=__version__,
 description='Tool to synchronise images from a master region to other regions',
 author='Fernando Lopez Aguilar',
