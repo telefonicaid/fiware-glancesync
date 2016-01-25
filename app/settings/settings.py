@@ -45,8 +45,6 @@ if os.environ.get("GLANCESYNC_SETTINGS_FILE"):
 else:
     cfg_filename = os.path.join(cfg_dir, '%s.cfg' % name)
 
-# cfg_filename = '/Users/fla/Documents/workspace/python/fiware-glancesync/app/settings/fiware-glancesync.cfg'
-
 config.read(cfg_filename)
 
 

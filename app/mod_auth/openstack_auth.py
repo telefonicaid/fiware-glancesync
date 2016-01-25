@@ -45,21 +45,6 @@ def validate_token(access_token):
     """
 
     # Send a request to validate a token
-    # h = Http()
-    # resp, cont = h.request("https://www.googleapis.com/oauth2/v2/userinfo",
-    #                        headers={'Host': 'www.googleapis.com',
-    #                                 'Authorization': access_token})
-    result = {'status': '200'}
-
-    cont = '{"access": {"token": {"issued_at": "2015-12-14T13:56:17.700332", "expires": "2015-12-15T13:56:17Z", ' \
-           '"id": "429081ec49834e1ba766c56954d72bf5", "tenant": {"enabled": true, ' \
-           '"id": "00000000000003228460960090160000", "name": "admin", "description": "Cloud admin"}, ' \
-           '"audit_ids": ["usff91lmRlGAuRaUxRLLBg"]}, "user": {"username": "admin", "roles_links": [], ' \
-           '"id": "5a919b072cac4b02917e785f1898826e", "roles": [{"name": "admin"}], "name": "admin"}, ' \
-           '"metadata": {"is_admin": 0, "roles": ["bcefc16468f344829a739512b96624df"]}}}'
-
-    resp, cont = result, cont
-
     try:
         a = AuthorizationManager(identity_url=settings.OPENSTACK_URL, api_version=settings.AUTH_API_V2)
 
@@ -75,9 +60,6 @@ def validate_token(access_token):
         return auth_result
 
     except Exception as excep:
-        #return HttpResponse(json.dumps(
-        #            {"unauthorized": {"code": HTTP_RESPONSE_CODE_UNAUTHORIZED, "message": str(excep)}}, indent=4),
-        #            status=HTTP_RESPONSE_CODE_UNAUTHORIZED)
         print("Error")
         raise excep
 

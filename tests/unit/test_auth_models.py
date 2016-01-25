@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 from unittest import TestCase
-from app.mod_auth.models import Image
+from app.mod_auth.models import Image, Images
 
 __author__ = 'fla'
 
@@ -112,3 +112,61 @@ class TestImage(TestCase):
         except ValueError as error:
             self.assertEqual(error.args[0], 'Error, the status does not correspond to any of the defined values')
             self.assertEqual(error.args[1], 'fake status')
+
+
+class TestImages(TestCase):
+    def test_check_add_only_one_image(self):
+        x = Images(1)
+
+        expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
+        x.add(expectedvalue)
+
+        self.assertEqual(len(x.images), 1, "Error, number of elements is not equal to 1")
+        self.assertEqual(x.images[0].id, '3cfeaf3f0103b9637bb3fcfe691fce1e')
+        self.assertEqual(x.images[0].name, 'base_ubuntu_14.04')
+        self.assertEqual(x.images[0].status, 'ok')
+        self.assertEqual(x.images[0].message, None)
+
+    def test_check_add_only_one_image_with_length_not_4(self):
+        x = Images(1)
+
+        expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e']
+
+        try:
+            x.add(expectedvalue)
+        except ValueError as error:
+            self.assertEqual(error.message, "Error, data should be a array with len equal to 4")
+
+    def test_check_dump(self):
+        x = Images(1)
+
+        expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
+        x.add(expectedvalue)
+
+        expectedresult = "{images: [{'id': '3cfeaf3f0103b9637bb3fcfe691fce1e', 'name': 'base_ubuntu_14.04', 'status': 'ok', 'message': null}]}"
+
+        result = x.dump()
+
+        self.assertEqual(expectedresult, result, "The returned JSON is not the expected one")
+
+    def test_check_add_only_two_images(self):
+        x = Images(2)
+
+        expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
+        x.add(expectedvalue)
+
+        expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
+        x.add(expectedvalue)
+
+        self.assertEqual(len(x.images), 2, "Error, number of elements is not equal to 2")
+        self.assertEqual(x.images[0].id, '3cfeaf3f0103b9637bb3fcfe691fce1e')
+        self.assertEqual(x.images[0].name, 'base_ubuntu_14.04')
+        self.assertEqual(x.images[0].status, 'ok')
+        self.assertEqual(x.images[0].message, None)
+
+        self.assertEqual(x.images[1].id, '4rds4f3f0103b9637bb3fcfe691fce1e')
+        self.assertEqual(x.images[1].name, 'base_centOS_7')
+        self.assertEqual(x.images[1].status, 'ok')
+        self.assertEqual(x.images[1].message, None)
+
+

@@ -26,6 +26,8 @@
 # Import the database object (db) from the main application module
 # We will define this inside /app/__init__.py in the next sections.
 from app import db
+from utils.mydict import FirstInsertFirstOrderedDict as fifo
+import json
 
 __author__ = 'fla'
 
@@ -62,7 +64,7 @@ class User(Base):
         return '<User %r>' % self.name
 
 
-class TokenModel():
+class TokenModel:
     """
     Define a Token model (in current version not stored in DB.
     """
@@ -76,7 +78,7 @@ class TokenModel():
         self.expires = expires
 
 
-class Image():
+class Image:
     """
     Define a Image model to be used in the response of the GlaceSync API.
     id: Image id corresponding to the Glance service in a region (e.g. "3cfeaf3f0103b9637bb3fcfe691fce1e").
@@ -133,3 +135,56 @@ class Image():
                              self.status, self.glancestatus)
 
         return True
+
+    def dump(self):
+        expectedkey = ['id', 'name', 'status', 'message']
+        expectedvalue = [self.id, self.name, self.status, self.message]
+
+        my_dict = fifo(expectedkey, expectedvalue)
+
+        return my_dict.dump()
+
+
+class Images:
+    """
+    Define a list of images to be manage by the glancesync tool. Basically it is a list of Image
+    """
+    def __init__(self, number_of_images):
+        """
+        Constructor of the class Images
+        :param number_of_images: Number of Images to manage in the array
+        """
+        self.number_of_images = number_of_images
+        self.images = []
+
+    def add(self, data):
+        """
+        Add a new Image to the array.
+        :param data: Data array to use in the constructor of the Image.
+        """
+        if len(data) != 4:
+            raise ValueError("Error, data should be a array with len equal to 4")
+        elif isinstance(data, list):
+            tmp = Image(identify=data[0],
+                        name=data[1],
+                        status=data[2],
+                        message=data[3])
+
+            self.images.append(tmp)
+
+    def dump(self):
+        """
+        Generate json message with the content of the Images
+        :return: json message
+        """
+        result = self.images[0].dump().replace('\"','\'')
+
+        if self.number_of_images > 1:
+            for i in range(1, self.number_of_images):
+                result = result + ', ' + self.images[1].dump().replace('\"','\'')
+
+        result = '{images: [' + result + ']}'
+
+
+        return result
+

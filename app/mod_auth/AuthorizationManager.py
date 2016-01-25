@@ -114,16 +114,6 @@ class AuthorizationManager():
                 raise Unauthorized("Token is empty")
             auth_result = self.get_info_token(admin_token, token)
 
-            '''
-            if auth_result:
-                if tenant_id == auth_result.tenant["id"]:
-                    logger.debug('The token is valid')
-                else:
-                    logger.error("TenantId %s ", tenant_id)
-                    logger.error("Token TenantId %s ", auth_result.tenant["id"])
-                    raise Unauthorized("Token is not valid for specified tenant %s" % tenant_id)
-            '''
-
             return auth_result
 
         except Unauthorized as unauth:
@@ -156,7 +146,7 @@ class AuthorizationManager():
             info = json.loads(response)
             tmp = info["access"]["token"]
 
-            my_token = TokenModel(expires=tmp["expires"], id=tmp["id"], tenant=tmp["tenant"])
+            my_token = TokenModel(expires=tmp["expires"], id=tmp["id"], tenant=None)
 
         elif self.api_version == AUTH_API_V3:
             headers = {ACCEPT_HEADER: JSON_TYPE, X_AUTH_TOKEN_HEADER: admin_token, X_SUBJECT_TOKEN_HEADER: token}
