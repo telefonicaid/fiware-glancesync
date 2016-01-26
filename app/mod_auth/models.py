@@ -27,7 +27,7 @@
 # We will define this inside /app/__init__.py in the next sections.
 from app import db
 from utils.mydict import FirstInsertFirstOrderedDict as fifo
-import json
+import uuid
 
 __author__ = 'fla'
 
@@ -149,12 +149,12 @@ class Images:
     """
     Define a list of images to be manage by the glancesync tool. Basically it is a list of Image
     """
-    def __init__(self, number_of_images):
+    def __init__(self):
         """
         Constructor of the class Images
         :param number_of_images: Number of Images to manage in the array
         """
-        self.number_of_images = number_of_images
+        self.number_of_images = 0
         self.images = []
 
     def add(self, data):
@@ -172,19 +172,40 @@ class Images:
 
             self.images.append(tmp)
 
+            self.number_of_images = self.number_of_images + 1
+
     def dump(self):
         """
         Generate json message with the content of the Images
         :return: json message
         """
-        result = self.images[0].dump().replace('\"','\'')
+        result = self.images[0].dump().replace('\"', '\'')
 
         if self.number_of_images > 1:
             for i in range(1, self.number_of_images):
-                result = result + ', ' + self.images[1].dump().replace('\"','\'')
+                result = result + ', ' + self.images[1].dump().replace('\"', '\'')
 
         result = '{images: [' + result + ']}'
 
-
         return result
 
+
+class Task:
+    def __init__(self, status=None):
+        self.taskid = uuid.uuid1()
+
+        if status is not None:
+            if status not in ('synced', 'syncing', 'failed'):
+                raise ValueError("Status message should be synced, syncing or failed")
+            else:
+                self.status = status
+        else:
+            self.status = status
+
+    def dump(self):
+        if self.status is None:
+            result = "{'taskId': '" + str(self.taskid) + "'}"
+        else:
+            result = "{'taskId': '" + str(self.taskid) + "', 'status': '" + self.status + "'}"
+
+        return result

@@ -31,6 +31,7 @@ from AuthorizationManager import AuthorizationManager
 from app.settings import settings
 from app.settings.log import logger
 from app.settings.settings import CONTENT_TYPE
+from functools import wraps
 
 __author__ = 'fla'
 
@@ -76,21 +77,21 @@ def validate_token(access_token):
     return data['access']['user']
 
 
-def authorized(fn):
+def authorized(func):
     """
-    Decorator that checks that requests contain an id-token
-    in the request header. user will be None if the
-    authentication failed, and have an id otherwise.
+    Decorator that checks that requests contain an X-Auth-Token
+    in the request header. user will be None if the authentication
+    failed, and have an id otherwise.
 
     Usage:
     @app.route("/")
     @authorized
     def secured_root(userid=None):
         pass
-    :param fn:
+    :param func:
     :return:
     """
-
+    @wraps(func)
     def _wrap(*args, **kwargs):
         logger.info("Checking token: {}...".format(request.headers['X-Auth-Token']))
 
@@ -114,5 +115,6 @@ def authorized(fn):
 
             return None
 
-        return fn(*args, **kwargs)
+        return func(*args, **kwargs)
+
     return _wrap

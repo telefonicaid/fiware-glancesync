@@ -23,7 +23,9 @@
 # contact with opensource@tid.es
 #
 from unittest import TestCase
-from app.mod_auth.models import Image, Images
+from app.mod_auth.models import Image, Images, Task
+import uuid
+import re
 
 __author__ = 'fla'
 
@@ -116,7 +118,7 @@ class TestImage(TestCase):
 
 class TestImages(TestCase):
     def test_check_add_only_one_image(self):
-        x = Images(1)
+        x = Images()
 
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
@@ -128,7 +130,7 @@ class TestImages(TestCase):
         self.assertEqual(x.images[0].message, None)
 
     def test_check_add_only_one_image_with_length_not_4(self):
-        x = Images(1)
+        x = Images()
 
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e']
 
@@ -138,7 +140,7 @@ class TestImages(TestCase):
             self.assertEqual(error.message, "Error, data should be a array with len equal to 4")
 
     def test_check_dump(self):
-        x = Images(1)
+        x = Images()
 
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
@@ -149,8 +151,25 @@ class TestImages(TestCase):
 
         self.assertEqual(expectedresult, result, "The returned JSON is not the expected one")
 
+    def test_check_dump_more_than_one(self):
+        x = Images()
+
+        expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
+        x.add(expectedvalue)
+
+        expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
+        x.add(expectedvalue)
+
+        expectedresult = "{images: [{'id': '3cfeaf3f0103b9637bb3fcfe691fce1e', 'name': 'base_ubuntu_14.04', " \
+                         "'status': 'ok', 'message': null}, {'id': '4rds4f3f0103b9637bb3fcfe691fce1e', " \
+                         "'name': 'base_centOS_7', 'status': 'ok', 'message': null}]}"
+
+        result = x.dump()
+
+        self.assertEqual(expectedresult, result, "The returned JSON is not the expected one")
+
     def test_check_add_only_two_images(self):
-        x = Images(2)
+        x = Images()
 
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
@@ -170,3 +189,41 @@ class TestImages(TestCase):
         self.assertEqual(x.images[1].message, None)
 
 
+class TestTask(TestCase):
+    def test_check_create_task_without_status(self):
+        task = Task()
+
+        self.assertTrue(isinstance(task.taskid, uuid.UUID))
+        self.assertIsNone(task.status)
+
+    def test_check_create_task_with_status(self):
+        task = Task('synced')
+
+        self.assertTrue(isinstance(task.taskid, uuid.UUID))
+        self.assertEqual(task.status, 'synced')
+
+    def test_check_create_task_with_invalid_status(self):
+        try:
+            Task('fake')
+
+            self.fail("The functionality should be implemented")
+        except ValueError as error:
+            self.assertEqual(error.message, "Status message should be synced, syncing or failed")
+
+    def test_check_dump_with_status(self):
+        task = Task()
+
+        result = task.dump()
+
+        match_obj = re.match(r'\{\'taskId\': \'(.*)\'\}', result, re.M)
+
+        assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
+
+    def test_check_dump_without_status(self):
+        task = Task('synced')
+
+        result = task.dump()
+
+        match_obj = re.match(r'\{\'taskId\': \'(.*)\', \'status\': \'(.*)\'\}', result, re.M)
+
+        assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)

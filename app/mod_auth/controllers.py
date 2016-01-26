@@ -37,7 +37,7 @@ from models import User
 from openstack_auth import authorized
 from app.settings.settings import CONTENT_TYPE
 from utils.mydict import FirstInsertFirstOrderedDict
-from app.mod_auth.models import Images
+from app.mod_auth.models import Images, Task
 
 __author__ = 'fla'
 
@@ -63,47 +63,44 @@ def get_status(regionid):
     message = "Listing information about the synchronization status in region {}".format(regionid)
 
     # Just for check this data should be returned by glancesync client
-    x = Images(2)
+    x = Images()
 
-    expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
-    x.add(expectedvalue)
+    value = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
+    x.add(value)
 
-    expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
-    x.add(expectedvalue)
+    value = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
+    x.add(value)
 
     return Response(response=x.dump(),
                     status=httplib.OK,
                     content_type=CONTENT_TYPE)
 
-'''
-{
-    "images": [ {
-        "id": "3cfeaf3f0103b9637bb3fcfe691fce1e",
-        "name": "base_ubuntu_14.04",
-        "status": "ok",
-        "message": null
-    },
-    {
-        "id": "153605c208287ef06a3c84712955c1e9",
-        "name": "base_centos_7",
-        "status": "ok_stalled_checksum",
-        "message": "lorem ipsum"
-    }
-    ]
-}
-'''
-
 
 @mod_auth.route('/<regionid>', methods=['POST'])
+@authorized
 def synchronize(regionid):
-    return "hola synchronize\n"
+    """
+    Synchronize the images of the corresponding region defined by its regionId.
+    The operation is asynchronous a response a taskId in order that you can follow
+    the execution of the process.
+    :param regionid: Region name how you can obtain from the Keystone
+                     service. Example: Spain2.
+    :return: JSON message with the identification of the created task
+    """
+    newtask = Task()
+
+    return Response(response=newtask.dump(),
+                    status=httplib.OK,
+                    content_type=CONTENT_TYPE)
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['GET'])
+@authorized
 def get_task(regionid, taskid):
     return "hola get_task\n"
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['DELETE'])
+@authorized
 def delete_task(regionid, taskid):
     return "hola delete_task\n"
