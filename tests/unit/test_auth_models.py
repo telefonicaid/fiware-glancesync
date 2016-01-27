@@ -197,14 +197,14 @@ class TestTask(TestCase):
         self.assertIsNone(task.status)
 
     def test_check_create_task_with_status(self):
-        task = Task('synced')
+        task = Task(status='synced')
 
         self.assertTrue(isinstance(task.taskid, uuid.UUID))
         self.assertEqual(task.status, 'synced')
 
     def test_check_create_task_with_invalid_status(self):
         try:
-            Task('fake')
+            Task(status='fake')
 
             self.fail("The functionality should be implemented")
         except ValueError as error:
@@ -220,10 +220,17 @@ class TestTask(TestCase):
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
 
     def test_check_dump_without_status(self):
-        task = Task('synced')
+        task = Task(status='synced')
 
         result = task.dump()
 
         match_obj = re.match(r'\{\'taskId\': \'(.*)\', \'status\': \'(.*)\'\}', result, re.M)
 
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
+
+    def test_check_create_task_with_taskid_and_status(self):
+
+        task = Task(taskid=uuid.uuid1(), status='synced')
+
+        self.assertTrue(isinstance(task.taskid, uuid.UUID))
+        self.assertEqual(task.status, 'synced')

@@ -36,8 +36,8 @@ from models import User
 # Import authentication decorator
 from openstack_auth import authorized
 from app.settings.settings import CONTENT_TYPE
-from utils.mydict import FirstInsertFirstOrderedDict
 from app.mod_auth.models import Images, Task
+from app import db
 
 __author__ = 'fla'
 
@@ -87,7 +87,20 @@ def synchronize(regionid):
                      service. Example: Spain2.
     :return: JSON message with the identification of the created task
     """
-    newtask = Task()
+    # WARNING
+    # It is for testing only, the functionality of this method is create a new Task,
+    # store the content of the new task with <taskid> in DB with status 'syncing'
+    # and launch a fork to start the execution of the synchronization process. At the
+    # end of the synchronization process, we update the DB registry with the status
+    # 'synced'
+
+    newtask = Task(status='syncing')
+
+    # name and role should be returned from authorized operation, to be extended in Sprint 16.02
+    newuser = User(name='bartolo', taskid=str(newtask.taskid), role='admin', status=newtask.status)
+
+    db.session.add(newuser)
+    db.session.commit()
 
     return Response(response=newtask.dump(),
                     status=httplib.OK,
@@ -97,7 +110,20 @@ def synchronize(regionid):
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['GET'])
 @authorized
 def get_task(regionid, taskid):
-    return "hola get_task\n"
+    """
+
+    :param regionid:
+    :param taskid:
+    :return:
+    """
+    # WARNING
+    # It is for test only, we have to recover this information from the DB
+    # in order to know the status of the synchronization of the task <taskid>
+    newtask = Task(status='synced')
+
+    return Response(response=newtask.dump(),
+                    status=httplib.OK,
+                    content_type=CONTENT_TYPE)
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['DELETE'])

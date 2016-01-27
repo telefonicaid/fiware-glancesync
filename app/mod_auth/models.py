@@ -48,6 +48,9 @@ class User(Base):
     # User name: Identification data
     name = db.Column(db.String(128), nullable=False, unique=True)
 
+    # Task Id: Identificator of the synchronization task
+    task_id = db.Column(db.String(128), nullable=False, unique=True)
+
     # Authorisation Data: role
     role = db.Column(db.String(128), nullable=False)
 
@@ -55,8 +58,9 @@ class User(Base):
     status = db.Column(db.String(128), nullable=False)
 
     # New instance instantiation procedure
-    def __init__(self, name, role, status):
+    def __init__(self, name, taskid, role, status):
         self.name = name
+        self.task_id = taskid
         self.role = role
         self.status = status
 
@@ -191,8 +195,11 @@ class Images:
 
 
 class Task:
-    def __init__(self, status=None):
-        self.taskid = uuid.uuid1()
+    def __init__(self, taskid=None, status=None):
+        if taskid is None:
+            self.taskid = uuid.uuid1()
+        else:
+            self.taskid = taskid
 
         if status is not None:
             if status not in ('synced', 'syncing', 'failed'):
