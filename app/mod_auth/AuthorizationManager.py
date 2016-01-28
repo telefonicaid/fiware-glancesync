@@ -145,8 +145,9 @@ class AuthorizationManager():
             response = r.text.decode()
             info = json.loads(response)
             tmp = info["access"]["token"]
+            username = info["access"]["user"]["username"]
 
-            my_token = TokenModel(expires=tmp["expires"], id=tmp["id"], tenant=None)
+            my_token = TokenModel(expires=tmp["expires"], id=tmp["id"], username=username)
 
         elif self.api_version == AUTH_API_V3:
             headers = {ACCEPT_HEADER: JSON_TYPE, X_AUTH_TOKEN_HEADER: admin_token, X_SUBJECT_TOKEN_HEADER: token}

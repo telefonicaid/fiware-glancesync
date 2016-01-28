@@ -72,14 +72,16 @@ class TokenModel:
     """
     Define a Token model (in current version not stored in DB.
     """
+    username = None
     tenant = None
     id = None
     expires = None
 
-    def __init__(self, tenant, id, expires):
-        self.tenant = tenant
+    def __init__(self, username, id, expires, tenant=None):
+        self.username = username
         self.id = id
         self.expires = expires
+        self.tenant = tenant
 
 
 class Image:

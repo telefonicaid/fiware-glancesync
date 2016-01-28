@@ -28,6 +28,7 @@ from flask import Blueprint, Response
 import httplib
 import datetime
 from app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE
+from app.settings.log import logger
 
 __author__ = 'fla'
 
@@ -45,6 +46,10 @@ def get_info():
     Lists information about GlanceSync API version.
     :return: JSON responses with the detailed information about the Glancesync API
     """
+    message = "GET information about glancesync server"
+
+    logger.info(message)
+
     message = "{\"id\": \"%s\", \"owner\": \"%s\", \"status\": \"%s\", \"version\": \"%s\", \"updated\": \"%s\", " \
               "\"runningfrom\": \"%s\", \"href\": \"%s\" }\n" \
               % (ID, OWNER, STATUS, VERSION, UPDATED, RUNNINGFROM, API_INFO_URL)

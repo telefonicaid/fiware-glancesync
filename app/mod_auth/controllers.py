@@ -24,7 +24,7 @@
 #
 
 # Import flask dependencies
-from flask import Blueprint, Response, request, flash, g, session, redirect, url_for
+from flask import Blueprint, Response, abort
 import httplib
 
 # Import the database object from the main app module
@@ -37,7 +37,7 @@ from models import User
 from openstack_auth import authorized
 from app.settings.settings import CONTENT_TYPE
 from app.mod_auth.models import Images, Task
-from app import db
+from app.settings.log import logger
 
 __author__ = 'fla'
 
@@ -48,7 +48,7 @@ mod_auth = Blueprint('auth', __name__, url_prefix='/regions')
 # Set the route and accepted methods
 @mod_auth.route('/<regionid>', methods=['GET'])
 @authorized
-def get_status(regionid):
+def get_status(regionid, token):
     """
     Lists information the status of the synchronization of the images in
     the region <regionid>. Keep in mind that <regionid> is the name of
@@ -58,9 +58,10 @@ def get_status(regionid):
     :return: JSON response message with the detailed information about
              the images and the sincronization status.
     """
-    print("Listing information about the synchronization status in region {}".format(regionid))
 
-    message = "Listing information about the synchronization status in region {}".format(regionid)
+    message = "GET, get information about the synchronization status in the region: {}".format(regionid)
+
+    logger.info(message)
 
     # Just for check this data should be returned by glancesync client
     x = Images()
@@ -78,7 +79,7 @@ def get_status(regionid):
 
 @mod_auth.route('/<regionid>', methods=['POST'])
 @authorized
-def synchronize(regionid):
+def synchronize(regionid, token):
     """
     Synchronize the images of the corresponding region defined by its regionId.
     The operation is asynchronous a response a taskId in order that you can follow
@@ -93,11 +94,14 @@ def synchronize(regionid):
     # and launch a fork to start the execution of the synchronization process. At the
     # end of the synchronization process, we update the DB registry with the status
     # 'synced'
+    message = "POST, create a new synchronization task in the region: {}".format(regionid)
+
+    logger.info(message)
 
     newtask = Task(status='syncing')
 
     # name and role should be returned from authorized operation, to be extended in Sprint 16.02
-    newuser = User(name='bartolo', taskid=str(newtask.taskid), role='admin', status=newtask.status)
+    newuser = User(name=token.username, taskid=str(newtask.taskid), role='admin', status=newtask.status)
 
     db.session.add(newuser)
     db.session.commit()
@@ -109,7 +113,7 @@ def synchronize(regionid):
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['GET'])
 @authorized
-def get_task(regionid, taskid):
+def get_task(regionid, taskid, token):
     """
 
     :param regionid:
@@ -119,14 +123,38 @@ def get_task(regionid, taskid):
     # WARNING
     # It is for test only, we have to recover this information from the DB
     # in order to know the status of the synchronization of the task <taskid>
-    newtask = Task(status='synced')
+    message = "GET, obtain the status of the synchronization of a task: {} in the region: {}".format(taskid, regionid)
 
-    return Response(response=newtask.dump(),
-                    status=httplib.OK,
-                    content_type=CONTENT_TYPE)
+    logger.info(message)
+
+    users = User.query.filter(User.task_id == taskid).all()
+
+    if not users:
+        abort(httplib.NOT_FOUND)
+    else:
+        newtask = Task(taskid=users[0].task_id, status=users[0].status)
+
+        return Response(response=newtask.dump(),
+                        status=httplib.OK,
+                        content_type=CONTENT_TYPE)
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['DELETE'])
 @authorized
-def delete_task(regionid, taskid):
-    return "hola delete_task\n"
+def delete_task(regionid, taskid, token):
+
+    message = "DELETE, delete the registry of task {} in the region: {}".format(taskid, regionid)
+
+    logger.info(message)
+
+    users = User.query.filter(User.task_id == taskid).all()
+
+    if not users:
+        abort(httplib.NOT_FOUND)
+    else:
+        db.session.delete(users[0])
+        db.session.commit()
+
+    return Response(response=None,
+                    status=httplib.OK,
+                    content_type=CONTENT_TYPE)

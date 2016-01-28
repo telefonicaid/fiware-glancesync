@@ -64,18 +64,6 @@ def validate_token(access_token):
         print("Error")
         raise excep
 
-    if not resp['status'] == '200':
-        return None
-
-    try:
-        data = json.loads(cont)
-    except TypeError:
-        # Running this in Python3
-        # httplib2 returns byte objects
-        data = json.loads(cont.decode())
-
-    return data['access']['user']
-
 
 def authorized(func):
     """
@@ -115,6 +103,7 @@ def authorized(func):
 
             return None
 
+        kwargs["token"] = token
         return func(*args, **kwargs)
 
     return _wrap
