@@ -23,9 +23,9 @@
 # contact with opensource@tid.es
 #
 from setuptools import setup, find_packages
-from fiware_cloto.cloto_settings.settings import VERSION
+from glancesync.glancesync_config import __version__
 from pip.req import parse_requirements
-
+from os.path import join as pjoin
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements("requirements.txt", session=False)
@@ -36,16 +36,19 @@ setup(
   name='fiware-glancesync',
   packages=find_packages(exclude=['*tests*']),
   install_requires=requirements_list,
+  data_files = [('/etc/', ['glancesync/glancesync.conf'])],  
   package_data={
-    'glancesync_settings': ['*.cfg']
-  },
-  version=VERSION,
+    'glancesync': ['glancesync.conf']
+  }, 
+  include_package_data=True,
+  version=__version__,
   description='Tool to synchronise images from a master region to other regions',
-  author='Fernando Lopez Aguilar,
+  author='Fernando Lopez Aguilar',
   author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
   license='Apache 2.0',
+  scripts=[pjoin( 'sync.py')],
   url='https://github.com/telefonicaid/fiware-glancesync',
-  download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % VERSION,
+  download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % __version__,
   keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
   classifiers=[
         "License :: OSI Approved :: Apache Software License", ],
