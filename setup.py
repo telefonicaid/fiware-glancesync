@@ -23,21 +23,31 @@
 # contact with opensource@tid.es
 #
 from setuptools import setup, find_packages
-from distutils.core import setup
+from fiware_cloto.cloto_settings.settings import VERSION
+from pip.req import parse_requirements
 
-__version__ = '1.2.0'
+
+# parse_requirements() returns generator of pip.req.InstallRequirement objects
+install_reqs = parse_requirements("requirements.txt", session=False)
+# > requirements_list is a list of requirement; e.g. ['requests==2.6.0', 'Fabric==1.8.3']
+requirements_list = [str(ir.req) for ir in install_reqs]
 
 setup(
-name='fiware-glancesync',
-packages=find_packages(exclude=['*tests*']),
-version=__version__,
-description='Tool to synchronise images from a master region to other regions',
-author='Fernando Lopez Aguilar',
-author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
-license='Apache 2.0',
-url='https://github.com/telefonicaid/fiware-glancesync',
-download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % __version__,
-keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
-classifiers=[
-"License :: OSI Approved :: Apache Software License", ],
+  name='fiware-glancesync',
+  packages=find_packages(exclude=['*tests*']),
+  install_requires=requirements_list,
+  package_data={
+    'glancesync_settings': ['*.cfg']
+  },
+  version=VERSION,
+  description='Tool to synchronise images from a master region to other regions',
+  author='Fernando Lopez Aguilar,
+  author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
+  license='Apache 2.0',
+  url='https://github.com/telefonicaid/fiware-glancesync',
+  download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % VERSION,
+  keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
+  classifiers=[
+        "License :: OSI Approved :: Apache Software License", ],
 )
+
