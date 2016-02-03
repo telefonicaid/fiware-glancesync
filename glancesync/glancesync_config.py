@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import ConfigParser
 import os
@@ -81,7 +81,7 @@ class GlanceSyncConfig(object):
     OS_REGION_NAME
     """
 
-    def __init__(self, configuration_path=None, stream=None):
+    def __init__(self, configuration_path=None, stream=None, override_d=None):
         """
         Init a a instance of the configuration. It can be created from a stream
         (e.g. a file or a StringIO) or from a configuration file whose path.
@@ -97,11 +97,20 @@ class GlanceSyncConfig(object):
         file is not.
 
         :param configuration_path: the path of the configuration file
-        :param stream: a stream object with the configuration file
+        :param stream: a stream object with the configuration
+        :param override_d: an optional dictionary to override options in the
+               configuration file. To override key1 in section sec1, use as
+               key 'sec1.key1'. If the key is not namespaced, DEFAULT section
+               is used.
         :return: nothing
         """
 
         logger = logging.getLogger('glancesync')
+
+        defaults = {'use_keystone_v3': 'False',
+                    'support_obsolete_images': 'True',
+                    'only_tenant_images': 'True', 'list_images_timeout': '30'}
+
         if not stream:
             if 'GLANCESYNC_CONFIG' in os.environ:
                 configuration_path = os.environ['GLANCESYNC_CONFIG']
@@ -116,12 +125,27 @@ class GlanceSyncConfig(object):
 
         # Read configuration if it exists
         if configuration_path is not None or stream is not None:
-            configparser = ConfigParser.SafeConfigParser()
+            configparser = ConfigParser.SafeConfigParser(defaults)
             if stream:
                 configparser.readfp(stream)
             else:
                 configparser.read(configuration_path)
+        else:
+            configparser = None
 
+        if override_d:
+            if not configparser:
+                configparser = ConfigParser.SafeConfigParser(defaults)
+
+            for key in override_d.keys():
+                value = override_d[key]
+                key_parts = key.split('.')
+                if len(key_parts) == 2:
+                    configparser.set(key_parts[0], key_parts[1], value)
+                else:
+                    configparser.set('DEFAULT', key_parts[0], value)
+
+        if configparser:
             if configparser.has_option('main', 'master_region'):
                 self.master_region = configparser.get('main', 'master_region')
 
@@ -179,13 +203,29 @@ class GlanceSyncConfig(object):
                     if len(cond.strip()):
                         target['metadata_condition'] = compile(
                             cond, 'metadata_condition', 'eval')
+
                 target['metadata_set'] = configparser.getset(
                     section, 'metadata_set')
-                if configparser.has_option(section, 'only_tenant_images'):
-                    target['only_tenant_images'] = configparser.getboolean(
+
+                target['only_tenant_images'] = configparser.getboolean(
                         section, 'only_tenant_images')
-                else:
-                    target['only_tenant_images'] = True
+
+                # This is only for the mock mode
+                if configparser.has_option(section, 'tenant_id'):
+                    target['tenant_id'] = configparser.get(
+                        section, 'tenant_id')
+                target['obsolete_syncprops'] = configparser.getset(
+                        section, 'obsolete_syncprops')
+
+                target['support_obsolete_images'] = configparser.getboolean(
+                        section, 'support_obsolete_images')
+
+
+                target['list_images_timeout'] = configparser.getint(
+                        section, 'list_images_timeout')
+
+                target['use_keystone_v3'] = configparser.getboolean(
+                    section, 'use_keystone_v3')
 
         # Default configuration if it is not present
         if self.master_region is None:

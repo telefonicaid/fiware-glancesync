@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import unittest
 import StringIO
 import copy
@@ -31,13 +29,14 @@ import hashlib
 import os
 import glob
 import tempfile
+import logging
 
 from glancesync.glancesync_image import GlanceSyncImage
-
-
 from glancesync.glancesync import GlanceSync
-
 from glancesync.glancesync_serverfacade_mock import ServersFacade
+from tests.unit.resources.config import RESOURCESPATH
+
+__author__ = 'chema'
 
 
 def create_images(region, count, prefix, tenant):
@@ -349,7 +348,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
     """
 
     def config(self):
-        self.path_test = '../resources/alreadysync'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/alreadysync'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
     def setUp(self):
@@ -379,8 +379,9 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 region = region[7:]
             self.assertTrue(os.path.exists(path_status))
             f = open(path_status + '/' + region + '.csv', 'rU')
-            expected = f.read().replace('\n', '\r\n')
+            expected = f.read().replace('\n', ';')
             result = stream.getvalue()
+            result = result.replace('\r\n', ';')
             self.assertEquals(expected, result)
 
     def test_sync(self):
@@ -421,15 +422,16 @@ class TestGlanceSync_Sync(unittest.TestCase):
                 region = region[7:]
             self.assertTrue(os.path.exists(path_status))
             f = open(path_status + '/' + region + '.csv', 'rU')
-            expected = f.read().replace('\n', '\r\n')
-            result = stream.getvalue()
+            expected = f.read().rstrip().replace('\n', ';')
+            result = stream.getvalue().rstrip().replace('\r\n', ';')
             self.assertEquals(expected, result)
 
 
 class TestGlanceSync_Empty(TestGlanceSync_Sync):
     """Test a environment where the destination region has no images"""
     def config(self):
-        self.path_test = '../resources/emptyregions'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/emptyregions'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -437,7 +439,8 @@ class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     """Test a environment where the destination region has some of the images
     """
     def config(self):
-        self.path_test = '../resources/mixed'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/mixed'
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -445,7 +448,8 @@ class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     """Test a environment where some images at the destination region has
     metadata different than the images on the master region"""
     def config(self):
-        self.path_test = '../resources/metadata'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/metadata'
         self.regions = ['master:Burgos']
 
 
@@ -453,15 +457,72 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     """Test a environment where some regional images has a checksum different
     than the master images"""
     def config(self):
-        self.path_test = '../resources/checksum'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/checksum'
         self.regions = ['master:Burgos']
+
+    def test_sync_warning(self):
+        """test that a warning is emitted with a image that has a
+        different checksum and there is not settings about what to do with."""
+        # Capture warnings
+        logger = logging.getLogger('glancesync')
+        self.buffer_log = StringIO.StringIO()
+        handler = logging.StreamHandler(self.buffer_log)
+        handler.setLevel(logging.WARNING)
+        logger.addHandler(handler)
+        TestGlanceSync_Checksum.setUp(self)
+
+        # run synchronisation
+        self.test_sync()
+
+        # Check that there are two warnings
+        warnings = self.buffer_log.getvalue().splitlines()
+        self.assertEquals(len(warnings), 1)
+        msg1 = 'Image image05 has a different checksum (ch5) in region Burgos'\
+               ' than in the master region. It was not set what to do. Please'\
+               ', fill either dontupdate, replace or rename with the checksum.'
+        self.assertTrue(warnings[0].startswith(msg1))
 
 
 class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
-        self.path_test = '../resources/ami'
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/ami'
         self.regions = ['master:Burgos']
 
-if __name__ == '__main__':
-        unittest.main()
+
+class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
+    """Test obsolete images support"""
+    def config(self):
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/obsolete'
+        self.regions = ['other:Burgos', 'target2:Madrid']
+
+
+class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
+    """Test that master images with duplicated name, status != active, and
+    owner differnt than the tenant, are ignored"""
+    def config(self):
+        path = os.path.abspath(os.curdir)
+        self.path_test = path + RESOURCESPATH + '/master_filtered'
+        self.regions = ['Burgos']
+
+    def test_sync_warning(self):
+        """test that a warning is emitted with a image name is duplicated"""
+        # Capture warnings
+        logger = logging.getLogger('glancesync')
+        self.buffer_log = StringIO.StringIO()
+        handler = logging.StreamHandler(self.buffer_log)
+        handler.setLevel(logging.WARNING)
+        logger.addHandler(handler)
+        TestGlanceSync_MasterFiltered.setUp(self)
+
+        # run synchronisation
+        self.test_sync()
+
+        # Check that there are two warnings
+        warnings = self.buffer_log.getvalue().splitlines()
+        self.assertEquals(len(warnings), 1)
+        msg1 = 'Duplicated images with name image01 will be ignored'
+        self.assertTrue(warnings[0].startswith(msg1))

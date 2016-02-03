@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import unittest
 import copy
 import os
@@ -32,6 +30,9 @@ import tempfile
 
 from glancesync.glancesync_serverfacade_mock import ServersFacade
 from glancesync.glancesync_region import GlanceSyncRegion
+from tests.unit.resources.config import RESOURCESPATH
+
+__author__ = 'chema'
 
 
 class TestGlanceServersFacadeMock(unittest.TestCase):
@@ -148,7 +149,8 @@ class TestGlanceServersFacadeMock(unittest.TestCase):
     def test_add_images_from_csv_to_mock(self):
         """test method add_images_from_cvs_to_mock. Check regions and images
         present"""
-        ServersFacade.add_images_from_csv_to_mock('../resources/basictest/')
+        path = os.path.abspath(os.curdir) + RESOURCESPATH + '/basictest/'
+        ServersFacade.add_images_from_csv_to_mock(path)
         region = GlanceSyncRegion('other:Santander', self.targets)
         self.assertIn('Santander', self.mock_other.get_regions())
         images = self.mock_other.get_imagelist(region)
@@ -211,6 +213,3 @@ class TestGlanceServersFacadeMockPersist(TestGlanceServersFacadeMock):
         self.mock_master.init_persistence(self.dir_persist)
         after = len(self.mock_master.get_imagelist(self.region2))
         self.assertEquals(before + 1, after)
-
-if __name__ == '__main__':
-    unittest.main()

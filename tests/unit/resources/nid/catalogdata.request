@@ -1,0 +1,50 @@
+</div><article id="node-855" class="node node-enabler node-teaser clearfix" about="/enablers/stream-oriented-kurento" typeof="sioc:Item foaf:Document">
+
+
+        <h2><a href="/enablers/stream-oriented-kurento">Stream-oriented - Kurento</a></h2>
+    <span property="dc:title" content="Stream-oriented - Kurento" class="rdf-meta element-hidden"></span><span property="sioc:num_replies" content="0" datatype="xsd:integer" class="rdf-meta element-hidden"></span>
+
+  <div class="content">
+    <div class="field field-name-field-api-icon field-type-image field-label-hidden"><div class="field-items"><div class="field-item even"><a href="/enablers/stream-oriented-kurento"><img typeof="foaf:Image" src="http://catalogue.fiware.org/sites/default/files/styles/enabler_icon_small/public/only-circle.png?itok=WoJYf3f1" width="55" height="55" alt="" /></a></div></div></div><div class="field-group-format group_api_content field-group-div group-api-content  speed-none effect-none"><div class="field field-name-field-api-short-description field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">Powerful software stack devoted to simplify the creation of complex interactive multimedia applications by exposing a rich family of APIs on top of a J2EE application server.</div></div></div><div class="field field-name-field-rank field-type-taxonomy-term-reference field-label-above clearfix"><h3 class="field-label">Rank: </h3><ul class="links"><li data-toggle="tooltip" data-placement="top" title="FIWARE GEris" class="taxonomy-term-reference-0"><a href="/support-ranks/fiware-geris" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="">FIWARE GEris</a></li></ul></div><div class="field field-name-field-api-chapter field-type-taxonomy-term-reference field-label-hidden clearfix"><ul class="links"><li data-toggle="tooltip" data-placement="top" title="Data/Context Management" class="taxonomy-term-reference-0"><a href="/chapter/datacontext-management" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="" class="active">Data/Context Management</a></li></ul></div></div>  </div>
+
+  <ul class="links inline"><li class="node-readmore first last"><a href="/enablers/stream-oriented-kurento" rel="tag" title="Stream-oriented - Kurento">Read more<span class="element-invisible"> about Stream-oriented - Kurento</span></a></li>
+</ul>
+
+</article>
+<article id="node-344" class="node node-enabler node-teaser clearfix" about="/enablers/publishsubscribe-context-broker-orion-context-broker" typeof="sioc:Item foaf:Document">
+
+
+        <h2><a href="/enablers/publishsubscribe-context-broker-orion-context-broker">Publish/Subscribe Context Broker - Orion Context Broker</a></h2>
+    <span property="dc:title" content="Publish/Subscribe Context Broker - Orion Context Broker" class="rdf-meta element-hidden"></span><span property="sioc:num_replies" content="0" datatype="xsd:integer" class="rdf-meta element-hidden"></span>
+
+  <div class="content">
+    <div class="field field-name-field-api-icon field-type-image field-label-hidden"><div class="field-items"><div class="field-item even"><a href="/enablers/publishsubscribe-context-broker-orion-context-broker"><img typeof="foaf:Image" src="http://catalogue.fiware.org/sites/default/files/styles/enabler_icon_small/public/orion.png?itok=ArUqibeR" width="55" height="55" alt="" /></a></div></div></div><div class="field-group-format group_api_content field-group-div group-api-content  speed-none effect-none"><div class="field field-name-field-api-short-description field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">Orion Context Broker is an implementation of NGSI9 and NGIS10 with persistence storage based in MongoDB</div></div></div><div class="field field-name-field-rank field-type-taxonomy-term-reference field-label-above clearfix"><h3 class="field-label">Rank: </h3><ul class="links"><li data-toggle="tooltip" data-placement="top" title="FIWARE GEris" class="taxonomy-term-reference-0"><a href="/support-ranks/fiware-geris" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="">FIWARE GEris</a></li></ul></div><div class="field field-name-field-api-chapter field-type-taxonomy-term-reference field-label-hidden clearfix"><ul class="links"><li data-toggle="tooltip" data-placement="top" title="Data/Context Management" class="taxonomy-term-reference-0"><a href="/chapter/datacontext-management" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="" class="active">Data/Context Management</a></li></ul></div></div>  </div>
+
+  <ul class="links inline"><li class="node-readmore first last"><a href="/enablers/publishsubscribe-context-broker-orion-context-broker" rel="tag" title="Publish/Subscribe Context Broker - Orion Context Broker">Read more<span class="element-invisible"> about Publish/Subscribe Context Broker - Orion Context Broker</span></a></li>
+</ul>
+
+</article>
+<article id="node-158" class="node node-enabler node-teaser clearfix" about="/enablers/bigdata-analysis-cosmos" typeof="sioc:Item foaf:Document">
+
+
+        <h2><a href="/enablers/bigdata-analysis-cosmos">BigData Analysis - Cosmos</a></h2>
+    <span property="dc:title" content="BigData Analysis - Cosmos" class="rdf-meta element-hidden"></span><span property="sioc:num_replies" content="0" datatype="xsd:integer" class="rdf-meta element-hidden"></span>
+
+  <div class="content">
+    <div class="field field-name-field-api-icon field-type-image field-label-hidden"><div class="field-items"><div class="field-item even"><a href="/enablers/bigdata-analysis-cosmos"><img typeof="foaf:Image" src="http://catalogue.fiware.org/sites/default/files/styles/enabler_icon_small/public/cosmos_logo.png?itok=v40DWLQ3" width="55" height="55" alt="" /></a></div></div></div><div class="field-group-format group_api_content field-group-div group-api-content  speed-none effect-none"><div class="field field-name-field-api-short-description field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">Monitoring and control of the BigData Analysis GE</div></div></div><div class="field field-name-field-rank field-type-taxonomy-term-reference field-label-above clearfix"><h3 class="field-label">Rank: </h3><ul class="links"><li data-toggle="tooltip" data-placement="top" title="FIWARE GEris" class="taxonomy-term-reference-0"><a href="/support-ranks/fiware-geris" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="">FIWARE GEris</a></li></ul></div><div class="field field-name-field-api-chapter field-type-taxonomy-term-reference field-label-hidden clearfix"><ul class="links"><li data-toggle="tooltip" data-placement="top" title="Data/Context Management" class="taxonomy-term-reference-0"><a href="/chapter/datacontext-management" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="" class="active">Data/Context Management</a></li></ul></div></div>  </div>
+
+  <ul class="links inline"><li class="node-readmore first last"><a href="/enablers/bigdata-analysis-cosmos" rel="tag" title="BigData Analysis - Cosmos">Read more<span class="element-invisible"> about BigData Analysis - Cosmos</span></a></li>
+</ul>
+
+</article>
+<article id="node-146" class="node node-enabler node-teaser clearfix" about="/enablers/complex-event-processing-cep-proactive-technology-online" typeof="sioc:Item foaf:Document">
+
+
+        <h2><a href="/enablers/complex-event-processing-cep-proactive-technology-online">Complex Event Processing (CEP) - Proactive Technology Online</a></h2>
+    <span property="dc:title" content="Complex Event Processing (CEP) - Proactive Technology Online" class="rdf-meta element-hidden"></span><span property="sioc:num_replies" content="0" datatype="xsd:integer" class="rdf-meta element-hidden"></span>
+
+  <div class="content">
+    <div class="field field-name-field-api-icon field-type-image field-label-hidden"><div class="field-items"><div class="field-item even"><a href="/enablers/complex-event-processing-cep-proactive-technology-online"><img typeof="foaf:Image" src="http://catalogue.fiware.org/sites/default/files/styles/enabler_icon_small/public/default_images/Lg-bw_1.png?itok=PhR7Rn2o" alt="" /></a></div></div></div><div class="field-group-format group_api_content field-group-div group-api-content  speed-none effect-none"><div class="field field-name-field-api-short-description field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">Complex Event Processing GE</div></div></div><div class="field field-name-field-rank field-type-taxonomy-term-reference field-label-above clearfix"><h3 class="field-label">Rank: </h3><ul class="links"><li data-toggle="tooltip" data-placement="top" title="FIWARE GEris" class="taxonomy-term-reference-0"><a href="/support-ranks/fiware-geris" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="">FIWARE GEris</a></li></ul></div><div class="field field-name-field-api-chapter field-type-taxonomy-term-reference field-label-hidden clearfix"><ul class="links"><li data-toggle="tooltip" data-placement="top" title="Data/Context Management" class="taxonomy-term-reference-0"><a href="/chapter/datacontext-management" typeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="" class="active">Data/Context Management</a></li></ul></div></div>  </div>
+
+  <ul class="links inline"><li class="node-readmore first last"><a href="/enablers/complex-event-processing-cep-proactive-technology-online" rel="tag" title="Complex Event Processing (CEP) - Proactive Technology Online">Read more<span class="element-invisible"> about Complex Event Processing (CEP) - Proactive Technology Online</span></a></li>
+</ul>

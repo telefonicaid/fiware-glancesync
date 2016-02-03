@@ -1,0 +1,13 @@
+Get the NID of the different GE(r)i.
+
+Usage:
+  getnid [--wikitext]
+  getnid --type (i2nd | cloud | ui | sec | iot | data | apps)
+  getnid -h | --help
+  getnid -v | --version
+
+Options:
+  -h --help     Show this screen.
+  -v --version  Show version.
+  --wikitext    Generate content in Wiki Markup format.
+  --type        Show details about the specific chapter

@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 from glancesync.glancesync import GlanceSync
 
 images_with_changes = {
@@ -87,10 +87,10 @@ def update_nids(region, glancesync):
 if __name__ == '__main__':
     glancesync = GlanceSync()
     for region in glancesync.get_regions():
-        print 'Updating images on region ' + region
+        print('Updating images on region ' + region)
         try:
             update_nids(region, glancesync)
         except Exception:
             # Do nothing. Error already logged.
             continue
-    print 'Done'
+    print('Done')

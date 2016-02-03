@@ -1,0 +1,9 @@
+{'cloud-hosting': {u'application-management-murano': u'1510',
+u'docker': u'1518',
+u'iaas-ge-fiware-reference-implementation': u'130',
+u'monitoring-ge-sextant': u'559',
+u'object-storage-ge-fiware-implementation': u'162',
+u'paas-manager-pegasus': u'528',
+u'policy-manager-bosun': u'1123',
+u'self-service-interfaces-cloud-portal': u'626',
+u'software-deployment-configuration-sagitta': u'537'}}

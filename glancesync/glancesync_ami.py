@@ -23,7 +23,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 
 import logging
 """This internal module check and update the kernel_id and ramdisk_id of
@@ -42,19 +42,18 @@ ramdisk_id.
 _logger = logging.getLogger('glancesync')
 
 
-def get_master_region_dict(image_list):
-    """Convert the image list to a dictionary indexed by name and also
-    replace at parameters kernel_id and ramdisk_id the UUID with the name of
+def clean_ami_ids(image_dict):
+    """replace at kernel_id and ramdisk_id parameters the UUID with the name of
     the image.
 
-    :param image_list: the list of images on the master region
-    :return: a dictionary indexed by name
+    :param image_dict: a dictionary of master images
+    :return: nothing
     """
 
     master_region_dictimagesbyid = dict(
-        (image.id, image) for image in image_list if image.status == 'active')
+        (image.id, image) for image in image_dict.values())
     master_region_dictimages = dict()
-    for image in image_list:
+    for image in image_dict.values():
         if 'kernel_id' in image.user_properties:
             # Prevent curious bug, images with empty values
             if not image.user_properties['kernel_id']:
@@ -72,9 +71,6 @@ def get_master_region_dict(image_list):
                     master_region_dictimagesbyid[image.user_properties[
                         'ramdisk_id']].name
 
-        master_region_dictimages[image.name] = image
-    return master_region_dictimages
-
 
 def update_kernelramdisk_id(image, master_image, region_images):
     """Modify the kernel_id and ramdisk_id if required of an AMI image.
@@ -83,8 +79,8 @@ def update_kernelramdisk_id(image, master_image, region_images):
     The function returns True if the object has been modified and need to be
     updated.
 
-    If the kernel or ramdisk image is not found, a warning is emitted, the
-    image is marked as private and the kernel_id/ramdisk_id is filled with the
+    If the kernel or ramdisk image is not found, a warning is emitted
+    and the kernel_id/ramdisk_id is filled with the
     name of the missing image with the prefix __
 
     if the ramdisk_id/kernel_id is present in image but not in master image,
@@ -103,8 +99,7 @@ def update_kernelramdisk_id(image, master_image, region_images):
     return r1 or r2
 
 
-def _update_auximg_id(property_id, image, master_image, images_region,
-                      dry_run=False):
+def _update_auximg_id(property_id, image, master_image, images_region):
     """
     Utility function that modify, if required, a property in the image
     pointing to the id of other image. For example, it is used with kernel_id
@@ -114,45 +109,42 @@ def _update_auximg_id(property_id, image, master_image, images_region,
     :param image: the image to modify
     :param master_image: the master image
     :param images_region: a dictionary indexed by name with the region's images
-    :param dry_run: if true, don't modify the image, only check it is required
     :return:
     """
     if property_id not in master_image.user_properties:
         if property_id not in image.user_properties:
             # Nothing to do
-            return False
+            result = False
         else:
             # remove property
-            if not dry_run:
-                del image.user_properties[property_id]
-            return True
+            del image.user_properties[property_id]
+            result = True
+    else:
+        # Get the name of the kernel/ramdisk image
+        aux_image_name = master_image.user_properties[property_id]
+        if aux_image_name not in images_region:
+            # It is very unusual that an image exists and not its kernel or
+            # ramdisk, because little images are upload first, but it is
+            # possible (e.g. if the image is removed manually or it is
+            # replaced by a more recent one)
+            # In this case, print a warning
+            msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
+            _logger.warning(msg.format(aux_image_name, image.region,
+                                       property_id, image.name))
+            # Put the aux image name; this provides information to the caller
+            # about the missing image. Put '__' as prefix.
+            image.user_properties[property_id] = '__' + aux_image_name
+            result = True
+        else:
+            aux_image = images_region[aux_image_name]
+            if property_id in image.user_properties and\
+                    aux_image.id == image.user_properties[property_id]:
+                result = False
+            else:
+                image.user_properties[property_id] = aux_image.id
+                result = True
 
-    # Get the name of the kernel/ramdisk image
-    aux_image_name = master_image.user_properties[property_id]
-    if aux_image_name not in images_region:
-        if dry_run:
-            return True
-        # It is very unusual that an image exists and not its kernel or
-        # ramdisk, because little images are upload first, but it is
-        # possible (e.g. if the image is removed manually or it is
-        # replaced by a more recent one)
-        # In this case, print a warning and mark the image as private
-        image.is_public = False
-        msg = '{1}: Not found {0} on region. It should be {2} of image {3}'
-        _logger.warning(msg.format(aux_image_name, image.region,
-                                   property_id, image.name))
-        # Put the aux image name; this provides information to the caller
-        # about the missing image. Put '__' as prefix.
-        image.user_properties[property_id] = '__' + aux_image_name
-        return True
-
-    aux_image = images_region[aux_image_name]
-    if property_id in image.user_properties and\
-            aux_image.id == image.user_properties[property_id]:
-        return False
-    if not dry_run:
-        image.user_properties[property_id] = aux_image.id
-    return True
+    return result
 
 
 def check_ami(image, master_image, region_images, pending_images):
@@ -171,7 +163,7 @@ def check_ami(image, master_image, region_images, pending_images):
 
     Typically, images with state 'ready' can be ignored; images with state
     'update' can be updated before uploading the pending images. Images with
-    'missing' state must be updated after the uploading of pending images.
+    'pending' state must be updated after the uploading of pending images.
     Finally, images with 'missing' state are broken.
 
     :param image: the image to check
@@ -216,24 +208,26 @@ def _check_auximg_id(property_id, image, master_image, images_region,
     if property_id not in master_image.user_properties:
         if property_id not in image.user_properties:
             # Nothing to do
-            return 'ready'
+            result = 'ready'
         else:
-            return 'update'
-
-    # Get the name of the kernel/ramdisk image
-    aux_image_name = master_image.user_properties[property_id]
-
-    # Check if the aux_image exists
-    if aux_image_name not in images_region:
-        if aux_image_name in pending_images:
-            return 'pending'
-        else:
-            return 'missing'
-
-    # Found image, Check it is OK or must be updated
-    aux_image = images_region[aux_image_name]
-    if property_id in image.user_properties and\
-            aux_image.id == image.user_properties[property_id]:
-        return 'ready'
+            result = 'update'
     else:
-        return 'update'
+        # Get the name of the kernel/ramdisk image
+        aux_image_name = master_image.user_properties[property_id]
+
+        # Check if the aux_image exists
+        if aux_image_name not in images_region:
+            if aux_image_name in pending_images:
+                result = 'pending'
+            else:
+                result = 'missing'
+        else:
+            # Found image, Check it is OK or must be updated
+            aux_image = images_region[aux_image_name]
+            if property_id in image.user_properties and\
+                    aux_image.id == image.user_properties[property_id]:
+                result = 'ready'
+            else:
+                result = 'update'
+
+    return result

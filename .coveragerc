@@ -1,0 +1,9 @@
+[report]
+omit =
+    tests/*
+    examples/*
+    */__init__.py
+    setup.py
+
+[report]
+ignore_errors = True

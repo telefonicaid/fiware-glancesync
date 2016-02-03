@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import csv
 import glob
@@ -251,6 +251,9 @@ class ServersFacade(object):
                     ServersFacade.images[region_name] = dict()
             with open(file) as f:
                 for row in csv.reader(f):
+                    # ignore blank lines
+                    if len(row) == 0:
+                        continue
                     image = GlanceSyncImage.from_field_list(row)
                     ServersFacade.images[region_name][image.id] = image
             if ServersFacade.use_persistence:
@@ -284,12 +287,14 @@ if __name__ == '__main__':
     else:
         meta.path = os.path.normpath(os.path.expanduser(meta.path))
         m = 'The directory "%s" is not empty. If you are sure, pass --confirm'
-        if os.path.exists(meta.path) and not meta.confirm:
-            if len(glob.glob(meta.path + '/_persist_*')) != 0:
+        if os.path.exists(meta.path) and not meta.confirm \
+                and len(glob.glob(meta.path + '/_persist_*')) != 0:
+
                 logging.error(m % meta.path)
                 sys.exit(-1)
 
     facade = ServersFacade(dict())
     facade.init_persistence(meta.path, True)
     facade.add_images_from_csv_to_mock(meta.initial_load)
-    print 'export GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path
+
+    print('export GLANCESYNC_MOCKPERSISTENT_PATH=' + meta.path)

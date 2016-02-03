@@ -7,3 +7,4 @@ oslo.config==1.9.3
 oslo.i18n==1.5.0
 oslo.serialization==1.4.0
 oslo.utils==1.4.0
+git+https://github.com/qaenablers/python-qautils@v1.2.0

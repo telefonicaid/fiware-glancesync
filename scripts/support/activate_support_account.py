@@ -24,7 +24,6 @@
 #
 
 import base64
-import os.path
 import os
 import shutil
 import pwd
@@ -48,18 +47,20 @@ from the metadata server.
 
 Injection is done through http://169.254.169.254/openstack/latest/user_data
 """
- 
-#If this is true, use password from configDrive if available
+
+
+# If this is true, use password from configDrive if available
 readPasswordDiskImage = False
 
 fiware_gpg = '/etc/fiware-support/gpg'
 password_length_before = 8
-password_length_after = 11 
+password_length_after = 11
+
 
 def generate_password():
     rand = open('/dev/urandom', 'rb')
     # replace in password + and / with . and ! that are better with int. keyboards
-    password = base64.b64encode(rand.read(password_length_before),'.!')
+    password = base64.b64encode(rand.read(password_length_before), '.!')
     # remove padding (typing = may be problem with internacional keyboard)
     p = password.find('=')
     if p != -1:
@@ -73,8 +74,8 @@ def generate_password():
 def read_password_from_cd():
     if not os.path.exists('/dev/sr0'):
         return None
-    subprocess.call(['mount', '/dev/sr0', '/mnt', '-o', 'mode=0400,norock'])
-    f = open('/mnt/openstack/latest/meta_data.json') 
+    call(['mount', '/dev/sr0', '/mnt', '-o', 'mode=0400,norock'])
+    f = open('/mnt/openstack/latest/meta_data.json')
     data = json.load(f)
     return data['admin_path']
 
@@ -90,6 +91,7 @@ def create_support_account():
                    'support']
     call(adduser)
 
+
 def get_public_keys_from_userdata(userdata):
     data = yaml.load(userdata)
     if not 'fiware-support' in data:
@@ -98,16 +100,18 @@ def get_public_keys_from_userdata(userdata):
     sshkey = data.get('sshkey', None)
     gpgkey = data.get('gpgkey', None)
     return sshkey, gpgkey
-    
+
+
 def get_public_keys():
     try:
-        h =  urllib2.urlopen('http://169.254.169.254/openstack/latest/user_data',None,10)
+        h = urllib2.urlopen('http://169.254.169.254/openstack/latest/user_data', None, 10)
     except Exception, e:
         return None, None
     if h.getcode() != 200:
         return None, None
 
     return get_public_keys_from_userdata(h)
+
 
 def sudo_with_password():
     """support user has sudo access, but always asking for a password"""
@@ -116,61 +120,61 @@ def sudo_with_password():
         sudo_file = open('/etc/sudoers.d/support', 'w')
         sudo_file.write('support ALL=(ALL)       ALL\n')
         sudo_file.close()
-        os.chmod('/etc/sudoers.d/support',0o440)
- 
+        os.chmod('/etc/sudoers.d/support', 0o440)
+
 
 def support_account_ready():
     """returns true is account exists and has a password"""
     shadow = open('/etc/shadow')
     for line in shadow.readlines():
         if line.startswith('support:$'):
-           return True
+            return True
     return False
 
 
 def get_uuid():
     """Get UUID of the VM from metadata server. Do fork to avoid the caller to waoit"""
     # Return control
-    if os.fork()>0:
-       exit()
-    
+    if os.fork() > 0:
+        exit()
+
     uuid = None
     seconds = 5
-    
+
     while True:
-         try:
-             h =  urllib2.urlopen('http://169.254.169.254/openstack/latest/meta_data.json',None,5)
-             if h.getcode() == 200:
-                 data = json.load(h)
-                 return data.get('uuid', None)
-         except Exception:
-             pass
+        try:
+            h = urllib2.urlopen('http://169.254.169.254/openstack/latest/meta_data.json', None, 5)
+            if h.getcode() == 200:
+                data = json.load(h)
+                return data.get('uuid', None)
+        except Exception:
+            pass
 
-         if seconds >= 80:
-             break
+        if seconds >= 80:
+            break
 
-         time.sleep(seconds)
-         seconds *= 2
+        time.sleep(seconds)
+        seconds *= 2
 
     return None
 
-uuid= get_uuid()
+uuid = get_uuid()
 if os.path.exists('/etc/fiware-support/uuid') and uuid and\
    os.path.exists('/etc/fiware-support/password'):
     f = open('/etc/fiware-support/uuid')
     if f.readline().strip() == uuid:
         password = open('/etc/fiware-support/password').read()
-        console=open('/dev/console', 'w')
+        console = open('/dev/console', 'w')
         console.write('\nFiWare Support:\n' + password)
         console.close()
         sys.exit(0)
- 
+
 # activate sudo for support user, but asking password
 sudo_with_password()
 
 # create account if it does not exist
 if not os.path.exists('/home/support'):
-     create_support_account()
+    create_support_account()
 
 # Get SSH and GPG public keys from metadata server; if failed trying from configdrive
 (sshkey, gpgkey) = (None, None)
@@ -210,7 +214,7 @@ else:
 shutil.rmtree(fiware_gpg, ignore_errors=True)
 os.mkdir(fiware_gpg)
 os.chmod(fiware_gpg, 0o700)
-call(['gpg', '--homedir', fiware_gpg, '--armor', 
+call(['gpg', '--homedir', fiware_gpg, '--armor',
       '--import', gpgpubkey])
 
 # Put a password
@@ -225,23 +229,23 @@ if not password:
 
 
 # set password of the account
-Popen('chpasswd',stdin=PIPE).communicate('support:' + password)
+Popen('chpasswd', stdin=PIPE).communicate('support:' + password)
 
 
 # print password to /dev/console, but only if generated
 if generated:
-   console=open('/dev/console', 'w')
-   cmd=['gpg', '--batch', '--armor', '-e', '--trust-model', 'always',
+    console = open('/dev/console', 'w')
+    cmd = ['gpg', '--batch', '--armor', '-e', '--trust-model', 'always',
             '--homedir', fiware_gpg, '-R', 'FiWare support']
-   proc=Popen(cmd,stdin=PIPE,stdout=PIPE)
-   password = proc.communicate('FiWare support password is: ' + password + '\n')[0]
-   console.write('\nFiWare Support:\n' + password + '\n')
-   f = open('/etc/fiware-support/password', 'w')
-   os.chmod('/etc/sudoers.d/support',0o400)
-   f.write(password + '\n')
-   f.close()
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE)
+    password = proc.communicate('FiWare support password is: ' + password + '\n')[0]
+    console.write('\nFiWare Support:\n' + password + '\n')
+    f = open('/etc/fiware-support/password', 'w')
+    os.chmod('/etc/sudoers.d/support', 0o400)
+    f.write(password + '\n')
+    f.close()
 
-   console.close()
+    console.close()
 
 # Save UUID, if any
 if uuid:

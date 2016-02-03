@@ -22,5 +22,4 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-__all__ = ['glancesync', 'glancesync_image']
+__author__ = 'chema'

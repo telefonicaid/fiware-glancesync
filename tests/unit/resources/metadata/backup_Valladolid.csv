@@ -1,0 +1,5 @@
+Valladolid,image01,001,active,1073741824,ddfe163345d338193ac2bdc183f8e9dcff904b43,tenant1id,True,"{'type': 'ngimages', 'nid': 1}"
+Valladolid,image02,002,active,1073741834,bcac9d1d8eab3713ae489224d0130c9468e7a0e3,tenant1id,True,"{'type': 'baseimage', 'k1': 'v1'}"
+Valladolid,image03,003,active,1073741844,3ea6c91e241f256e5e3a88ebd647372022323a53,tenant1id,False,"{'type': 'ngimages', 'nid': 2, 'k3': 'v3'}"
+Valladolid,image04,004,active,1073741854,798f861ee74f6ff83ccbc9c53b419941d0080e50,tenant1id,True,"{'type': 'other', 'k1' : 'value1'}"
+Valladolid,image05,005,active,1073741864,44a6c91e241f256e5e3a88ebd647372022323a53,tenant1id,True,"{'type': 'ngimages', 'k3': 'v3'}"

@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import unittest
 import tempfile
 import os
@@ -33,6 +31,8 @@ import copy
 
 from glancesync import glancesync_config
 from glancesync.glancesync_config import GlanceSyncConfig
+
+__author__ = 'chema'
 
 configuration_content = """
 [main]
@@ -110,12 +110,18 @@ keystone_url = http://server:4730/v2.0
 # http://server:4730/v2.0,tenant1
 only_tenant_images = False
 
+list_images_timeout = 20
+use_keystone_v3 = True
+
 [experimental]
 credential = user2,\
   ZmFrZXBhc3N3b3JkLG9mY291cnNl,\
   http://server2:4730/v2.0,tenant2
 ignore_regions = Spain
 metadata_condition=
+# A hack useful in mock mode
+tenant_id = tenant2_id
+support_obsolete_images = False
 
 """
 
@@ -196,7 +202,20 @@ class TestGlanceSyncStream(unittest.TestCase):
                           'http://server2:4730/v2.0')
         self.assertEquals(experimental['tenant'], 'tenant2')
         self.assertTrue(experimental['only_tenant_images'])
+        self.assertTrue(master['support_obsolete_images'])
+        self.assertFalse(experimental['support_obsolete_images'])
         self.assertEquals(experimental['ignore_regions'], set(['Spain']))
+        self.assertEquals(experimental['tenant_id'], 'tenant2_id')
+        self.assertEquals(master['list_images_timeout'], 20)
+        self.assertTrue(master['use_keystone_v3'])
+        self.assertFalse(experimental['use_keystone_v3'])
+
+    def test_override(self):
+        """check overriding options passing a dictionary to constructor"""
+        override = {'master.user': 'otheruser', 'only_tenant_images': 'False'}
+        config = GlanceSyncConfig(stream=self.stream, override_d=override)
+        self.assertEquals(config.targets['master']['user'], 'otheruser')
+        self.assertFalse(config.targets['experimental']['only_tenant_images'])
 
 
 class TestGlanceSyncConfigFile(unittest.TestCase):
@@ -450,7 +469,3 @@ class TestGlanceSyncIncompleteConfig(unittest.TestCase):
         self.assertEquals(config.targets['master']['ignore_regions'], set())
         self.assertEquals(config.targets['master']['metadata_set'], set())
         self.assertFalse(config.targets['master']['only_tenant_images'])
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,0 +1,5 @@
+{'internet-things-services-enablement': {u'backend-device-management-idas': u'696',
+u'iot-broker': u'476',
+u'iot-data-edge-consolidation-ge-cepheus': u'198',
+u'iot-discovery': u'635',
+u'protocol-adapter-mr-coap': u'1023'}}

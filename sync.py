@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'jmpr22'
+__author__ = 'chema'
 import sys
 import StringIO
 import os
@@ -31,16 +31,32 @@ import datetime
 import argparse
 import logging
 
-from glancesync.glancesync_fi import GlanceSyncFi as GlanceSync
+from glancesync.glancesync import GlanceSync
 
 
 class Sync(object):
-    def __init__(self, regions):
+    def __init__(self, regions, override_d=None):
         """init object"""
-        self.glancesync = GlanceSync()
-        self.glancesync.init_logs()
+        GlanceSync.init_logs()
+        self.glancesync = GlanceSync(options_dict=override_d)
+
+        regions_expanded = list()
+        already_sorted = True
+        for region in regions:
+            if region.endswith(':'):
+                regions_expanded.extend(self.glancesync.get_regions(
+                    target=region[:-1]))
+                already_sorted = False
+            else:
+                regions_expanded.append(region)
+
+        regions = regions_expanded
         if not regions:
-            regions_unsorted = self.glancesync.get_regions()
+            regions = self.glancesync.get_regions()
+            already_sorted = False
+
+        if not already_sorted:
+            regions_unsorted = regions
             regions = list()
             for region in self.glancesync.preferable_order:
                 if region in regions_unsorted:
@@ -56,7 +72,7 @@ class Sync(object):
             try:
                 stream = StringIO.StringIO()
                 self.glancesync.export_sync_region_status(region, stream)
-                print stream.getvalue()
+                print(stream.getvalue())
             except Exception:
                 # Don't do anything. Message has been already printed
                 # try next region
@@ -70,11 +86,11 @@ class Sync(object):
         max_children = self.glancesync.max_children
         now = datetime.datetime.now()
         datestr = str(now.year) + str(now.month).zfill(2) + \
-                  str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
-                  str(now.minute).zfill(2)
+            str(now.day).zfill(2) + '_' + str(now.hour).zfill(2) +\
+            str(now.minute).zfill(2)
 
-        print '======Master (' + self.glancesync.master_region + ')'
-        self.glancesync.print_images_master_region()
+        msg = '======Master is ' + self.glancesync.master_region
+        print(msg)
         sys.stdout.flush()
         os.mkdir('sync_' + datestr)
         children = dict()
@@ -105,15 +121,15 @@ class Sync(object):
                     logger.propagate = 0
 
                     self.glancesync.sync_region(region)
-                    sys.exit(0)
+                    # After a fork, os_exit() and not sys.exit() must be used.
+                    os._exit(0)
             except Exception:
                 raise
                 sys.stderr.flush()
                 sys.exit(-1)
         while len(children) > 0:
             self._wait_child(children)
-        print 'All is done.'
-
+        print('All is done.')
 
     def sequential_sync(self, dry_run=False):
         """Run the synchronisation sequentially (that is, do not start the
@@ -122,12 +138,13 @@ class Sync(object):
 
         :param dry_run: if true, do not synchronise images actually
         """
-        print '======Master (' + self.glancesync.master_region + ')'
-        self.glancesync.print_images_master_region()
+        msg = '======Master is ' + self.glancesync.master_region
+        print(msg)
 
         for region in self.regions:
             try:
-                print "======" + region
+                msg = "======" + region
+                print(msg)
                 sys.stdout.flush()
                 self.glancesync.sync_region(region, dry_run=dry_run)
             except Exception:
@@ -150,37 +167,103 @@ class Sync(object):
             else:
                 finish_direct_child = True
                 if status == 0:
-                    print 'Region {0} finish'.format(children[pid])
+                    msg = 'Region {0} has finished'.format(children[pid])
+                    print(msg)
                 else:
-                    print 'Region {0} finish with errors'.format(children[pid])
+                    msg = 'Region {0} has finished with errors'
+                    print(msg.format(children[pid]))
                 del children[pid]
                 sys.stdout.flush()
+
+    def show_regions(self):
+        """print a full list of the regions available (excluding the
+        master region) in all the targets defined in the configuration file"""
+        regions = self.glancesync.get_regions()
+        for target in self.glancesync.targets.keys():
+            if target == 'facade' or target == 'master':
+                continue
+            regions.extend(self.glancesync.get_regions(target=target))
+
+        print(' '.join(regions))
+
+    def make_backup(self):
+        """make a backup of the metadata in the regions specified at the
+        constructor (in addition to the master region). The backup is created
+        in a  directory named 'backup_glance_' with the date and time as suffix
+
+        There is a file for each region (the name is backup_<region>.csv) and
+        inside the file a line for each image.
+
+        Only the information about public images/ the images owned by
+        the tenant, can be obtained, regardless if the user is an admin. This
+        is a limitation of the glance API"""
+
+        now = datetime.datetime.now().isoformat()
+        directory = 'backup_glance_' + now
+        os.mkdir(directory)
+
+        regions = set(self.regions)
+        regions.add(self.glancesync.master_region)
+        for region in regions:
+            try:
+                self.glancesync.backup_glancemetadata_region(region, directory)
+            except Exception:
+                # do nothing. Already logged.
+                continue
+
 
 if __name__ == '__main__':
     # Parse cmdline
     description = 'A tool to sync images from a master region to other '\
                   'regions'
     parser = argparse.ArgumentParser(description=description)
+
     parser.add_argument('regions', metavar='region', type=str, nargs='*',
                         help='region where the images are uploaded to')
+
     parser.add_argument('--parallel', action='store_true',
                         help='sync several regions in parallel')
+
+    parser.add_argument(
+        '--config', nargs='+', help='override configuration options. (e.g. ' +
+        "main.master_region=Valladolid metadata_condition='image.name=name1')")
+
     group = parser.add_mutually_exclusive_group()
+
     group.add_argument('--dry-run', action='store_true',
                        help='do not upload actually the images')
-    parser.add_argument('--show-status', action='store_true', help=
-                        'do not sync, but show the synchronisation'
-                        ' status')
+
+    group.add_argument('--show-status', action='store_true',
+                       help='do not sync, but show the synchronisation status')
+
+    group.add_argument('--show-regions', action='store_true',
+                       help='don not sync, only show the available regions')
+
+    group.add_argument(
+        '--make-backup', action='store_true',
+        help="do no sync, make a backup of the regions' metadata")
+
     meta = parser.parse_args()
+    options = dict()
+
+    if meta.config:
+        for option in meta.config:
+            pair = option.split('=')
+            if len(pair) != 2:
+                parser.error('config options must have the format key=value')
+                sys.exit(-1)
+            options[pair[0].strip()] = pair[1]
 
     # Run cmd
-    sync = Sync(meta.regions)
+    sync = Sync(meta.regions, options)
 
     if meta.show_status:
         sync.report_status()
     elif meta.parallel:
         sync.parallel_sync()
+    elif meta.show_regions:
+        sync.show_regions()
+    elif meta.make_backup:
+        sync.make_backup()
     else:
         sync.sequential_sync(meta.dry_run)
-
-

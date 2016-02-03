@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+__author__ = 'chema'
 
 import os
 import logging
@@ -41,6 +41,7 @@ from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
 the master region.
 """
 
+
 class GlanceSync(object):
     """Class to synchronize glance servers in different regions taking the base
      of the master region.
@@ -50,41 +51,37 @@ class GlanceSync(object):
     method.
     """
 
-    def __init__(self, config_stream=None):
+    def __init__(self, config_stream=None, options_dict=None):
         """Constructor of the object
         """
         self.log = logging.getLogger('glancesync')
         if config_stream is None:
-            glancesyncconfig = GlanceSyncConfig()
+            glancesyncconfig = GlanceSyncConfig(override_d=options_dict)
         else:
-            glancesyncconfig = GlanceSyncConfig(stream=config_stream)
+            glancesyncconfig = GlanceSyncConfig(
+                stream=config_stream, override_d=options_dict)
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
         self.images_dir = glancesyncconfig.images_dir
         self.targets = glancesyncconfig.targets
         count = 0
         for target in self.targets.values():
-            if 'facade_module' in target:
-                import_code = 'from ' + target['facade_module'] +\
-                              'import ServersFacade as Facade' + str(count)
-                instance_code = 'Facade' + str(count) + '(target)'
-                exec import_code
-                target['facade'] = eval(instance_code)
+            if 'GLANCESYNC_USE_MOCK' in os.environ:
+                target['facade'] = ServersFacadeMock(target)
+            elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
+                target['facade'] = ServersFacadeMock(target)
+                target['facade'].init_persistence(
+                    os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
             else:
-                if 'GLANCESYNC_USE_MOCK' in os.environ:
-                    target['facade'] = ServersFacadeMock(target)
-                elif 'GLANCESYNC_MOCKPERSISTENT_PATH' in os.environ:
-                    target['facade'] = ServersFacadeMock(target)
-                    target['facade'].init_persistence(
-                        os.environ['GLANCESYNC_MOCKPERSISTENT_PATH'])
-                else:
-                    target['facade'] = ServersFacade(target)
+                target['facade'] = ServersFacade(target)
 
         self.preferable_order = glancesyncconfig.preferable_order
         self.max_children = glancesyncconfig.max_children
         master_region = GlanceSyncRegion(self.master_region, self.targets)
         images = master_region.target['facade'].get_imagelist(master_region)
-        self.master_region_dict = glancesync_ami.get_master_region_dict(images)
+
+        self.master_region_dict = self._master_images_to_dict(images)
+        glancesync_ami.clean_ami_ids(self.master_region_dict)
 
     def get_regions(self, omit_master_region=True, target='master'):
         """It returns the list of regions
@@ -141,8 +138,27 @@ class GlanceSync(object):
         target = regionobj.target
         only_tenant_images = target['only_tenant_images']
         target['tenant_id'] = target['facade'].get_tenant_id()
-        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         imagesregion = self.get_images_region(regionstr, only_tenant_images)
+
+        # Get a list of obsolete images in the region
+        # they are managed differently that the other images to sync, because:
+        # * they are not uploaded if not present
+        # * the name is changed (the _obsolete suffix is added)
+        if target['support_obsolete_images']:
+            syncprops = target.get('obsolete_syncprops', None)
+            obsolete = regionobj.image_list_to_obsolete(
+                self.master_region_dict, imagesregion, syncprops)
+        else:
+            obsolete = list()
+
+        # previous step: manage obsolete images. Obsolete images are not
+        # synchronisable.
+        for image in obsolete:
+            self.log.info(regionobj.fullname +
+                          ': updating obsolete image ' + image.name)
+            facade.update_metadata(regionobj, image)
+
+        master_images = regionobj.images_to_sync_dict(self.master_region_dict)
         dictimages = regionobj.local_images_filtered(master_images,
                                                      imagesregion)
         imagesregion = dictimages.values()
@@ -184,25 +200,35 @@ class GlanceSync(object):
             elif tuple[0] == 'pending_replace':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
+                self.log.info(regionobj.fullname + ': Replacing image ' +
+                              tuple[1].name + ' (' + str(sizeimage) +
+                              ' MB)')
                 if not dry_run:
-                    self.log.info(regionobj.fullname + ': Replacing image ' +
-                                  tuple[1].name + ' (' + str(sizeimage) +
-                                  ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     facade.delete_image(regionobj, region_image.id,
                                         confirm=False)
-            elif tuple[0] == 'pending_rename_n_replace':
+            elif tuple[0] == 'pending_rename':
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
+                self.log.info(
+                    regionobj.fullname + ': Renaming and replacing image '
+                    + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+
                 if not dry_run:
-                    self.log.info(
-                        regionobj.fullname + ': Renaming and replacing image '
-                        + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
                     self.__upload_image(tuple[1], dictimages, regionobj)
                     region_image.name += '.old'
                     region_image.is_public = False
                     facade.update_metadata(regionobj, region_image)
-
+            elif tuple[0] == 'error_checksum':
+                region_image = dictimages[tuple[1].name]
+                msg =\
+                    'Image {0} has a different checksum ({2}) in region {1} '\
+                    'than in the master region. It was not set what to do. '\
+                    'Please, fill either dontupdate, replace or rename '\
+                    'with the checksum.'
+                self.log.warning(msg.format(region_image.name,
+                                            regionobj.fullname,
+                                            region_image.checksum))
             if uploaded:
                 was_synchronised = False
                 totalmbs += sizeimage
@@ -245,7 +271,7 @@ class GlanceSync(object):
         updated.
         *pending_replace: the image must be replaced, because the checksum is
         different.
-        *pending_rename_n_replace: the image must be replaced, but before this
+        *pending_rename: the image must be replaced, but before this
         the old image will be renamed.
         *pending_ami: the image has kernel_id or ramdisk_id and this value is
         pending because the image has not been uploaded yet.
@@ -363,13 +389,15 @@ class GlanceSync(object):
         region.target['tenant_id'] = facade.get_tenant_id()
         if only_tenant_images:
             return list(
-                image for image in facade.get_imagelist(region) if
-                not image.owner or image.owner.zfill(32) ==
-                region.target['tenant_id'].zfill(32) or image.owner == '')
+                image for image in facade.get_imagelist(region)
+                if image.name and
+                (not image.owner or image.owner.zfill(32) ==
+                 region.target['tenant_id'].zfill(32) or image.owner == ''))
         else:
             return facade.get_imagelist(region)
 
-    def init_logs(self, include_date=False):
+    @staticmethod
+    def init_logs(include_date=False):
         """
         Init the glancesync logger. This function is invoked by the frontends
         tools to avoid the warning about missing Handlers in logger:
@@ -403,7 +431,8 @@ class GlanceSync(object):
         metadata_set = regionobj.target['metadata_set']
         properties = list(new_image.user_properties.keys())
         for p in properties:
-            if p not in metadata_set:
+            if p not in metadata_set and \
+                    p != 'kernel_id' and p != 'ramdisk_id':
                 del new_image.user_properties[p]
 
         # upload
@@ -432,3 +461,34 @@ class GlanceSync(object):
                         del image.user_properties[prop]
         image.is_public = master_image.is_public
         regionobj.target['facade'].update_metadata(regionobj, image)
+
+    def _master_images_to_dict(self, images):
+        """Convert the list of images to a dictionary. Remove images with a
+        duplicate name (e.g. if name appears three times, remove the three
+        images), images with a non-active status and images with a different
+        owner
+        :param images: a list of master images
+        :return: a dictionary of master images indexed by name
+        """
+        # ignore images of other tenants and not active images
+        tenant_id = self.targets['master']['facade'].get_tenant_id().zfill(32)
+        images = list(image for image in images
+                      if image.status == 'active' and image.name and
+                      (not image.owner or image.owner.zfill(32) == tenant_id))
+
+        # Verify that there are not two active images with the same name
+        images_set = set()
+        duplicated = set()
+        msg = 'Duplicated images with name {0} will be ignored'
+        for image in images:
+            if image.name in images_set and image.name not in duplicated:
+                self.log.warning(msg.format(image.name))
+                duplicated.add(image.name)
+            else:
+                images_set.add(image.name)
+
+        # make dictionary
+        images = dict((image.name, image) for image in images
+                      if image.name not in duplicated)
+
+        return images

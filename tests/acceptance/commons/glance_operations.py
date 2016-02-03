@@ -21,15 +21,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
+
+from constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
+from qautils.logger.logger_utils import get_logger
+from glanceclient.client import Client as GlanceClient
+from keystoneclient.v2_0.client import Client as KeystoneClient
+import os
+
 __author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015"
 __license__ = " Apache License, Version 2.0"
-
-
-from commons.constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
-from qautils.logger_utils import get_logger
-from glanceclient.client import Client as GlanceClient
-from keystoneclient.v2_0.client import Client as KeystoneClient
 
 __logger__ = get_logger("qautils")
 
@@ -59,6 +60,16 @@ class GlanceOperations():
             __logger__.info("Glance public URL: %s", glance_public_url)
             self.glance_client = GlanceClient(endpoint=glance_public_url, version='1', token=self.auth_token)
 
+    def __get_resource_path__(self, image_filename):
+        current = os.getcwd()
+
+        if "tests/acceptance" in current:
+            image_path = "{}/{}".format(IMAGES_DIR, image_filename)
+        else:
+            image_path = "tests/acceptance/{}/{}".format(IMAGES_DIR, image_filename)
+
+        return image_path
+
     def __get_glance_endpoint_from_keystone__(self, region_name):
         """
         Get the endpoint of Glance from Keystone Service Catalog
@@ -76,7 +87,6 @@ class GlanceOperations():
         __logger__.debug("Glance endpoint (Service: %s, Type: 'publicURL', Region: %s) is: %s",
                          KEYSTONE_GLANCE_SERVICE_NAME, region_name, endpoint)
         return endpoint
-
 
     def __init_auth__(self, username, password, tenant_id, auth_url):
         """
@@ -123,7 +133,7 @@ class GlanceOperations():
         __logger__.debug("Image created: %s", str(image))
 
         if image_filename:
-            image_path = "{}/{}".format(IMAGES_DIR, image_filename)
+            image_path = self.__get_resource_path__(image_filename)
             __logger__.debug("Updating image with content from file '%s'", image_path)
             image.update(data=open(image_path, 'rb'))
 
@@ -135,29 +145,43 @@ class GlanceOperations():
             image.update(properties=custom_properties)
         return image.id
 
-    def update_image_properties(self, image_id, custom_properties):
+    def update_image_properties(self, image_id, **kwargs):
         """
         Update the image properties of the given image_id
         :param image_id: Image ID
-        :param custom_properties (dict): User properties to be added in the image metadata
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): Image name to be updated.
+            - is_public (boolean): Visibility of the image.
         :return: None
         """
 
-        __logger__.debug("Updating image with custom properties: '%s'", custom_properties)
-        self.glance_client.images.update(image_id, properties=custom_properties)
+        if "custom_properties" in kwargs:
+            __logger__.debug("Updating image with custom properties: '%s'", kwargs["custom_properties"])
+            self.glance_client.images.update(image_id, properties=kwargs["custom_properties"])
 
-    def update_image_properties_by_name(self, image_name, custom_properties):
+        if "name" in kwargs:
+            __logger__.debug("Updating image name to '%s'", kwargs['name'])
+            self.glance_client.images.update(image_id, name=kwargs['name'])
+
+        if "is_public" in kwargs:
+            __logger__.debug("Updating visibility of the image to '%s'", kwargs['is_public'])
+            self.glance_client.images.update(image_id, is_public=kwargs['is_public'])
+
+    def update_image_properties_by_name(self, image_name, **kwargs):
         """
         Update properties of all images found by the given name
         :param image_name: Name of the image to update (data)
-        :param custom_properties (dict): User properties to be added in the image metadata
-        :return:
+        :param **kwargs: Optional params:
+            - custom_properties (dict): User properties to be added in the image metadata
+            - name (string): New image name to be updated.
+            - is_public (boolean): Visibility of the image.
+        :return: None
         """
 
-        __logger__.debug("Updating properties of all images, by name '%s' and properties '%s'", image_name,
-                         custom_properties)
+        __logger__.debug("Updating all images by name '%s'. Props: '%s'", image_name, kwargs)
         for image in self.get_images(image_name):
-            self.update_image_properties(image.id, custom_properties)
+            self.update_image_properties(image.id, **kwargs)
 
     def remove_image(self, image_id):
         """
