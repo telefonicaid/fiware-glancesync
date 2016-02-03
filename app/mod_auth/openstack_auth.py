@@ -68,16 +68,18 @@ def validate_token(access_token):
 def authorized(func):
     """
     Decorator that checks that requests contain an X-Auth-Token
-    in the request header. user will be None if the authentication
-    failed, and have an id otherwise.
+    in the request header. Returned function have to declare an
+    attribute token of type Token.
 
     Usage:
     @app.route("/")
     @authorized
-    def secured_root(userid=None):
+    def secured_root(token=None):
         pass
-    :param func:
-    :return:
+    :param func: Function to return the process
+    :return: The call to the function <func> with the token result
+             or abort if there was an error in the authentication
+             process.
     """
     @wraps(func)
     def _wrap(*args, **kwargs):

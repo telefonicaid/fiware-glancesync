@@ -35,6 +35,10 @@ from models import User
 
 # Import authentication decorator
 from openstack_auth import authorized
+
+# Import region manage decorator
+from region_manager import check_region
+
 from app.settings.settings import CONTENT_TYPE
 from app.mod_auth.models import Images, Task
 from app.settings.log import logger
@@ -48,7 +52,8 @@ mod_auth = Blueprint('auth', __name__, url_prefix='/regions')
 # Set the route and accepted methods
 @mod_auth.route('/<regionid>', methods=['GET'])
 @authorized
-def get_status(regionid, token):
+@check_region
+def get_status(regionid, token=None):
     """
     Lists information the status of the synchronization of the images in
     the region <regionid>. Keep in mind that <regionid> is the name of
@@ -79,7 +84,8 @@ def get_status(regionid, token):
 
 @mod_auth.route('/<regionid>', methods=['POST'])
 @authorized
-def synchronize(regionid, token):
+@check_region
+def synchronize(regionid, token=None):
     """
     Synchronize the images of the corresponding region defined by its regionId.
     The operation is asynchronous a response a taskId in order that you can follow
@@ -113,7 +119,8 @@ def synchronize(regionid, token):
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['GET'])
 @authorized
-def get_task(regionid, taskid, token):
+@check_region
+def get_task(regionid, taskid, token=None):
     """
 
     :param regionid:
@@ -141,7 +148,8 @@ def get_task(regionid, taskid, token):
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['DELETE'])
 @authorized
-def delete_task(regionid, taskid, token):
+@check_region
+def delete_task(regionid, taskid, token=None):
 
     message = "DELETE, delete the registry of task {} in the region: {}".format(taskid, regionid)
 
