@@ -206,15 +206,15 @@
 
 |-
 || security
-|| identity management keyrock
-| ! align="center" | 1045
+|| trustworthyfactory
+| ! align="center" |1488
 || --
 || --
 
 |-
 ||
-|| cyber security ge cybercaptor
-| ! align="center" | 1526
+|| identity management keyrock
+| ! align="center" | 1045
 || --
 || --
 
@@ -227,15 +227,22 @@
 
 |-
 ||
-|| authorization pdp authzforce
-| ! align="center" | 568
+|| pep proxy wilma
+| ! align="center" | 1412
 || --
 || --
 
 |-
 ||
-|| pep proxy wilma
-| ! align="center" | 1412
+|| cyber security ge cybercaptor
+| ! align="center" | 1526
+|| --
+|| --
+
+|-
+||
+|| authorization pdp authzforce
+| ! align="center" | 568
 || --
 || --
 
