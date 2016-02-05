@@ -24,18 +24,23 @@
 #
 
 # Import flask dependencies
+from flask import abort, Response
+
 from app.settings.log import logger
 from functools import wraps
 from app.mod_auth.AuthorizationManager import AuthorizationManager
 from app.settings import settings
 import requests
 import json
+from app.settings.settings import CONTENT_TYPE
+import httplib
 
 __author__ = 'fla'
 
 
 class region():
     regions = []
+    ERROR_MESSAGE = '{ "error": { "message": "Bad region", "code": 410 } }'
 
     def __init__(self):
         """
@@ -70,16 +75,14 @@ class region():
 
             print self.regions
 
-
-    def validate_region(region_name):
+    def validate_region(self, region_name):
         """
         Validate if region_name is a name that can be found
         in the Keystone component.
         :param region_name: The name of the region.
         :return: True if it is correct or false otherwise.
         """
-
-        return True
+        return region_name in self.regions
 
 
 def check_region(func):
@@ -97,8 +100,15 @@ def check_region(func):
 
         region_management = region()
 
-        logger.info("Checking region: {}...".format('123'))
+        logger.info("Checking region: {}...".format(region_name))
 
-        return func(*args, **kwargs)
+        result = region_management.validate_region(region_name)
+
+        if result:
+            return func(*args, **kwargs)
+        else:
+            abort(Response(response=region_management.ERROR_MESSAGE,
+                           status=httplib.GONE,
+                           content_type=CONTENT_TYPE))
 
     return _wrap
