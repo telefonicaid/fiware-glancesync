@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 __author__ = 'chema'
-__version__ = '1.3.1'
+__version__ = '1.3.3'
 
 import ConfigParser
 import os
@@ -106,7 +106,7 @@ class GlanceSyncConfig(object):
         :return: nothing
         """
 
-        logger = logging.getLogger('glancesync')
+        self.logger = logging.getLogger('glancesync')
 
         defaults = {'use_keystone_v3': 'False',
                     'support_obsolete_images': 'True',
@@ -189,7 +189,7 @@ class GlanceSyncConfig(object):
                         msg = 'A credential parameter is mandatory for each '\
                             'target (or the set: user, password, tenant, '\
                             'keystone_url)'
-                        logger.error(msg)
+                        self.logger.error(msg)
                         raise Exception(msg)
                 target['forcesyncs'] = configparser.getset(
                     section, 'forcesyncs')
