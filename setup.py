@@ -31,6 +31,7 @@ from os.path import join as pjoin
 install_reqs = parse_requirements("requirements.txt", session=False)
 # > requirements_list is a list of requirement; e.g. ['requests==2.6.0', 'Fabric==1.8.3']
 requirements_list = [str(ir.req) for ir in install_reqs]
+__version__ = '1.3.0'
 
 setup(
   name='fiware-glancesync',
