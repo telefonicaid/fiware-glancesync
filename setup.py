@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 from setuptools import setup, find_packages
-from glancesync.glancesync_config import __version__
+from glancesync.settings.glancesync_config import __version__
 from pip.req import parse_requirements
 from os.path import join as pjoin
 
@@ -31,13 +31,12 @@ from os.path import join as pjoin
 install_reqs = parse_requirements("requirements.txt", session=False)
 # > requirements_list is a list of requirement; e.g. ['requests==2.6.0', 'Fabric==1.8.3']
 requirements_list = [str(ir.req) for ir in install_reqs]
-__version__ = '1.3.0'
 
 setup(
   name='fiware-glancesync',
   packages=find_packages(exclude=['*tests*']),
   install_requires=requirements_list,
-  data_files = [('/etc/', ['glancesync/glancesync.conf'])],  
+  data_files = [('/etc/', ['glancesync/settings/glancesync.conf'])],  
   package_data={
     'glancesync': ['glancesync.conf']
   }, 
