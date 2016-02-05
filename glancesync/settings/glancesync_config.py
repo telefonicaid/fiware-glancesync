@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 __author__ = 'chema'
-__version__ = '1.3.3'
+__version__ = '1.3.0'
 
 import ConfigParser
 import os
