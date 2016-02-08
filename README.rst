@@ -477,6 +477,17 @@ This configuration file defines two *targets*: ``master`` and ``experimental``. 
 synchronises all the public images with properties *nid* and/or *type* defined. The last one only
 synchronises images with ``type=baseimages``
 
+Installation with Docker
+------------------------
+By using the Dockerfile, it is possible to generate the image
+
+.. code::
+docker build -t fiware-glancesync .
+
+To run the glancesync contanair, it is required to pass the environment variables.
+..code::
+docker run -ti -e OS_USERNAME={OS_USERNAME} -e OS_PASSWORD={OS_PASSWORD} -e OS_AUTH_URL={OS_AUTH_URL} -e OS_TENANT_NAME={OS_TENANT_NAME} -e OS_REGION={OS_REGION} fiware-glancesync  
+
 Security consideration
 ----------------------
 
