@@ -24,10 +24,11 @@
 #
 
 # Import flask dependencies
-from flask import Blueprint, Response
+from flask import Blueprint, make_response
 import httplib
 import datetime
-from app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE
+from app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE, \
+    SERVER_HEADER, SERVER, JSON_TYPE
 from app.settings.log import logger
 
 __author__ = 'fla'
@@ -54,6 +55,8 @@ def get_info():
               "\"runningfrom\": \"%s\", \"href\": \"%s\" }\n" \
               % (ID, OWNER, STATUS, VERSION, UPDATED, RUNNINGFROM, API_INFO_URL)
 
-    return Response(response=message,
-                    status=httplib.OK,
-                    content_type=CONTENT_TYPE)
+    resp = make_response(message, httplib.OK)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp

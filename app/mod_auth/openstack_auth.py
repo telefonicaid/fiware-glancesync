@@ -26,11 +26,10 @@
 import httplib
 
 # Import flask dependencies
-from flask import request, abort, json, Response
+from flask import request, abort, json
 from AuthorizationManager import AuthorizationManager
 from app.settings import settings
 from app.settings.log import logger
-from app.settings.settings import CONTENT_TYPE
 from functools import wraps
 
 __author__ = 'fla'
@@ -83,13 +82,12 @@ def authorized(func):
     """
     @wraps(func)
     def _wrap(*args, **kwargs):
-        logger.info("Checking token: {}...".format(request.headers['X-Auth-Token']))
-
         if 'X-Auth-Token' not in request.headers:
             # Unauthorized
             logger.error("No token in header")
             abort(httplib.UNAUTHORIZED)
-            return None
+        else:
+            logger.info("Checking token: {}...".format(request.headers['X-Auth-Token']))
 
         try:
             token = validate_token(access_token=request.headers['X-Auth-Token'])
@@ -99,11 +97,7 @@ def authorized(func):
         except Exception as excep:
             data = json.loads(excep.message)
 
-            abort(Response(response=excep.message,
-                           status=data['error']['code'],
-                           content_type=CONTENT_TYPE))
-
-            return None
+            abort(data['error']['code'], excep.message)
 
         kwargs["token"] = token
         return func(*args, **kwargs)

@@ -82,6 +82,8 @@ X_AUTH_TOKEN_HEADER = config.get('http', 'X_AUTH_TOKEN_HEADER')
 X_SUBJECT_TOKEN_HEADER = config.get('http', 'X_SUBJECT_TOKEN_HEADER')
 TOKENS_PATH_V2 = config.get('http', 'TOKENS_PATH_V2')
 TOKENS_PATH_V3 = config.get('http', 'TOKENS_PATH_V3')
+SERVER = config.get('http', 'SERVER')
+SERVER_HEADER = config.get('http', 'SERVER_HEADER')
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

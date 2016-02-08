@@ -26,7 +26,7 @@
 import httplib
 
 # Import flask
-from flask import Flask
+from flask import Flask, make_response
 
 # Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -45,37 +45,63 @@ db = SQLAlchemy(app)
 from app.mod_auth.controllers import mod_auth as auth_module
 from app.mod_info.controllers import mod_info as info_module
 
+# Import settings value
+from app.settings.settings import CONTENT_TYPE, SERVER, SERVER_HEADER, JSON_TYPE
+
 
 # Sample HTTP error handling (401)
 @app.errorhandler(httplib.UNAUTHORIZED)
-def not_found(error):
-    msg = '{"error": {"message": "The request you have made requires authentication.", "code": 401, ' \
-          '"title": "Unauthorized"}}\n'
-    return msg, httplib.UNAUTHORIZED
+def unauthorized(error):
+    msg = '{ "error": { "message": "The request you have made requires authentication.", "code": ' \
+          + str(httplib.UNAUTHORIZED) + ', "title": "Unauthorized" } }\n'
+
+    resp = make_response(msg, httplib.UNAUTHORIZED)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 
 # Sample HTTP error handling (404)
 @app.errorhandler(httplib.NOT_FOUND)
 def not_found(error):
-    msg = '{ "error": { "message": "Item not found", "code": 404 } }\n'
-    return msg, httplib.NOT_FOUND
+    if error.description is not None:
+        msg = error.description
+    else:
+        msg = '{ "error": { "message": "Item not found.", "code": ' + str(httplib.NOT_FOUND) + ' } }\n'
+
+    resp = make_response(msg, httplib.NOT_FOUND)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 
 # Sample HTTP error handling (405)
 @app.errorhandler(httplib.METHOD_NOT_ALLOWED)
 def bad_method(error):
-    msg = '{ "error": { "message": "Bad method", "code": 405 } }\n'
-    return msg, httplib.METHOD_NOT_ALLOWED
+    msg = '{ "error": { "message": "Bad method", "code": ' + str(httplib.METHOD_NOT_ALLOWED) + ' } }\n'
+
+    resp = make_response(msg, httplib.METHOD_NOT_ALLOWED)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 
-# Sample HTTP error handling (410)
-@app.errorhandler(httplib.GONE)
-def bad_method(error):
-    msg = '{ "error": { "message": "Bad region", "code": 410 } }\n'
-    return msg, httplib.GONE
+# Sample HTTP error handling (400)
+@app.errorhandler(httplib.BAD_REQUEST)
+def bad_request(error):
+    if error.description is not None:
+        msg = error.description
+    else:
+        msg = '{ "error": { "message": "Bad region", "code": ' + str(httplib.BAD_REQUEST) + ' } }\n'
 
-#serviceUnavailable	503	The service is not available
-#badRequest	400	The request has not been done correctly
+    resp = make_response(msg, httplib.BAD_REQUEST)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 # Register blueprint(s)
 app.register_blueprint(auth_module)

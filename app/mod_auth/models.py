@@ -45,8 +45,11 @@ class Base(db.Model):
 class User(Base):
     __tablename__ = 'auth_user'
 
+    # Region name: Identification data
+    region = db.Column(db.String(128), nullable=False, unique=False)
+
     # User name: Identification data
-    name = db.Column(db.String(128), nullable=False, unique=True)
+    name = db.Column(db.String(128), nullable=False, unique=False)
 
     # Task Id: Identificator of the synchronization task
     task_id = db.Column(db.String(128), nullable=False, unique=True)
@@ -58,7 +61,8 @@ class User(Base):
     status = db.Column(db.String(128), nullable=False)
 
     # New instance instantiation procedure
-    def __init__(self, name, taskid, role, status):
+    def __init__(self, region, name, taskid, role, status):
+        self.region = region
         self.name = name
         self.task_id = taskid
         self.role = role
@@ -185,11 +189,11 @@ class Images:
         Generate json message with the content of the Images
         :return: json message
         """
-        result = self.images[0].dump().replace('\"', '\'')
+        result = self.images[0].dump()
 
         if self.number_of_images > 1:
             for i in range(1, self.number_of_images):
-                result = result + ', ' + self.images[1].dump().replace('\"', '\'')
+                result = result + ', ' + self.images[1].dump()
 
         result = '{images: [' + result + ']}'
 
@@ -213,8 +217,8 @@ class Task:
 
     def dump(self):
         if self.status is None:
-            result = "{'taskId': '" + str(self.taskid) + "'}"
+            result = '{"taskId": "' + str(self.taskid) + '"}'
         else:
-            result = "{'taskId': '" + str(self.taskid) + "', 'status': '" + self.status + "'}"
+            result = '{"taskId": "' + str(self.taskid) + '", "status": "' + self.status + '"}'
 
         return result

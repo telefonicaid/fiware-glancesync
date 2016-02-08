@@ -24,7 +24,7 @@
 #
 
 # Import flask dependencies
-from flask import Blueprint, Response, abort
+from flask import Blueprint, abort, make_response
 import httplib
 
 # Import the database object from the main app module
@@ -39,7 +39,7 @@ from openstack_auth import authorized
 # Import region manage decorator
 from region_manager import check_region
 
-from app.settings.settings import CONTENT_TYPE
+from app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
 from app.mod_auth.models import Images, Task
 from app.settings.log import logger
 
@@ -77,9 +77,11 @@ def get_status(regionid, token=None):
     value = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
     x.add(value)
 
-    return Response(response=x.dump(),
-                    status=httplib.OK,
-                    content_type=CONTENT_TYPE)
+    resp = make_response(x.dump(), httplib.OK)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 
 @mod_auth.route('/<regionid>', methods=['POST'])
@@ -107,14 +109,17 @@ def synchronize(regionid, token=None):
     newtask = Task(status='syncing')
 
     # name and role should be returned from authorized operation, to be extended in Sprint 16.02
-    newuser = User(name=token.username, taskid=str(newtask.taskid), role='admin', status=newtask.status)
+    newuser = User(region=regionid, name=token.username, taskid=str(newtask.taskid),
+                   role='admin', status=newtask.status)
 
     db.session.add(newuser)
     db.session.commit()
 
-    return Response(response=newtask.dump(),
-                    status=httplib.OK,
-                    content_type=CONTENT_TYPE)
+    resp = make_response(newtask.dump(), httplib.OK)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['GET'])
@@ -141,15 +146,26 @@ def get_task(regionid, taskid, token=None):
     else:
         newtask = Task(taskid=users[0].task_id, status=users[0].status)
 
-        return Response(response=newtask.dump(),
-                        status=httplib.OK,
-                        content_type=CONTENT_TYPE)
+        resp = make_response(newtask.dump(), httplib.OK)
+        resp.headers[SERVER_HEADER] = SERVER
+        resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+        return resp
 
 
 @mod_auth.route('/<regionid>/tasks/<taskid>', methods=['DELETE'])
 @authorized
 @check_region
 def delete_task(regionid, taskid, token=None):
+    """
+    Delete a synchronized task from the DB.
+    :param regionid: The name of the region.
+    :param taskid: The identity of the task.
+    :param token: The token of the request to be authorized.
+    :return: 200 - Ok if all is Ok
+             ERROR - if the token is invalid, the region is incorrect
+                     or the task is not synchronized.
+    """
 
     message = "DELETE, delete the registry of task {} in the region: {}".format(taskid, regionid)
 
@@ -159,10 +175,19 @@ def delete_task(regionid, taskid, token=None):
 
     if not users:
         abort(httplib.NOT_FOUND)
-    else:
+    elif users[0].status != 'syncing':
+        # we can delete iff the status es 'synced' or 'failing'
         db.session.delete(users[0])
         db.session.commit()
+    else:
+        # We cannot delete the task due to the status in syncing
+        msg = '{ "error": { "message": "Task status is syncing. Unable to delete it.", "code": '\
+               + str(httplib.BAD_REQUEST) + ' } }'
 
-    return Response(response=None,
-                    status=httplib.OK,
-                    content_type=CONTENT_TYPE)
+        abort(httplib.BAD_REQUEST, msg)
+
+    resp = make_response("", httplib.OK)
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp

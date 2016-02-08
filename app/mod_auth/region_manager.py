@@ -32,7 +32,6 @@ from app.mod_auth.AuthorizationManager import AuthorizationManager
 from app.settings import settings
 import requests
 import json
-from app.settings.settings import CONTENT_TYPE
 import httplib
 
 __author__ = 'fla'
@@ -90,8 +89,14 @@ def check_region(func):
     Decorator that checks that requested region is a real region
     that exists in keystone.
 
-    :param func:
-    :return:
+    Usage:
+    @app.route("/")
+    @check_region
+    def secured_root(token=None):
+        pass
+
+    :param func: Function to return the process
+    :return: The call to the function <func> .
     """
 
     @wraps(func)
@@ -107,8 +112,6 @@ def check_region(func):
         if result:
             return func(*args, **kwargs)
         else:
-            abort(Response(response=region_management.ERROR_MESSAGE,
-                           status=httplib.GONE,
-                           content_type=CONTENT_TYPE))
+            abort(httplib.BAD_REQUEST)
 
     return _wrap
