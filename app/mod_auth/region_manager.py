@@ -65,7 +65,7 @@ class region():
 
             endpoint_groups = r['endpoint_groups']
 
-            for i in range (0, len(endpoint_groups)):
+            for i in range(0, len(endpoint_groups)):
                 # If the specific endpoint_groups has not a filters, it is not a correct
                 # region and we discard it.
                 region_filter = endpoint_groups[i]['filters']

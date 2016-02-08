@@ -145,7 +145,8 @@ class TestImages(TestCase):
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
 
-        expectedresult = "{images: [{'id': '3cfeaf3f0103b9637bb3fcfe691fce1e', 'name': 'base_ubuntu_14.04', 'status': 'ok', 'message': null}]}"
+        expectedresult = '{images: [{"id": "3cfeaf3f0103b9637bb3fcfe691fce1e", "name": "base_ubuntu_14.04", ' \
+                         '"status": "ok", "message": null}]}'
 
         result = x.dump()
 
@@ -160,9 +161,9 @@ class TestImages(TestCase):
         expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
         x.add(expectedvalue)
 
-        expectedresult = "{images: [{'id': '3cfeaf3f0103b9637bb3fcfe691fce1e', 'name': 'base_ubuntu_14.04', " \
-                         "'status': 'ok', 'message': null}, {'id': '4rds4f3f0103b9637bb3fcfe691fce1e', " \
-                         "'name': 'base_centOS_7', 'status': 'ok', 'message': null}]}"
+        expectedresult = '{images: [{"id": "3cfeaf3f0103b9637bb3fcfe691fce1e", "name": "base_ubuntu_14.04", ' \
+                         '"status": "ok", "message": null}, {"id": "4rds4f3f0103b9637bb3fcfe691fce1e", ' \
+                         '"name": "base_centOS_7", "status": "ok", "message": null}]}'
 
         result = x.dump()
 
@@ -215,7 +216,7 @@ class TestTask(TestCase):
 
         result = task.dump()
 
-        match_obj = re.match(r'\{\'taskId\': \'(.*)\'\}', result, re.M)
+        match_obj = re.match(r'\{\"taskId\": \"(.*)\"\}', result, re.M)
 
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
 
@@ -224,7 +225,7 @@ class TestTask(TestCase):
 
         result = task.dump()
 
-        match_obj = re.match(r'\{\'taskId\': \'(.*)\', \'status\': \'(.*)\'\}', result, re.M)
+        match_obj = re.match(r'\{\"taskId\": \"(.*)\", \"status\": \"(.*)\"\}', result, re.M)
 
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
 

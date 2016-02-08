@@ -193,15 +193,13 @@ class NID(object):
         :param result: The dictionary with the list of chapter name, GE names and NID values.
         :return: The lists of chapter names and GE names with their NID values in tikiwiki format.
         """
-        msg = '''{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" class="wikitable"
-    |-
-    |+ align="center" style="background:DarkSlateBlue; color:white"|<big>\'\'\'Summary of usage in the Spain node\'\'\'</big>
-    ! ! width="100 px" style="background:Lavender; color:Black" | Chapter
-    ! width="100 px" style="background:Lavender; color:Black" | Generic Enabler
-    ! width="50 px" style="background:Lavender; color:Black" | NID
-    ! width="50 px" style="background:Lavender; color:Black" | NID Version
-    ! width="100 px" style="background:Lavender; color:Black" | Image
-    '''
+        msg = '{| border="1" cellpadding="10" cellspacing="0" style="background:#ffffff" align="center" ' \
+            'class="wikitable"\n|-\n|+ align="center" style="background:DarkSlateBlue; color:white"|' \
+            '<big>\'\'\'Summary of usage in the Spain node\'\'\'</big>\n! ! width="100 px" ' \
+            'style="background:Lavender; color:Black" | Chapter\n! width="100 px" style="background:Lavender;' \
+            ' color:Black" | Generic Enabler\n! width="50 px" style="background:Lavender; color:Black" | NID\n' \
+            '! width="50 px" style="background:Lavender; color:Black" | NID Version\n! width="100 px"' \
+            ' style="background:Lavender; color:Black" | Image'
 
         msg += '\n' + self.__sectionB__(result) + '\n\n|}\n'
 
