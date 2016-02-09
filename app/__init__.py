@@ -106,7 +106,3 @@ def bad_request(error):
 # Register blueprint(s)
 app.register_blueprint(auth_module)
 app.register_blueprint(info_module)
-
-# Build the database:
-# This will create the database file using SQLAlchemy
-db.create_all()

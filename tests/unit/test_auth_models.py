@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 from unittest import TestCase
-from app.mod_auth.models import Image, Images, Task
+from app.mod_auth.models import Image, Images, Task, TokenModel
 import uuid
 import re
 
@@ -235,3 +235,19 @@ class TestTask(TestCase):
 
         self.assertTrue(isinstance(task.taskid, uuid.UUID))
         self.assertEqual(task.status, 'synced')
+
+
+class TestTokenModel(TestCase):
+    def test_check_initialice_class(self):
+        expected_username = 'fake name'
+        expected_id = 'fake id'
+        expected_tenant = 'fake tenant'
+        expected_expires = 'fake date'
+
+        token = TokenModel(username=expected_username, id=expected_id,
+                           tenant=expected_tenant, expires=expected_expires)
+
+        self.assertEqual(token.username, expected_username, 'The username is not the expected one')
+        self.assertEqual(token.id, expected_id, 'The id is not the expected one')
+        self.assertEqual(token.tenant, expected_tenant, 'The tenant is not the expected one')
+        self.assertEqual(token.expires, expected_expires, 'The expires is not the expected one')

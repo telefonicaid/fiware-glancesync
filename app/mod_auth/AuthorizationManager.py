@@ -41,7 +41,7 @@ DEFAULT_REQUEST_TIMEOUT = 100
 HTTP_RESPONSE_CODE_OK = 200
 
 
-class AuthorizationManager():
+class AuthorizationManager:
     """This class provides methods to manage authorization.
     """
     myClient = None
@@ -58,6 +58,9 @@ class AuthorizationManager():
             from keystoneclient.v2_0 import client as keystone_client
         elif api_version == AUTH_API_V3:
             from keystoneclient.v2_0 import client as keystone_client
+        else:
+            msg = 'The allowed values for api version are {} or {}'.format(AUTH_API_V2, AUTH_API_V3)
+            raise ValueError(msg)
 
         self.myClient = keystone_client
         self.api_version = api_version
@@ -133,7 +136,6 @@ class AuthorizationManager():
         :param auth_api: the version of the keystone API
         :return: TokenModel with the information.
         """
-
         if self.api_version == AUTH_API_V2:
             headers = {ACCEPT_HEADER: JSON_TYPE, X_AUTH_TOKEN_HEADER: admin_token}
             r = self.client.get(self.identity_url + "/" + TOKENS_PATH_V2 + token, headers=headers)

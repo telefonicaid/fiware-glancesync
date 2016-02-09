@@ -7,3 +7,4 @@ oslo.utils==1.4.0
 
 # Requirements for the GlanceSync API
 Flask-SQLAlchemy==1.0
+Flask-Migrate==1.7.0

@@ -67,6 +67,8 @@ API_INFO_URL = config.get('glancesync', 'API_INFO_URL')
 VERSION = config.get('glancesync', 'VERSION')
 STATUS = config.get('glancesync', 'STATUS')
 UPDATED = config.get('glancesync', 'UPDATED')
+PORT = config.get('glancesync', 'PORT')
+HOST = config.get('glancesync', 'HOST')
 
 
 # LOGGING CONFIGURATION
