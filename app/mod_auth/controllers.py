@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FI-WARE project.
 #
@@ -58,8 +57,10 @@ def get_status(regionid, token=None):
     Lists information the status of the synchronization of the images in
     the region <regionid>. Keep in mind that <regionid> is the name of
     the region.
+
     :param regionid: Region name how you can obtain from the Keystone
                      service. Example: Spain2.
+    :param token: The token of the request to be authorized.
     :return: JSON response message with the detailed information about
              the images and the sincronization status.
     """
@@ -92,9 +93,11 @@ def synchronize(regionid, token=None):
     Synchronize the images of the corresponding region defined by its regionId.
     The operation is asynchronous a response a taskId in order that you can follow
     the execution of the process.
+
     :param regionid: Region name how you can obtain from the Keystone
                      service. Example: Spain2.
-    :return: JSON message with the identification of the created task
+    :param token: The token of the request to be authorized.
+    :return: JSON message with the identification of the created task.
     """
     # WARNING
     # It is for testing only, the functionality of this method is create a new Task,
@@ -127,10 +130,15 @@ def synchronize(regionid, token=None):
 @check_region
 def get_task(regionid, taskid, token=None):
     """
+    Get the status of the requested synchronization task.
 
-    :param regionid:
-    :param taskid:
-    :return:
+    :param regionid: Region name how you can obtain from the Keystone
+                     service. Example: Spain2.
+    :param taskid: The identity of the task.
+    :param token: The token of the request to be authorized.
+    :return: 200 - Ok if all is Ok
+             ERROR - if the token is invalid, the region is incorrect
+                     or the task does not exist.
     """
     # WARNING
     # It is for test only, we have to recover this information from the DB
@@ -159,6 +167,7 @@ def get_task(regionid, taskid, token=None):
 def delete_task(regionid, taskid, token=None):
     """
     Delete a synchronized task from the DB.
+
     :param regionid: The name of the region.
     :param taskid: The identity of the task.
     :param token: The token of the request to be authorized.

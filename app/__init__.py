@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FI-WARE project.
 #
@@ -49,11 +48,24 @@ from app.mod_info.controllers import mod_info as info_module
 from app.settings.settings import CONTENT_TYPE, SERVER, SERVER_HEADER, JSON_TYPE
 
 
-# Sample HTTP error handling (401)
+# HTTP error handling (401)
 @app.errorhandler(httplib.UNAUTHORIZED)
 def unauthorized(error):
-    msg = '{ "error": { "message": "The request you have made requires authentication.", "code": ' \
-          + str(httplib.UNAUTHORIZED) + ', "title": "Unauthorized" } }\n'
+    """
+    Default unauthorized error message.
+
+    :param error: The received error.
+    :return: Response of the request with the error message.
+    """
+    msg = '''
+    {
+        "error": {
+            "message": "The request you have made requires authentication.",
+            "code": "%s",
+            "title": "Unauthorized"
+        }
+    }
+    ''' % str(httplib.UNAUTHORIZED)
 
     resp = make_response(msg, httplib.UNAUTHORIZED)
     resp.headers[SERVER_HEADER] = SERVER
@@ -62,13 +74,23 @@ def unauthorized(error):
     return resp
 
 
-# Sample HTTP error handling (404)
+# HTTP error handling (404)
 @app.errorhandler(httplib.NOT_FOUND)
 def not_found(error):
-    if error.description is not None:
-        msg = error.description
-    else:
-        msg = '{ "error": { "message": "Item not found.", "code": ' + str(httplib.NOT_FOUND) + ' } }\n'
+    """
+    Default not found error message.
+
+    :param error: The received error.
+    :return: Response of the request with the error message.
+    """
+    msg = error.description or '''
+    {
+        "error": {
+            "message": "Item not found.",
+            "code": "%s"
+        }
+    }
+    ''' % str(httplib.NOT_FOUND)
 
     resp = make_response(msg, httplib.NOT_FOUND)
     resp.headers[SERVER_HEADER] = SERVER
@@ -77,10 +99,23 @@ def not_found(error):
     return resp
 
 
-# Sample HTTP error handling (405)
+# HTTP error handling (405)
 @app.errorhandler(httplib.METHOD_NOT_ALLOWED)
 def bad_method(error):
-    msg = '{ "error": { "message": "Bad method", "code": ' + str(httplib.METHOD_NOT_ALLOWED) + ' } }\n'
+    """
+    Default method not allowed error message.
+
+    :param error: The received error.
+    :return: Response of the request with the error message.
+    """
+    msg = '''
+    {
+        "error": {
+            "message": "Bad method",
+            "code": "%s"
+        }
+    }
+    ''' % str(httplib.METHOD_NOT_ALLOWED)
 
     resp = make_response(msg, httplib.METHOD_NOT_ALLOWED)
     resp.headers[SERVER_HEADER] = SERVER
@@ -89,13 +124,23 @@ def bad_method(error):
     return resp
 
 
-# Sample HTTP error handling (400)
+# HTTP error handling (400)
 @app.errorhandler(httplib.BAD_REQUEST)
 def bad_request(error):
-    if error.description is not None:
-        msg = error.description
-    else:
-        msg = '{ "error": { "message": "Bad region", "code": ' + str(httplib.BAD_REQUEST) + ' } }\n'
+    """
+    Default bad request error message.
+
+    :param error: The received error.
+    :return: Response of the request with the error message.
+    """
+    msg = error.description or '''
+    {
+        "error": {
+            "message": "Bad region",
+            "code": "%s"
+        }
+    }
+    ''' % str(httplib.BAD_REQUEST)
 
     resp = make_response(msg, httplib.BAD_REQUEST)
     resp.headers[SERVER_HEADER] = SERVER

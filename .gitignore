@@ -56,3 +56,11 @@ docs/_build/
 
 # IDE
 .idea
+
+# Ignore files for testing
+tests/acceptance/resources/images/qatesting10meg
+tests/acceptance/resources/images/qatesting20meg
+
+# Ignore DB file
+glancesync_api.db
+

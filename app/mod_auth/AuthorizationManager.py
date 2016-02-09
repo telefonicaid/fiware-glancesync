@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FI-WARE project.
 #
@@ -52,12 +51,19 @@ class AuthorizationManager:
     identity_url = None
 
     def __init__(self, identity_url, api_version):
+        """
+        Default contructor.
+
+        :param identity_url: The url of the Keystone service.
+        :param api_version: The version of the Kesytone API to be used.
+        :return: None
+        """
         self.session = session
 
         if api_version == AUTH_API_V2:
             from keystoneclient.v2_0 import client as keystone_client
         elif api_version == AUTH_API_V3:
-            from keystoneclient.v2_0 import client as keystone_client
+            from keystoneclient.v3 import client as keystone_client
         else:
             msg = 'The allowed values for api version are {} or {}'.format(AUTH_API_V2, AUTH_API_V3)
             raise ValueError(msg)
@@ -68,8 +74,13 @@ class AuthorizationManager:
 
     def get_auth_token(self, username, password, tenant_id, **kwargs):
         """
-        Init the variables related to authorization, needed to execute tests
-        :return: The auth token retrieved
+        Init the variables related to authorization, needed to execute tests.
+
+        :param username: The admin user name.
+        :param password: The admin passwrod.
+        :param tenant_id: The id of the tenant.
+        :param kwargs: Any other (key,value) parameters passed to the method.
+        :return: The auth token retrieved.
         """
         if AuthorizationManager.auth_token is None:
             # Get new auth token
@@ -109,7 +120,13 @@ class AuthorizationManager:
         return AuthorizationManager.auth_token
 
     def checkToken(self, admin_token, token):
-        """checks if a token is valid against a url using an admin token."""
+        """
+        Checks if a token is valid against a url using an admin token.
+
+        :param admin_token: The admin token to check the token.
+        :param token: The token to be validated.
+        :return: The result of the validation or error if something was wrong.
+        """
         logger.info("Starting Authentication of token %s ", token)
 
         try:
@@ -129,11 +146,11 @@ class AuthorizationManager:
             raise ex
 
     def get_info_token(self, admin_token, token):
-        """ Gets the token details and return a TokenModel with that information
-        :param url: Keystone URL
-        :param admin_token: the auth token needed to get token information
-        :param token: the token which information will be taken
-        :param auth_api: the version of the keystone API
+        """
+        Gets the token details and return a TokenModel with that information.
+
+        :param admin_token: The auth token needed to get token information.
+        :param token: The token which information will be taken.
         :return: TokenModel with the information.
         """
         if self.api_version == AUTH_API_V2:
@@ -149,18 +166,20 @@ class AuthorizationManager:
             tmp = info["access"]["token"]
             username = info["access"]["user"]["username"]
 
-            my_token = TokenModel(expires=tmp["expires"], id=tmp["id"], username=username)
+            my_token = TokenModel(expires=tmp['expires'], id=tmp['id'], username=username)
 
         elif self.api_version == AUTH_API_V3:
             headers = {ACCEPT_HEADER: JSON_TYPE, X_AUTH_TOKEN_HEADER: admin_token, X_SUBJECT_TOKEN_HEADER: token}
             r = self.client.get(self.identity_url + "/" + TOKENS_PATH_V3, headers=headers)
             response = r.text.decode()
+
             if r.status_code is not HTTP_RESPONSE_CODE_OK:
                 raise AuthorizationFailure(response)
 
             info = json.loads(response)
             tmp = info["token"]
 
-            my_token = TokenModel(expires=tmp["expires_at"], id=tmp["id"], tenant=tmp["project"])
+            my_token = TokenModel(expires=tmp['expires_at'], id=token, username=tmp['user']['name'],
+                                  tenant=tmp['project']['name'])
 
         return my_token
