@@ -29,7 +29,7 @@ import logging
 import csv
 import copy
 
-from glancesync_config import GlanceSyncConfig
+from settings.glancesync_config import GlanceSyncConfig
 from glancesync_region import GlanceSyncRegion
 from glancesync_image import GlanceSyncImage
 import glancesync_ami

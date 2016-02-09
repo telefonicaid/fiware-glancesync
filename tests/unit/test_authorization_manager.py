@@ -33,8 +33,7 @@ __author__ = 'fla'
 class TestAuthenticationManager(TestCase):
     def test_check_creation_with_v2_api(self):
         """
-        Check that we create an image object with a correct status.
-        :return:
+        Check that we create an object with keystone API v2.0.
         """
         auth = AuthorizationManager(identity_url='fake_url', api_version=AUTH_API_V2)
 
@@ -43,18 +42,16 @@ class TestAuthenticationManager(TestCase):
 
     def test_check_creation_with_v3_api(self):
         """
-        Check that we create an image object with a correct status.
-        :return:
+        Check that we create an object with keystone API v3.
         """
         auth = AuthorizationManager(identity_url='fake_url', api_version=AUTH_API_V3)
 
-        self.assertEqual(auth.api_version, AUTH_API_V3, 'The Authentication API version is not v2')
+        self.assertEqual(auth.api_version, AUTH_API_V3, 'The Authentication API version is not v3')
         self.assertEqual(auth.identity_url, 'fake_url', 'The URL of the Keystone is not the expected')
 
     def test_check_creation_with_any_api(self):
         """
-        Check that we create an image object with a correct status.
-        :return:
+        Check that we create an object with keystone API fake and catch the exception.
         """
         try:
             AuthorizationManager(identity_url='fake_url', api_version='fake_version')

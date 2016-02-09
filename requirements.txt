@@ -1,9 +1,12 @@
-python-keystoneclient==1.3.0
-python-glanceclient==0.18.0
-oslo.config==1.9.3
-oslo.i18n==1.5.0
-oslo.serialization==1.4.0
-oslo.utils==1.4.0
+pbr<2.0,>=1.6
+
+python-keystoneclient==1.8.0
+python-glanceclient==1.1.0
+
+oslo.config>=2.3.0
+oslo.i18n>=1.5.0
+oslo.serialization>=1.6.0
+oslo.utils>=2.0.0
 
 # Requirements for the GlanceSync API
 Flask-SQLAlchemy==1.0

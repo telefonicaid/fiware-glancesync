@@ -43,7 +43,8 @@ def a_new_image_created_in_glance_of_master(context, image_name):
     create_new_image(context, context.master_region_name, image_name)
 
 
-@given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)" and file "(?P<file>\w*)"')
+@given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)" '
+       u'and file "(?P<file>\w*)"')
 @given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)", '
        u'file "(?P<file>\w*)" and these properties')
 def other_new_image_created_in_glance_of_master(context, image_name, file):
