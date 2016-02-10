@@ -38,7 +38,14 @@ __author__ = 'fla'
 
 class region():
     regions = []
-    ERROR_MESSAGE = '{ "error": { "message": "Bad region", "code": 410 } }'
+    ERROR_MESSAGE = '''
+    {
+        "error": {
+            "message": "Bad region",
+            "code": "%s"
+        }
+    }
+    ''' % str(httplib.BAD_REQUEST)
 
     def __init__(self):
         """
@@ -48,7 +55,7 @@ class region():
         # GET http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups
 
         if not self.regions:
-            a = AuthorizationManager(identity_url=settings.OPENSTACK_URL, api_version=settings.AUTH_API_V2)
+            a = AuthorizationManager(identity_url=settings.KEYSTONE_URL, api_version=settings.AUTH_API_V2)
 
             # Get the Admin token to validate the access_token
             adm_token = a.get_auth_token(settings.ADM_USER, settings.ADM_PASS, settings.ADM_TENANT_ID,

@@ -29,6 +29,7 @@ from flask import request, abort, json
 from AuthorizationManager import AuthorizationManager
 from app.settings import settings
 from app.settings.log import logger
+from app.settings.settings import X_AUTH_TOKEN_HEADER
 from functools import wraps
 
 __author__ = 'fla'
@@ -36,16 +37,15 @@ __author__ = 'fla'
 
 def validate_token(access_token):
     """
-    Verifies that an access-token is valid and
-    meant for this app.
-    :param access_token: Access token to be checked
-                         in keystone server.
+    Verifies that an access-token is valid and meant for this app.
+
+    :param access_token: Access token to be checked in keystone server.
     :return: None on fail, and an e-mail on success
     """
 
     # Send a request to validate a token
     try:
-        a = AuthorizationManager(identity_url=settings.OPENSTACK_URL, api_version=settings.AUTH_API_V2)
+        a = AuthorizationManager(identity_url=settings.KEYSTONE_URL, api_version=settings.AUTH_API_V2)
 
         # Get the Admin token to validate the access_token
         adm_token = a.get_auth_token(settings.ADM_USER, settings.ADM_PASS, settings.ADM_TENANT_ID,
@@ -81,7 +81,7 @@ def authorized(func):
     """
     @wraps(func)
     def _wrap(*args, **kwargs):
-        if 'X-Auth-Token' not in request.headers:
+        if X_AUTH_TOKEN_HEADER not in request.headers:
             # Unauthorized
             logger.error("No token in header")
             abort(httplib.UNAUTHORIZED)

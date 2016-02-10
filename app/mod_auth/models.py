@@ -101,7 +101,7 @@ class Image:
     id = None       # Ex id = "3cfeaf3f0103b9637bb3fcfe691fce1e",
     name = None     # Ex name = "base_ubuntu_14.04",
     status = None   # Ex status = "ok",
-    message = None  # Ex message = null,
+    message = None  # Ex message = "Unexpected error in the synchronization of the image",
 
     # Constants associated to the glancesync status
     OK = 'ok'
@@ -119,16 +119,16 @@ class Image:
                     'error_checksum', 'error_ami',
                     'pending_metadata', 'pending_upload', 'pending_replace', 'pending_rename', 'pending_ami'}
 
-    def __init__(self, identify, name, status, message):
+    def __init__(self, identifier, name, status, message):
         """
         Default constructor of the class.
-        :param identify: Id of the image.
+        :param identifier: Id of the image.
         :param name: Name of the image.
         :param status: Status of the synchronization process.
         :param message: Message about the proccess if something was wrong.
         :return:
         """
-        self.id = identify
+        self.id = identifier
         self.name = name
         self.status = status
         self.message = message
@@ -160,8 +160,7 @@ class Images:
     """
     def __init__(self):
         """
-        Constructor of the class Images
-        :param number_of_images: Number of Images to manage in the array
+        Constructor of the class Images.
         """
         self.number_of_images = 0
         self.images = []

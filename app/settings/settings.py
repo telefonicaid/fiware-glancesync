@@ -48,7 +48,7 @@ config.read(cfg_filename)
 
 
 # OPENSTACK CONFIGURATION
-OPENSTACK_URL = config.get('openstack', 'OPENSTACK_URL')
+KEYSTONE_URL = config.get('openstack', 'KEYSTONE_URL')
 ADM_USER = config.get('openstack', 'ADM_USER')
 ADM_PASS = config.get('openstack', 'ADM_PASS')
 ADM_TENANT_ID = config.get('openstack', 'ADM_TENANT_ID')

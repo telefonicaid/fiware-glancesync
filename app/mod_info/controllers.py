@@ -50,9 +50,17 @@ def get_info():
 
     logger.info(message)
 
-    message = "{\"id\": \"%s\", \"owner\": \"%s\", \"status\": \"%s\", \"version\": \"%s\", \"updated\": \"%s\", " \
-              "\"runningfrom\": \"%s\", \"href\": \"%s\" }\n" \
-              % (ID, OWNER, STATUS, VERSION, UPDATED, RUNNINGFROM, API_INFO_URL)
+    message = '''
+    {
+        "id": "%s",
+        "owner": "%s",
+        "status": "%s",
+        "version": "%s",
+        "updated": "%s",
+        "runningfrom": "%s",
+        "href": "%s"
+    }
+    ''' % (ID, OWNER, STATUS, VERSION, UPDATED, RUNNINGFROM, API_INFO_URL)
 
     resp = make_response(message, httplib.OK)
     resp.headers[SERVER_HEADER] = SERVER
