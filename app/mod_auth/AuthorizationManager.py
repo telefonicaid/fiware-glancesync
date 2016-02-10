@@ -101,7 +101,9 @@ class AuthorizationManager:
                 identity_package = 'keystoneclient.auth.identity.%s' % self.api_version.replace('.0', '')
                 identity_module = __import__(identity_package, fromlist=['Password'])
                 password_class = getattr(identity_module, 'Password')
+
                 logger.debug("Authentication with %s", password_class)
+
                 credentials = password_class(**cred_kwargs)
             except (ImportError, AttributeError) as e:
                 raise e
@@ -134,13 +136,15 @@ class AuthorizationManager:
                 raise Unauthorized("Token is empty")
             auth_result = self.get_info_token(admin_token, token)
 
+            # Here we should check that the tenant id is the id of the project that we want to check
+
             return auth_result
 
         except Unauthorized as unauth:
             logger.error(unauth)
             raise unauth
         except InternalServerError as internalError:
-            raise AuthorizationFailure("Token could not have enough permissions to access tenant: %s" % "1111")
+            raise AuthorizationFailure("Token could not have enough permissions to access tenant")
         except Exception as ex:
             logger.error("%s", ex.message)
             raise ex
@@ -174,7 +178,7 @@ class AuthorizationManager:
             response = r.text.decode()
 
             if r.status_code is not HTTP_RESPONSE_CODE_OK:
-                raise AuthorizationFailure(response)
+                raise AuthorizationFailure(r)
 
             info = json.loads(response)
             tmp = info["token"]

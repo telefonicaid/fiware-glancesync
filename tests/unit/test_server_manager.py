@@ -26,19 +26,36 @@ from flask.ext.testing import TestCase
 from app import db, app
 from app.mod_auth.models import User
 import os
+import unittest
+import httplib
+import requests_mock
+import json
 
 __author__ = 'fla'
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
 
-class MyTest(TestCase):
+class DBTest(TestCase):
+    """
+    Class to develop the unit tests related to the management of the DB.
+    """
 
     def create_app(self):
+        """
+        Create the app with the corresponding database for testing.
+
+        :return: the app.
+        """
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
         return app
 
     def setUp(self):
+        """
+        Configure the test environment with the creation of the DB and storing some data to test it.
+
+        :return: Nothing.
+        """
         db.create_all()
 
         # create users:
@@ -49,6 +66,11 @@ class MyTest(TestCase):
         db.session.commit()
 
     def tearDown(self):
+        """
+        Remove the registries and delete the DB at the end of each test.
+
+        :return: Nothing.
+        """
         # Remove the session and drop de DB
         db.session.remove()
         db.reflect()
@@ -58,13 +80,348 @@ class MyTest(TestCase):
         os.remove(db.session.bind.url.database)
 
     def test_get_all_users(self):
+        """
+        Test that we can recover two users from the DB.
+
+        :return: Nothing.
+        """
         users = User.query.all()
         assert len(users) == 2, 'Expect all users to be returned'
 
     def test_get_user(self):
+        """
+        Check that we can recover a specific user registry from the DB.
+
+        :return: Nothing.
+        """
         user = User.query.filter_by(task_id='1234').first()
         assert user.name == 'joe@soap.com', 'Expect the correct user to be returned'
         assert user.region == 'Spain', 'Expect the correct region to be returned'
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
         assert user.status == 'synced', 'Expect the correct status to be returned'
+
+
+class APITests(unittest.TestCase):
+    """
+    Class to test the error handled in the GlanceSync API, except Bad Request.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Setup of the Class tests.
+
+        :return: Nothing.
+        """
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Tear down of the Class tests.
+
+        :return: Nothing.
+        """
+        pass
+
+    def setUp(self):
+        """
+        Configuration of each test.
+
+        :return: Nothing.
+        """
+        self.app = app.test_client()
+        self.app.testing = True
+
+    def tearDown(self):
+        """
+        Tear down of each test after finalization of it.
+
+        :return: Nothing.
+        """
+        pass
+
+    def test_pagenotfound_statuscode(self):
+        """
+        Test that we obtain a page not found error when try to access to a missing page.
+
+        :return: Nothing.
+        """
+        result = self.app.get('/missing-page')
+
+        self.assertEqual(result.status_code, httplib.NOT_FOUND)
+
+    def test_unauthorizedpage_statuscode(self):
+        """
+        Test that we receive a unauthorized error message when we call the API (except the /info) without X-Auth-Token
+        header or without valid token on this header.
+
+        :return: Nothing.
+        """
+        result = self.app.get('/regions/Spain')
+
+        self.assertEqual(result.status_code, httplib.UNAUTHORIZED)
+
+    def test_methodnotallowed_statuscode(self):
+        """
+        Test that we receive a method not allowed error message when we call the API with a unsupported method.
+
+        :return: Nothing.
+        """
+        result = self.app.post('/')
+
+        self.assertEqual(result.status_code, httplib.METHOD_NOT_ALLOWED)
+
+
+@requests_mock.Mocker()
+class TestServerRequests(unittest.TestCase):
+    """
+    Class to test the overall behaviour of the Glancesync API except the global error handled.
+    """
+    validate_info_v2 = '''
+    {
+        "access": {
+            "token": {
+                "expires": "2016-02-10T11:16:56Z",
+                "id": "7cd3b96409ef497587c98c8c5f596b8d"
+            },
+            "user": {
+                "username": "admin"
+            }
+        }
+    }
+    '''
+
+    region_list = '''
+    {
+        "endpoint_groups": [
+            {
+                "filters": {
+                    "region_id": "Trento"
+                }
+            },
+            {
+                "filters": {
+                    "region_id": "Budapest2"
+                }
+            }
+        ]
+    }
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Setup of the Class test.
+
+        :return: Nothing.
+        """
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Tear down of the class test.
+
+        :return: Nothing.
+        """
+        pass
+
+    def setUp(self):
+        """
+        Configure the execution of each test in the class. Get the app for testing and create the testing DB.
+
+        :return: Nothing.
+        """
+        self.app = app.test_client()
+        self.app.testing = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
+
+        db.create_all()
+
+    def tearDown(self):
+        """
+        Tear down the environment after each executed test.
+
+        :return: Nothing.
+        """
+        # Remove the session and drop de DB
+        db.session.remove()
+        db.reflect()
+        db.drop_all()
+
+        # Delete the SQLite file
+        os.remove(db.session.bind.url.database)
+
+    def test_badrequest_statuscode(self, m):
+        """
+        Check that we receive a BAD REQUEST if the requested region is not supported in the FIWARE Lab.
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        m.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+
+        result = self.app.get('/regions/fake', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result.status_code, httplib.BAD_REQUEST)
+
+    def test_get_status(self, m):
+        """
+        Test that the can obtain the status of the synchronization process of a region.
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        result = self.app.get('/regions/Trento', headers={'X-Auth-Token': 'token'})
+
+        data = json.loads(result.data)
+
+        self.assertTrue(isinstance(data, dict), "The returned value is not a dict.")
+        self.assertTrue('images' in data, "The returned value is not the expected one.")
+
+    def test_synchronize(self, m):
+        """
+        Test that we can synchronize a region.
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        result = self.app.post('/regions/Trento', headers={'X-Auth-Token': 'token'})
+
+        data = json.loads(result.data)
+
+        self.assertTrue('taskId' in data, "The returned value is not the expected one.")
+        self.assertTrue('status' in data, "The returned value is not the expected one.")
+
+    def test_get_task_status(self, m):
+        """
+        Test that we can recover the status of a task.
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        # We have to secure that we have a task in the db with status synced.
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='synced')
+        db.session.add(user)
+        db.session.commit()
+
+        result = self.app.get('/regions/Trento/tasks/1234', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, "200 OK", 'The result status of the operation is not the expected one')
+        self.assertEqual(result._status_code, httplib.OK, 'The result status of the operation is not the expected one')
+
+        data = json.loads(result.data)
+
+        self.assertEqual(data['taskId'], '1234', 'The task id returned is not the expected one.')
+        self.assertEqual(data['status'], 'synced', 'The status od the task returned is not the expected one.')
+
+    def test_get_task_status_with_incorrect_taskId(self, m):
+        """
+        Test that we receive a NOT FOUND message if the task id is not valid (it does not exist).
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        result = self.app.get('/regions/Trento/tasks/fake_task', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, "404 NOT FOUND", 'The result status of the operation is not the expected one')
+        self.assertEqual(result._status_code, httplib.NOT_FOUND,
+                         'The result status of the operation is not the expected one')
+
+    def test_delete_task_with_synced_status(self, m):
+        """
+        Test that we can delete a task with valid status (synced).
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        # We have to secure that we have a task in the db with status synced.
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='synced')
+        db.session.add(user)
+        db.session.commit()
+
+        result = self.app.delete('/regions/Trento/tasks/1234', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, "200 OK", 'The result status of the operation is not the expected one')
+        self.assertEqual(result._status_code, httplib.OK, 'The result status of the operation is not the expected one')
+
+    def test_delete_task_with_incorrect_taskId(self, m):
+        """
+        Test that we receive a NOT FOUND error message if we try to delete a task with invalid id (it does not exist).
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        result = self.app.delete('/regions/Trento/tasks/fake_id', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, '404 NOT FOUND', 'The result status of the operation is not the expected one')
+        self.assertEqual(result._status_code, httplib.NOT_FOUND,
+                         'The result status of the operation is not the expected one')
+
+    def test_delete_task_with_syncing_status(self, m):
+        """
+        Test that we receive a BAD REQUEST when we try to delete a task with incorrect status (status is syncing).
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        # We have to secure that we have a task in the db with status synced.
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='syncing')
+        db.session.add(user)
+        db.session.commit()
+
+        result = self.app.delete('/regions/Trento/tasks/1234', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, '400 BAD REQUEST',
+                         'The result status of the operation is not the expected one')
+
+        self.assertEqual(result._status_code, httplib.BAD_REQUEST,
+                         'The result status of the operation is not the expected one')
+
+        data = json.loads(result.data)
+
+        self.assertEqual(data['error']['message'], 'Task status is syncing. Unable to delete it.',
+                         'The error message returned is not the expected one.')
+
+        self.assertEqual(data['error']['code'], httplib.BAD_REQUEST,
+                         'The status od the task returned is not the expected one.')
+
+    def test_get_info(self, m):
+        """
+        Test that we can recover the information about the GlanceSync API.
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        result = self.app.get('/')
+
+        self.assertEqual(result.status_code, httplib.OK)
+
+        data = json.loads(result.data)
+
+        self.assertEqual(data['status'], 'SUPPORTED', 'The expected data is not the same')

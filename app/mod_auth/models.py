@@ -194,7 +194,7 @@ class Images:
             for i in range(1, self.number_of_images):
                 result = result + ', ' + self.images[1].dump()
 
-        result = '{images: [' + result + ']}'
+        result = '{"images": [' + result + ']}'
 
         return result
 
