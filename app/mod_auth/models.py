@@ -173,7 +173,7 @@ class Images:
         if len(data) != 4:
             raise ValueError("Error, data should be a array with len equal to 4")
         elif isinstance(data, list):
-            tmp = Image(identify=data[0],
+            tmp = Image(identifier=data[0],
                         name=data[1],
                         status=data[2],
                         message=data[3])

@@ -36,7 +36,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.OK, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.OK, message='fake message')
 
         self.assertEqual(temp.status, Image.OK, 'The status is not the same')
 
@@ -45,7 +45,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.OK_STALLED_CHECKSUM, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.OK_STALLED_CHECKSUM, message='fake message')
 
         self.assertEqual(temp.status, Image.OK_STALLED_CHECKSUM, 'The status is not the same')
 
@@ -54,7 +54,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.ERROR_AMI, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.ERROR_AMI, message='fake message')
 
         self.assertEqual(temp.status, Image.ERROR_AMI, 'The status is not the same')
 
@@ -63,7 +63,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.ERROR_CHECKSUM, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.ERROR_CHECKSUM, message='fake message')
 
         self.assertEqual(temp.status, Image.ERROR_CHECKSUM, 'The status is not the same')
 
@@ -72,7 +72,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.PENDING_METADATA, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.PENDING_METADATA, message='fake message')
 
         self.assertEqual(temp.status, Image.PENDING_METADATA, 'The status is not the same')
 
@@ -81,7 +81,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.PENDING_RENAME, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.PENDING_RENAME, message='fake message')
 
         self.assertEqual(temp.status, Image.PENDING_RENAME, 'The status is not the same')
 
@@ -90,7 +90,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.PENDING_REPLACE, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.PENDING_REPLACE, message='fake message')
 
         self.assertEqual(temp.status, Image.PENDING_REPLACE, 'The status is not the same')
 
@@ -99,7 +99,7 @@ class TestImage(TestCase):
         Check that we create an image object with a correct status.
         :return:
         """
-        temp = Image(identify='an id', name='fake name', status=Image.PENDING_UPLOAD, message='fake message')
+        temp = Image(identifier='an id', name='fake name', status=Image.PENDING_UPLOAD, message='fake message')
 
         self.assertEqual(temp.status, Image.PENDING_UPLOAD, 'The status is not the same')
 
@@ -110,7 +110,7 @@ class TestImage(TestCase):
         """
 
         try:
-            temp = Image(identify='an id', name='fake name', status='fake status', message='fake message')
+            temp = Image(identifier='an id', name='fake name', status='fake status', message='fake message')
         except ValueError as error:
             self.assertEqual(error.args[0], 'Error, the status does not correspond to any of the defined values')
             self.assertEqual(error.args[1], 'fake status')
