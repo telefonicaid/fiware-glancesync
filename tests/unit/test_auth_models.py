@@ -26,6 +26,7 @@ from unittest import TestCase
 from app.mod_auth.models import Image, Images, Task, TokenModel
 import uuid
 import re
+import json
 
 __author__ = 'fla'
 
@@ -145,12 +146,18 @@ class TestImages(TestCase):
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
 
-        expectedresult = '{"images": [{"id": "3cfeaf3f0103b9637bb3fcfe691fce1e", "name": "base_ubuntu_14.04", ' \
-                         '"status": "ok", "message": null}]}'
+        expectedid = '3cfeaf3f0103b9637bb3fcfe691fce1e'
+        expectedname = 'base_ubuntu_14.04'
+        expectedstatus = 'ok'
+        expectedmessage = None
 
         result = x.dump()
+        data = json.loads(result)['images'][0]
 
-        self.assertEqual(expectedresult, result, "The returned JSON is not the expected one")
+        self.assertEqual(data['id'], expectedid, "The returned JSON is not the expected one")
+        self.assertEqual(data['name'], expectedname, "The returned JSON is not the expected one")
+        self.assertEqual(data['status'], expectedstatus, "The returned JSON is not the expected one")
+        self.assertEqual(data['message'], expectedmessage, "The returned JSON is not the expected one")
 
     def test_check_dump_more_than_one(self):
         x = Images()
@@ -158,16 +165,22 @@ class TestImages(TestCase):
         expectedvalue = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
         x.add(expectedvalue)
 
-        expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
+        expectedvalue = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'pending_upload', 'fake message']
         x.add(expectedvalue)
 
-        expectedresult = '{"images": [{"id": "3cfeaf3f0103b9637bb3fcfe691fce1e", "name": "base_ubuntu_14.04", ' \
-                         '"status": "ok", "message": null}, {"id": "4rds4f3f0103b9637bb3fcfe691fce1e", ' \
-                         '"name": "base_centOS_7", "status": "ok", "message": null}]}'
+        expectedid = ['3cfeaf3f0103b9637bb3fcfe691fce1e', '4rds4f3f0103b9637bb3fcfe691fce1e']
+        expectedname = ['base_ubuntu_14.04', 'base_centOS_7']
+        expectedstatus = ['ok', 'pending_upload']
+        expectedmessage = [None, 'fake message']
 
         result = x.dump()
+        data = json.loads(result)['images']
 
-        self.assertEqual(expectedresult, result, "The returned JSON is not the expected one")
+        for i in range (0, 2):
+            self.assertEqual(data[i]['id'], expectedid[i], "The returned JSON is not the expected one")
+            self.assertEqual(data[i]['name'], expectedname[i], "The returned JSON is not the expected one")
+            self.assertEqual(data[i]['status'], expectedstatus[i], "The returned JSON is not the expected one")
+            self.assertEqual(data[i]['message'], expectedmessage[i], "The returned JSON is not the expected one")
 
     def test_check_add_only_two_images(self):
         x = Images()
@@ -198,10 +211,10 @@ class TestTask(TestCase):
         self.assertIsNone(task.status)
 
     def test_check_create_task_with_status(self):
-        task = Task(status='synced')
+        task = Task(status=Task.SYNCED)
 
         self.assertTrue(isinstance(task.taskid, uuid.UUID))
-        self.assertEqual(task.status, 'synced')
+        self.assertEqual(task.status, Task.SYNCED)
 
     def test_check_create_task_with_invalid_status(self):
         try:
@@ -211,30 +224,34 @@ class TestTask(TestCase):
         except ValueError as error:
             self.assertEqual(error.message, "Status message should be synced, syncing or failed")
 
-    def test_check_dump_with_status(self):
+    def test_check_dump_without_status(self):
         task = Task()
 
         result = task.dump()
 
-        match_obj = re.match(r'\{\"taskId\": \"(.*)\"\}', result, re.M)
+        result = result.replace('\n', '').replace('\r', '').replace(' ','')
+
+        match_obj = re.match(r'\{\"taskId\":\"(.*)\"\}', result, re.M)
 
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
 
-    def test_check_dump_without_status(self):
-        task = Task(status='synced')
+    def test_check_dump_with_status(self):
+        task = Task(status=Task.SYNCED)
 
         result = task.dump()
 
-        match_obj = re.match(r'\{\"taskId\": \"(.*)\", \"status\": \"(.*)\"\}', result, re.M)
+        result = result.replace('\n', '').replace('\r', '').replace(' ','')
+
+        match_obj = re.match(r'\{\"taskId\":\"(.*)\",\"status\":\"(.*)\"\}', result, re.M)
 
         assert(match_obj is not None), 'The json message: {} \n\n is not the expected...'.format(result)
 
     def test_check_create_task_with_taskid_and_status(self):
 
-        task = Task(taskid=uuid.uuid1(), status='synced')
+        task = Task(taskid=uuid.uuid1(), status=Task.SYNCED)
 
         self.assertTrue(isinstance(task.taskid, uuid.UUID))
-        self.assertEqual(task.status, 'synced')
+        self.assertEqual(task.status, Task.SYNCED)
 
 
 class TestTokenModel(TestCase):

@@ -109,7 +109,7 @@ def synchronize(regionid, token=None):
 
     logger.info(message)
 
-    newtask = Task(status='syncing')
+    newtask = Task(status=Task.SYNCING)
 
     # name and role should be returned from authorized operation, to be extended in Sprint 16.02
     newuser = User(region=regionid, name=token.username, taskid=str(newtask.taskid),
@@ -184,7 +184,7 @@ def delete_task(regionid, taskid, token=None):
 
     if not users:
         abort(httplib.NOT_FOUND)
-    elif users[0].status != 'syncing':
+    elif users[0].status != Task.SYNCING:
         # we can delete iff the status es 'synced' or 'failing'
         db.session.delete(users[0])
         db.session.commit()

@@ -30,6 +30,7 @@ import unittest
 import httplib
 import requests_mock
 import json
+from app.mod_auth.models import Task
 
 __author__ = 'fla'
 
@@ -59,8 +60,8 @@ class DBTest(TestCase):
         db.create_all()
 
         # create users:
-        user1 = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='synced')
-        user2 = User(region='Spain2', name='foo@tim.go',   taskid='5678', role='fake role', status='syncing')
+        user1 = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user2 = User(region='Spain2', name='foo@tim.go',   taskid='5678', role='fake role', status=Task.SYNCING)
         db.session.add(user1)
         db.session.add(user2)
         db.session.commit()
@@ -99,7 +100,7 @@ class DBTest(TestCase):
         assert user.region == 'Spain', 'Expect the correct region to be returned'
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
-        assert user.status == 'synced', 'Expect the correct status to be returned'
+        assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
 
 
 class APITests(unittest.TestCase):
@@ -315,7 +316,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='synced')
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -327,7 +328,7 @@ class TestServerRequests(unittest.TestCase):
         data = json.loads(result.data)
 
         self.assertEqual(data['taskId'], '1234', 'The task id returned is not the expected one.')
-        self.assertEqual(data['status'], 'synced', 'The status od the task returned is not the expected one.')
+        self.assertEqual(data['status'], Task.SYNCED, 'The status od the task returned is not the expected one.')
 
     def test_get_task_status_with_incorrect_taskId(self, m):
         """
@@ -356,7 +357,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='synced')
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -391,7 +392,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status='syncing')
+        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCING)
         db.session.add(user)
         db.session.commit()
 
