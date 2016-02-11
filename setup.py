@@ -36,7 +36,7 @@ setup(
   name='fiware-glancesync',
   packages=find_packages(exclude=['*tests*']),
   install_requires=requirements_list,
-  data_files = [('/etc/', ['glancesync/settings/glancesync.conf'])],  
+  data_files = [('.', ['glancesync/settings/glancesync.conf'])],  
   package_data={
     'glancesync': ['glancesync.conf']
   }, 
