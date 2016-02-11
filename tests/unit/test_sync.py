@@ -185,14 +185,18 @@ class TestSyncParallel(unittest.TestCase):
         data1 = open(file1).read()
         data2 = open(file2).read()
 
-        match_obj1 = re.match(r'.*Sync region.* (.*)', data1, re.M | re.I)
+        # The expected values for data1 and data2 are:
+        # 'Sync region<region id> <timestamp>' or 'INFO:Sync region<region id> <timestamp>'
+        regular_expression = r'(INFO:)?Sync region.* (.*)'
+
+        match_obj1 = re.match(regular_expression, data1, re.M | re.I)
         assert(match_obj1 is not None), 'The file {} does not contain the expected value'.format(file1)
 
-        match_obj2 = re.match(r'.*Sync region.* (.*)', data2, re.M | re.I)
+        match_obj2 = re.match(regular_expression, data2, re.M | re.I)
         assert(match_obj2 is not None), 'The file {} does not contain the expected value'.format(file2)
 
-        time1 = float(match_obj1.group(1))
-        time2 = float(match_obj2.group(1))
+        time1 = float(match_obj1.group(2))
+        time2 = float(match_obj2.group(2))
         return abs(time1 - time2)
 
     @patch('sync.datetime')
