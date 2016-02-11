@@ -23,13 +23,11 @@
 # contact with opensource@tid.es
 #
 import httplib
-
-# Import flask dependencies
 from flask import request, abort, json
 from AuthorizationManager import AuthorizationManager
-from app.settings import settings
 from app.settings.log import logger
-from app.settings.settings import X_AUTH_TOKEN_HEADER
+from app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE_URL, AUTH_API_V2, ADM_PASS, ADM_USER, \
+    ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME
 from functools import wraps
 
 __author__ = 'fla'
@@ -45,12 +43,14 @@ def validate_token(access_token):
 
     # Send a request to validate a token
     try:
-        a = AuthorizationManager(identity_url=settings.KEYSTONE_URL, api_version=settings.AUTH_API_V2)
+        keystone_url = KEYSTONE_URL + '/' + AUTH_API_V2
+
+        a = AuthorizationManager(identity_url=keystone_url, api_version=AUTH_API_V2)
 
         # Get the Admin token to validate the access_token
-        adm_token = a.get_auth_token(settings.ADM_USER, settings.ADM_PASS, settings.ADM_TENANT_ID,
-                                     tenant_name=settings.ADM_TENANT_NAME,
-                                     user_domain_name=settings.USER_DOMAIN_NAME)
+        adm_token = a.get_auth_token(username=ADM_USER, password=ADM_PASS, tenant_id=ADM_TENANT_ID,
+                                     tenant_name=ADM_TENANT_NAME,
+                                     user_domain_name=USER_DOMAIN_NAME)
 
         auth_result = a.checkToken(adm_token, access_token)
 
@@ -86,10 +86,10 @@ def authorized(func):
             logger.error("No token in header")
             abort(httplib.UNAUTHORIZED)
         else:
-            logger.info("Checking token: {}...".format(request.headers['X-Auth-Token']))
+            logger.info("Checking token: {}...".format(request.headers[X_AUTH_TOKEN_HEADER]))
 
         try:
-            token = validate_token(access_token=request.headers['X-Auth-Token'])
+            token = validate_token(access_token=request.headers[X_AUTH_TOKEN_HEADER])
 
             print(token)
 
@@ -98,7 +98,8 @@ def authorized(func):
 
             abort(data['error']['code'], excep.message)
 
-        kwargs["token"] = token
+        kwargs['token'] = token
+
         return func(*args, **kwargs)
 
     return _wrap

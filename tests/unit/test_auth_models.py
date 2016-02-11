@@ -176,7 +176,7 @@ class TestImages(TestCase):
         result = x.dump()
         data = json.loads(result)['images']
 
-        for i in range (0, 2):
+        for i in range(0, 2):
             self.assertEqual(data[i]['id'], expectedid[i], "The returned JSON is not the expected one")
             self.assertEqual(data[i]['name'], expectedname[i], "The returned JSON is not the expected one")
             self.assertEqual(data[i]['status'], expectedstatus[i], "The returned JSON is not the expected one")
@@ -229,7 +229,7 @@ class TestTask(TestCase):
 
         result = task.dump()
 
-        result = result.replace('\n', '').replace('\r', '').replace(' ','')
+        result = result.replace('\n', '').replace('\r', '').replace(' ', '')
 
         match_obj = re.match(r'\{\"taskId\":\"(.*)\"\}', result, re.M)
 
@@ -240,7 +240,7 @@ class TestTask(TestCase):
 
         result = task.dump()
 
-        result = result.replace('\n', '').replace('\r', '').replace(' ','')
+        result = result.replace('\n', '').replace('\r', '').replace(' ', '')
 
         match_obj = re.match(r'\{\"taskId\":\"(.*)\",\"status\":\"(.*)\"\}', result, re.M)
 

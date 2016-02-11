@@ -56,7 +56,7 @@ ADM_TENANT_NAME = config.get('openstack', 'ADM_TENANT_NAME')
 USER_DOMAIN_NAME = config.get('openstack', 'USER_DOMAIN_NAME')
 AUTH_API_V2 = config.get('openstack', 'AUTH_API_V2')
 AUTH_API_V3 = config.get('openstack', 'AUTH_API_V3')
-
+REGION_LIST_API_V3 = config.get('openstack', 'REGION_LIST_API_V3')
 
 # GLANCESYNC CONFIGURATION
 SETTINGS_TYPE = config.get('glancesync', 'SETTINGS_TYPE')

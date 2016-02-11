@@ -21,13 +21,8 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-# Define constants
 import httplib
-
-# Import flask
 from flask import Flask, make_response
-
-# Import SQLAlchemy
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # Defile the WGSI application object
@@ -44,7 +39,6 @@ db = SQLAlchemy(app)
 from app.mod_auth.controllers import mod_auth as auth_module
 from app.mod_info.controllers import mod_info as info_module
 
-# Import settings value
 from app.settings.settings import CONTENT_TYPE, SERVER, SERVER_HEADER, JSON_TYPE
 
 

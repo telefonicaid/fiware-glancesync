@@ -22,22 +22,12 @@
 # contact with opensource@tid.es
 #
 
-# Import flask dependencies
 from flask import Blueprint, abort, make_response
 import httplib
-
-# Import the database object from the main app module
 from app import db
-
-# Import module models (i.e. User)
 from models import User
-
-# Import authentication decorator
 from openstack_auth import authorized
-
-# Import region manage decorator
 from region_manager import check_region
-
 from app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
 from app.mod_auth.models import Images, Task
 from app.settings.log import logger

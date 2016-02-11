@@ -28,10 +28,11 @@ from flask import abort, Response
 from app.settings.log import logger
 from functools import wraps
 from app.mod_auth.AuthorizationManager import AuthorizationManager
-from app.settings import settings
 import requests
 import json
 import httplib
+from app.settings.settings import KEYSTONE_URL, AUTH_API_V2, AUTH_API_V3, REGION_LIST_API_V3, ADM_USER, ADM_PASS, \
+    ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME, X_AUTH_TOKEN_HEADER
 
 __author__ = 'fla'
 
@@ -55,17 +56,20 @@ class region():
         # GET http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups
 
         if not self.regions:
-            a = AuthorizationManager(identity_url=settings.KEYSTONE_URL, api_version=settings.AUTH_API_V2)
+            keystone_url = KEYSTONE_URL + '/' + AUTH_API_V2
+
+            a = AuthorizationManager(identity_url=keystone_url, api_version=AUTH_API_V2)
 
             # Get the Admin token to validate the access_token
-            adm_token = a.get_auth_token(settings.ADM_USER, settings.ADM_PASS, settings.ADM_TENANT_ID,
-                                         tenant_name=settings.ADM_TENANT_NAME,
-                                         user_domain_name=settings.USER_DOMAIN_NAME)
+            adm_token = a.get_auth_token(username=ADM_USER, password=ADM_PASS, tenant_id=ADM_TENANT_ID,
+                                         tenant_name=ADM_TENANT_NAME,
+                                         user_domain_name=USER_DOMAIN_NAME)
 
             s = requests.Session()
-            s.headers.update({'X-Auth-Token': adm_token})
+            s.headers.update({X_AUTH_TOKEN_HEADER: adm_token})
 
-            response = s.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups')
+            keystone_url = KEYSTONE_URL + '/' + AUTH_API_V3 + '/' + REGION_LIST_API_V3
+            response = s.get(keystone_url)
 
             r = json.loads(response.text)
 
