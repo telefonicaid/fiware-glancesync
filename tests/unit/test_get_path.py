@@ -22,61 +22,87 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'fla'
-
 from unittest import TestCase
 from tests.unit.test_getnid import get_path
+import os
+
+__author__ = 'fla'
 
 
 class TestGlanceSyncNIDOperations(TestCase):
     relativepath = 'tests/unit/resources/nid'
-    path1 = '/Users/fla/Documents/workspace/python/fiware-glancesync'
-    path2 = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests/unit'
-    path3 = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests'
-    path4 = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests/unit/resources'
-    path5 = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests/fake/resources'
-    path6 = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests/unit/fake'
-    path7 = '/Users/fla/Documents/workspace/python/fiware-glancesync/fake/uni/resources'
-    path50 = '/Users/fla/Documents/workspace/python/workspace/tests'
-    validresult = '/Users/fla/Documents/workspace/python/fiware-glancesync/tests/unit/resources/nid'
+    glancesynchome = '/Users/foo/Documents/workspace/python/fiware-glancesync'
+    validresult = os.path.join(glancesynchome, relativepath)
 
     def test_simple(self):
-        result = get_path(self.path1, self.relativepath)
+        # Given
+        path = self.glancesynchome
 
+        # When
+        result = get_path(path, self.relativepath)
+
+        # Then
         self.assertEqual(self.validresult, result)
 
     def test_path_with_tests_unit(self):
-        result = get_path(self.path2, self.relativepath)
+        # Given
+        path = os.path.join(self.glancesynchome, 'tests/unit')
 
+        # When
+        result = get_path(path, self.relativepath)
+
+        # Then
         self.assertEqual(self.validresult, result)
 
     def test_path_with_tests(self):
-        result = get_path(self.path3, self.relativepath)
+        # Given
+        path = os.path.join(self.glancesynchome, 'tests')
 
+        # When
+        result = get_path(path, self.relativepath)
+
+        # Then
         self.assertEqual(self.validresult, result)
 
     def test_path_with_tests_unit_resources(self):
-        result = get_path(self.path4, self.relativepath)
+        # Given
+        path = os.path.join(self.glancesynchome, 'tests/unit/resources')
 
+        # When
+        result = get_path(path, self.relativepath)
+
+        # Then
         self.assertEqual(self.validresult, result)
 
     def test_path_with_some_mistake_folder1(self):
+        # Given
+        path = os.path.join(self.glancesynchome, 'tests/fake/resources')
+
+        # When
         try:
-            get_path(self.path5, self.relativepath)
+            get_path(path, self.relativepath)
+        # Then
         except ValueError as ex:
-            print "Error"
             self.assertEqual(ex.message, 'Error, the paths are not equivalent')
 
     def test_path_with_some_mistake_folder2(self):
+        # Given
+        path = os.path.join(self.glancesynchome, 'tests/unit/fake')
+
+        # When
         try:
-            get_path(self.path6, self.relativepath)
+            get_path(path, self.relativepath)
+        # Then
         except ValueError as ex:
-            print "Error"
             self.assertEqual(ex.message, 'Error, the paths are not equivalent')
 
     def test_path_with_some_mistake_folder3(self):
+        # Given
+        path = os.path.join(self.glancesynchome, 'fake/uni/resources')
+
+        # When
         try:
-            get_path(self.path7, self.relativepath)
+            get_path(path, self.relativepath)
+        # Then
         except ValueError as ex:
-            print "Error"
             self.assertEqual(ex.message, 'Error, the paths are not equivalent')

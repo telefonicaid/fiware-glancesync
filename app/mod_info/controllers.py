@@ -28,7 +28,7 @@ import httplib
 import datetime
 from app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE, \
     SERVER_HEADER, SERVER, JSON_TYPE
-from app.settings.log import logger
+from app.settings.settings import logger_api
 
 __author__ = 'fla'
 
@@ -48,7 +48,7 @@ def get_info():
     """
     message = "GET information about glancesync server"
 
-    logger.info(message)
+    logger_api.info(message)
 
     message = '''
     {
@@ -65,5 +65,7 @@ def get_info():
     resp = make_response(message, httplib.OK)
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    logger_api.info('Return result: %s', message)
 
     return resp

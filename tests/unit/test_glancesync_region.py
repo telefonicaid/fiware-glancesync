@@ -94,7 +94,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
     def setUp(self):
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         logger.addHandler(handler)
@@ -575,7 +575,7 @@ class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
         synchronisable"""
 
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)

@@ -25,7 +25,7 @@
 #
 __author__ = 'chema'
 
-import logging
+from app.settings.settings import logger_cli
 
 """This module includes code supporting the glancesync functionality, but
 users should not use this class in their code, because it is internal and its
@@ -51,7 +51,7 @@ class GlanceSyncRegion(object):
         :param targets: the dictionary with the targets defined in the
             configuration file.
         """
-        self.log = logging.getLogger('glancesync')
+        self.log = logger_cli
 
         parts = fullname.split(':')
         if len(parts) == 2:

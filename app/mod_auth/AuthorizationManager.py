@@ -30,7 +30,7 @@ from keystoneclient import session
 import requests
 
 from models import TokenModel
-from app.settings.log import logger
+from app.settings.settings import logger_api
 from app.settings.settings import ACCEPT_HEADER, JSON_TYPE, X_AUTH_TOKEN_HEADER, TOKENS_PATH_V2, \
     X_SUBJECT_TOKEN_HEADER, TOKENS_PATH_V3, AUTH_API_V2, AUTH_API_V3
 
@@ -102,21 +102,21 @@ class AuthorizationManager:
                 identity_module = __import__(identity_package, fromlist=['Password'])
                 password_class = getattr(identity_module, 'Password')
 
-                logger.debug("Authentication with %s", password_class)
+                logger_api.debug("Authentication with %s", password_class)
 
                 credentials = password_class(**cred_kwargs)
             except (ImportError, AttributeError) as e:
                 raise e
 
             # Get auth token
-            logger.debug("Getting auth token for tenant %s...", tenant_id)
+            logger_api.debug("Getting auth token for tenant %s...", tenant_id)
             try:
                 auth_sess = self.session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
                 AuthorizationManager.auth_token = auth_sess.get_token()
-                logger.debug("Admin token generated:" + self.auth_token)
+                logger_api.debug("Admin token generated:" + self.auth_token)
 
             except (KeystoneClientException, KeystoneConnectionRefused) as e:
-                logger.error("No auth token (%s)", e.message)
+                logger_api.error("No auth token (%s)", e.message)
                 raise e
 
         return AuthorizationManager.auth_token
@@ -129,7 +129,7 @@ class AuthorizationManager:
         :param token: The token to be validated.
         :return: The result of the validation or error if something was wrong.
         """
-        logger.info("Starting Authentication of token %s ", token)
+        logger_api.info("Starting Authentication of token %s ", token)
 
         try:
             if not token:
@@ -141,12 +141,12 @@ class AuthorizationManager:
             return auth_result
 
         except Unauthorized as unauth:
-            logger.error(unauth)
+            logger_api.error(unauth)
             raise unauth
         except InternalServerError as internalError:
             raise AuthorizationFailure("Token could not have enough permissions to access tenant")
         except Exception as ex:
-            logger.error("%s", ex.message)
+            logger_api.error("%s", ex.message)
             raise ex
 
     def get_info_token(self, admin_token, token):

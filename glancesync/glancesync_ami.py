@@ -25,7 +25,7 @@
 #
 __author__ = 'chema'
 
-import logging
+from app.settings.settings import logger_cli
 """This internal module check and update the kernel_id and ramdisk_id of
 AMI images. This metadata points to the UUID of two auxiliary images: the
 kernel and the ramdisk.
@@ -39,7 +39,7 @@ ramdisk_id.
 """
 
 
-_logger = logging.getLogger('glancesync')
+_logger = logger_cli
 
 
 def clean_ami_ids(image_dict):

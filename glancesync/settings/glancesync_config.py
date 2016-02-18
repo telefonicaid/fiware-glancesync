@@ -28,9 +28,7 @@ __version__ = '1.3.0'
 import ConfigParser
 import os
 import base64
-import logging
-
-import sys
+from app.settings.settings import logger_cli
 
 
 # Methods to obtain a list/set, which a default empty.
@@ -106,7 +104,7 @@ class GlanceSyncConfig(object):
         :return: nothing
         """
 
-        self.logger = logging.getLogger('glancesync')
+        self.logger = logger_cli
 
         defaults = {'use_keystone_v3': 'False',
                     'support_obsolete_images': 'True',

@@ -25,7 +25,6 @@
 __author__ = 'chema'
 
 import os
-import logging
 import csv
 import copy
 
@@ -35,6 +34,7 @@ from glancesync_image import GlanceSyncImage
 import glancesync_ami
 from glancesync_serversfacade import ServersFacade
 from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
+from app.settings.settings import logger_cli
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
@@ -53,7 +53,7 @@ class GlanceSync(object):
     def __init__(self, config_stream=None, options_dict=None):
         """Constructor of the object
         """
-        self.log = logging.getLogger('glancesync')
+        self.log = logger_cli
 
         if config_stream is None:
             glancesyncconfig = GlanceSyncConfig(override_d=options_dict)
@@ -417,7 +417,8 @@ class GlanceSync(object):
         """
 
         '''
-        We do not need to create a new logger just import it from app.settings.log.py
+        We do not need to create a new logger just import it from
+        app.settings.settings import logger_cli
         TO BE CHECKED
 
         handler = logging.StreamHandler()
@@ -427,7 +428,8 @@ class GlanceSync(object):
         logger.setLevel(logging.INFO)
         logger.propagate = 0
         '''
-        pass
+        # Just puplicate the assignement of logger_cli to the log variable
+        self.log = logger_cli
 
     def __upload_image(self, master_image, images_dict, regionobj):
         new_image = copy.deepcopy(master_image)

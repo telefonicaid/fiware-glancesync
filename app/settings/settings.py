@@ -24,6 +24,9 @@
 from ConfigParser import SafeConfigParser
 import app as fiware_glancesync
 import os.path
+import logging
+import logging.config
+
 config = SafeConfigParser()
 
 """
@@ -39,13 +42,19 @@ name = 'fiware-glancesync'
 
 cfg_dir = "/etc/fiware.d"
 
+# GLANCESYNC CONFIGURATION
 if os.environ.get("GLANCESYNC_SETTINGS_FILE"):
     cfg_filename = os.environ.get("GLANCESYNC_SETTINGS_FILE")
 else:
     cfg_filename = os.path.join(cfg_dir, '%s.cfg' % name)
 
-config.read(cfg_filename)
-
+if os.path.exists(cfg_filename) and os.access(cfg_filename, os.R_OK):
+    config.read(cfg_filename)
+else:
+    msg = '\nERROR: There is neither defined GLANCESYNC_SETTINGS_FILE environment variable ' \
+          '\n       pointing to fiware-glancesync.cfg nor /etc/fiware.d/etc/fiware-glancesync.cfg ' \
+          '\n       file. Please correct at least one of them to execute the program.'
+    exit(msg)
 
 # OPENSTACK CONFIGURATION
 KEYSTONE_URL = config.get('openstack', 'KEYSTONE_URL')
@@ -69,12 +78,6 @@ UPDATED = config.get('glancesync', 'UPDATED')
 PORT = config.get('glancesync', 'PORT')
 HOST = config.get('glancesync', 'HOST')
 
-
-# LOGGING CONFIGURATION
-LOGGING_LEVEL = config.get('logging', 'level')
-LOGGING_PATH = config.get('logging', 'LOGGING_PATH')
-
-
 # HTTP CONSTANTS
 CONTENT_TYPE = config.get('http', 'CONTENT_TYPE')
 ACCEPT_HEADER = config.get('http', 'ACCEPT')
@@ -86,51 +89,23 @@ TOKENS_PATH_V3 = config.get('http', 'TOKENS_PATH_V3')
 SERVER = config.get('http', 'SERVER')
 SERVER_HEADER = config.get('http', 'SERVER_HEADER')
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-'''LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'formatters': {
-        'file_formatter': {
-            'format': '%(asctime)s %(levelname)s glancesync [-] %(message)s'
-        },
-    },
-    'handlers': {
-        'my_file': {
-            'level': '' + config.get('logging', 'level'),
-            'filters': ['require_debug_false'],
-            'class': 'logging.FileHandler',
-            'filename': LOGGING_PATH + '/RuleEngine.log',
-            'formatter': 'file_formatter'
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
-            'formatter': 'file_formatter'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'RuleEngine': {
-            'level': '' + config.get('logging', 'level'),
-            'handlers': ['my_file'],
-            'propagate': False,
+# LOGGING CONFIGURATION
+logging_name = 'fiware-glancesync-logging'
 
-        }
-    }
-}
-'''
+if os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE"):
+    cfg_logging_filename = os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE")
+else:
+    cfg_logging_filename = os.path.join(cfg_dir, '%s.cfg' % logging_name)
+
+if os.path.exists(cfg_logging_filename) and os.access(cfg_logging_filename, os.R_OK):
+    # Load logging configuration file
+    logging.config.fileConfig(cfg_logging_filename)
+else:
+    msg = '\nERROR: There is neither defined GLANCESYNC_LOGGING_SETTINGS_FILE environment variable ' \
+          '\n       pointing to fiware-glancesync.cfg nor /etc/fiware.d/etc/fiware-glancesync-logging.cfg ' \
+          '\n       file. Please correct at least one of them to execute the program.'
+    exit(msg)
+
+# create logger
+logger_api = logging.getLogger('GlanceSync-API')
+logger_cli = logging.getLogger('GlanceSync-Client')

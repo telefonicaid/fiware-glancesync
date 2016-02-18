@@ -472,7 +472,7 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
         """test that a warning is emitted with a image that has a
         different checksum and there is not settings about what to do with."""
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)
@@ -521,7 +521,7 @@ class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
     def test_sync_warning(self):
         """test that a warning is emitted with a image name is duplicated"""
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)

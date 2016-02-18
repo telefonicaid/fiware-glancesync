@@ -25,7 +25,7 @@
 # Import flask dependencies
 from flask import abort, Response
 
-from app.settings.log import logger
+from app.settings.settings import logger_api
 from functools import wraps
 from app.mod_auth.AuthorizationManager import AuthorizationManager
 import requests
@@ -115,7 +115,7 @@ def check_region(func):
 
         region_management = region()
 
-        logger.info("Checking region: {}...".format(region_name))
+        logger_api.info("Checking region: {}...".format(region_name))
 
         result = region_management.validate_region(region_name)
 

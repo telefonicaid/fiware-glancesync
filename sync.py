@@ -107,13 +107,11 @@ class Sync(object):
                 else:
                     path = os.path.join('sync_' + datestr, region + '.txt')
                     handler = logging.FileHandler(path)
-                    handler.setFormatter(logging.Formatter(
-                        '%(levelname)s:%(message)s'))
+                    handler.setFormatter(logging.Formatter('%(message)s'))
 
                     logger = self.glancesync.log
                     # Remove old handlers
                     for h in logger.handlers:
-                        handler.setFormatter(logging.Formatter('%(message)s'))
                         logger.removeHandler(h)
 
                     logger.addHandler(handler)

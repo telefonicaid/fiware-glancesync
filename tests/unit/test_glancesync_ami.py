@@ -84,7 +84,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
                          'img1': self.reg_image}
         self.logbuffer = StringIO.StringIO()
         handler = logging.StreamHandler(self.logbuffer)
-        logging.getLogger('glancesync').addHandler(handler)
+        logging.getLogger('GlanceSync-Client').addHandler(handler)
 
     def test_update_kernelramdisk_id(self):
         """test update_kernelramdisk_id. Case: the image need to be updated.

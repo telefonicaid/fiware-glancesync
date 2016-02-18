@@ -30,7 +30,7 @@ from openstack_auth import authorized
 from region_manager import check_region
 from app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
 from app.mod_auth.models import Images, Task
-from app.settings.log import logger
+from app.settings.settings import logger_api
 
 __author__ = 'fla'
 
@@ -57,7 +57,7 @@ def get_status(regionid, token=None):
 
     message = "GET, get information about the synchronization status in the region: {}".format(regionid)
 
-    logger.info(message)
+    logger_api.info(message)
 
     # Just for check this data should be returned by glancesync client
     x = Images()
@@ -97,7 +97,7 @@ def synchronize(regionid, token=None):
     # 'synced'
     message = "POST, create a new synchronization task in the region: {}".format(regionid)
 
-    logger.info(message)
+    logger_api.info(message)
 
     newtask = Task(status=Task.SYNCING)
 
@@ -135,7 +135,7 @@ def get_task(regionid, taskid, token=None):
     # in order to know the status of the synchronization of the task <taskid>
     message = "GET, obtain the status of the synchronization of a task: {} in the region: {}".format(taskid, regionid)
 
-    logger.info(message)
+    logger_api.info(message)
 
     users = User.query.filter(User.task_id == taskid).all()
 
@@ -168,7 +168,7 @@ def delete_task(regionid, taskid, token=None):
 
     message = "DELETE, delete the registry of task {} in the region: {}".format(taskid, regionid)
 
-    logger.info(message)
+    logger_api.info(message)
 
     users = User.query.filter(User.task_id == taskid).all()
 
