@@ -82,7 +82,7 @@ class region():
                 if region_filter and 'region_id' in region_filter:
                     self.regions.append(region_filter['region_id'])
 
-            print self.regions
+            logger_api.debug(self.regions)
 
     def validate_region(self, region_name):
         """

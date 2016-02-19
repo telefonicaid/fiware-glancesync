@@ -428,8 +428,8 @@ class GlanceSync(object):
         logger.setLevel(logging.INFO)
         logger.propagate = 0
         '''
-        # Just puplicate the assignement of logger_cli to the log variable
-        self.log = logger_cli
+        # Just duplicate the assignement of logger_cli to the log variable
+        # log = logger_cli
 
     def __upload_image(self, master_image, images_dict, regionobj):
         new_image = copy.deepcopy(master_image)

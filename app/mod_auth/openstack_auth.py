@@ -54,13 +54,31 @@ def validate_token(access_token):
 
         auth_result = a.checkToken(adm_token, access_token)
 
-        print(auth_result)
-
         return auth_result
 
     except Exception as excep:
-        print("Error")
         raise excep
+
+
+def error_message(message):
+    """
+    Return the correct message to the client taking into account the error message in the keystone client component.
+
+    :param message: The keystone client error message.
+    :return: The correct GlanceSync error message.
+    """
+    errors = dict()
+
+    errors = {
+        'Expecting to find username or userId in passwordCredentials - the server could not comply '
+        'with the request since it is either malformed or otherwise incorrect. The client is assumed to be in error.':
+            'You have to configure the admin user in the configuration file (fiware-glancesync.cfg)',
+        'The request you have made requires authentication.':
+            'You should have defined the correct admin user and its password in the configuration '
+            'file (fiware-glancesync.cfg)'
+    }
+
+    return errors[message]
 
 
 def authorized(func):
@@ -91,12 +109,25 @@ def authorized(func):
         try:
             token = validate_token(access_token=request.headers[X_AUTH_TOKEN_HEADER])
 
-            print(token)
-
         except Exception as excep:
-            data = json.loads(excep.message)
+            # The exception could be a json message for the application
+            # or text message for the keystone client components.
+            try:
+                data = json.loads(excep.message)
 
-            abort(data['error']['code'], excep.message)
+                abort(data['error']['code'], excep.message)
+
+            except ValueError:
+                message = '''
+                {
+                    "error": {
+                        "message": "%s",
+                        "code": %s
+                    }
+                }
+                ''' % (error_message(excep.message), httplib.BAD_REQUEST)
+
+                abort(httplib.BAD_REQUEST, message)
 
         kwargs['token'] = token
 

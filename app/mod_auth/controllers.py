@@ -72,6 +72,8 @@ def get_status(regionid, token=None):
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
+    logger_api.info('Return result: %s', x.dump())
+
     return resp
 
 
@@ -99,18 +101,40 @@ def synchronize(regionid, token=None):
 
     logger_api.info(message)
 
-    newtask = Task(status=Task.SYNCING)
+    # Previously to each operation, we have to check if there is a task in the DB
+    # with the status syncing associated to this region.
+    users = User.query.filter(User.region == regionid).all()
 
-    # name and role should be returned from authorized operation, to be extended in Sprint 16.02
-    newuser = User(region=regionid, name=token.username, taskid=str(newtask.taskid),
-                   role='admin', status=newtask.status)
+    if not users:
+        newtask = Task(status=Task.SYNCING)
 
-    db.session.add(newuser)
-    db.session.commit()
+        # name and role should be returned from authorized operation, to be extended in Sprint 16.02
+        newuser = User(region=regionid, name=token.username, taskid=str(newtask.taskid),
+                       role='admin', status=newtask.status)
+
+        db.session.add(newuser)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            message = '''
+            {
+                "error": {
+                    "message": "Please check that you have initialized the DB. See the documentation about it.",
+                    "code": %s
+                }
+            }
+            ''' % httplib.BAD_REQUEST
+
+            abort(httplib.BAD_REQUEST, message)
+    elif len(users) == 1 and users[0].region == regionid and users[0].status == Task.SYNCING:
+        newtask = Task(taskid=users[0].task_id, status=users[0].status)
 
     resp = make_response(newtask.dump(), httplib.OK)
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    logger_api.info('Return result: %s', newtask.dump())
 
     return resp
 
@@ -140,13 +164,27 @@ def get_task(regionid, taskid, token=None):
     users = User.query.filter(User.task_id == taskid).all()
 
     if not users:
-        abort(httplib.NOT_FOUND)
+        msg = "The requested URL was not found on the server. If you entered the URL manually please" \
+              " check your spelling and try again."
+
+        message = '''
+        {
+            "error": {
+                "message": "%s",
+                "code": %s
+            }
+        }
+        ''' % (msg, httplib.NOT_FOUND)
+
+        abort(httplib.NOT_FOUND, message)
     else:
         newtask = Task(taskid=users[0].task_id, status=users[0].status)
 
         resp = make_response(newtask.dump(), httplib.OK)
         resp.headers[SERVER_HEADER] = SERVER
         resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+        logger_api.info('Return result: %s', newtask.dump())
 
         return resp
 
@@ -173,15 +211,33 @@ def delete_task(regionid, taskid, token=None):
     users = User.query.filter(User.task_id == taskid).all()
 
     if not users:
-        abort(httplib.NOT_FOUND)
-    elif users[0].status != Task.SYNCING:
+        msg = "The requested URL was not found on the server. If you entered the URL manually please" \
+              " check your spelling and try again."
+
+        message = '''
+        {
+            "error": {
+                "message": "%s",
+                "code": %s
+            }
+        }
+        ''' % (msg, httplib.NOT_FOUND)
+
+        abort(httplib.NOT_FOUND, message)
+    elif len(users) == 1 and users[0].region == regionid and users[0].status != Task.SYNCING:
         # we can delete iff the status es 'synced' or 'failing'
         db.session.delete(users[0])
         db.session.commit()
     else:
         # We cannot delete the task due to the status in syncing
-        msg = '{ "error": { "message": "Task status is syncing. Unable to delete it.", "code": '\
-               + str(httplib.BAD_REQUEST) + ' } }'
+        msg = '''
+        {
+            "error": {
+                "message": "Task status is syncing. Unable to delete it.",
+                "code": %s
+            }
+        }
+        ''' % httplib.BAD_REQUEST
 
         abort(httplib.BAD_REQUEST, msg)
 
@@ -189,4 +245,7 @@ def delete_task(regionid, taskid, token=None):
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
+    logger_api.info("Deleted task: %s" % taskid)
+
     return resp
+

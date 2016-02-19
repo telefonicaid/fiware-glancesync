@@ -109,7 +109,7 @@ class AuthorizationManager:
                 raise e
 
             # Get auth token
-            logger_api.debug("Getting auth token for tenant %s...", tenant_id)
+            logger_api.debug("Getting auth token for tenant '%s'...", tenant_id)
             try:
                 auth_sess = self.session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
                 AuthorizationManager.auth_token = auth_sess.get_token()

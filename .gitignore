@@ -63,4 +63,4 @@ tests/acceptance/resources/images/qatesting20meg
 
 # Ignore DB file
 glancesync_api.db
-
+migrations/

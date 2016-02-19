@@ -79,7 +79,7 @@ def launch_vm(vmname, imagename, ip, key, flavorname, cloudinit=False, configdri
         vmname, flavor=flavor, image=image_id, key_name=key,
         security_groups=['default'], nics=[nic], **extra_params)
     time.sleep(2)
-    #print server.adminPass
+
     if ip:
         server.add_floating_ip(ip)
     return server.id
