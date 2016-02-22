@@ -357,7 +357,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user = User(region='Trento',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -365,6 +365,29 @@ class TestServerRequests(unittest.TestCase):
 
         self.assertEqual(result._status, "200 OK", 'The result status of the operation is not the expected one')
         self.assertEqual(result._status_code, httplib.OK, 'The result status of the operation is not the expected one')
+
+    def test_delete_task_with_synced_status_incorrect_region(self, m):
+        """
+        Test that we can delete a task with valid status (synced).
+
+        :param m: The request mock.
+        :return: Nothing.
+        """
+        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+
+        # We have to secure that we have a task in the db with status synced.
+        user = User(region='Spain',  name='joe@soap.com', taskid='5678', role='fake role', status=Task.SYNCED)
+        db.session.add(user)
+        db.session.commit()
+
+        result = self.app.delete('/regions/Trento/tasks/5678', headers={'X-Auth-Token': 'token'})
+
+        self.assertEqual(result._status, '400 BAD REQUEST',
+                         'The result status of the operation is not the expected one')
+
+        self.assertEqual(result._status_code, httplib.BAD_REQUEST,
+                         'The result status of the operation is not the expected one')
 
     def test_delete_task_with_incorrect_taskId(self, m):
         """

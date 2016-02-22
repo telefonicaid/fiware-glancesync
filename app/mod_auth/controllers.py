@@ -31,6 +31,7 @@ from region_manager import check_region
 from app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
 from app.mod_auth.models import Images, Task
 from app.settings.settings import logger_api
+import time
 
 __author__ = 'fla'
 
@@ -116,6 +117,11 @@ def synchronize(regionid, token=None):
 
         try:
             db.session.commit()
+
+            # Do the stuff to sync the images here...
+            # delete the time.sleep(20)
+            time.sleep(20)
+
         except Exception as e:
             message = '''
             {
@@ -248,4 +254,3 @@ def delete_task(regionid, taskid, token=None):
     logger_api.info("Deleted task: %s" % taskid)
 
     return resp
-

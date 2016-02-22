@@ -11,3 +11,16 @@ oslo.utils>=2.0.0
 # Requirements for the GlanceSync API
 Flask-SQLAlchemy==1.0
 Flask-Migrate==1.7.0
+
+# Requirements fro async operations
+Flask==0.10.1
+Flask-Script==0.6.7
+Jinja2==2.7.2
+MarkupSafe==0.19
+Werkzeug==0.9.4
+aniso8601==0.82
+gunicorn==18.0
+itsdangerous==0.24
+pytz==2014.2
+six==1.8.0
+wsgiref==0.1.2

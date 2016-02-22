@@ -22,10 +22,13 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from flask_script import Manager, Server
+# from flask_script import Manager, Server
+# from flask_script import Command, Option
+from flask.ext.script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
 from app import app, db
 from app.settings.settings import HOST, PORT
+from app.settings.gunicorn_server import GunicornServer
 
 __author__ = 'fla'
 
@@ -35,6 +38,7 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 manager.add_command("runserver", Server(host=HOST, port=PORT, use_debugger=True))
+manager.add_command("gunicornserver", GunicornServer())
 
 if __name__ == '__main__':
     manager.run()
