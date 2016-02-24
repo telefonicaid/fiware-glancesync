@@ -109,3 +109,8 @@ else:
 # create logger
 logger_api = logging.getLogger('GlanceSync-API')
 logger_cli = logging.getLogger('GlanceSync-Client')
+
+# GUNICORN constants
+WORKERS = config.get('gunicorn', 'WORKERS')
+PIDFILE = config.get('gunicorn', 'PIDFILE')
+LOGLEVEL = config.get('gunicorn', 'LOGLEVEL')
