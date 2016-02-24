@@ -101,8 +101,8 @@ if os.path.exists(cfg_logging_filename) and os.access(cfg_logging_filename, os.R
     # Load logging configuration file
     logging.config.fileConfig(cfg_logging_filename)
 else:
-    msg = '\nERROR: There is neither defined GLANCESYNC_LOGGING_SETTINGS_FILE environment variable ' \
-          '\n       pointing to fiware-glancesync.cfg nor /etc/fiware.d/etc/fiware-glancesync-logging.cfg ' \
+    msg = '\nERROR: There is neither defined GLANCESYNC_LOGGING_SETTINGS_FILE environment variable pointing' \
+          '\n       to fiware-glancesync-logging.cfg nor /etc/fiware.d/etc/fiware-glancesync-logging.cfg ' \
           '\n       file. Please correct at least one of them to execute the program.'
     exit(msg)
 
