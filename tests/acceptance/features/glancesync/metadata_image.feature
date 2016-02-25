@@ -130,7 +130,6 @@ Feature: Image sync between regions using GlanceSync in the same federation but
             | 'fake, fake'           |              |               |              |               |
 
 
-    @skip @bug @CLAUDIA-5306
     Scenario: 05: All metadata are synchronized when metadata_set property is empty
       Given a new image created in the Glance of master node with name "qatesting01" and these properties
               | param_name      | param_value         |
@@ -142,13 +141,7 @@ Feature: Image sync between regions using GlanceSync in the same federation but
               | DEFAULT         | metadata_condition  | image.is_public        |
               | DEFAULT         | metadata_set        |                        |
       When  I sync the image
-      Then  all images are synchronized
-      And   the image "qatesting01" is present in all nodes with the expected data
-      And   the properties values of the image "qatesting01" in all nodes are the following:
-              | param_name      | param_value         |
-              | sdc_aware       | True                |
-              | type            | fiware:apps         |
-              | nid             | 453                 |
+      Then  no images are synchronized
 
 
     @skip @bug @CLAUDIA-5307 @CLAUDIA-5308

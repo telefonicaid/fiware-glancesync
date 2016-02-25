@@ -267,6 +267,8 @@ class GlanceSyncImage(object):
             globals_dict['image'] = self
             globals_dict['metadata_set'] = metadata_set
             synchronisable = eval(metadata_condition, globals_dict)
+            if not metadata_set:
+                synchronisable = False
         elif not self.is_public:
             synchronisable = False
         elif not metadata_set:
