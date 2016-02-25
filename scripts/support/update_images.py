@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

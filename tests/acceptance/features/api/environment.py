@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -30,7 +30,7 @@ from glancesync_api_client.api_client import GlanceSyncApiClient
 
 
 __author__ = "@jframos"
-__copyright__ = "Copyright 2015"
+__copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
 __logger__ = get_logger("qautils")

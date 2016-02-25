@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ def launch_vm(vmname, imagename, ip, key, flavorname, cloudinit=False, configdri
         vmname, flavor=flavor, image=image_id, key_name=key,
         security_groups=['default'], nics=[nic], **extra_params)
     time.sleep(2)
-    #print server.adminPass
+
     if ip:
         server.add_floating_ip(ip)
     return server.id

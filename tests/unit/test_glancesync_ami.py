@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class TestGlanceSyncAMI_update(unittest.TestCase):
                          'img1': self.reg_image}
         self.logbuffer = StringIO.StringIO()
         handler = logging.StreamHandler(self.logbuffer)
-        logging.getLogger('glancesync').addHandler(handler)
+        logging.getLogger('GlanceSync-Client').addHandler(handler)
 
     def test_update_kernelramdisk_id(self):
         """test update_kernelramdisk_id. Case: the image need to be updated.

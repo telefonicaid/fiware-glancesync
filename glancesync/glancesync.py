@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
 __author__ = 'chema'
 
 import os
-import logging
 import csv
 import copy
 
@@ -35,7 +34,7 @@ from glancesync_image import GlanceSyncImage
 import glancesync_ami
 from glancesync_serversfacade import ServersFacade
 from glancesync_serverfacade_mock import ServersFacade as ServersFacadeMock
-
+from app.settings.settings import logger_cli
 
 """Module to synchronize glance servers in different regions taking the base of
 the master region.
@@ -54,12 +53,14 @@ class GlanceSync(object):
     def __init__(self, config_stream=None, options_dict=None):
         """Constructor of the object
         """
-        self.log = logging.getLogger('glancesync')
+        self.log = logger_cli
+
         if config_stream is None:
             glancesyncconfig = GlanceSyncConfig(override_d=options_dict)
         else:
             glancesyncconfig = GlanceSyncConfig(
                 stream=config_stream, override_d=options_dict)
+
         self.regions_uris = dict()
         self.master_region = glancesyncconfig.master_region
         self.images_dir = glancesyncconfig.images_dir
@@ -415,12 +416,20 @@ class GlanceSync(object):
         :return:
         """
 
+        '''
+        We do not need to create a new logger just import it from
+        app.settings.settings import logger_cli
+        TO BE CHECKED
+
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(levelname)s:%(message)s'))
         logger = logging.getLogger('glancesync')
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
         logger.propagate = 0
+        '''
+        # Just duplicate the assignement of logger_cli to the log variable
+        # log = logger_cli
 
     def __upload_image(self, master_image, images_dict, regionobj):
         new_image = copy.deepcopy(master_image)

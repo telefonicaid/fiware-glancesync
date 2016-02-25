@@ -81,7 +81,7 @@ Prerequisites
 - Python 2.7 or newer (2.x) (https://www.python.org/downloads/).
 - pip (https://pypi.python.org/pypi/pip).
 - virtualenv (https://pypi.python.org/pypi/virtualenv).
-- GlanceSync (https://pdihub.hi.inet/fiware/fiware-glancesync/).
+- GlanceSync (https://github.com/telefonicaid/fiware-glancesync).
 
 Top_
 
@@ -168,6 +168,11 @@ If you want to execute the features implemented in scripts folder, just execute:
 ::
 
   $> behave features/scripts --tags ~@skip
+
+Last but not least, if you want to execute the features implemented in api folder, just execute:
+::
+
+  $> behave features/api --tags ~@skip
 
 Top_
 

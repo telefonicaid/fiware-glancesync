@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,44 @@ import requests_mock
 
 from scripts.getnids.getnid import NID, processingnid
 from tests.unit.resources.config import RESOURCESPATH
+
+
+def get_path(path, relativepath):
+    head_path, tail_path = os.path.split(path)
+
+    tmp = relativepath.split('/')
+
+    try:
+        index = tmp.index(tail_path)
+
+        if index >= 1:
+            # We have to check the previous directory folder to check if they are the same
+
+            for i in range(0, index):
+                head_path, tail_path = os.path.split(head_path)
+
+                try:
+                    tmp.index(tail_path)
+                except ValueError:
+                    raise ValueError('Error, the paths are not equivalent')
+
+            path = head_path
+
+        elif index == 0:
+            # We have coincidence at the first level so we can join the strings
+            # except the first level of relative folder.
+            del tmp[0]
+            relativepath = '/'.join(tmp)
+
+    except ValueError as ex:
+        # Two errors can be found here, one due to there is not coincidence between the paths
+        if ex.message == 'Error, the paths are not equivalent':
+            raise ex
+        else:
+            tmp = relativepath
+
+    result = os.path.join(path, relativepath)
+    return result
 
 
 @requests_mock.Mocker()
@@ -68,7 +106,8 @@ class TestGlanceSyncNIDOperations(unittest.TestCase):
         :return: The file content.
         """
         try:
-            filename = os.getcwd() + relativepath + '/' + filename
+            tmp = get_path(os.getcwd(), relativepath)
+            filename = os.path.join(tmp, filename)
 
             # Open de file and get data
             f = open(filename, 'r')
