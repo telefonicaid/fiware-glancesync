@@ -96,6 +96,7 @@ Feature: Image sync between regions using GlanceSync in the same federation with
     And   the properties values of the image "qatesting01" in all target nodes are the following:
             | param_name      | param_value         |
             | is_public       | False               |
+            | att4            | False               |
 
 
   Scenario: Sync images although the do not comply sync conditions: Public image with metadata and metadata_set. No checksum conflicts.

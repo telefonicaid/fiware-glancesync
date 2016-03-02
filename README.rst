@@ -187,6 +187,8 @@ This is the algorithm to determine if an image is synchronisable:
    that is a dictionary with the metadata of the image. Other properties are *id*,
    *name*, *owner*, *size*, *region*, *is_public*. The image may be synchronised
    even if it is not public, to avoid this, check ``image.is_public`` in the condition.
+   If metadata_set is not defined and ``image.is_public``, then the image will be synchronised
+   with all ``user_properties``.
 6) if ``metadata_condition`` is not defined, the image is public, and
    ``metadata_set`` is defined, the image is synchronised if some of the
    properties of ``metadata_set`` is on ``image.user_properties``.

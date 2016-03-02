@@ -439,10 +439,11 @@ class GlanceSync(object):
         # filter properties to upload
         metadata_set = regionobj.target['metadata_set']
         properties = list(new_image.user_properties.keys())
-        for p in properties:
-            if p not in metadata_set and \
-                    p != 'kernel_id' and p != 'ramdisk_id':
-                del new_image.user_properties[p]
+        if len(metadata_set) > 0:
+            for p in properties:
+                if p not in metadata_set and \
+                        p != 'kernel_id' and p != 'ramdisk_id':
+                    del new_image.user_properties[p]
 
         # upload
         uuid = regionobj.target['facade'].upload_image(
