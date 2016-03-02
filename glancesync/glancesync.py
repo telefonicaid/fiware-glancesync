@@ -437,13 +437,12 @@ class GlanceSync(object):
         glancesync_ami.update_kernelramdisk_id(
             new_image, master_image, images_dict)
         # filter properties to upload
-        metadata_set = regionobj.target['metadata_set']
-        properties = list(new_image.user_properties.keys())
+        metadata_set = set(regionobj.target['metadata_set'])
+        properties = set(new_image.user_properties.keys())
         if len(metadata_set) > 0:
-            for p in properties:
-                if p not in metadata_set and \
-                        p != 'kernel_id' and p != 'ramdisk_id':
-                    del new_image.user_properties[p]
+            diff = properties - metadata_set - set(['kernel_id', 'ramdisk_id'])
+            for p in diff:
+                del new_image.user_properties[p]
 
         # upload
         uuid = regionobj.target['facade'].upload_image(
