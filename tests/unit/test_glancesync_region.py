@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ class TestGlanceSyncRegion(unittest.TestCase):
 
     def setUp(self):
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         logger.addHandler(handler)
@@ -575,7 +575,7 @@ class TestGlanceSyncRegionObsoletedImages(unittest.TestCase):
         synchronisable"""
 
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)

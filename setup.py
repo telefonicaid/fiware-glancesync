@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FI-WARE project.
 #
@@ -22,21 +22,34 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from distutils.core import setup
+from setuptools import setup, find_packages
+from glancesync.settings.glancesync_config import __version__
+from pip.req import parse_requirements
+from os.path import join as pjoin
 
-__version__ = '1.2.0'
+# parse_requirements() returns generator of pip.req.InstallRequirement objects
+install_reqs = parse_requirements("requirements.txt", session=False)
+# > requirements_list is a list of requirement; e.g. ['requests==2.6.0', 'Fabric==1.8.3']
+requirements_list = [str(ir.req) for ir in install_reqs]
 
 setup(
-name='fiware-glancesync',
-packages=['fiware-glancesync'],  # this must be the same as the name above
-version=__version__,
-description='Tool to synchronise images from a master region to other regions',
-author='Fernando Lopez Aguilar',
-author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
-license='Apache 2.0',
-url='https://github.com/telefonicaid/fiware-glancesync',
-download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % __version__,
-keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
-classifiers=[
-"License :: OSI Approved :: Apache Software License", ],
+  name='fiware-glancesync',
+  packages=find_packages(exclude=['*tests*']),
+  install_requires=requirements_list,
+  data_files=[('.', ['glancesync/settings/glancesync.conf'])],
+  package_data={
+    'glancesync': ['glancesync.conf']
+  },
+  include_package_data=True,
+  version=__version__,
+  description='Tool to synchronise images from a master region to other regions',
+  author='Fernando Lopez Aguilar',
+  author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
+  license='Apache 2.0',
+  scripts=[pjoin('sync.py')],
+  url='https://github.com/telefonicaid/fiware-glancesync',
+  download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % __version__,
+  keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
+  classifiers=[
+        "License :: OSI Approved :: Apache Software License", ],
 )

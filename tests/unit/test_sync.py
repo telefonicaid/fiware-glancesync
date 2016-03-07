@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import datetime
 import os
 import logging
 import time
+import re
 
 from sync import Sync
 
@@ -147,7 +148,10 @@ class TestSyncParallel(unittest.TestCase):
                 self.log.info('Sync ' + region + ' ' + str(time.time()))
         }
         self.glancesync.configure_mock(**config)
-        self.dir_name = 'sync_20200206_2357'
+
+        path = os.path.abspath(os.curdir)
+        self.dir_name = os.path.join(path, 'sync_20200206_2357')
+
         self.tearDown()
 
     def tearDown(self):
@@ -166,6 +170,9 @@ class TestSyncParallel(unittest.TestCase):
         :param datetime_mock: the absolute difference time, in seconds (float)
         :return:
         """
+        match_obj1 = None
+        match_obj2 = None
+
         dt = datetime.datetime(2020, 2, 6, 23, 57)
         config = {'datetime.now.return_value': dt}
         datetime_mock.configure_mock(**config)
@@ -174,13 +181,23 @@ class TestSyncParallel(unittest.TestCase):
         file2 = os.path.join(self.dir_name, 'region2.txt')
         assert(os.path.exists(file1))
         assert(os.path.exists(file2))
+
         data1 = open(file1).read()
-        assert(data1.startswith('Sync region1'))
         data2 = open(file2).read()
-        assert(data2.startswith('Sync region2'))
-        time1 = float(data1.split(' ')[2])
-        time2 = float(data2.split(' ')[2])
-        return abs(time1-time2)
+
+        # The expected values for data1 and data2 are:
+        # 'Sync region<region id> <timestamp>' or 'INFO:Sync region<region id> <timestamp>'
+        regular_expression = r'(INFO:)?Sync region.* (.*)'
+
+        match_obj1 = re.match(regular_expression, data1, re.M | re.I)
+        assert(match_obj1 is not None), 'The file {} does not contain the expected value'.format(file1)
+
+        match_obj2 = re.match(regular_expression, data2, re.M | re.I)
+        assert(match_obj2 is not None), 'The file {} does not contain the expected value'.format(file2)
+
+        time1 = float(match_obj1.group(2))
+        time2 = float(match_obj2.group(2))
+        return abs(time1 - time2)
 
     @patch('sync.datetime')
     def test_parallel_sync(self, datetime_mock):

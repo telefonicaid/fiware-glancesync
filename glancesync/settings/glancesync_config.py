@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,13 +23,12 @@
 # contact with opensource@tid.es
 #
 __author__ = 'chema'
+__version__ = '1.3.0'
 
 import ConfigParser
 import os
 import base64
-import logging
-
-import sys
+from app.settings.settings import logger_cli
 
 
 # Methods to obtain a list/set, which a default empty.
@@ -105,7 +104,7 @@ class GlanceSyncConfig(object):
         :return: nothing
         """
 
-        logger = logging.getLogger('glancesync')
+        self.logger = logger_cli
 
         defaults = {'use_keystone_v3': 'False',
                     'support_obsolete_images': 'True',
@@ -188,7 +187,7 @@ class GlanceSyncConfig(object):
                         msg = 'A credential parameter is mandatory for each '\
                             'target (or the set: user, password, tenant, '\
                             'keystone_url)'
-                        logger.error(msg)
+                        self.logger.error(msg)
                         raise Exception(msg)
                 target['forcesyncs'] = configparser.getset(
                     section, 'forcesyncs')
@@ -219,7 +218,6 @@ class GlanceSyncConfig(object):
 
                 target['support_obsolete_images'] = configparser.getboolean(
                         section, 'support_obsolete_images')
-
 
                 target['list_images_timeout'] = configparser.getint(
                         section, 'list_images_timeout')

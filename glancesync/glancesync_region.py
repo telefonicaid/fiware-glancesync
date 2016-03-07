@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 #
 __author__ = 'chema'
 
-import logging
+from app.settings.settings import logger_cli
 
 """This module includes code supporting the glancesync functionality, but
 users should not use this class in their code, because it is internal and its
@@ -41,7 +41,6 @@ class GlanceSyncRegion(object):
     """This class supports the concept of region with a target namespace"""
 
     def __init__(self, fullname, targets):
-        self.log = logging.getLogger('glancesync')
         """Create a new region object.
 
         :param fullname: It is specified as 'target:region_name'. A target is
@@ -52,6 +51,8 @@ class GlanceSyncRegion(object):
         :param targets: the dictionary with the targets defined in the
             configuration file.
         """
+        self.log = logger_cli
+
         parts = fullname.split(':')
         if len(parts) == 2:
             self.region = parts[1]

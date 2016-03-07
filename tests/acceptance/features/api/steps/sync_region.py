@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -29,7 +29,7 @@ import time
 from qautils.logger.logger_utils import get_logger
 
 __author__ = "@jframos"
-__copyright__ = "Copyright 2015"
+__copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
 __logger__ = get_logger("steps.sync_region")
@@ -43,7 +43,8 @@ def a_new_image_created_in_glance_of_master(context, image_name):
     create_new_image(context, context.master_region_name, image_name)
 
 
-@given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)" and file "(?P<file>\w*)"')
+@given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)" '
+       u'and file "(?P<file>\w*)"')
 @given(u'a new image created in the Glance of master node with name "(?P<image_name>[\w_\.]*)", '
        u'file "(?P<file>\w*)" and these properties')
 def other_new_image_created_in_glance_of_master(context, image_name, file):

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -107,13 +107,11 @@ class Sync(object):
                 else:
                     path = os.path.join('sync_' + datestr, region + '.txt')
                     handler = logging.FileHandler(path)
-                    handler.setFormatter(logging.Formatter(
-                        '%(levelname)s:%(message)s'))
+                    handler.setFormatter(logging.Formatter('%(message)s'))
 
                     logger = self.glancesync.log
                     # Remove old handlers
                     for h in logger.handlers:
-                        handler.setFormatter(logging.Formatter('%(message)s'))
                         logger.removeHandler(h)
 
                     logger.addHandler(handler)

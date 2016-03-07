@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import os.path
 import StringIO
 import copy
 
-from glancesync import glancesync_config
-from glancesync.glancesync_config import GlanceSyncConfig
+from glancesync.settings import glancesync_config
+from glancesync.settings.glancesync_config import GlanceSyncConfig
 
 __author__ = 'chema'
 

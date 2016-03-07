@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ class MyOpenStackClients(MagicMock):
 
 mock_osclients = MyOpenStackClients()
 
+
 class TestGlanceServersFacadeM(unittest.TestCase):
     """Test the facade using a mock, that is, only checks that the right calls
     to osclients are made"""
@@ -89,7 +90,6 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         mock_osclients.reset_mock()
         self.facade = ServersFacade(self.target)
         self.facade.images_dir = None
-
 
         image = GlanceSyncImage('imagetest', '01', self.region, None, False)
         image.raw = dict()
@@ -185,7 +185,6 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.upload_image(self.region_obj, self.image)
 
-
     def test_upload_ex2(self):
         """test an exception because the file does not exists"""
         self.facade.images_dir = tempfile.mkdtemp(prefix='imagesdir_tmp')
@@ -238,6 +237,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
             self.facade.delete_image(self.region_obj, self.image.id, False)
         self.assertEquals(str(cm.exception), msg)
 
+
 def _unset_environment():
     """Clean environment, to ensure that osclients get information from
     setter methods. Environment is restored after the test
@@ -248,6 +248,7 @@ def _unset_environment():
     del env['OS_PASSWORD']
     del env['OS_USERNAME']
     del env['OS_TENANT_NAME']
+
 
 @unittest.skipUnless(testingFacadeReal, 'avoid testing against a real server')
 class TestGlanceServersFacade(unittest.TestCase):

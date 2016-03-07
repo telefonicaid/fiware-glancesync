@@ -1,0 +1,3 @@
+recursive-include glancesync *.conf
+include *.txt *.conf
+recursive-include licenses *.txt

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- encoding: utf-8 --
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FI-WARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ from glancesync.glancesync_image import GlanceSyncImage
 from glancesync.glancesync import GlanceSync
 from glancesync.glancesync_serverfacade_mock import ServersFacade
 from tests.unit.resources.config import RESOURCESPATH
+from tests.unit.test_getnid import get_path
 
 __author__ = 'chema'
 
@@ -349,7 +350,8 @@ class TestGlanceSync_Sync(unittest.TestCase):
 
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/alreadysync'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'alreadysync')
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
     def setUp(self):
@@ -431,7 +433,9 @@ class TestGlanceSync_Empty(TestGlanceSync_Sync):
     """Test a environment where the destination region has no images"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/emptyregions'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'emptyregions')
+
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -440,7 +444,8 @@ class TestGlanceSync_Mixed(TestGlanceSync_Sync):
     """
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/mixed'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'mixed')
         self.regions = ['Valladolid', 'master:Burgos', 'other:Madrid']
 
 
@@ -449,7 +454,8 @@ class TestGlanceSync_Metadata(TestGlanceSync_Sync):
     metadata different than the images on the master region"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/metadata'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'metadata')
         self.regions = ['master:Burgos']
 
 
@@ -458,14 +464,15 @@ class TestGlanceSync_Checksum(TestGlanceSync_Sync):
     than the master images"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/checksum'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'checksum')
         self.regions = ['master:Burgos']
 
     def test_sync_warning(self):
         """test that a warning is emitted with a image that has a
         different checksum and there is not settings about what to do with."""
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)
@@ -488,7 +495,8 @@ class TestGlanceSync_AMI(TestGlanceSync_Sync):
     """Test a environment with AMI images (kernel_id/ramdisk_id)"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/ami'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'ami')
         self.regions = ['master:Burgos']
 
 
@@ -496,7 +504,8 @@ class TestGlanceSync_Obsolete(TestGlanceSync_Sync):
     """Test obsolete images support"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/obsolete'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'obsolete')
         self.regions = ['other:Burgos', 'target2:Madrid']
 
 
@@ -505,13 +514,14 @@ class TestGlanceSync_MasterFiltered(TestGlanceSync_Sync):
     owner differnt than the tenant, are ignored"""
     def config(self):
         path = os.path.abspath(os.curdir)
-        self.path_test = path + RESOURCESPATH + '/master_filtered'
+        tmp = get_path(path, RESOURCESPATH)
+        self.path_test = os.path.join(tmp, 'master_filtered')
         self.regions = ['Burgos']
 
     def test_sync_warning(self):
         """test that a warning is emitted with a image name is duplicated"""
         # Capture warnings
-        logger = logging.getLogger('glancesync')
+        logger = logging.getLogger('GlanceSync-Client')
         self.buffer_log = StringIO.StringIO()
         handler = logging.StreamHandler(self.buffer_log)
         handler.setLevel(logging.WARNING)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -27,7 +27,7 @@ from qautils.logger.logger_utils import get_logger
 from commons.utils import load_project_properties
 
 __author__ = "fla"
-__copyright__ = "Copyright 2015"
+__copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
 __logger__ = get_logger("qautils")
