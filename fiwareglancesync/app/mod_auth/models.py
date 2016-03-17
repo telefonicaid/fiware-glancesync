@@ -24,8 +24,8 @@
 #
 # Import the database object (db) from the main application module
 # We will define this inside /app/__init__.py in the next sections.
-from app import db
-from utils.mydict import FirstInsertFirstOrderedDict as fifo
+from fiwareglancesync.app.app import db
+from fiwareglancesync.utils.mydict import FirstInsertFirstOrderedDict as fifo
 import uuid
 
 __author__ = 'fla'

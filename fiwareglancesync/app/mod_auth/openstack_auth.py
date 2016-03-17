@@ -25,8 +25,8 @@
 import httplib
 from flask import request, abort, json
 from AuthorizationManager import AuthorizationManager
-from app.settings.settings import logger_api
-from app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE_URL, AUTH_API_V2, ADM_PASS, ADM_USER, \
+from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE_URL, AUTH_API_V2, ADM_PASS, ADM_USER, \
     ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME
 from functools import wraps
 

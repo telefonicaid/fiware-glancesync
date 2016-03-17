@@ -13,7 +13,8 @@ install:
 
 # command to run tests
 script:
-  nosetests --with-coverage --cover-package=./ --exe
+  - pep8 --max-line-length=120 .
+  - nosetests --with-coverage --cover-package=./ --exe
 
 after_success:
   coveralls

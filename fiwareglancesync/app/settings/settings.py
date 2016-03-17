@@ -22,7 +22,7 @@
 # contact with opensource@tid.es
 #
 from ConfigParser import SafeConfigParser
-import app as fiware_glancesync
+import fiwareglancesync.app as fiware_glancesync
 import os.path
 import logging
 import logging.config

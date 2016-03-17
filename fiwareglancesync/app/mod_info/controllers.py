@@ -26,9 +26,9 @@
 from flask import Blueprint, make_response
 import httplib
 import datetime
-from app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE, \
+from fiwareglancesync.app.settings.settings import OWNER, VERSION, API_INFO_URL, UPDATED, STATUS, CONTENT_TYPE, \
     SERVER_HEADER, SERVER, JSON_TYPE
-from app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import logger_api
 
 __author__ = 'fla'
 

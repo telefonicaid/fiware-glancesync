@@ -28,7 +28,7 @@ __version__ = '1.4.0'
 import ConfigParser
 import os
 import base64
-from app.settings.settings import logger_cli
+from fiwareglancesync.app.settings.settings import logger_cli
 
 
 # Methods to obtain a list/set, which a default empty.

@@ -25,13 +25,13 @@
 # Import flask dependencies
 from flask import abort, Response
 
-from app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import logger_api
 from functools import wraps
-from app.mod_auth.AuthorizationManager import AuthorizationManager
+from fiwareglancesync.app.mod_auth.AuthorizationManager import AuthorizationManager
 import requests
 import json
 import httplib
-from app.settings.settings import KEYSTONE_URL, AUTH_API_V2, AUTH_API_V3, REGION_LIST_API_V3, ADM_USER, ADM_PASS, \
+from fiwareglancesync.app.settings.settings import KEYSTONE_URL, AUTH_API_V2, AUTH_API_V3, REGION_LIST_API_V3, ADM_USER, ADM_PASS, \
     ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME, X_AUTH_TOKEN_HEADER
 
 __author__ = 'fla'

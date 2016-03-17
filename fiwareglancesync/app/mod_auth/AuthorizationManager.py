@@ -30,8 +30,8 @@ from keystoneclient import session
 import requests
 
 from models import TokenModel
-from app.settings.settings import logger_api
-from app.settings.settings import ACCEPT_HEADER, JSON_TYPE, X_AUTH_TOKEN_HEADER, TOKENS_PATH_V2, \
+from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import ACCEPT_HEADER, JSON_TYPE, X_AUTH_TOKEN_HEADER, TOKENS_PATH_V2, \
     X_SUBJECT_TOKEN_HEADER, TOKENS_PATH_V3, AUTH_API_V2, AUTH_API_V3
 
 __author__ = 'fla'

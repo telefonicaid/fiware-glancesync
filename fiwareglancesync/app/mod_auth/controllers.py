@@ -24,13 +24,14 @@
 
 from flask import Blueprint, abort, make_response
 import httplib
-from app import db
+from fiwareglancesync.app.app import db
 from models import User
 from openstack_auth import authorized
 from region_manager import check_region
-from app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
-from app.mod_auth.models import Images, Task
-from app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
+from fiwareglancesync.app.mod_auth.models import Images, Task
+from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.sync import Sync
 import time
 
 __author__ = 'fla'
@@ -59,6 +60,9 @@ def get_status(regionid, token=None):
     message = "GET, get information about the synchronization status in the region: {}".format(regionid)
 
     logger_api.info(message)
+
+    sync = Sync([regionid], {})
+    sync.report_status()
 
     # Just for check this data should be returned by glancesync client
     x = Images()
@@ -121,6 +125,25 @@ def synchronize(regionid, token=None):
             # Do the stuff to sync the images here...
             # delete the time.sleep(20)
             time.sleep(20)
+
+
+
+                # Run cmd
+    # sync = Sync(meta.regions, options)
+    #
+    # if meta.show_status:
+    #     sync.report_status()
+    # elif meta.parallel:
+    #     sync.parallel_sync()
+    # elif meta.show_regions:
+    #     sync.show_regions()
+    # elif meta.make_backup:
+    #     sync.make_backup()
+    # else:
+    #     sync.sequential_sync(meta.dry_run)
+
+
+
 
         except Exception as e:
             message = '''
