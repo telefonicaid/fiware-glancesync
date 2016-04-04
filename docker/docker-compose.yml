@@ -1,7 +1,5 @@
 fiwareglancesync:
   image: fiware-glancesync
-  ports:
-   - 8000:8000
   environment: 
    - ADM_PASSWORD
    - ADM_USERNAME
