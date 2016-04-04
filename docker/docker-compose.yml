@@ -1,0 +1,10 @@
+fiwareglancesync:
+  image: fiware-glancesync
+  ports:
+   - 8000:8000
+  environment: 
+   - ADM_PASSWORD
+   - ADM_USERNAME
+   - ADM_TENANT_NAME
+   - ADM_TENANT_ID
+   - KEYSTONE_IP
