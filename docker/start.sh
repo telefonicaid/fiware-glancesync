@@ -15,10 +15,11 @@ virtualenv venv
 pip install -r requirements.txt
 export PYTHONPATH=../..
   
-behave tests/acceptance/features/glancesync/ --tags ~@skip --junit --junit-directory testreport
+behave features/glancesync/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of script components:
-behave /opt/fiware-glancesync/tests/acceptance/features/scripts/ --tags ~@skip --junit --junit-directory testreport
+behave features/scripts/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of API:
-behave /opt/fiware-glancesync/tests/acceptance/features/api/ --tags ~@skip --junit --junit-directory testreport
+behave features/api/ --tags ~@skip --junit --junit-directory testreport
+sleep 12000
