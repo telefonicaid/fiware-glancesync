@@ -17,6 +17,7 @@ ENV GLANCESYNC_LOGGING_SETTINGS_FILE=/etc/fiware.d/etc/fiware-glancesync-logging
 RUN python setup.py install
 WORKDIR /opt/fiware-glancesync/tests/acceptance/
 COPY settings.json conf/settings.json
+RUN pip install -r requirements.txt
 COPY start.sh .
 CMD ./start.sh
 

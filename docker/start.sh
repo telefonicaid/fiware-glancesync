@@ -9,7 +9,6 @@ sed -i -e "s/{KEYSTONE_IP}/${KEYSTONE_IP}/" /etc/fiware.d/etc/fiware-glancesync.
 sed -i -e "s/{ADM_TENANT_ID}/${ADM_TENANT_ID}/" /etc/fiware.d/etc/fiware-glancesync.cfg
 sed -i -e "s/{ADM_USERNAME}/${ADM_USERNAME}/" /etc/fiware.d/etc/fiware-glancesync.cfg
 
-pip install -r requirements.txt
 export PYTHONPATH=../..
   
 behave features/glancesync/ --tags ~@skip --junit --junit-directory testreport
@@ -19,3 +18,4 @@ behave features/scripts/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of API:
 behave features/api/ --tags ~@skip --junit --junit-directory testreport
+sleep 12000

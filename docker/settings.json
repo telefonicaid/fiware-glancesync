@@ -29,43 +29,10 @@
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}"
-    },
-    {
-      "credential_type": "secondary_admin",
-      "federation_name": "Federation1",
-      "region_name": "Burgos",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
-      "tenant_name": "tenant-qa",
-      "user_domain_name": "default",
-      "user": "qa",
-      "password": "testing"
-    },
-    {
-      "credential_type": "base_admin",
-      "federation_name": "Federation1",
-      "region_name": "Caceres",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
-      "tenant_name": "admin",
-      "user_domain_name": "default",
-      "user": "admin",
-      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T"
-    },
-    {
-      "credential_type": "secondary_admin",
-      "federation_name": "Federation1",
-      "region_name": "Caceres",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
-      "tenant_name": "tenant-qa",
-      "user_domain_name": "default",
-      "user": "qa",
-      "password": "testing"
     }
   ],
   "glancesync":{
-      "master_region_name": "Valladolid",
+      "master_region_name": "RegionOne",
       "bin_path": "/opt/fiware/glancesync",
       "config_file": "/etc/glancesync.conf"
   },
@@ -74,12 +41,12 @@
       "host": "private-anon-4017d6312-glancesync.apiary-mock.com",
       "port": "80",
       "resource": "",
-      "keystone_url": "http://10.95.55.167:35357/v2.0/",
-      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
-      "tenant_name": "admin",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "{ADM_TENANT_ID}",
+      "tenant_name": "{ADM_TENANT_NAME}",
       "user_domain_name": "default",
-      "user": "admin",
-      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T"
+      "user": "{ADM_USERNAME}",
+      "password": "{ADM_PASSWORD}"
   },
   "getnid":{
       "catalogue_url": "http://catalogue.fiware.org/",
