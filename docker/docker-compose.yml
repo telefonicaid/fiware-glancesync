@@ -6,5 +6,3 @@ fiwareglancesync:
    - ADM_TENANT_NAME
    - ADM_TENANT_ID
    - KEYSTONE_IP
-  ports:
-   - 22:22
