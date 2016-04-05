@@ -21,7 +21,8 @@ WORKDIR /opt/fiware/glancesync/tests/acceptance/
 COPY settings.json conf/settings.json
 RUN pip install -r requirements.txt
 COPY glancesync.conf /etc/glancesync.conf
-
+RUN mkdir /var/lib/glance
+RUN mkdir /var/lib/glance/images
 COPY start.sh .
 CMD ./start.sh
 
