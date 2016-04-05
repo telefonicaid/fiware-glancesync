@@ -18,4 +18,3 @@ behave features/scripts/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of API:
 behave features/api/ --tags ~@skip --junit --junit-directory testreport
-sleep 12000
