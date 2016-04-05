@@ -14,10 +14,10 @@
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}",
-      "host_name": "{KEYSTONE_IP}",
+      "host_name": "localhost",
       "host_user": "glancesync",
       "host_password": "glancesync",
-      "host_key": "/home/develenv/.ssh/fiware_cloud_rsa"
+      "host_key": "/home/glancesync/.ssh/id_rsa"
     },
     {
       "credential_type": "base_admin",

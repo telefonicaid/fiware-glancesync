@@ -22,6 +22,8 @@
 # contact with opensource@tid.es
 
 from qautils.remote.fabric_utils import FabricUtils
+from subprocess import Popen, PIPE
+import os
 
 __author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
@@ -52,6 +54,7 @@ class GlanceSyncRemoteCmdClient:
         self.conf_file_path = configuration_file_path
         self.conf_file_backup_path = None
         self.bin_path = glancesyc_bin_path
+        self.host = master_hostname
 
     def change_configuration_file(self, section, key, value):
         """
@@ -64,7 +67,7 @@ class GlanceSyncRemoteCmdClient:
 
         command = "crudini --set {config_file} {section} {key} {value}".format(config_file=self.conf_file_path,
                                                                                section=section, key=key, value=value)
-        return self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
 
     def backup_glancesync_config_file(self, backup_dir):
         """
@@ -76,7 +79,7 @@ class GlanceSyncRemoteCmdClient:
         self.conf_file_backup_path = "{backup_dir}/glancesync.conf.backup".format(backup_dir=backup_dir)
         command = "cp -f {config_file} {backup_file}".format(config_file=self.conf_file_path,
                                                              backup_file=self.conf_file_backup_path)
-        self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
 
     def restore_backup(self):
         """
@@ -86,7 +89,7 @@ class GlanceSyncRemoteCmdClient:
         if self.conf_file_backup_path:
             command = "cp -f {backup_file} {config_file}".format(backup_file=self.conf_file_backup_path,
                                                                  config_file=self.conf_file_path)
-            self.fabric_utils.execute_command(command)
+            return self.execute_command(command)
 
     def get_output_log_list(self):
         """
@@ -96,7 +99,7 @@ class GlanceSyncRemoteCmdClient:
 
         command = "ls -d {output_files_pater}*/*".format(bin_path=self.bin_path,
                                                          output_files_pater=OUTPUT_PARALLEL_LOGS)
-        return self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
 
     def get_output_log_content(self, file_absolute_path):
         """
@@ -106,7 +109,7 @@ class GlanceSyncRemoteCmdClient:
         """
 
         command = "cat {file_absolute_path}".format(file_absolute_path=file_absolute_path)
-        return self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
 
     def clean_all_parallel_output_logs(self):
         """
@@ -116,7 +119,7 @@ class GlanceSyncRemoteCmdClient:
 
         command = "rm -rf {output_files_pater}".format(bin_path=self.bin_path,
                                                        output_files_pater=OUTPUT_PARALLEL_LOGS)
-        return self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
 
     def sync(self, list_nodes=None, options=None):
         """
@@ -133,4 +136,22 @@ class GlanceSyncRemoteCmdClient:
         command = "{}/{}".format(self.bin_path, COMMAND_SYNC) if self.bin_path is not None else "sync"
         command = "{command} {options}".format(command=command, options=options) if options else command
         command = "{command} {list_nodes}".format(command=command, list_nodes=list_nodes) if list_nodes else command
-        return self.fabric_utils.execute_command(command)
+        return self.execute_command(command)
+
+    def execute_command(self, command):
+        if self.host == "localhost":
+            return self.execute_command_locally(command)
+        else:
+            return self.fabric_utils.execute_command(command)
+
+    def execute_command_locally(self, command):
+        print('locally'+command)
+        p = Popen(command, shell=True, stderr=PIPE)
+        metadatajson, err = p.communicate()
+        print err
+        print metadatajson
+        if err:
+            return None
+        if not metadatajson:
+            return 'ok'
+        return metadatajson
