@@ -146,7 +146,7 @@ class GlanceSyncRemoteCmdClient:
 
     def execute_command_locally(self, command):
         print('locally'+command)
-        p = Popen(command, shell=True, stderr=PIPE)
+        p = Popen(command, shell=True, stdout=PIPE)
         metadatajson, err = p.communicate()
         print err
         print metadatajson
