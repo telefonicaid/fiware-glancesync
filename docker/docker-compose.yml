@@ -1,0 +1,8 @@
+fiwareglancesync:
+  image: fiware-glancesync
+  environment: 
+   - ADM_PASSWORD
+   - ADM_USERNAME
+   - ADM_TENANT_NAME
+   - ADM_TENANT_ID
+   - KEYSTONE_IP
