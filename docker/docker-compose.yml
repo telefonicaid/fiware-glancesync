@@ -6,3 +6,5 @@ fiwareglancesync:
    - ADM_TENANT_NAME
    - ADM_TENANT_ID
    - KEYSTONE_IP
+   - Region1
+   - Region2
