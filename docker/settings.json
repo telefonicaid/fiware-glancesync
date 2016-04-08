@@ -41,6 +41,29 @@
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}"
+    }, 
+    {
+      "credential_type": "base_admin",
+      "federation_name": "Federation1",
+      "region_name": "{Region3}",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "{ADM_TENANT_ID}",
+      "tenant_name": "{ADM_TENANT_NAME}",
+      "user_domain_name": "default",
+      "user": "{ADM_USERNAME}",
+      "password": "{ADM_PASSWORD}"
+    },
+    {
+      "credential_type": "secondary_admin",
+      "federation_name": "Federation1",
+      "region_name": "{Region3}",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
+      "tenant_id": "{ADM_TENANT_ID}",
+      "tenant_name": "{ADM_TENANT_NAME}",
+      "user_domain_name": "default",
+      "user": "{ADM_USERNAME}",
+      "password": "{ADM_PASSWORD}"
     }
   ],
   "glancesync":{

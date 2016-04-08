@@ -8,3 +8,4 @@ fiwareglancesync:
    - KEYSTONE_IP
    - Region1
    - Region2
+   - Region3

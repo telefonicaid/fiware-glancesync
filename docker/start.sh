@@ -11,6 +11,7 @@ sed -i -e "s/{ADM_USERNAME}/${ADM_USERNAME}/" /etc/fiware.d/etc/fiware-glancesyn
 sed -i -e "s/{Region1}/${Region1}/" /etc/glancesync.conf
 sed -i -e "s/{Region1}/${Region1}/" conf/settings.json
 sed -i -e "s/{Region2}/${Region2}/" conf/settings.json
+sed -i -e "s/{Region3}/${Region3}/" conf/settings.json
 
 export OS_REGION_NAME=$Region1
 export  OS_USERNAME=$ADM_USERNAME
