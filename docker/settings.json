@@ -35,12 +35,11 @@
       "federation_name": "Federation1",
       "region_name": "{Region2}",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
-      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
-      "tenant_id": "{ADM_TENANT_ID}",
-      "tenant_name": "{ADM_TENANT_NAME}",
+      "tenant_id": "de18e854c14142ab87fcab1873de3b21",
+      "tenant_name": "qa",
       "user_domain_name": "default",
-      "user": "{ADM_USERNAME}",
-      "password": "{ADM_PASSWORD}"
+      "user": "qa",
+      "password": "qa"
     }, 
     {
       "credential_type": "base_admin",
@@ -58,12 +57,11 @@
       "federation_name": "Federation1",
       "region_name": "{Region3}",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
-      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
-      "tenant_id": "{ADM_TENANT_ID}",
-      "tenant_name": "{ADM_TENANT_NAME}",
+      "tenant_id": "de18e854c14142ab87fcab1873de3b21",
+      "tenant_name": "qa",
       "user_domain_name": "default",
-      "user": "{ADM_USERNAME}",
-      "password": "{ADM_PASSWORD}"
+      "user": "qa",
+      "password": "qa"
     }
   ],
   "glancesync":{
