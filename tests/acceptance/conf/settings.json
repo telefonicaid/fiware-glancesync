@@ -9,60 +9,60 @@
       "credential_type": "base_admin|host",
       "federation_name": "Federation1",
       "region_name": "Valladolid",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": "",
-      "host_name": "",
-      "host_user": "",
-      "host_password": "",
-      "host_key": ""
+      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T",
+      "host_name": "10.95.55.167",
+      "host_user": "glancesync",
+      "host_password": "glancesync",
+      "host_key": "/home/develenv/.ssh/fiware_cloud_rsa"
     },
     {
       "credential_type": "base_admin",
       "federation_name": "Federation1",
       "region_name": "Burgos",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": ""
+      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T"
     },
     {
       "credential_type": "secondary_admin",
       "federation_name": "Federation1",
       "region_name": "Burgos",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
       "tenant_name": "tenant-qa",
       "user_domain_name": "default",
       "user": "qa",
-      "password": ""
+      "password": "testing"
     },
     {
       "credential_type": "base_admin",
       "federation_name": "Federation1",
       "region_name": "Caceres",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": ""
+      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T"
     },
     {
       "credential_type": "secondary_admin",
       "federation_name": "Federation1",
       "region_name": "Caceres",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "cfd80f6910684c1487bf3678ed039f49",
       "tenant_name": "tenant-qa",
       "user_domain_name": "default",
       "user": "qa",
-      "password": ""
+      "password": "testing"
     }
   ],
   "glancesync":{
@@ -72,18 +72,19 @@
   },
     "glancesync_api":{
       "protocol": "http",
-      "host": "private-anon-2663e034c-glancesync.apiary-mock.com",
+      "host": "private-anon-4017d6312-glancesync.apiary-mock.com",
       "port": "80",
       "resource": "",
-      "keystone_url": "",
-      "tenant_id": "",
+      "keystone_url": "http://10.95.55.167:35357/v2.0/",
+      "tenant_id": "c09517bb5d714141ba1b5f499088a584",
       "tenant_name": "admin",
       "user_domain_name": "default",
       "user": "admin",
-      "password": ""
+      "password": "hwqwdEf8hoH9Z0SIVXwRZGyT0fjY8T"
   },
   "getnid":{
       "catalogue_url": "http://catalogue.fiware.org/",
       "bin_path": "/scripts/getnids/getnid.py"
   }
 }
+

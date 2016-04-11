@@ -145,11 +145,8 @@ class GlanceSyncRemoteCmdClient:
             return self.fabric_utils.execute_command(command)
 
     def execute_command_locally(self, command):
-        print('locally'+command)
         p = Popen(command, shell=True, stdout=PIPE)
         metadatajson, err = p.communicate()
-        print err
-        print metadatajson
         if err:
             return None
         if not metadatajson:
