@@ -28,8 +28,8 @@ import os
 import glob
 import tempfile
 
-from glancesync.glancesync_serverfacade_mock import ServersFacade
-from glancesync.glancesync_region import GlanceSyncRegion
+from fiwareglancesync.glancesync_serverfacade_mock import ServersFacade
+from fiwareglancesync.glancesync_region import GlanceSyncRegion
 from tests.unit.resources.config import RESOURCESPATH
 from tests.unit.test_getnid import get_path
 

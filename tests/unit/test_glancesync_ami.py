@@ -29,8 +29,8 @@ import copy
 import logging
 import StringIO
 
-from glancesync.glancesync_image import GlanceSyncImage
-import glancesync.glancesync_ami as ami
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+import fiwareglancesync.glancesync_ami as ami
 
 
 class TestGlanceSyncAMI(unittest.TestCase):

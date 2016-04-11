@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 from unittest import TestCase
-from app.mod_auth.models import Image, Images, Task, TokenModel
+from fiwareglancesync.app.mod_auth.models import Image, Images, Task, TokenModel
 import uuid
 import re
 import json

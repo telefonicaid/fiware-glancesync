@@ -36,8 +36,9 @@ class Base(db.Model):
     __abstract__ = True
 
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime,  default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    current_date = db.func.current_timestamp()
+    date_created = db.Column(db.DateTime,  default=current_date)
+    date_modified = db.Column(db.DateTime,  default=current_date, onupdate=current_date)
 
 
 # Define a User model
@@ -60,15 +61,19 @@ class User(Base):
     status = db.Column(db.String(128), nullable=False)
 
     # New instance instantiation procedure
-    def __init__(self, region, name, taskid, role, status):
+    def __init__(self, region, name, task_id, role, status):
         self.region = region
         self.name = name
-        self.task_id = taskid
+        self.task_id = task_id
         self.role = role
         self.status = status
 
     def __repr__(self):
         return '<User %r>' % self.name
+
+    def change_status(self, new_status):
+        self.status = new_status
+        self.date_modified = db.func.current_timestamp()
 
 
 class TokenModel:
@@ -133,10 +138,10 @@ class Image:
         self.status = status
         self.message = message
 
-        try:
-            self.check_status()
-        except ValueError as ex:
-            raise ex
+        # try:
+        #     self.check_status()
+        # except ValueError as ex:
+        #     raise ex
 
     def check_status(self):
         if self.status not in self.glancestatus:
@@ -191,7 +196,7 @@ class Images:
 
         if self.number_of_images > 1:
             for i in range(1, self.number_of_images):
-                result = result + ', ' + self.images[1].dump()
+                result = result + ', ' + self.images[i].dump()
 
         result = '''
         {

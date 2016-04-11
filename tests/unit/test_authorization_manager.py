@@ -23,8 +23,8 @@
 # contact with opensource@tid.es
 #
 from unittest import TestCase
-from app.mod_auth.AuthorizationManager import AuthorizationManager
-from app.settings.settings import AUTH_API_V2, AUTH_API_V3
+from fiwareglancesync.app.mod_auth.AuthorizationManager import AuthorizationManager
+from fiwareglancesync.app.settings.settings import AUTH_API_V2, AUTH_API_V3
 import requests_mock
 from keystoneclient.exceptions import AuthorizationFailure, Unauthorized
 

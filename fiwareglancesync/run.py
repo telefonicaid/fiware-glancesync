@@ -26,9 +26,9 @@
 # from flask_script import Command, Option
 from flask.ext.script import Manager, Server
 from flask_migrate import Migrate, MigrateCommand
-from fiwareglancesync.app.app import app, db
-from fiwareglancesync.app.settings.settings import HOST, PORT
-from fiwareglancesync.app.settings.gunicorn_server import GunicornServer
+from app.app import app, db
+from app.settings.settings import HOST, PORT
+from app.settings.gunicorn_server import GunicornServer
 
 
 __author__ = 'fla'

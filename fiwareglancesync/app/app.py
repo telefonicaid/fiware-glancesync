@@ -34,7 +34,7 @@ app.config.from_object('config')
 
 # Define the database object which is imported
 # by modules and controllers
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, session_options={'expire_on_commit': False})
 
 # Import a module / component using its blueprint handler variable (mod_auth)
 from mod_auth.controllers import mod_auth as auth_module

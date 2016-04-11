@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
+
 import sys
 import StringIO
 import os
@@ -31,7 +31,7 @@ import datetime
 import argparse
 import logging
 
-from glancesync.glancesync import GlanceSync
+from fiwareglancesync.glancesync import GlanceSync
 
 
 class Sync(object):

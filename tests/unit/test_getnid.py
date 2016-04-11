@@ -29,7 +29,7 @@ import os
 
 import requests_mock
 
-from scripts.getnids.getnid import NID, processingnid
+from fiwareglancesync.scripts.getnids.getnid import NID, processingnid
 from tests.unit.resources.config import RESOURCESPATH
 
 

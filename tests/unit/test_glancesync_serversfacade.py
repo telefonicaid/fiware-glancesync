@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 from os import environ as env
 import os
@@ -33,10 +32,9 @@ from mock import patch, MagicMock, call, ANY
 from keystoneclient.auth.identity import v2, v3
 from multiprocessing import TimeoutError
 
-from glancesync.glancesync_serversfacade import ServersFacade,\
-    GlanceFacadeException
-from glancesync.glancesync_image import GlanceSyncImage
-from glancesync.glancesync_region import GlanceSyncRegion
+from fiwareglancesync.glancesync_serversfacade import ServersFacade, GlanceFacadeException
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.glancesync_region import GlanceSyncRegion
 
 """This environment variable activates a pair of
 integration test to verify that the facade works correctly
@@ -69,7 +67,7 @@ mock_osclients = MyOpenStackClients()
 class TestGlanceServersFacadeM(unittest.TestCase):
     """Test the facade using a mock, that is, only checks that the right calls
     to osclients are made"""
-    @patch('glancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
+    @patch('fiwareglancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
     def setUp(self):
         """create self.facade, create also a GlanceSyncImage object and a
         temporal file. Use a mock to replace osclients"""
@@ -128,7 +126,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         ]
         self.assertListEqual(mock_osclients.mock_calls, calls)
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list(self, mock_pool):
         """test list method. Check that apply_async method of the pool is
         invoked passing the glance_client"""
@@ -138,7 +136,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         mock_pool.return_value.apply_async.assert_called_once_with(
             ANY, (glance_client,))
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list_ex_timeout(self, mock_pool):
         """test TimeoutError exception with list operation"""
         config = {'apply_async.return_value.get.side_effect': TimeoutError()}
@@ -147,7 +145,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.get_imagelist(self.region_obj)
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list_ex(self, mock_pool):
         """test an exception with list operation"""
         config = {'apply_async.return_value.get.side_effect':

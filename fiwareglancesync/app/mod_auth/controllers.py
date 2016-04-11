@@ -23,21 +23,27 @@
 #
 
 from flask import Blueprint, abort, make_response
+from flask import request
+
 import httplib
 from fiwareglancesync.app.app import db
-from models import User
+from fiwareglancesync.app.mod_auth.models import User
 from openstack_auth import authorized
 from region_manager import check_region
 from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
 from fiwareglancesync.app.mod_auth.models import Images, Task
 from fiwareglancesync.app.settings.settings import logger_api
-from fiwareglancesync.sync import Sync
-import time
+import threading
+
+from fiwareglancesync.glancesync import GlanceSync
+
 
 __author__ = 'fla'
 
 # Define the blueprint: 'auth', set its url prefix: app.url/regions
 mod_auth = Blueprint('auth', __name__, url_prefix='/regions')
+
+GlanceSync.init_logs()
 
 
 # Set the route and accepted methods
@@ -57,30 +63,47 @@ def get_status(regionid, token=None):
              the images and the sincronization status.
     """
 
+    image_name = request.args.get('image')
+
     message = "GET, get information about the synchronization status in the region: {}".format(regionid)
 
     logger_api.info(message)
 
-    sync = Sync([regionid], {})
-    sync.report_status()
+    glancesync = GlanceSync(options_dict=None)
+    list_images = glancesync.get_images_region(regionid, only_tenant_images=False)
 
-    # Just for check this data should be returned by glancesync client
     x = Images()
+    for item in list_images:
+        try:
+            if image_name is None or item.name == image_name:
+                x.add([item.id, item.name, item.status, None])
+        except Exception as e:
+            print(e)
 
-    value = ['3cfeaf3f0103b9637bb3fcfe691fce1e', 'base_ubuntu_14.04', 'ok', None]
-    x.add(value)
-
-    value = ['4rds4f3f0103b9637bb3fcfe691fce1e', 'base_centOS_7', 'ok', None]
-    x.add(value)
-
-    resp = make_response(x.dump(), httplib.OK)
-    resp.headers[SERVER_HEADER] = SERVER
-    resp.headers[CONTENT_TYPE] = JSON_TYPE
+    response = make_response(x.dump(), httplib.OK)
+    response.headers[SERVER_HEADER] = SERVER
+    response.headers[CONTENT_TYPE] = JSON_TYPE
 
     logger_api.info('Return result: %s', x.dump())
+    return response
 
-    return resp
 
+def run_in_thread(regionid, user):
+
+    logger_api.info('Sync region {}, running in thread: {}'.format(regionid, threading.currentThread().getName()))
+    try:
+        #glancesync = GlanceSync(options_dict=None)
+        #glancesync.sync_region(regionid, dry_run=dry_run)
+
+        row_changed = User.query.filter(User.task_id == user.task_id).one()
+        row_changed.change_status(Task.SYNCED)
+        db.session.commit()
+
+    except Exception as e:
+        logger_api.warn('Error in thread {}, with error: {}'.format(threading.currentThread().getName(), e.message))
+        row_changed = User.query.filter(User.task_id == user.task_id).one()
+        row_changed.change_status(Task.FAILED)
+        db.session.commit
 
 @mod_auth.route('/<regionid>', methods=['POST'])
 @authorized
@@ -109,12 +132,13 @@ def synchronize(regionid, token=None):
     # Previously to each operation, we have to check if there is a task in the DB
     # with the status syncing associated to this region.
     users = User.query.filter(User.region == regionid).all()
+    newtask = None
 
     if not users:
         newtask = Task(status=Task.SYNCING)
 
         # name and role should be returned from authorized operation, to be extended in Sprint 16.02
-        newuser = User(region=regionid, name=token.username, taskid=str(newtask.taskid),
+        newuser = User(region=regionid, name=token.username, task_id=str(newtask.taskid),
                        role='admin', status=newtask.status)
 
         db.session.add(newuser)
@@ -123,27 +147,9 @@ def synchronize(regionid, token=None):
             db.session.commit()
 
             # Do the stuff to sync the images here...
-            # delete the time.sleep(20)
-            time.sleep(20)
-
-
-
-                # Run cmd
-    # sync = Sync(meta.regions, options)
-    #
-    # if meta.show_status:
-    #     sync.report_status()
-    # elif meta.parallel:
-    #     sync.parallel_sync()
-    # elif meta.show_regions:
-    #     sync.show_regions()
-    # elif meta.make_backup:
-    #     sync.make_backup()
-    # else:
-    #     sync.sequential_sync(meta.dry_run)
-
-
-
+            logger_api.debug("new thread")
+            t = threading.Thread(target=run_in_thread, args=(regionid, newuser))
+            t.start()
 
         except Exception as e:
             message = '''
@@ -158,6 +164,18 @@ def synchronize(regionid, token=None):
             abort(httplib.BAD_REQUEST, message)
     elif len(users) == 1 and users[0].region == regionid and users[0].status == Task.SYNCING:
         newtask = Task(taskid=users[0].task_id, status=users[0].status)
+
+    if newtask is None:
+        message = '''
+            {
+                "error": {
+                    "message": "Already exist some task for this region",
+                    "code": %s
+                }
+            }
+            ''' % httplib.BAD_REQUEST
+
+        abort(httplib.BAD_REQUEST, message)
 
     resp = make_response(newtask.dump(), httplib.OK)
     resp.headers[SERVER_HEADER] = SERVER

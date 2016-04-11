@@ -25,6 +25,7 @@
 __author__ = 'chema'
 
 import copy
+import json
 
 
 class GlanceSyncImage(object):
@@ -280,3 +281,13 @@ class GlanceSyncImage(object):
             synchronisable = some_property_in
 
         return synchronisable
+
+    def to_json(self):
+        values = dict()
+        values['region'] = self.region
+        values['name'] = self.name
+        values['id'] = self.id
+        values['status'] = self.status
+        # self.status, self.size,
+        #     self.checksum, self.owner, self.is_public,
+        return values

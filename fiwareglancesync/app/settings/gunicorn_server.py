@@ -5,7 +5,7 @@ import sys
 import os
 from gunicorn import version_info
 from gunicorn.app.base import Application
-from fiwareglancesync.app.settings.settings import logger_api
+from app.settings.settings import logger_api
 
 
 class GunicornServer(Command):

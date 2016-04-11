@@ -24,7 +24,7 @@
 #
 import unittest
 import copy
-from glancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.glancesync_image import GlanceSyncImage
 
 __author__ = 'chema'
 

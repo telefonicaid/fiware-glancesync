@@ -29,8 +29,8 @@ import copy
 import StringIO
 import logging
 
-from glancesync.glancesync_region import GlanceSyncRegion
-from glancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.glancesync_region import GlanceSyncRegion
+from fiwareglancesync.glancesync_image import GlanceSyncImage
 
 
 class TestGlanceSyncRegionBasic(unittest.TestCase):

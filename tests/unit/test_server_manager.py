@@ -23,14 +23,15 @@
 # contact with opensource@tid.es
 #
 from flask.ext.testing import TestCase
-from app import db, app
-from app.mod_auth.models import User
+from fiwareglancesync.app import app
+from fiwareglancesync.app.app import db
+from fiwareglancesync.app.mod_auth.models import User
 import os
 import unittest
 import httplib
 import requests_mock
 import json
-from app.mod_auth.models import Task
+from fiwareglancesync.app.mod_auth.models import Task
 
 __author__ = 'fla'
 
@@ -60,8 +61,8 @@ class DBTest(TestCase):
         db.create_all()
 
         # create users:
-        user1 = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
-        user2 = User(region='Spain2', name='foo@tim.go',   taskid='5678', role='fake role', status=Task.SYNCING)
+        user1 = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
+        user2 = User(region='Spain2', name='foo@tim.go',   task_id='5678', role='fake role', status=Task.SYNCING)
         db.session.add(user1)
         db.session.add(user2)
         db.session.commit()
@@ -132,7 +133,7 @@ class APITests(unittest.TestCase):
 
         :return: Nothing.
         """
-        self.app = app.test_client()
+        self.app = app.app.test_client()
         self.app.testing = True
 
     def tearDown(self):
@@ -235,9 +236,9 @@ class TestServerRequests(unittest.TestCase):
 
         :return: Nothing.
         """
-        self.app = app.test_client()
+        self.app = app.app.test_client()
         self.app.testing = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
+        app.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
 
         db.create_all()
 
@@ -316,7 +317,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -357,7 +358,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Trento',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user = User(region='Trento',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -377,7 +378,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='5678', role='fake role', status=Task.SYNCED)
+        user = User(region='Spain',  name='joe@soap.com', task_id='5678', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -415,7 +416,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCING)
+        user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCING)
         db.session.add(user)
         db.session.commit()
 

@@ -31,9 +31,9 @@ import glob
 import tempfile
 import logging
 
-from glancesync.glancesync_image import GlanceSyncImage
-from glancesync.glancesync import GlanceSync
-from glancesync.glancesync_serverfacade_mock import ServersFacade
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.glancesync import GlanceSync
+from fiwareglancesync.glancesync_serverfacade_mock import ServersFacade
 from tests.unit.resources.config import RESOURCESPATH
 from tests.unit.test_getnid import get_path
 
