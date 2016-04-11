@@ -41,9 +41,7 @@ export IP=${FLOATINGIP:-$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $
 
 export FLAVOR=${FLAVOR:-m1.small}
 
-echo $(dirname $0)
 cd $(dirname $0)
-echo $IP
 wait_ssh() {
   user=$1
   if [ -f ~/.ssh/known_hosts ] ; then 
