@@ -7,7 +7,7 @@
     {
       "credential_type": "base_admin|host",
       "federation_name": "Federation1",
-      "region_name": "RegionOne",
+      "region_name": "{Region1}",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
       "tenant_id": "{ADM_TENANT_ID}",
       "tenant_name": "{ADM_TENANT_NAME}",
@@ -22,17 +22,50 @@
     {
       "credential_type": "base_admin",
       "federation_name": "Federation1",
-      "region_name": "RegionTwo",
+      "region_name": "{Region2}",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
       "tenant_id": "{ADM_TENANT_ID}",
       "tenant_name": "{ADM_TENANT_NAME}",
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}"
+    },
+    {
+      "credential_type": "secondary_admin",
+      "federation_name": "Federation1",
+      "region_name": "{Region2}",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "de18e854c14142ab87fcab1873de3b21",
+      "tenant_name": "qa",
+      "user_domain_name": "default",
+      "user": "qa",
+      "password": "qa"
+    }, 
+    {
+      "credential_type": "base_admin",
+      "federation_name": "Federation1",
+      "region_name": "{Region3}",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "{ADM_TENANT_ID}",
+      "tenant_name": "{ADM_TENANT_NAME}",
+      "user_domain_name": "default",
+      "user": "{ADM_USERNAME}",
+      "password": "{ADM_PASSWORD}"
+    },
+    {
+      "credential_type": "secondary_admin",
+      "federation_name": "Federation1",
+      "region_name": "{Region3}",
+      "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
+      "tenant_id": "de18e854c14142ab87fcab1873de3b21",
+      "tenant_name": "qa",
+      "user_domain_name": "default",
+      "user": "qa",
+      "password": "qa"
     }
   ],
   "glancesync":{
-      "master_region_name": "RegionOne",
+      "master_region_name": "{Region1}",
       "bin_path": "/opt/fiware/glancesync",
       "config_file": "/etc/glancesync.conf"
   },
