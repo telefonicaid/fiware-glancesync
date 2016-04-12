@@ -43,7 +43,7 @@
     }, 
     {
       "credential_type": "base_admin",
-      "federation_name": "Federation1",
+      "federation_name": "Federation2",
       "region_name": "{Region3}",
       "keystone_url": "http://{KEYSTONE_IP2}:35357/v2.0/",
       "tenant_id": "{ADM_TENANT_ID}",
@@ -54,7 +54,7 @@
     },
     {
       "credential_type": "secondary_admin",
-      "federation_name": "Federation1",
+      "federation_name": "Federation2",
       "region_name": "{Region3}",
       "keystone_url": "http://{KEYSTONE_IP2}:35357/v2.0/",
       "tenant_id": "de18e854c14142ab87fcab1873de3b21",

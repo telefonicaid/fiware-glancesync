@@ -13,5 +13,6 @@ ENV GLANCESYNC_SETTINGS_FILE=/opt/fiware/glancesync/app/settings/fiware-glancesy
 ENV GLANCESYNC_LOGGING_SETTINGS_FILE=/opt/fiware/glancesync/app/settings/fiware-glancesync-logging.cfg
 RUN mkdir /opt/fiware/glancesync/test_results/
 RUN mkdir /opt/fiware/glancesync/coverage/
+COPY sonar-project.properties sonar-project.properties
 CMD nosetests --with-coverage --cover-package=./ --cover-xml --cover-xml-file=coverage/coverage.xml --with-xunit --xunit-file=test_results/TEST-nosetests.xml --exe
 
