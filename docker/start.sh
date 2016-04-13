@@ -31,7 +31,6 @@ sed -i -e "s/{Region3}/${Region3}/" conf/settings.json
 
 
 export PYTHONPATH=../..
-sleep 1200000000000
 behave features/glancesync/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of script components:
