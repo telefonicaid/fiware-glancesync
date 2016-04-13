@@ -35,7 +35,7 @@
       "federation_name": "Federation1",
       "region_name": "{Region2}",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
-      "tenant_id": "de18e854c14142ab87fcab1873de3b21",
+      "tenant_id": "{TENANT_ID_QA}",
       "tenant_name": "qa",
       "user_domain_name": "default",
       "user": "qa",

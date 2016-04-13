@@ -10,7 +10,7 @@ export OS_IDENTITY_API_VERSION=3
 
 openstack project show qa > qa
 
-export TENANTID_QA=`grep "| id" qa | awk 'NR==1{print $4}'`
+export TENANT_ID_QA=`grep "| id" qa | awk 'NR==1{print $4}'`
 sed -i -e "s/{ADM_TENANT_NAME}/${ADM_TENANT_NAME}/" conf/settings.json
 sed -i -e "s/{ADM_PASSWORD}/${ADM_PASSWORD}/" conf/settings.json
 sed -i -e "s/{KEYSTONE_IP}/${KEYSTONE_IP}/" conf/settings.json
