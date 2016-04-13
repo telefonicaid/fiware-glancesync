@@ -24,6 +24,7 @@
 
 from constants import KEYSTONE_GLANCE_SERVICE_NAME, IMAGES_DIR
 from qautils.logger.logger_utils import get_logger
+import shutil
 from glanceclient.client import Client as GlanceClient
 from keystoneclient.v2_0.client import Client as KeystoneClient
 import os
@@ -136,6 +137,12 @@ class GlanceOperations():
             image_path = self.__get_resource_path__(image_filename)
             __logger__.debug("Updating image with content from file '%s'", image_path)
             image.update(data=open(image_path, 'rb'))
+
+            glance_file_name = "/var/lib/glance/images/" + image.id
+
+            if os.path.exists(("/var/lib/glance/images")):
+                __logger__.debug("Storing image with content from file '%s'", glance_file_name)
+                shutil.copy(image_path, glance_file_name)
 
         __logger__.debug("Updating image property: 'is_public=%s'", is_public)
         image.update(properties=custom_properties, is_public=is_public)
