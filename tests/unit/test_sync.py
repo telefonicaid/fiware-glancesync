@@ -36,7 +36,7 @@ from fiwareglancesync.sync import Sync
 
 class TestSync(unittest.TestCase):
     """Class to test all methods but constructor and parallel sync"""
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def setUp(self, glancesync):
         """create constructor, mock with glancesync, Set a master region"""
         self.regions = []
@@ -100,28 +100,28 @@ class TestSyncConstr(unittest.TestCase):
             'return_value.preferable_order': ['other:r1', 'r2', 'r3']
         }
 
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_simple(self, glancesync):
         """test constructor without regions"""
         glancesync.configure_mock(**self.config)
         sync = Sync([])
         self.assertEqual(['r2', 'r1'], sync.regions)
 
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_targets(self, glancesync):
         """test constructor with two targets"""
         glancesync.configure_mock(**self.config)
         sync = Sync(['master:', 'other:'])
         self.assertEqual(['other:r1', 'r2', 'r1'], sync.regions)
 
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_mix(self, glancesync):
         """test constructor with a target and a region"""
         glancesync.configure_mock(**self.config)
         sync = Sync(['r1', 'other:'])
         self.assertEqual(['other:r1', 'r1'], sync.regions)
 
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_ignore_order(self, glancesync):
         """test a constructor with a list of regions. Preferable order should
         be ignored"""
@@ -132,7 +132,7 @@ class TestSyncConstr(unittest.TestCase):
 
 class TestSyncParallel(unittest.TestCase):
     """Test the parallel functionality"""
-    @patch('fiwareglancesync.glancesync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def setUp(self, glancesync):
         """create constructor, mock with glancesync, Set a master region"""
         regions = ['region1', 'region2']
@@ -150,7 +150,6 @@ class TestSyncParallel(unittest.TestCase):
 
         path = os.path.abspath(os.curdir)
         self.dir_name = os.path.join(path, 'sync_20200206_2357')
-
 
     def tearDown(self):
         """clean directory and files created during the test"""

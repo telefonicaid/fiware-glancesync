@@ -22,21 +22,20 @@
 # contact with opensource@tid.es
 #
 
+import httplib
+import threading
+
 from flask import Blueprint, abort, make_response
 from flask import request
 
-import httplib
 from fiwareglancesync.app.app import db
 from fiwareglancesync.app.mod_auth.models import User
+from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
+from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.glancesync import GlanceSync
+from fiwareglancesync.utils.utils import Images, Task
 from openstack_auth import authorized
 from region_manager import check_region
-from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER_HEADER, SERVER, JSON_TYPE
-from fiwareglancesync.app.mod_auth.models import Images, Task
-from fiwareglancesync.app.settings.settings import logger_api
-import threading
-
-from fiwareglancesync.glancesync import GlanceSync
-
 
 __author__ = 'fla'
 
@@ -63,11 +62,11 @@ def get_status(regionid, token=None):
              the images and the sincronization status.
     """
 
-    image_name = request.args.get('image')
-
     message = "GET, get information about the synchronization status in the region: {}".format(regionid)
 
     logger_api.info(message)
+
+    image_name = request.args.get('image')
 
     glancesync = GlanceSync(options_dict=None)
     list_images = glancesync.get_images_region(regionid, only_tenant_images=False)
@@ -104,6 +103,7 @@ def run_in_thread(regionid, user):
         row_changed = User.query.filter(User.task_id == user.task_id).one()
         row_changed.change_status(Task.FAILED)
         db.session.commit
+
 
 @mod_auth.route('/<regionid>', methods=['POST'])
 @authorized

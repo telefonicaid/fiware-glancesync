@@ -22,22 +22,26 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+import httplib
+import json
+import os
+import unittest
+
+import requests_mock
 from flask.ext.testing import TestCase
+from mock import patch
+
 from fiwareglancesync.app import app
 from fiwareglancesync.app.app import db
 from fiwareglancesync.app.mod_auth.models import User
-import os
-import unittest
-import httplib
-import requests_mock
-import json
-from fiwareglancesync.app.mod_auth.models import Task
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.utils.utils import Task
 
 __author__ = 'fla'
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
-
+'''
 class DBTest(TestCase):
     """
     Class to develop the unit tests related to the management of the DB.
@@ -102,6 +106,7 @@ class DBTest(TestCase):
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
+'''
 
 
 class APITests(unittest.TestCase):
@@ -242,6 +247,20 @@ class TestServerRequests(unittest.TestCase):
 
         db.create_all()
 
+        image1 = GlanceSyncImage(region='Valladolid', name='image10', id='010', status='active',
+                                 size=1073741914, checksum='b1d5781111d84f7b3fe45a0852e59758cd7a87e5',
+                                 owner='tenant1', is_public=True, user_properties={'type': 'baseimage'})
+
+        image2 = GlanceSyncImage(region='Valladolid', name='image20', id='020', status='active',
+                                 size=1073741916, checksum='d885781111d84f7b3fe45a0852e59758cd7a87e5',
+                                 owner='tenant1', is_public=True, user_properties={'type': 'baseimage'})
+
+        images_region = [image1, image2]
+
+        self.config = {
+            'return_value.get_images_region.return_value': images_region
+        }
+
     def tearDown(self):
         """
         Tear down the environment after each executed test.
@@ -272,7 +291,8 @@ class TestServerRequests(unittest.TestCase):
 
         self.assertEqual(result.status_code, httplib.BAD_REQUEST)
 
-    def test_get_status(self, m):
+    @patch('fiwareglancesync.app.mod_auth.controllers.GlanceSync', auto_spec=True)
+    def test_get_status(self, m, glancesync):
         """
         Test that the can obtain the status of the synchronization process of a region.
 
@@ -282,12 +302,20 @@ class TestServerRequests(unittest.TestCase):
         m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
+        m.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+
+        glancesync.configure_mock(**self.config)
+
         result = self.app.get('/regions/Trento', headers={'X-Auth-Token': 'token'})
 
         data = json.loads(result.data)
 
         self.assertTrue(isinstance(data, dict), "The returned value is not a dict.")
         self.assertTrue('images' in data, "The returned value is not the expected one.")
+        self.assertTrue(result.status == '200 OK', "The expected status is not 200 Ok")
+        self.assertTrue(result.status_code == 200, "The expected status code is not 200")
+        self.assertTrue(data['images'][0]['id'] == u'010', 'The expected id of the first image is not 010')
+        self.assertTrue(data['images'][1]['id'] == u'020', 'The expected id of the first image is not 020')
 
     def test_synchronize(self, m):
         """

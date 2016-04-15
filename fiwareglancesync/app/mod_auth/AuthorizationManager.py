@@ -23,16 +23,16 @@
 #
 import json
 
+import requests
+from keystoneclient import session
 from keystoneclient.exceptions import AuthorizationFailure, Unauthorized, InternalServerError
 from keystoneclient.exceptions import ClientException as KeystoneClientException
 from keystoneclient.exceptions import ConnectionRefused as KeystoneConnectionRefused
-from keystoneclient import session
-import requests
 
-from models import TokenModel
-from fiwareglancesync.app.settings.settings import logger_api
 from fiwareglancesync.app.settings.settings import ACCEPT_HEADER, JSON_TYPE, X_AUTH_TOKEN_HEADER, TOKENS_PATH_V2, \
     X_SUBJECT_TOKEN_HEADER, TOKENS_PATH_V3, AUTH_API_V2, AUTH_API_V3
+from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.utils.utils import TokenModel
 
 __author__ = 'fla'
 

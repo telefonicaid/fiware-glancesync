@@ -140,7 +140,8 @@ class TestAuthenticationManager(TestCase):
         try:
             auth.get_info_token(admin_token='admin_token', token='token')
         except AuthorizationFailure as e:
-            self.assertEquals(e.message, "User token not found", 'The expected error message is not the same')
+            result = (e.message == 'Cannot authorize API client.' or e.message == 'User token not found')
+            self.assertTrue(result, 'The expected error message is not the same')
 
     def test_error_from_keystone_v3(self, m):
         """
@@ -156,7 +157,8 @@ class TestAuthenticationManager(TestCase):
         try:
             auth.get_info_token(admin_token='admin_token', token='token')
         except AuthorizationFailure as e:
-            self.assertEquals(e.message.status_code, 404, 'The expected status code is not the same')
+            result = (e.message == 'Cannot authorize API client.' or e.message.status_code == 404)
+            self.assertTrue(result, 'The expected error message is not the same')
 
     def test_get_auth_token_from_keystone_v2(self, m):
         """

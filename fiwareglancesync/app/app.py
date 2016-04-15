@@ -24,13 +24,14 @@
 import httplib
 from flask import Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+from settings.settings import config
 
 
 # Defile the WGSI application object
 app = Flask(__name__, instance_relative_config=True)
 
 # Configurations
-app.config.from_object('config')
+app.config.from_object(config)
 
 # Define the database object which is imported
 # by modules and controllers

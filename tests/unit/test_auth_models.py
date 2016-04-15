@@ -22,11 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from unittest import TestCase
-from fiwareglancesync.app.mod_auth.models import Image, Images, Task, TokenModel
-import uuid
-import re
 import json
+import re
+import uuid
+from unittest import TestCase
+
+from fiwareglancesync.utils.utils import Image, Images, Task, TokenModel
 
 __author__ = 'fla'
 
@@ -111,7 +112,7 @@ class TestImage(TestCase):
         """
 
         try:
-            temp = Image(identifier='an id', name='fake name', status='fake status', message='fake message')
+            Image(identifier='an id', name='fake name', status='fake status', message='fake message')
         except ValueError as error:
             self.assertEqual(error.args[0], 'Error, the status does not correspond to any of the defined values')
             self.assertEqual(error.args[1], 'fake status')

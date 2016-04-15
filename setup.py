@@ -44,7 +44,7 @@ setup(
   author='Fernando Lopez Aguilar',
   author_email='fernando.lopezaguilar@telefonica.com, e.fiware.tid@telefonica.com',
   license='Apache 2.0',
-  scripts=[pjoin('fiwareglancesync/run.py'),pjoin('fiwareglancesync/sync.py')],
+  scripts=[pjoin('fiwareglancesync/run.py'), pjoin('fiwareglancesync/sync.py')],
   url='https://github.com/telefonicaid/fiware-glancesync',
   download_url='https://github.com/telefonicaid/fiware-glancesync/tarball/v%s' % __version__,
   keywords=['fiware', 'glancesync', 'glance',  'images', 'cloud'],
