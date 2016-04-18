@@ -9,8 +9,8 @@ install:
   - pip install -r test-requirements.txt
   - pip install -r fiwareglancesync/scripts/getnids/requirements.txt
   - pip install coveralls
-  - export GLANCESYNC_SETTINGS_FILE=$(pwd)/app/settings/fiware-glancesync.cfg
-  - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/app/settings/fiware-glancesync-logging.cfg
+  - export GLANCESYNC_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync.cfg
+  - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync-logging.cfg
 
 # command to run tests
 script:
