@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 import os
 import csv
@@ -212,8 +211,8 @@ class GlanceSync(object):
                 uploaded = True
                 region_image = dictimages[tuple[1].name]
                 self.log.info(
-                    regionobj.fullname + ': Renaming and replacing image '
-                    + tuple[1].name + ' (' + str(sizeimage) + ' MB)')
+                    regionobj.fullname + ': Renaming and replacing image ' + tuple[1].name + ' (' + str(sizeimage) +
+                    ' MB)')
 
                 if not dry_run:
                     self.__upload_image(tuple[1], dictimages, regionobj)

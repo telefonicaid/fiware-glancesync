@@ -193,8 +193,8 @@ class TestAuthenticationManager(TestCase):
         m.post('http://fake_url/auth/tokens', text=self.validate_info_v3)
 
         try:
-            auth.get_auth_token(username='fake name', password='fake password',
-                                             tenant_id='fake tenant', user_domain_name="Default")
+            auth.get_auth_token(username='fake name', password='fake password', tenant_id='fake tenant',
+                                user_domain_name="Default")
         except KeyError as e:
             self.assertEquals(e.message, "x-subject-token", 'The missing header is not the expected one.')
 

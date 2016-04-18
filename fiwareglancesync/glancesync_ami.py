@@ -23,7 +23,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 from app.settings.settings import logger_cli
 """This internal module check and update the kernel_id and ramdisk_id of

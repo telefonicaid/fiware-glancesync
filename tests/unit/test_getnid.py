@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'fla'
 
 import unittest
 import os
@@ -210,12 +209,12 @@ class TestGlanceSyncNIDOperations(unittest.TestCase):
 
     def test_getchapter(self, m):
         expectedvalue = {'advanced-middleware-and-interfaces-network-and-devices': 1,
-                        'cloud-hosting': 1,
-                        'advanced-web-based-user-interface': 2,
-                        'security': 1,
-                        'internet-things-services-enablement': 1,
-                        'datacontext-management': 1,
-                        'applicationsservices-and-data-delivery': 1}
+                         'cloud-hosting': 1,
+                         'advanced-web-based-user-interface': 2,
+                         'security': 1,
+                         'internet-things-services-enablement': 1,
+                         'datacontext-management': 1,
+                         'applicationsservices-and-data-delivery': 1}
 
         result = self.nid.getchapter()
 

@@ -22,16 +22,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
-__version__ = '1.4.0'
-
 import ConfigParser
 import os
 import base64
 from fiwareglancesync.app.settings.settings import logger_cli
 
+__version__ = '1.4.0'
 
 # Methods to obtain a list/set, which a default empty.
+
 
 def _get_set(self, section, key):
     if self.has_option(section, key):

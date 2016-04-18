@@ -148,8 +148,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
     @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list_ex(self, mock_pool):
         """test an exception with list operation"""
-        config = {'apply_async.return_value.get.side_effect':
-                   Exception('not found')}
+        config = {'apply_async.return_value.get.side_effect': Exception('not found')}
         mock_pool.return_value.configure_mock(**config)
         msg = 'fakeregion: Error retrieving image list. Cause: not found'
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
@@ -208,8 +207,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
     def test_update_ex(self):
         """test and exception during the update"""
-        config = {'get_glanceclient.return_value.images.get.return_value.'
-            'update.side_effect': Exception('bad attribute')}
+        config = {'get_glanceclient.return_value.images.get.return_value.update.side_effect': Exception('bad '
+                                                                                                        'attribute')}
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Update of imagetest failed. Cause: bad attribute'
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
@@ -218,16 +217,15 @@ class TestGlanceServersFacadeM(unittest.TestCase):
     def test_delete(self):
         """test that the delete method of osclients is called"""
         test_call_delete_mock = MagicMock()
-        config = {'get_glanceclient.return_value.images.get.return_value':
-                  test_call_delete_mock}
+        config = {'get_glanceclient.return_value.images.get.return_value': test_call_delete_mock}
         self.facade.osclients.configure_mock(**config)
         self.facade.delete_image(self.region_obj, self.image.id, False)
         test_call_delete_mock.delete.assert_called_with()
 
     def test_delete_ex(self):
         """test and exception during the delete operation"""
-        config = {'get_glanceclient.return_value.images.get.return_value.'
-            'delete.side_effect': Exception('image is protected')}
+        config = {'get_glanceclient.return_value.images.get.return_value.delete.side_effect': Exception('image is '
+                                                                                                        'protected')}
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Deletion of image 01 Failed. Cause: image is '\
             'protected'

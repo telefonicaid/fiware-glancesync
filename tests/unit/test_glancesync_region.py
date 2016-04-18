@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 import unittest
 import copy
@@ -261,12 +260,9 @@ class TestGlanceSyncRegion(unittest.TestCase):
         right checksum, the image with the right checksum is used. This is
         independent of the warning"""
         region_list = self.region_dict.values()
-        image_new_1 = self.dup_image(self.region_dict['image00'], 'Burgos',
-                                   11, '0')
-        image_new_2 = self.dup_image(self.region_dict['image00'], 'Burgos',
-                                   12, '0')
-        image_new_3 = self.dup_image(self.region_dict['image00'], 'Burgos',
-                                   13, '0')
+        image_new_1 = self.dup_image(self.region_dict['image00'], 'Burgos', 11, '0')
+        image_new_2 = self.dup_image(self.region_dict['image00'], 'Burgos', 12, '0')
+        image_new_3 = self.dup_image(self.region_dict['image00'], 'Burgos', 13, '0')
 
         image_new_2.checksum = self.region_dict['image00'].checksum
         image_new_1.checksum = 'otherchecksum'

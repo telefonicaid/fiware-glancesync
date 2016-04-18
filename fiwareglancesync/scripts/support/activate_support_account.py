@@ -94,7 +94,7 @@ def create_support_account():
 
 def get_public_keys_from_userdata(userdata):
     data = yaml.load(userdata)
-    if not 'fiware-support' in data:
+    if 'fiware-support' not in data:
         return None, None
     data = data['fiware-support']
     sshkey = data.get('sshkey', None)
@@ -236,7 +236,7 @@ Popen('chpasswd', stdin=PIPE).communicate('support:' + password)
 if generated:
     console = open('/dev/console', 'w')
     cmd = ['gpg', '--batch', '--armor', '-e', '--trust-model', 'always',
-            '--homedir', fiware_gpg, '-R', 'FiWare support']
+           '--homedir', fiware_gpg, '-R', 'FiWare support']
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE)
     password = proc.communicate('FiWare support password is: ' + password + '\n')[0]
     console.write('\nFiWare Support:\n' + password + '\n')

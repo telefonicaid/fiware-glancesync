@@ -38,7 +38,6 @@ Options:
 
 """
 
-author = 'fla'
 
 from docopt import docopt
 import requests

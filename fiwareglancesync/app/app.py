@@ -26,6 +26,11 @@ from flask import Flask, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from settings.settings import config
 
+# Import a module / component using its blueprint handler variable (mod_auth)
+from mod_auth.controllers import mod_auth as auth_module
+from mod_info.controllers import mod_info as info_module
+
+from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER, SERVER_HEADER, JSON_TYPE
 
 # Defile the WGSI application object
 app = Flask(__name__, instance_relative_config=True)
@@ -36,12 +41,6 @@ app.config.from_object(config)
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app, session_options={'expire_on_commit': False})
-
-# Import a module / component using its blueprint handler variable (mod_auth)
-from mod_auth.controllers import mod_auth as auth_module
-from mod_info.controllers import mod_info as info_module
-
-from fiwareglancesync.app.settings.settings import CONTENT_TYPE, SERVER, SERVER_HEADER, JSON_TYPE
 
 
 # HTTP error handling (401)

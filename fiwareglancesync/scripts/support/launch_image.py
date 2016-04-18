@@ -71,7 +71,7 @@ def launch_vm(vmname, imagename, ip, key, flavorname, cloudinit=False, configdri
 
     if configdrive:
         extra_params['files'] = {'/etc/fiware-support/defaultssh.pub': open('fake_test_key.pub'),
-                                  '/etc/fiware-support/defaultgpg.pub': open('public-fake.gpg')}
+                                 '/etc/fiware-support/defaultgpg.pub': open('public-fake.gpg')}
         extra_params['config_drive'] = True
         extra_params['meta'] = {'encrypt': 'True'}
 
