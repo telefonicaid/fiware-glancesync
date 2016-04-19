@@ -9,6 +9,7 @@ install:
   - pip install -r test-requirements.txt
   - pip install -r fiwareglancesync/scripts/getnids/requirements.txt
   - pip install coveralls
+  - pip install pep8
   - export GLANCESYNC_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync.cfg
   - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync-logging.cfg
 
