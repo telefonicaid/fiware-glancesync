@@ -91,8 +91,8 @@ def run_in_thread(regionid, user):
 
     logger_api.info('Sync region {}, running in thread: {}'.format(regionid, threading.currentThread().getName()))
     try:
-        # glancesync = GlanceSync(options_dict=None)
-        # glancesync.sync_region(regionid, dry_run=dry_run)
+        glancesync = GlanceSync(options_dict=None)
+        glancesync.sync_region(regionid, dry_run=False)
 
         row_changed = User.query.filter(User.task_id == user.task_id).one()
         row_changed.change_status(Task.SYNCED)
