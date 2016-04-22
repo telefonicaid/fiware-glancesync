@@ -79,11 +79,15 @@ def get_status(regionid, token=None):
         except Exception as e:
             print(e)
 
-    response = make_response(x.dump(), httplib.OK)
+    if list_images:
+        logger_api.info('Return result: %s', x.dump())
+        response = make_response(x.dump(), httplib.OK)
+    else:
+        response = make_response('{}', httplib.OK)
+
     response.headers[SERVER_HEADER] = SERVER
     response.headers[CONTENT_TYPE] = JSON_TYPE
 
-    logger_api.info('Return result: %s', x.dump())
     return response
 
 

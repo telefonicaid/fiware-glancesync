@@ -35,7 +35,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # Define the database - we are working with
 # SQLite for the moment
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'glancesync_api.db')
+
+database_path = os.environ.get("GLANCESYNCAPP_DATABASE_PATH")
+
+print '************ database: {}'.format(database_path)
+if database_path:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_path, 'glancesyncapi.db')
+else:
+    msg = '\nERROR: There is not defined GLANCESYNCAPP_DATABASE_PATH environment variable ' \
+          '\n       pointing to database path file' \
+          '\n       Please correct at least one of them to execute the program.'
+    exit(msg)
+
 DATABASE_CONNECT_OPTIONS = {}
 
 # Application threads. A common general assumption is
