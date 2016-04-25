@@ -3,7 +3,7 @@
 GlanceSync - Glance Synchronization Component
 *********************************************
 
-| |Build Status| |Coveralls| |StackOverflow|
+| |License Badge| |StackOverflow| |Build Status| |Coveralls|
 
 .. contents:: :local:
 
@@ -1112,12 +1112,15 @@ Top_
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-glancesync
    :alt: Build status
-.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+.. |StackOverflow| image:: https://img.shields.io/badge/support-sof-yellowgreen.svg
    :target: https://stackoverflow.com/questions/tagged/fiware-glancesync
    :alt: Help? Ask questions
 .. |Coveralls| image:: https://coveralls.io/repos/telefonicaid/fiware-glancesync/badge.svg?branch=develop&service=github
    :target: https://coveralls.io/github/telefonicaid/fiware-glancesync?branch=develop
    :alt: Unit Tests coverage
+.. |License Badge| image:: https://img.shields.io/badge/license-Apache_2.0-blue.svg
+   :target: LICENSE
+   :alt: Apache 2.0 License
 
 .. REFERENCES
 
