@@ -9,7 +9,7 @@ Feature: Lists information about the status of the synchronization of the images
     GET /regions/regionId?image=imageName
 
 
-  @happy_path @env_dependant @experimentation @skip # needs a real environment.
+  @happy_path @env_dependant @experimentation # needs a real environment.
   Scenario: Get all synchronized images.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   a new image created in the Glance of master node with name "qatesting02"
