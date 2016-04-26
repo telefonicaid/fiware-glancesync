@@ -72,7 +72,6 @@ def parallel_process_is_execute_in_all_nodes(context):
     """
     assert_that(context.glancesync_result, is_not(None),
                 "Problem when executing Sync command")
-
     for region in context.glance_manager_list:
         if region != context.master_region_name:
 
@@ -92,7 +91,12 @@ def image_is_synchronized_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            files = output_files[0].splitlines()
+            output_file = None
+            for file in files:
+                if region in file:
+                    output_file = file
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_file)
             glancesync_assertions.image_is_synchronized_assertion(file_content, region, image_name)
 
 
