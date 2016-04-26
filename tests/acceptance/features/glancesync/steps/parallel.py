@@ -91,12 +91,7 @@ def image_is_synchronized_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            files = output_files[0].splitlines()
-            output_file = None
-            for file in files:
-                if region in file:
-                    output_file = file
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_file)
+            file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.image_is_synchronized_assertion(file_content, region, image_name)
 
 
@@ -120,7 +115,7 @@ def no_images_are_sync_parallel(context):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.no_images_are_sync_assertion(file_content, region)
 
 
@@ -136,7 +131,7 @@ def warning_message_checksum_conflict_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.warning_message_checksum_conflict_assertion(file_content, region, image_name)
 
 
@@ -151,7 +146,7 @@ def image_is_replaced_parallel(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.image_is_replaced_assertion(file_content, region, image_name)
 
 
@@ -166,5 +161,17 @@ def image_is_renamed_replaced(context, image_name):
     for region in context.glance_manager_list:
         if region != context.master_region_name:
             output_files = [file for file in context.output_file_list if region in file]
-            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.image_is_renamed_replaced_assertion(file_content, region, image_name)
+
+def obtain_out_file_content(context, output_files, region):
+    files = output_files[0].splitlines()
+    output_file = None
+    for file in files:
+        if region in file:
+            output_file = file
+        if output_file:
+           file_content = context.glancesync_cmd_client.get_output_log_content(output_file)
+        else:
+           file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+    return file_content
