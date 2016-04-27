@@ -14,6 +14,7 @@ install:
   - export GLANCESYNC_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync.cfg
   - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync-logging.cfg
   - export GLANCESYNCAPP_CONFIG=$(pwd)/fiwareglancesync/app/config.py
+  - export GLANCESYNCAPP_DATABASE_PATH=$(pwd)/fiwareglancesync
 
 # command to run tests
 script:
