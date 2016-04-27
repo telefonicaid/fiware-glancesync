@@ -93,11 +93,6 @@ class Image:
         self.status = status
         self.message = message
 
-        # try:
-        #     self.check_status()
-        # except ValueError as ex:
-        #     raise ex
-
     def check_status(self):
         if self.status not in self.glancestatus:
             raise ValueError('Error, the status does not correspond to any of the defined values',

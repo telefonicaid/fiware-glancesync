@@ -92,6 +92,11 @@ def get_status(regionid, token=None):
 
 
 def run_in_thread(regionid, user):
+    """
+    Launch the synchronization in a new Thread
+    :param regionid: region name to sync
+    :param user: an instance of User
+    """
 
     logger_api.info('Sync region {}, running in thread: {}'.format(regionid, threading.currentThread().getName()))
     try:
