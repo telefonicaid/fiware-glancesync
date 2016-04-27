@@ -101,8 +101,6 @@ def before_all(context):
         assert context.glancesync_cmd_client, \
             "GlanceSync configuration for '%s' not found".format(context.master_region_name)
 
-
-
     __logger__.debug("Glance operation managers list: %s", context.glance_manager_list)
 
     # Init GlanceSync API Client

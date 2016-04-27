@@ -66,7 +66,6 @@ def glancesync_configured_to_sync_images_default(context):
                     "GlanceSync has NOT been configured due to some problem executing command")
 
 
-
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the expected data')
 def image_is_present_in_all_nodes(context, image_name):
     """Check that the image is present in all nodes with the expected data"""

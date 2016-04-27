@@ -164,6 +164,7 @@ def image_is_renamed_replaced(context, image_name):
             file_content = obtain_out_file_content(context, output_files, region)
             glancesync_assertions.image_is_renamed_replaced_assertion(file_content, region, image_name)
 
+
 def obtain_out_file_content(context, output_files, region):
     files = output_files[0].splitlines()
     output_file = None
@@ -171,7 +172,7 @@ def obtain_out_file_content(context, output_files, region):
         if region in file:
             output_file = file
         if output_file:
-           file_content = context.glancesync_cmd_client.get_output_log_content(output_file)
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_file)
         else:
-           file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
+            file_content = context.glancesync_cmd_client.get_output_log_content(output_files[0])
     return file_content
