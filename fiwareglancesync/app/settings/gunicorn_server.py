@@ -1,11 +1,11 @@
 from flask_script import Command, Option
-from settings import WORKERS, PIDFILE, LOGLEVEL, PORT, HOST
+from fiwareglancesync.app.settings.settings import WORKERS, PIDFILE, LOGLEVEL, PORT, HOST
 from distutils.dir_util import mkpath
 import sys
 import os
 from gunicorn import version_info
 from gunicorn.app.base import Application
-from app.settings.settings import logger_api
+from fiwareglancesync.app.settings.settings import logger_api
 
 
 class GunicornServer(Command):

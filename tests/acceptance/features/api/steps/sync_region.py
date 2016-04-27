@@ -53,6 +53,20 @@ def other_new_image_created_in_glance_of_master(context, image_name, file):
     create_new_image(context, context.master_region_name, image_name, file)
 
 
+@step(u'GlanceSync configured to sync images without specifying any condition')
+def glancesync_configured_to_sync_images_default(context):
+    """Configure GlanceSync with 'default' values"""
+
+    for row in [{'config_key': 'metadata_condition', 'config_value': ''},
+                {'config_key': 'metadata_set', 'config_value': ''}]:
+        result = context.glancesync_cmd_client.change_configuration_file(section='DEFAULT',
+                                                                         key=row['config_key'],
+                                                                         value=row['config_value'])
+        assert_that(result, is_not(None),
+                    "GlanceSync has NOT been configured due to some problem executing command")
+
+
+
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the expected data')
 def image_is_present_in_all_nodes(context, image_name):
     """Check that the image is present in all nodes with the expected data"""
