@@ -1,8 +1,8 @@
 export OS_REGION_NAME=$Region1
-export  OS_USERNAME=$ADM_USERNAME
+export OS_USERNAME=$ADM_USERNAME
 export OS_PASSWORD=$ADM_PASSWORD
 export OS_TENANT_NAME=$ADM_TENANT_NAME
-export  OS_AUTH_URL=http://$KEYSTONE_IP:5000/v3
+export OS_AUTH_URL=http://$KEYSTONE_IP:5000/v3
 export OS_AUTH_URL_V2=http://$KEYSTONE_IP:5000/v2.0/
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
@@ -13,10 +13,10 @@ openstack project show qa > qa
 export TENANT_ID_QA=`grep "| id" qa | awk 'NR==1{print $4}'`
 
 export OS_REGION_NAME=$Region3
-export  OS_USERNAME=$ADM_USERNAME
+export OS_USERNAME=$ADM_USERNAME
 export OS_PASSWORD=$ADM_PASSWORD
 export OS_TENANT_NAME=$ADM_TENANT_NAME
-export  OS_AUTH_URL=http://$KEYSTONE_IP2:5000/v3
+export OS_AUTH_URL=http://$KEYSTONE_IP2:5000/v3
 export OS_AUTH_URL_V2=http://$KEYSTONE_IP2:5000/v2.0/
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
@@ -50,5 +50,14 @@ behave features/glancesync/ --tags ~@skip --junit --junit-directory testreport
 
 # Execute Behave features of script components:
 behave features/scripts/ --tags ~@skip --junit --junit-directory testreport
+
+# Start glancesync API server:
+
+cd /opt/fiware/glancesync/fiwareglancesync
+export GLANCESYNCAPP_DATABASE_PATH=$PWD
+export GLANCESYNCAPP_CONFIG=$PWD/app/config.py
+python run.py db init;python run.py db migrate;python run.py db upgrade
+python run.py runserver&
+cd /opt/fiware/glancesync/tests/acceptance
 # Execute Behave features of API:
 behave features/api/ --tags ~@skip --junit --junit-directory testreport

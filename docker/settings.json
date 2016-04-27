@@ -71,8 +71,8 @@
   },
     "glancesync_api":{
       "protocol": "http",
-      "host": "private-anon-802da6421-glancesync.apiary-mock.com",
-      "port": "80",
+      "host": "localhost",
+      "port": "8080",
       "resource": "",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
       "tenant_id": "{ADM_TENANT_ID}",

@@ -26,5 +26,6 @@ RUN pip install python-openstackclient
 RUN mkdir /var/lib/glance
 RUN mkdir /var/lib/glance/images
 COPY start.sh /opt/fiware/glancesync/tests/acceptance/
+EXPOSE 8080
 CMD ./start.sh
 

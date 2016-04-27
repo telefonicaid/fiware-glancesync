@@ -31,7 +31,13 @@ from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__, instance_relative_config=True)
 
 # Configurations
-app.config.from_object('config')
+if os.environ.get("GLANCESYNCAPP_CONFIG"):
+    app.config.from_envvar('GLANCESYNCAPP_CONFIG')
+else:
+    msg = '\nERROR: There is not defined GLANCESYNCAPP_CONFIG environment variable ' \
+          '\n       pointing to config.py path file' \
+          '\n       Please correct at least one of them to execute the program.'
+    exit(msg)
 
 # Define the database object which is imported
 # by modules and controllers
