@@ -29,10 +29,9 @@ import os.path
 import StringIO
 import copy
 
-from glancesync.settings import glancesync_config
-from glancesync.settings.glancesync_config import GlanceSyncConfig
+from fiwareglancesync.settings import glancesync_config
+from fiwareglancesync.settings.glancesync_config import GlanceSyncConfig
 
-__author__ = 'chema'
 
 configuration_content = """
 [main]

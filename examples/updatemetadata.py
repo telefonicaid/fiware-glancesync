@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
+
 from glancesync.glancesync import GlanceSync
 
 images_with_changes = {
@@ -69,8 +69,7 @@ def update_nids(region, glancesync):
             if (image.user_properties.get('nid', None) == nid and
                     image.user_properties.get('type', None) == typei and
                     image.is_public == public and
-                    image.user_properties.get('nid_version', None)
-                    == nid_version):
+                    image.user_properties.get('nid_version', None) == nid_version):
                 continue
 
             if nid:

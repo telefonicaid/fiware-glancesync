@@ -29,7 +29,6 @@ from commons.utils import get_real_value_of_image_property
 from qautils.dataset.dataset_utils import DatasetUtils
 import logging
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

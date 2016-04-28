@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 from os import environ as env
 import os
@@ -33,10 +32,9 @@ from mock import patch, MagicMock, call, ANY
 from keystoneclient.auth.identity import v2, v3
 from multiprocessing import TimeoutError
 
-from glancesync.glancesync_serversfacade import ServersFacade,\
-    GlanceFacadeException
-from glancesync.glancesync_image import GlanceSyncImage
-from glancesync.glancesync_region import GlanceSyncRegion
+from fiwareglancesync.glancesync_serversfacade import ServersFacade, GlanceFacadeException
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.glancesync_region import GlanceSyncRegion
 
 """This environment variable activates a pair of
 integration test to verify that the facade works correctly
@@ -69,7 +67,7 @@ mock_osclients = MyOpenStackClients()
 class TestGlanceServersFacadeM(unittest.TestCase):
     """Test the facade using a mock, that is, only checks that the right calls
     to osclients are made"""
-    @patch('glancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
+    @patch('fiwareglancesync.glancesync_serversfacade.OpenStackClients', mock_osclients)
     def setUp(self):
         """create self.facade, create also a GlanceSyncImage object and a
         temporal file. Use a mock to replace osclients"""
@@ -128,7 +126,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         ]
         self.assertListEqual(mock_osclients.mock_calls, calls)
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list(self, mock_pool):
         """test list method. Check that apply_async method of the pool is
         invoked passing the glance_client"""
@@ -138,7 +136,7 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         mock_pool.return_value.apply_async.assert_called_once_with(
             ANY, (glance_client,))
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list_ex_timeout(self, mock_pool):
         """test TimeoutError exception with list operation"""
         config = {'apply_async.return_value.get.side_effect': TimeoutError()}
@@ -147,11 +145,10 @@ class TestGlanceServersFacadeM(unittest.TestCase):
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
             self.facade.get_imagelist(self.region_obj)
 
-    @patch('glancesync.glancesync_serversfacade.Pool')
+    @patch('fiwareglancesync.glancesync_serversfacade.Pool')
     def test_list_ex(self, mock_pool):
         """test an exception with list operation"""
-        config = {'apply_async.return_value.get.side_effect':
-                   Exception('not found')}
+        config = {'apply_async.return_value.get.side_effect': Exception('not found')}
         mock_pool.return_value.configure_mock(**config)
         msg = 'fakeregion: Error retrieving image list. Cause: not found'
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
@@ -210,8 +207,8 @@ class TestGlanceServersFacadeM(unittest.TestCase):
 
     def test_update_ex(self):
         """test and exception during the update"""
-        config = {'get_glanceclient.return_value.images.get.return_value.'
-            'update.side_effect': Exception('bad attribute')}
+        config = {'get_glanceclient.return_value.images.get.return_value.update.side_effect': Exception('bad '
+                                                                                                        'attribute')}
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Update of imagetest failed. Cause: bad attribute'
         with self.assertRaisesRegexp(GlanceFacadeException, msg):
@@ -220,16 +217,15 @@ class TestGlanceServersFacadeM(unittest.TestCase):
     def test_delete(self):
         """test that the delete method of osclients is called"""
         test_call_delete_mock = MagicMock()
-        config = {'get_glanceclient.return_value.images.get.return_value':
-                  test_call_delete_mock}
+        config = {'get_glanceclient.return_value.images.get.return_value': test_call_delete_mock}
         self.facade.osclients.configure_mock(**config)
         self.facade.delete_image(self.region_obj, self.image.id, False)
         test_call_delete_mock.delete.assert_called_with()
 
     def test_delete_ex(self):
         """test and exception during the delete operation"""
-        config = {'get_glanceclient.return_value.images.get.return_value.'
-            'delete.side_effect': Exception('image is protected')}
+        config = {'get_glanceclient.return_value.images.get.return_value.delete.side_effect': Exception('image is '
+                                                                                                        'protected')}
         self.facade.osclients.configure_mock(**config)
         msg = 'fakeregion: Deletion of image 01 Failed. Cause: image is '\
             'protected'

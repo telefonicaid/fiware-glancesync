@@ -29,7 +29,6 @@ from commons.constants import PROPERTIES_CONFIG_CRED_REGION_NAME, PROPERTIES_CON
 from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_OWNER
 from commons.glance_operations import GlanceOperations
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

@@ -22,9 +22,8 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
-from mock import MagicMock, patch, call, ANY
+from mock import patch, call, ANY
 import unittest
 import datetime
 import os
@@ -32,12 +31,12 @@ import logging
 import time
 import re
 
-from sync import Sync
+from fiwareglancesync.sync import Sync
 
 
 class TestSync(unittest.TestCase):
     """Class to test all methods but constructor and parallel sync"""
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def setUp(self, glancesync):
         """create constructor, mock with glancesync, Set a master region"""
         self.regions = []
@@ -70,8 +69,8 @@ class TestSync(unittest.TestCase):
         calls = [call(), call(target='other_target')]
         self.glancesync.return_value.get_regions.assert_has_calls(calls)
 
-    @patch('sync.os')
-    @patch('sync.datetime')
+    @patch('fiwareglancesync.sync.os')
+    @patch('fiwareglancesync.sync.datetime')
     def test_make_backup(self, datetime_mock, os_mock):
         """check make backup; calls are correct and mkdir is invoked with
         right parameters"""
@@ -101,28 +100,28 @@ class TestSyncConstr(unittest.TestCase):
             'return_value.preferable_order': ['other:r1', 'r2', 'r3']
         }
 
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_simple(self, glancesync):
         """test constructor without regions"""
         glancesync.configure_mock(**self.config)
         sync = Sync([])
         self.assertEqual(['r2', 'r1'], sync.regions)
 
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_targets(self, glancesync):
         """test constructor with two targets"""
         glancesync.configure_mock(**self.config)
         sync = Sync(['master:', 'other:'])
         self.assertEqual(['other:r1', 'r2', 'r1'], sync.regions)
 
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_mix(self, glancesync):
         """test constructor with a target and a region"""
         glancesync.configure_mock(**self.config)
         sync = Sync(['r1', 'other:'])
         self.assertEqual(['other:r1', 'r1'], sync.regions)
 
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def test_constructor_ignore_order(self, glancesync):
         """test a constructor with a list of regions. Preferable order should
         be ignored"""
@@ -133,7 +132,7 @@ class TestSyncConstr(unittest.TestCase):
 
 class TestSyncParallel(unittest.TestCase):
     """Test the parallel functionality"""
-    @patch('sync.GlanceSync', auto_spec=True)
+    @patch('fiwareglancesync.sync.GlanceSync', auto_spec=True)
     def setUp(self, glancesync):
         """create constructor, mock with glancesync, Set a master region"""
         regions = ['region1', 'region2']
@@ -151,8 +150,6 @@ class TestSyncParallel(unittest.TestCase):
 
         path = os.path.abspath(os.curdir)
         self.dir_name = os.path.join(path, 'sync_20200206_2357')
-
-        self.tearDown()
 
     def tearDown(self):
         """clean directory and files created during the test"""
@@ -199,7 +196,7 @@ class TestSyncParallel(unittest.TestCase):
         time2 = float(match_obj2.group(2))
         return abs(time1 - time2)
 
-    @patch('sync.datetime')
+    @patch('fiwareglancesync.sync.datetime')
     def test_parallel_sync(self, datetime_mock):
         """test with support for two clients, so both processes run at the
         some time"""
@@ -210,7 +207,7 @@ class TestSyncParallel(unittest.TestCase):
         diff = self._check_sync_invoked(datetime_mock)
         assert(diff <= 1)
 
-    @patch('sync.datetime')
+    @patch('fiwareglancesync.sync.datetime')
     def test_noparallel_sync(self, datetime_mock):
         """test with support for only one client, so one process run first
         and then the other one"""

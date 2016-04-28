@@ -28,7 +28,6 @@ from commons.constants import WAIT_SECONDS, MAX_WAIT_TASK_FINISHED
 import time
 from qautils.logger.logger_utils import get_logger
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
@@ -51,6 +50,19 @@ def other_new_image_created_in_glance_of_master(context, image_name, file):
     """Create new image in the Glance of Master Node with the content of the given file"""
 
     create_new_image(context, context.master_region_name, image_name, file)
+
+
+@step(u'GlanceSync configured to sync images without specifying any condition')
+def glancesync_configured_to_sync_images_default(context):
+    """Configure GlanceSync with 'default' values"""
+
+    for row in [{'config_key': 'metadata_condition', 'config_value': ''},
+                {'config_key': 'metadata_set', 'config_value': ''}]:
+        result = context.glancesync_cmd_client.change_configuration_file(section='DEFAULT',
+                                                                         key=row['config_key'],
+                                                                         value=row['config_value'])
+        assert_that(result, is_not(None),
+                    "GlanceSync has NOT been configured due to some problem executing command")
 
 
 @step(u'the image "(?P<image_name>\w*)" is present in all nodes with the expected data')

@@ -26,7 +26,6 @@ from qautils.http.rest_client_utils import RestClient
 from qautils.http.headers_utils import HEADER_ACCEPT
 from qautils.http.body_model_utils import response_body_to_dict
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

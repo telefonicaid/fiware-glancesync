@@ -28,12 +28,11 @@ import os
 import glob
 import tempfile
 
-from glancesync.glancesync_serverfacade_mock import ServersFacade
-from glancesync.glancesync_region import GlanceSyncRegion
+from fiwareglancesync.glancesync_serverfacade_mock import ServersFacade
+from fiwareglancesync.glancesync_region import GlanceSyncRegion
 from tests.unit.resources.config import RESOURCESPATH
 from tests.unit.test_getnid import get_path
-
-__author__ = 'chema'
+from nose.tools import nottest
 
 
 class TestGlanceServersFacadeMock(unittest.TestCase):
@@ -201,6 +200,7 @@ class TestGlanceServersFacadeMockPersist(TestGlanceServersFacadeMock):
             os.remove(filename)
         os.rmdir(self.dir_persist)
 
+    @nottest
     def test_persistence(self):
         """test some operations without calling tearDown but reloading files
         This is to verify persistence"""

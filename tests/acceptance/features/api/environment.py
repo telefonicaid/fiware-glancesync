@@ -27,9 +27,9 @@ from qautils.logger.logger_utils import get_logger
 from commons.utils import load_project_properties
 from commons.glance_operations import GlanceOperations
 from glancesync_api_client.api_client import GlanceSyncApiClient
+from glancesync_cmd_client.remote_client import GlanceSyncRemoteCmdClient
 
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
@@ -71,6 +71,34 @@ def before_all(context):
             # Init GlanceOperation
             glance_ops = GlanceOperations(username, password, tenant_id, auth_url, region_name)
             context.glance_manager_list.update({region_name: glance_ops})
+
+    __logger__.debug("Glance operation managers list: %s", context.glance_manager_list)
+
+    # Init GlanceSync client (master node)
+    __logger__.info("Initiating GlanceSync client")
+    context.glancesync_cmd_client = None
+    for cred in context.config[PROPERTIES_CONFIG_CRED]:
+        region_name = cred[PROPERTIES_CONFIG_CRED_REGION_NAME]
+        if region_name == context.master_region_name:
+            hostname = cred[PROPERTIES_CONFIG_CRED_HOST_NAME]
+            username = cred[PROPERTIES_CONFIG_CRED_HOST_USER]
+            password = cred[PROPERTIES_CONFIG_CRED_HOST_PASSWORD]
+            key = cred[PROPERTIES_CONFIG_CRED_HOST_KEY]
+            config_file_path = \
+                context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_CONFIG_FILE]
+
+            glancesyc_bin_path = \
+                context.config[PROPERTIES_CONFIG_GLANCESYNC][PROPERTIES_CONFIG_GLANCESYNC_BIN_PATH]
+
+            context.glancesync_cmd_client = GlanceSyncRemoteCmdClient(hostname, username, password,
+                                                                      configuration_file_path=config_file_path,
+                                                                      glancesyc_bin_path=glancesyc_bin_path,
+                                                                      master_keyfile=key)
+            break
+
+    if context.glancesync_cmd_client is None:
+        assert context.glancesync_cmd_client, \
+            "GlanceSync configuration for '%s' not found".format(context.master_region_name)
 
     __logger__.debug("Glance operation managers list: %s", context.glance_manager_list)
 

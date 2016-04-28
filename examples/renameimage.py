@@ -26,7 +26,6 @@ import sys
 import logging
 from glancesync.glancesync import GlanceSync
 
-__author__ = 'chema'
 
 """This code renames an image in all the regions. The image must exist in
 the master region (it is OK if the image has been already renamed). If the

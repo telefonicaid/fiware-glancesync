@@ -22,21 +22,25 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from flask.ext.testing import TestCase
-from app import db, app
-from app.mod_auth.models import User
+import httplib
+import json
 import os
 import unittest
-import httplib
-import requests_mock
-import json
-from app.mod_auth.models import Task
 
-__author__ = 'fla'
+import requests_mock
+from flask.ext.testing import TestCase
+from mock import patch
+
+from fiwareglancesync.app import app
+from fiwareglancesync.app.app import db
+from fiwareglancesync.app.mod_auth.models import User
+from fiwareglancesync.glancesync_image import GlanceSyncImage
+from fiwareglancesync.utils.utils import Task
+
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
-
+'''
 class DBTest(TestCase):
     """
     Class to develop the unit tests related to the management of the DB.
@@ -60,8 +64,8 @@ class DBTest(TestCase):
         db.create_all()
 
         # create users:
-        user1 = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
-        user2 = User(region='Spain2', name='foo@tim.go',   taskid='5678', role='fake role', status=Task.SYNCING)
+        user1 = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
+        user2 = User(region='Spain2', name='foo@tim.go',   task_id='5678', role='fake role', status=Task.SYNCING)
         db.session.add(user1)
         db.session.add(user2)
         db.session.commit()
@@ -101,6 +105,7 @@ class DBTest(TestCase):
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
+'''
 
 
 class APITests(unittest.TestCase):
@@ -132,7 +137,7 @@ class APITests(unittest.TestCase):
 
         :return: Nothing.
         """
-        self.app = app.test_client()
+        self.app = app.app.test_client()
         self.app.testing = True
 
     def tearDown(self):
@@ -235,11 +240,25 @@ class TestServerRequests(unittest.TestCase):
 
         :return: Nothing.
         """
-        self.app = app.test_client()
+        self.app = app.app.test_client()
         self.app.testing = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
+        app.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
 
         db.create_all()
+
+        image1 = GlanceSyncImage(region='Valladolid', name='image10', id='010', status='active',
+                                 size=1073741914, checksum='b1d5781111d84f7b3fe45a0852e59758cd7a87e5',
+                                 owner='tenant1', is_public=True, user_properties={'type': 'baseimage'})
+
+        image2 = GlanceSyncImage(region='Valladolid', name='image20', id='020', status='active',
+                                 size=1073741916, checksum='d885781111d84f7b3fe45a0852e59758cd7a87e5',
+                                 owner='tenant1', is_public=True, user_properties={'type': 'baseimage'})
+
+        images_region = [image1, image2]
+
+        self.config = {
+            'return_value.get_images_region.return_value': images_region
+        }
 
     def tearDown(self):
         """
@@ -271,7 +290,8 @@ class TestServerRequests(unittest.TestCase):
 
         self.assertEqual(result.status_code, httplib.BAD_REQUEST)
 
-    def test_get_status(self, m):
+    @patch('fiwareglancesync.app.mod_auth.controllers.GlanceSync', auto_spec=True)
+    def test_get_status(self, m, glancesync):
         """
         Test that the can obtain the status of the synchronization process of a region.
 
@@ -281,12 +301,20 @@ class TestServerRequests(unittest.TestCase):
         m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
+        m.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+
+        glancesync.configure_mock(**self.config)
+
         result = self.app.get('/regions/Trento', headers={'X-Auth-Token': 'token'})
 
         data = json.loads(result.data)
 
         self.assertTrue(isinstance(data, dict), "The returned value is not a dict.")
         self.assertTrue('images' in data, "The returned value is not the expected one.")
+        self.assertTrue(result.status == '200 OK', "The expected status is not 200 Ok")
+        self.assertTrue(result.status_code == 200, "The expected status code is not 200")
+        self.assertTrue(data['images'][0]['id'] == u'010', 'The expected id of the first image is not 010')
+        self.assertTrue(data['images'][1]['id'] == u'020', 'The expected id of the first image is not 020')
 
     def test_synchronize(self, m):
         """
@@ -316,7 +344,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -357,7 +385,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Trento',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCED)
+        user = User(region='Trento',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -377,7 +405,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='5678', role='fake role', status=Task.SYNCED)
+        user = User(region='Spain',  name='joe@soap.com', task_id='5678', role='fake role', status=Task.SYNCED)
         db.session.add(user)
         db.session.commit()
 
@@ -415,7 +443,7 @@ class TestServerRequests(unittest.TestCase):
         m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
-        user = User(region='Spain',  name='joe@soap.com', taskid='1234', role='fake role', status=Task.SYNCING)
+        user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCING)
         db.session.add(user)
         db.session.commit()
 

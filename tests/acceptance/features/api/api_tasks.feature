@@ -17,9 +17,11 @@ Feature: Manage tasks to get the status of the synchronization process
     And   a new task is created
     When  I request the status of the related task
     Then  the task information is retrieved
+    And   the synchronization is executed in "Caceres"
+    And  I remove the task
 
 
-  @happy_path @env_dependant @experimentation @skip # needs a real environment.
+  @happy_path @env_dependant @experimentation # needs a real environment.
   Scenario: Remove task.
     Given a new image created in the Glance of master node with name "qatesting01"
     And   the synchronization is executed in "Caceres"

@@ -10,3 +10,5 @@ fiwareglancesync:
    - Region1
    - Region2
    - Region3
+  ports:
+   - 8080:8080

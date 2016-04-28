@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-#__author__ = 'jfernandez'
-
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"

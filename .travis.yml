@@ -4,16 +4,22 @@ python:
 
 # command to install dependencies
 install:
+  - pip install --upgrade pip
+  - pip install --upgrade setuptools
   - pip install -r requirements.txt
   - pip install -r test-requirements.txt
-  - pip install -r ./scripts/getnids/requirements.txt
+  - pip install -r fiwareglancesync/scripts/getnids/requirements.txt
   - pip install coveralls
-  - export GLANCESYNC_SETTINGS_FILE=$(pwd)/app/settings/fiware-glancesync.cfg
-  - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/app/settings/fiware-glancesync-logging.cfg
+  - pip install pep8
+  - export GLANCESYNC_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync.cfg
+  - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync-logging.cfg
+  - export GLANCESYNCAPP_CONFIG=$(pwd)/fiwareglancesync/app/config.py
+  - export GLANCESYNCAPP_DATABASE_PATH=$(pwd)/fiwareglancesync
 
 # command to run tests
 script:
-  nosetests --with-coverage --cover-package=./ --exe
+  - pep8 --max-line-length=120 .
+  - nosetests --with-coverage --cover-package=./ --exe
 
 after_success:
   coveralls

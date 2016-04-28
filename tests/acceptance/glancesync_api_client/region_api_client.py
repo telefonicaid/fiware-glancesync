@@ -27,7 +27,6 @@ from qautils.http.headers_utils import HEADER_REPRESENTATION_JSON
 from qautils.http.body_model_utils import response_body_to_dict
 
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 
