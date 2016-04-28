@@ -28,8 +28,6 @@ from fiwareglancesync.app.settings.settings import AUTH_API_V2, AUTH_API_V3
 import requests_mock
 from keystoneclient.exceptions import AuthorizationFailure, Unauthorized
 
-__author__ = 'fla'
-
 
 @requests_mock.Mocker()
 class TestAuthenticationManager(TestCase):

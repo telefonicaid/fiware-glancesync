@@ -37,7 +37,6 @@ from fiwareglancesync.utils.utils import Images, Task
 from openstack_auth import authorized
 from region_manager import check_region
 
-__author__ = 'fla'
 
 # Define the blueprint: 'auth', set its url prefix: app.url/regions
 mod_auth = Blueprint('auth', __name__, url_prefix='/regions')

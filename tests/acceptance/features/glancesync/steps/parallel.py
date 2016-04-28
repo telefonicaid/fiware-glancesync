@@ -28,7 +28,6 @@ from glancesync_cmd_client.output_constants import GLANCESYNC_OUTPUT_PARALLEL_FI
 import commons.glancesync_output_assertions as glancesync_assertions
 import logging
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

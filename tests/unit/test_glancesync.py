@@ -37,8 +37,6 @@ from fiwareglancesync.glancesync_serverfacade_mock import ServersFacade
 from tests.unit.resources.config import RESOURCESPATH
 from tests.unit.test_getnid import get_path
 
-__author__ = 'chema'
-
 
 def create_images(region, count, prefix, tenant):
     """Helper function for creating a sequence or regions. The images are

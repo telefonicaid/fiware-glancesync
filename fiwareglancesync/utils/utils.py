@@ -28,8 +28,6 @@
 from fiwareglancesync.utils.mydict import FirstInsertFirstOrderedDict as fifo
 import uuid
 
-__author__ = 'fla'
-
 
 class TokenModel:
     """

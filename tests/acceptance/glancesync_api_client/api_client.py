@@ -30,7 +30,6 @@ from glancesync_api_client.task_api_client import TaskApiClient
 from qautils.logger.logger_utils import get_logger
 from keystoneclient.v2_0 import Client as KeystoneClient
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

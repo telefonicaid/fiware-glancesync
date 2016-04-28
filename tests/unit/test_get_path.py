@@ -26,8 +26,6 @@ from unittest import TestCase
 from tests.unit.test_getnid import get_path
 import os
 
-__author__ = 'fla'
-
 
 class TestGlanceSyncNIDOperations(TestCase):
     relativepath = 'tests/unit/resources/nid'

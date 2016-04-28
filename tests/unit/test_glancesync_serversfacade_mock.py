@@ -34,8 +34,6 @@ from tests.unit.resources.config import RESOURCESPATH
 from tests.unit.test_getnid import get_path
 from nose.tools import nottest
 
-__author__ = 'chema'
-
 
 class TestGlanceServersFacadeMock(unittest.TestCase):
     def setUp(self):

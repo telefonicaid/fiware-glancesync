@@ -29,8 +29,6 @@ from unittest import TestCase
 
 from fiwareglancesync.utils.utils import Image, Images, Task, TokenModel
 
-__author__ = 'fla'
-
 
 class TestImage(TestCase):
     def test_check_status_OK(self):

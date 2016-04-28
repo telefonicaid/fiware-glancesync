@@ -31,8 +31,6 @@ from fiwareglancesync.app.settings.settings import HOST, PORT
 from fiwareglancesync.app.settings.gunicorn_server import GunicornServer
 
 
-__author__ = 'fla'
-
 migrate = Migrate(app, db)
 
 # Add the db and runserver commands

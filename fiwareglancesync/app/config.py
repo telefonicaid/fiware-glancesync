@@ -24,8 +24,6 @@
 #
 import os
 
-__author__ = 'fla'
-
 
 # Statement for enabling the development environment
 DEBUG = True

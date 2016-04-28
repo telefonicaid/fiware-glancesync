@@ -37,7 +37,6 @@ from fiwareglancesync.app.mod_auth.models import User
 from fiwareglancesync.glancesync_image import GlanceSyncImage
 from fiwareglancesync.utils.utils import Task
 
-__author__ = 'fla'
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 

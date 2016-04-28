@@ -31,7 +31,6 @@ from glancesync_cmd_client.output_constants import \
     GLANCESYNC_OUTPUT_WARNING_CHECKSUM_CONFLICT, GLANCESYNC_OUTPUT_DUPLICATED, GLANCESYNC_OUTPUT_NOT_ACTIVE, \
     GLANCESYNC_OUTPUT_IMAGE_REPLACING, GLANCESYNC_OUTPUT_RENAMING
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

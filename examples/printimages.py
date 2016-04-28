@@ -26,8 +26,6 @@
 import sys
 from glancesync.glancesync import GlanceSync
 
-__author__ = 'chema'
-
 
 def _print_images_group(images, properties, comparewith):
     """

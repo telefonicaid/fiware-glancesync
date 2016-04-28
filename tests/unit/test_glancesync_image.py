@@ -26,8 +26,6 @@ import unittest
 import copy
 from fiwareglancesync.glancesync_image import GlanceSyncImage
 
-__author__ = 'chema'
-
 
 class TestGlanceSyncImageRegion(unittest.TestCase):
     """Class to test all methods but compare_with_masterregion, that has

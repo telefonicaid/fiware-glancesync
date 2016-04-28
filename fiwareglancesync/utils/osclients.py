@@ -31,7 +31,6 @@ from keystoneclient.v3 import client as keystonev3
 
 from importlib import import_module
 
-__author__ = 'chema'
 
 # OpenStack modules available with their imports
 modules_available = {

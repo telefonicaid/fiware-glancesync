@@ -30,7 +30,6 @@ from fiwareglancesync.app.settings.settings import OWNER, VERSION, API_INFO_URL,
     SERVER_HEADER, SERVER, JSON_TYPE
 from fiwareglancesync.app.settings.settings import logger_api
 
-__author__ = 'fla'
 
 # Define the blueprint: 'auth', set its url prefix: app.url/regions
 mod_info = Blueprint('info', __name__, url_prefix='/')

@@ -28,7 +28,6 @@ import json
 import re
 import os
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

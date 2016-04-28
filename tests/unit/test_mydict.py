@@ -25,8 +25,6 @@
 from fiwareglancesync.utils.mydict import FirstInsertFirstOrderedDict as fifo
 from unittest import TestCase
 
-__author__ = 'fla'
-
 
 class TestFirstInsertFirstOrderedDict(TestCase):
     def setUp(self):

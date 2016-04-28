@@ -25,8 +25,6 @@
 from collections import OrderedDict
 import json
 
-__author__ = 'fla'
-
 
 class FirstInsertFirstOrderedDict(OrderedDict):
     """

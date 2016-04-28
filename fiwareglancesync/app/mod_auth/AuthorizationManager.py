@@ -34,7 +34,6 @@ from fiwareglancesync.app.settings.settings import ACCEPT_HEADER, JSON_TYPE, X_A
 from fiwareglancesync.app.settings.settings import logger_api
 from fiwareglancesync.utils.utils import TokenModel
 
-__author__ = 'fla'
 
 DEFAULT_REQUEST_TIMEOUT = 100
 HTTP_RESPONSE_CODE_OK = 200

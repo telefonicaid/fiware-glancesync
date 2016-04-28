@@ -30,8 +30,6 @@ import os
 import logging
 
 
-__author__ = 'fla'
-
 # Get logger for Behave steps
 __logger__ = logging.getLogger("getnid_steps")
 

@@ -30,8 +30,6 @@ from fiwareglancesync.app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE
     ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME
 from functools import wraps
 
-__author__ = 'fla'
-
 
 def validate_token(access_token):
     """

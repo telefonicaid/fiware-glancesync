@@ -29,7 +29,6 @@ from glanceclient.client import Client as GlanceClient
 from keystoneclient.v2_0.client import Client as KeystoneClient
 import os
 
-__author__ = "Javier Fernández"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

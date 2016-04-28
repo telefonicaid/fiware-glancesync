@@ -28,7 +28,6 @@ from commons.constants import WAIT_SECONDS, MAX_WAIT_TASK_FINISHED
 import time
 from qautils.logger.logger_utils import get_logger
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

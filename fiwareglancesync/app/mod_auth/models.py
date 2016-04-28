@@ -26,8 +26,6 @@
 # We will define this inside /app/__init__.py in the next sections.
 from fiwareglancesync.app.app import db
 
-__author__ = 'fla'
-
 
 # Define a base model for other database tables to inherit
 class Base(db.Model):

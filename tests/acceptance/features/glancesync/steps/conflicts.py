@@ -28,7 +28,6 @@ from qautils.dataset.dataset_utils import DatasetUtils
 import commons.glancesync_output_assertions as glancesync_assertions
 
 
-__author__ = "@jframos"
 __copyright__ = "Copyright 2015-2016"
 __license__ = " Apache License, Version 2.0"
 

@@ -32,7 +32,6 @@ import copy
 from fiwareglancesync.settings import glancesync_config
 from fiwareglancesync.settings.glancesync_config import GlanceSyncConfig
 
-__author__ = 'chema'
 
 configuration_content = """
 [main]

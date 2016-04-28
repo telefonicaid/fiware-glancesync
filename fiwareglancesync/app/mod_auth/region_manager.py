@@ -34,8 +34,6 @@ import httplib
 from fiwareglancesync.app.settings.settings import KEYSTONE_URL, AUTH_API_V2, AUTH_API_V3, REGION_LIST_API_V3, \
     ADM_USER, ADM_PASS, ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME, X_AUTH_TOKEN_HEADER
 
-__author__ = 'fla'
-
 
 class region():
     regions = []
