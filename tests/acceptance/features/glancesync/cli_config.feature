@@ -26,7 +26,7 @@ Feature: GlanceSync CLI implementation. Configuration given by CLI params.
             | param_name      | param_value         |
             | is_public       | False               |
     And   GlanceSync configured to sync images without specifying any condition
-    When  I run the sync command with options "--config ignore_regions='Caceres' metadata_condition='not image.is_public'"
+    When  I run the sync command with options "--config master.ignore_regions='Caceres' metadata_condition='not image.is_public'"
     Then  the image "qatesting01" is only present in target node "Burgos"
 
 
