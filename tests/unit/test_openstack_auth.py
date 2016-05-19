@@ -57,11 +57,10 @@ class TestOpenStackAuth(TestCase):
             self.assertEqual('The request you have made requires authentication.', json.loads(ex.args[0])['error'][
                 'message'])
 
-
     @patch.object(fiwareglancesync.app.mod_auth.openstack_auth, 'check_user_token')
     @patch.object(fiwareglancesync.app.mod_auth.openstack_auth, 'build_keystone_url')
     def test_should_raise_error_in_validate_token_and_retry_with_successfully_result(self, build_keystone_url_mock,
-                                                                  check_user_token_mock):
+                                                                                     check_user_token_mock):
         """
         Should raise exception with json error in validate token and retry check token with successfully result
         :param mock:
