@@ -31,6 +31,10 @@ from fiwareglancesync.app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE
 from functools import wraps
 
 
+def build_keystone_url():
+    return KEYSTONE_URL + '/' + AUTH_API_V2
+
+
 def validate_token(access_token):
     """
     Verifies that an access-token is valid and meant for this app.
@@ -41,21 +45,36 @@ def validate_token(access_token):
 
     # Send a request to validate a token
     try:
-        keystone_url = KEYSTONE_URL + '/' + AUTH_API_V2
+        keystone_url = build_keystone_url()
 
-        a = AuthorizationManager(identity_url=keystone_url, api_version=AUTH_API_V2)
+        authorization_manager = AuthorizationManager(identity_url=keystone_url, api_version=AUTH_API_V2)
 
-        # Get the Admin token to validate the access_token
-        adm_token = a.get_auth_token(username=ADM_USER, password=ADM_PASS, tenant_id=ADM_TENANT_ID,
-                                     tenant_name=ADM_TENANT_NAME,
-                                     user_domain_name=USER_DOMAIN_NAME)
+        return check_user_token(authorization_manager, access_token)
 
-        auth_result = a.checkToken(adm_token, access_token)
+    except Exception as exception:
+        try:
+            message = json.loads(exception.args[0])['error']['message']
+            if message == 'The request you have made requires authentication.':
+                AuthorizationManager.auth_token = None
+                return check_user_token(authorization_manager, access_token)
+            raise exception
+        except:
+            raise exception
 
-        return auth_result
 
-    except Exception as excep:
-        raise excep
+def check_user_token(authorization_manager, access_token):
+    """
+    Check token using admin token
+    :param authorization_manager: an instance of AuthorizationManager
+    :param access_token: token to validates
+    :return: json with error
+    """
+    # Get the Admin token to validate the access_token
+    adm_token = authorization_manager.get_auth_token(username=ADM_USER, password=ADM_PASS, tenant_id=ADM_TENANT_ID,
+                                                     tenant_name=ADM_TENANT_NAME,
+                                                     user_domain_name=USER_DOMAIN_NAME)
+    auth_result = authorization_manager.checkToken(adm_token, access_token)
+    return auth_result
 
 
 def error_message(message):
