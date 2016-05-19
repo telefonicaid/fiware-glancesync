@@ -32,7 +32,7 @@ export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
 export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2}')
 export SECURITY_GROUP_CREATE=sshopen
 export SECURITY_GROUP_TEST=allopen
-export KEYPAIR=createimage
+export KEYPAIR=createtestimage
 export CREATESCRIPT=create.sh
 export TESTSCRIPT=test.sh
 export UPLOAD_FILE=data.tgz

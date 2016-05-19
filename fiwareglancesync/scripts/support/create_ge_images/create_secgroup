@@ -32,7 +32,7 @@ nova secgroup-create sshopen "ssh open"
 nova secgroup-add-rule sshopen tcp 22 22 0.0.0.0/0
 
 rm -f ~/.ssh/createtestimage
-nova keypair-add  createimage > ~/.ssh/createtestimage
+nova keypair-add createtestimage > ~/.ssh/createtestimage
 chmod 400 ~/.ssh/createtestimage
 
 IP=$(nova floating-ip-list | awk '/^\|[ ]+[0-9]+/ { print $2 }')
