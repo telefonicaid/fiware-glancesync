@@ -95,7 +95,10 @@ def error_message(message):
             'file (fiware-glancesync.cfg)'
     }
 
-    return errors[message]
+    if message in errors:
+        return errors[message]
+    else:
+        return message
 
 
 def authorized(func):
@@ -135,14 +138,12 @@ def authorized(func):
                 abort(data['error']['code'], excep.message)
 
             except ValueError:
-                message = '''
-                {
+                message = {
                     "error": {
-                        "message": "%s",
-                        "code": %s
+                        "message": error_message(excep.message),
+                        "code": httplib.BAD_REQUEST
                     }
                 }
-                ''' % (error_message(excep.message), httplib.BAD_REQUEST)
 
                 abort(httplib.BAD_REQUEST, message)
 
