@@ -23,8 +23,9 @@
 #
 import os
 import httplib
-from flask import Flask, make_response
+from flask import Flask, jsonify, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+from fiwareglancesync.app.settings.settings import logger_api
 
 
 # Defile the WGSI application object
@@ -59,17 +60,18 @@ def unauthorized(error):
     :param error: The received error.
     :return: Response of the request with the error message.
     """
-    msg = '''
-    {
-        "error": {
-            "message": "The request you have made requires authentication.",
-            "code": "%s",
-            "title": "Unauthorized"
+    message = {
+        'error': {
+            'message': 'The request you have made requires authentication.',
+            'description': error.description,
+            "code": httplib.UNAUTHORIZED,
+            'title': 'Unauthorized'
         }
     }
-    ''' % str(httplib.UNAUTHORIZED)
 
-    resp = make_response(msg, httplib.UNAUTHORIZED)
+    logger_api.warn(message)
+    resp = jsonify(message)
+    resp.status_code = httplib.UNAUTHORIZED
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
@@ -85,16 +87,17 @@ def not_found(error):
     :param error: The received error.
     :return: Response of the request with the error message.
     """
-    msg = error.description or '''
-    {
-        "error": {
-            "message": "Item not found.",
-            "code": "%s"
+    message = {
+        'error': {
+            'message': 'Item not found: ',
+            'description': error.description,
+            'code': httplib.NOT_FOUND
         }
     }
-    ''' % str(httplib.NOT_FOUND)
 
-    resp = make_response(msg, httplib.NOT_FOUND)
+    logger_api.warn(message)
+    resp = jsonify(message)
+    resp.status_code = httplib.NOT_FOUND
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
@@ -119,6 +122,7 @@ def bad_method(error):
     }
     ''' % str(httplib.METHOD_NOT_ALLOWED)
 
+    logger_api.warn(msg)
     resp = make_response(msg, httplib.METHOD_NOT_ALLOWED)
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
@@ -135,16 +139,43 @@ def bad_request(error):
     :param error: The received error.
     :return: Response of the request with the error message.
     """
-    msg = error.description or '''
-    {
+    if isinstance(error.description, dict):
+        message = error.description
+    else:
+        message = {
+            "error": {
+                "message": "Bad request",
+                "code": httplib.BAD_REQUEST,
+                "description": error.description
+            }
+        }
+
+    logger_api.warn(message)
+    resp = jsonify(message)
+    resp.status_code = httplib.BAD_REQUEST
+    resp.headers[SERVER_HEADER] = SERVER
+    resp.headers[CONTENT_TYPE] = JSON_TYPE
+
+    return resp
+
+
+@app.errorhandler(Exception)
+def unhandled_exception(exception):
+    """
+    When unhandled Exception.
+
+    :param exception: The produced exception.
+    :return: Response of the request with the error message.
+    """
+    message = {
         "error": {
-            "message": "Bad region",
-            "code": "%s"
+            "message": "Unhandled exception",
+            "code": httplib.INTERNAL_SERVER_ERROR
         }
     }
-    ''' % str(httplib.BAD_REQUEST)
-
-    resp = make_response(msg, httplib.BAD_REQUEST)
+    logger_api.warn(message)
+    resp = jsonify(message)
+    resp.status_code = httplib.INTERNAL_SERVER_ERROR
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 

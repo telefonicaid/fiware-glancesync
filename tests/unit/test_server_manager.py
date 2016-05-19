@@ -36,6 +36,7 @@ from fiwareglancesync.app.app import db
 from fiwareglancesync.app.mod_auth.models import User
 from fiwareglancesync.glancesync_image import GlanceSyncImage
 from fiwareglancesync.utils.utils import Task
+from fiwareglancesync.app.settings.settings import KEYSTONE_URL
 
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
@@ -281,10 +282,10 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
-        m.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
 
         result = self.app.get('/regions/fake', headers={'X-Auth-Token': 'token'})
 
@@ -298,10 +299,10 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
-        m.get('http://cloud.lab.fiware.org:4730/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
 
         glancesync.configure_mock(**self.config)
 
@@ -323,8 +324,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         result = self.app.post('/regions/Trento', headers={'X-Auth-Token': 'token'})
 
@@ -340,8 +341,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
@@ -365,8 +366,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         result = self.app.get('/regions/Trento/tasks/fake_task', headers={'X-Auth-Token': 'token'})
 
@@ -381,8 +382,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Trento',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
@@ -401,8 +402,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='5678', role='fake role', status=Task.SYNCED)
@@ -423,8 +424,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         result = self.app.delete('/regions/Trento/tasks/fake_id', headers={'X-Auth-Token': 'token'})
 
@@ -439,8 +440,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get('http://cloud.lab.fiware.org:4730/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post('http://cloud.lab.fiware.org:4730/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCING)
