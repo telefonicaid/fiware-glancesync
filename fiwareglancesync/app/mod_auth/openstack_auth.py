@@ -24,7 +24,7 @@
 #
 import httplib
 from flask import request, abort, json
-from AuthorizationManager import AuthorizationManager
+from fiwareglancesync.app.mod_auth.AuthorizationManager import AuthorizationManager
 from fiwareglancesync.app.settings.settings import logger_api
 from fiwareglancesync.app.settings.settings import X_AUTH_TOKEN_HEADER, KEYSTONE_URL, AUTH_API_V2, ADM_PASS, ADM_USER, \
     ADM_TENANT_ID, ADM_TENANT_NAME, USER_DOMAIN_NAME
@@ -73,7 +73,7 @@ def check_user_token(authorization_manager, access_token):
     adm_token = authorization_manager.get_auth_token(username=ADM_USER, password=ADM_PASS, tenant_id=ADM_TENANT_ID,
                                                      tenant_name=ADM_TENANT_NAME,
                                                      user_domain_name=USER_DOMAIN_NAME)
-    auth_result = authorization_manager.checkToken(adm_token, access_token)
+    auth_result = authorization_manager.check_token(adm_token, access_token)
     return auth_result
 
 
@@ -84,7 +84,6 @@ def error_message(message):
     :param message: The keystone client error message.
     :return: The correct GlanceSync error message.
     """
-    errors = dict()
 
     errors = {
         'Expecting to find username or userId in passwordCredentials - the server could not comply '
