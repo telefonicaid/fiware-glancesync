@@ -222,14 +222,12 @@ def get_task(regionid, taskid, token=None):
         msg = "The requested URL was not found on the server. If you entered the URL manually please" \
               " check your spelling and try again."
 
-        message = '''
-        {
+        message = {
             "error": {
-                "message": "%s",
-                "code": %s
+                "message": msg,
+                "code": httplib.NOT_FOUND
             }
         }
-        ''' % (msg, httplib.NOT_FOUND)
 
         abort(httplib.NOT_FOUND, message)
     else:
@@ -269,14 +267,12 @@ def delete_task(regionid, taskid, token=None):
         msg = "The requested URL was not found on the server. If you entered the URL manually please" \
               " check your spelling and try again."
 
-        message = '''
-        {
+        message = {
             "error": {
-                "message": "%s",
-                "code": %s
+                "message": msg,
+                "code": httplib.NOT_FOUND
             }
         }
-        ''' % (msg, httplib.NOT_FOUND)
 
         abort(httplib.NOT_FOUND, message)
     elif len(users) == 1 and users[0].region == regionid and users[0].status != Task.SYNCING:
@@ -285,14 +281,12 @@ def delete_task(regionid, taskid, token=None):
         db.session.commit()
     else:
         # We cannot delete the task due to the status in syncing
-        msg = '''
-        {
+        msg = {
             "error": {
                 "message": "Task status is syncing. Unable to delete it.",
-                "code": %s
+                "code": httplib.BAD_REQUEST
             }
         }
-        ''' % httplib.BAD_REQUEST
 
         abort(httplib.BAD_REQUEST, msg)
 
