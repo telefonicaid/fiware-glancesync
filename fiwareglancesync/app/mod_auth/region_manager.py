@@ -120,6 +120,6 @@ def check_region(func):
         if result:
             return func(*args, **kwargs)
         else:
-            abort(httplib.BAD_REQUEST)
+            abort(httplib.BAD_REQUEST, "Invalid region "+region_name)
 
     return _wrap
