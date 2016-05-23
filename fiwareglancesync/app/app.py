@@ -113,17 +113,17 @@ def bad_method(error):
     :param error: The received error.
     :return: Response of the request with the error message.
     """
-    msg = '''
-    {
+    message = {
         "error": {
             "message": "Bad method",
-            "code": "%s"
+            "code": httplib.METHOD_NOT_ALLOWED,
+            "description": error.description
         }
     }
-    ''' % str(httplib.METHOD_NOT_ALLOWED)
 
-    logger_api.warn(msg)
-    resp = make_response(msg, httplib.METHOD_NOT_ALLOWED)
+    logger_api.warn(message)
+    resp = jsonify(message)
+    resp.status_code = httplib.METHOD_NOT_ALLOWED
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
