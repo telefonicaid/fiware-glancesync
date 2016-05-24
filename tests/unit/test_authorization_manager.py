@@ -288,6 +288,16 @@ class TestAuthenticationManager(TestCase):
         # Then
         self.assertTrue(result)
 
+    def test_is_admin_should_return_false_with_empty_roles(self, m):
+        # Given
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+        roles_list = None
+        # When
+        result = auth._is_admin(roles_list)
+        # Then
+        self.assertFalse(result)
+
+
     def test_raise_exception_with_user_not_admin_with_from_keystone_v3(self, m):
         # Given
         response_with_v3 = {
