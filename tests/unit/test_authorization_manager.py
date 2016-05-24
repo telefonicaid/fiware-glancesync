@@ -297,7 +297,6 @@ class TestAuthenticationManager(TestCase):
         # Then
         self.assertFalse(result)
 
-
     def test_raise_exception_with_user_not_admin_with_from_keystone_v3(self, m):
         # Given
         response_with_v3 = {
