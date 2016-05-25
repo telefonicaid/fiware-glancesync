@@ -5,6 +5,8 @@ fiwareglancesync:
    - ADM_USERNAME
    - ADM_TENANT_NAME
    - ADM_TENANT_ID
+   - OS_PROJECT_DOMAIN_NAME
+   - OS_USER_DOMAIN_NAME
    - KEYSTONE_IP
    - KEYSTONE_IP2
    - Region1
