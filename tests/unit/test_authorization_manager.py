@@ -26,18 +26,59 @@ from unittest import TestCase
 from fiwareglancesync.app.mod_auth.AuthorizationManager import AuthorizationManager
 from fiwareglancesync.app.settings.settings import AUTH_API_V2, AUTH_API_V3
 import requests_mock
-from keystoneclient.exceptions import AuthorizationFailure, Unauthorized
+from keystoneclient.exceptions import AuthorizationFailure, Unauthorized, InternalServerError
+import json
+from mock import patch
 
 
 @requests_mock.Mocker()
 class TestAuthenticationManager(TestCase):
-    validate_info_v2 = '{ "access": { "token": { "expires": "2016-02-10T11:16:56Z", ' \
-                       '"id": "7cd3b96409ef497587c98c8c5f596b8d" }, "user": { "username": "admin" } } }'
+    validate_info_v2 = {
+        "access": {
+            "token": {
+                "expires": "2016-02-10T11:16:56Z",
+                "id": "7cd3b96409ef497587c98c8c5f596b8d"
+            },
+            "user": {
+                "username": "admin",
+                "roles": [
+                    {
+                        "id": "8d27cbfdaf3845b8a5cfc349f0b52bac",
+                        "name": "owner"
+                    },
+                    {
+                        "is_default": True,
+                        "id": "a6c6f50bc3ff438ab311a9063610d383",
+                        "name": "admin"
+                    }
+                ],
 
-    validate_info_v3 = '{ "token": { "expires_at": "2016-02-10T11:16:56.000000Z", ' \
-                       '"project": { "id": "00000000000003228460960090160000", "name": "admin" }, ' \
-                       '"user": { "id": "5a919b072cac4b02917e785f1898826e", "name": "admin" }, ' \
-                       '"issued_at": "2016-02-09T11:16:56.440835" } }'
+            }
+        }
+    }
+
+    validate_info_v3 = {
+        "token": {
+            "roles": [
+                {
+                    "id": "8d2767fdak5k45b8a5cfc349f0b52bac",
+                    "name": "owner"
+                },
+                {
+                    "id": "a6c6f50bc3kkk38ab311a9063610d383",
+                    "name": "admin"
+                }
+            ],
+            "expires_at": "2016-02-10T11:16:56.000000Z",
+            "project": {
+                "id": "00000000000003228460960090160000", "name": "admin"
+            },
+            "user": {
+                "id": "5a919b072cac4b02917e785f1898826e", "name": "admin"
+            },
+            "issued_at": "2016-02-09T11:16:56.440835"
+        }
+    }
 
     expiredExpectedv2 = "2016-02-10T11:16:56Z"
     expiredExpectedv3 = "2016-02-10T11:16:56.000000Z"
@@ -96,7 +137,7 @@ class TestAuthenticationManager(TestCase):
         """
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
 
-        m.get('http://fake_url/tokens/token', text=self.validate_info_v2)
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
 
         tokenExpected = auth.get_info_token(admin_token='admin_token', token='token')
 
@@ -115,7 +156,7 @@ class TestAuthenticationManager(TestCase):
         """
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V3)
 
-        m.get('http://fake_url/auth/tokens/', text=self.validate_info_v3)
+        m.get('http://fake_url/auth/tokens/', json=self.validate_info_v3)
 
         tokenExpected = auth.get_info_token(admin_token='admin_token', token=self.idExpected)
 
@@ -170,7 +211,7 @@ class TestAuthenticationManager(TestCase):
         # Make sure that there is no auth token
         AuthorizationManager.auth_token = None
 
-        m.post('http://fake_url/tokens', text=self.validate_info_v2)
+        m.post('http://fake_url/tokens', json=self.validate_info_v2)
 
         auth_token = auth.get_auth_token(username='fake name', password='fake password', tenant_id='fake tenant')
 
@@ -188,7 +229,7 @@ class TestAuthenticationManager(TestCase):
         # Make sure that there is no auth token
         AuthorizationManager.auth_token = None
 
-        m.post('http://fake_url/auth/tokens', text=self.validate_info_v3)
+        m.post('http://fake_url/auth/tokens', json=self.validate_info_v3)
 
         try:
             auth.get_auth_token(username='fake name', password='fake password', tenant_id='fake tenant',
@@ -205,21 +246,160 @@ class TestAuthenticationManager(TestCase):
         """
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
 
-        m.get('http://fake_url/tokens/token', text=self.validate_info_v2)
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
 
-        tokenExpected = auth.checkToken(admin_token='admin_token', token='token')
+        tokenExpected = auth.check_token(admin_token='admin_token', token='token')
 
         self.assertEquals(tokenExpected.expires, self.expiredExpectedv2, 'The expired time expected is not the same')
         self.assertEquals(tokenExpected.id, self.idExpected, 'The token id expected is not the same')
         self.assertEquals(tokenExpected.username, self.usernameExpected, 'The username expected is not the same')
         self.assertEquals(tokenExpected.tenant, self.tenantExpectedv2, 'The tenant expected is not the same')
 
-    def test_check_token_with_no_token(self, m):
+    def test_check_token_without_token(self, m):
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
 
-        m.get('http://fake_url/tokens/token', text=self.validate_info_v2)
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
 
         try:
-            auth.checkToken(admin_token='admin_token', token='token')
+            auth.check_token(admin_token='admin_token', token=None)
+            self.assertFalse(False)
         except Unauthorized as e:
             self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
+
+    @patch.object(AuthorizationManager, 'get_info_token', create=True, return_value=None)
+    def test_check_token_and_raise_general_exception(self, m, get_info_token_mock):
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+        get_info_token_mock.side_effect = Exception("error message")
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
+
+        try:
+            auth.check_token(admin_token='admin_token', token='token')
+            self.assertFalse(True)
+        except Exception as e:
+            self.assertEquals(e.message, "error message")
+        finally:
+            self.assertTrue(get_info_token_mock.called)
+            get_info_token_mock.reset_mock()
+
+    @patch.object(AuthorizationManager, 'get_info_token', create=True, return_value=None)
+    def test_check_token_and_raise_internal_server_error(self, m, get_info_token_mock):
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+        get_info_token_mock.side_effect = InternalServerError("internal server message")
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
+
+        try:
+            auth.check_token(admin_token='admin_token', token='token')
+            self.assertFalse(True)
+        except AuthorizationFailure as e:
+            self.assertEquals(e.message, "Cannot authorize API client.")
+        finally:
+            self.assertTrue(get_info_token_mock.called)
+            get_info_token_mock.reset_mock()
+
+    def test_is_admin_should_return_false_without_user_no_admin(self, m):
+        # Given
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+        roles_list = [
+            {u'id': u'8d27cbfdaf3845b8a5cfc349f0b52bac', u'name': u'owner'},
+            {u'is_default': True, u'id': u'a6c6f50bc3ff438ab311a9063610d383', u'name': u'other'}]
+
+        # When
+        result = auth._is_admin(roles_list)
+        # Then
+        self.assertFalse(result)
+
+    def test_is_admin_should_return_true_with_admin_user(self, m):
+        # Given
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+        roles_list = [
+            {u'id': u'8d27cbfdaf3845b8a5cfc349f0b52bac', u'name': u'owner'},
+            {u'is_default': True, u'id': u'a6c6f50bc3ff438ab311a9063610d383', u'name': u'admin'}]
+
+        # When
+        result = auth._is_admin(roles_list)
+        # Then
+        self.assertTrue(result)
+
+    def test_is_admin_should_return_false_with_empty_roles(self, m):
+        # Given
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+        roles_list = None
+        # When
+        result = auth._is_admin(roles_list)
+        # Then
+        self.assertFalse(result)
+
+    def test_raise_exception_with_user_not_admin_with_keystone_v3(self, m):
+        # Given
+        response_with_v3 = {
+            "token": {
+                "roles": [
+                    {
+                        "id": "8d2767fdak5k45b8a5cfc349f0b52bac",
+                        "name": "owner"
+                    },
+                    {
+                        "id": "a6c6f50bc3kkk38ab311a9063610d383",
+                        "name": "other"
+                    }
+                ],
+                "expires_at": "2016-02-10T11:16:56.000000Z",
+                "project": {
+                    "id": "00000000000000000000960090160000", "name": "admin"
+                },
+                "user": {
+                    "id": "5a919b072cac4b02917e785f1898826e", "name": "admin"
+                },
+                "issued_at": "2016-02-09T11:16:56.440835"
+            }
+        }
+
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V3)
+
+        m.get('http://fake_url/auth/tokens/', json=response_with_v3)
+
+        try:
+            # When
+            auth.get_info_token(admin_token='admin_token', token=self.idExpected)
+        except Exception as exception:
+            # Then
+            self.assertEqual('Role is not admin', exception.args[0])
+
+    def test_raise_exception_with_user_not_admin_with_keystone_v2(self, m):
+        # Given
+        response_with_v2 = {
+            "access": {
+                "token": {
+                    "expires": "2016-02-10T11:16:56Z",
+                    "id": "7cd3b96409ef497587c98c8c5f596b8d"
+                },
+                "user": {
+                    "username": "admin",
+                    "roles": [
+                        {
+                            "id": "8d27cbfdaf3845b8a5cfc349f0b52bac",
+                            "name": "owner"
+                        },
+                        {
+                            "is_default": True,
+                            "id": "a6c6f50bc3ff438ab311a9063610d383",
+                            "name": "other"
+                        }
+                    ],
+
+                }
+            }
+        }
+
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+        m.get('http://fake_url/tokens/token', json=response_with_v2)
+
+        try:
+            # When
+            auth.get_info_token(admin_token='admin_token', token='token')
+        except Exception as exception:
+            # Then
+            self.assertEqual('Role is not admin', exception.args[0])

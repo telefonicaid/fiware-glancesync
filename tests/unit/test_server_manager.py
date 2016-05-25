@@ -186,22 +186,32 @@ class TestServerRequests(unittest.TestCase):
     """
     Class to test the overall behaviour of the Glancesync API except the global error handled.
     """
-    validate_info_v2 = '''
-    {
+
+    validate_info_v2 = {
         "access": {
             "token": {
                 "expires": "2016-02-10T11:16:56Z",
                 "id": "7cd3b96409ef497587c98c8c5f596b8d"
             },
             "user": {
-                "username": "admin"
+                "username": "admin",
+                "roles": [
+                    {
+                        "id": "8d27cbfdaf3845b8a5cfc349f0b52bac",
+                        "name": "owner"
+                    },
+                    {
+                        "is_default": True,
+                        "id": "a6c6f50bc3ff438ab311a9063610d383",
+                        "name": "admin"
+                    }
+                ],
+
             }
         }
     }
-    '''
 
-    region_list = '''
-    {
+    region_list = {
         "endpoint_groups": [
             {
                 "filters": {
@@ -215,7 +225,6 @@ class TestServerRequests(unittest.TestCase):
             }
         ]
     }
-    '''
 
     @classmethod
     def setUpClass(cls):
@@ -282,10 +291,10 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
-        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', json=self.region_list)
 
         result = self.app.get('/regions/fake', headers={'X-Auth-Token': 'token'})
 
@@ -299,10 +308,10 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
-        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', text=self.region_list)
+        m.get(KEYSTONE_URL + '/v3/OS-EP-FILTER/endpoint_groups', json=self.region_list)
 
         glancesync.configure_mock(**self.config)
 
@@ -324,8 +333,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         result = self.app.post('/regions/Trento', headers={'X-Auth-Token': 'token'})
 
@@ -341,8 +350,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
@@ -366,8 +375,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         result = self.app.get('/regions/Trento/tasks/fake_task', headers={'X-Auth-Token': 'token'})
 
@@ -382,8 +391,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Trento',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCED)
@@ -402,8 +411,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='5678', role='fake role', status=Task.SYNCED)
@@ -424,8 +433,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         result = self.app.delete('/regions/Trento/tasks/fake_id', headers={'X-Auth-Token': 'token'})
 
@@ -440,8 +449,8 @@ class TestServerRequests(unittest.TestCase):
         :param m: The request mock.
         :return: Nothing.
         """
-        m.get(KEYSTONE_URL + '/v2.0/tokens/token', text=self.validate_info_v2)
-        m.post(KEYSTONE_URL + '/v2.0/tokens', text=self.validate_info_v2)
+        m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
+        m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
         # We have to secure that we have a task in the db with status synced.
         user = User(region='Spain',  name='joe@soap.com', task_id='1234', role='fake role', status=Task.SYNCING)

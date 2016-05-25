@@ -120,7 +120,20 @@ class AuthorizationManager:
 
         return AuthorizationManager.auth_token
 
-    def checkToken(self, admin_token, token):
+    def _is_admin(self, roles_list):
+        """
+        Check if one of the role is admin
+        :return:
+        """
+        if roles_list is None:
+            return False
+        for i, val in enumerate(roles_list):
+            if val["name"] == "admin":
+                return True
+
+        return False
+
+    def check_token(self, admin_token, token):
         """
         Checks if a token is valid against a url using an admin token.
 
@@ -143,6 +156,7 @@ class AuthorizationManager:
             logger_api.error(unauth)
             raise unauth
         except InternalServerError as internalError:
+            logger_api.error("%s", internalError.message)
             raise AuthorizationFailure("Token could not have enough permissions to access tenant")
         except Exception as ex:
             logger_api.error("%s", ex.message)
@@ -171,6 +185,12 @@ class AuthorizationManager:
 
             my_token = TokenModel(expires=tmp['expires'], id=tmp['id'], username=username)
 
+            if "roles" in info["access"]["user"]:
+                if not self._is_admin(info["access"]["user"]["roles"]):
+                    raise AuthorizationFailure("Role is not admin")
+            else:
+                raise AuthorizationFailure("User hasn't defined roles")
+
         elif self.api_version == AUTH_API_V3:
             headers = {ACCEPT_HEADER: JSON_TYPE, X_AUTH_TOKEN_HEADER: admin_token, X_SUBJECT_TOKEN_HEADER: token}
             r = self.client.get(self.identity_url + "/" + TOKENS_PATH_V3, headers=headers)
@@ -184,5 +204,11 @@ class AuthorizationManager:
 
             my_token = TokenModel(expires=tmp['expires_at'], id=token, username=tmp['user']['name'],
                                   tenant=tmp['project']['name'])
+
+            if "roles" in info["token"]:
+                if not self._is_admin(info["token"]["roles"]):
+                    raise AuthorizationFailure("Role is not admin")
+            else:
+                raise AuthorizationFailure("User hasn't defined roles")
 
         return my_token
