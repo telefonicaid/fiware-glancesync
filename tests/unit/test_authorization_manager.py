@@ -264,16 +264,6 @@ class TestAuthenticationManager(TestCase):
         except Unauthorized as e:
             self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
 
-    def test_check_token_with_no_token(self, m):
-            auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
-
-            m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
-
-            try:
-                auth.check_token(admin_token='admin_token', token='token')
-            except Unauthorized as e:
-                self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
-
     def test_is_admin_should_return_false_without_user_no_admin(self, m):
         # Given
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
