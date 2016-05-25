@@ -156,6 +156,7 @@ class AuthorizationManager:
             logger_api.error(unauth)
             raise unauth
         except InternalServerError as internalError:
+            logger_api.error("%s", internalError.message)
             raise AuthorizationFailure("Token could not have enough permissions to access tenant")
         except Exception as ex:
             logger_api.error("%s", ex.message)

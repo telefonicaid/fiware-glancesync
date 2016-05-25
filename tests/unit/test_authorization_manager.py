@@ -26,8 +26,9 @@ from unittest import TestCase
 from fiwareglancesync.app.mod_auth.AuthorizationManager import AuthorizationManager
 from fiwareglancesync.app.settings.settings import AUTH_API_V2, AUTH_API_V3
 import requests_mock
-from keystoneclient.exceptions import AuthorizationFailure, Unauthorized
+from keystoneclient.exceptions import AuthorizationFailure, Unauthorized, InternalServerError
 import json
+from mock import patch
 
 
 @requests_mock.Mocker()
@@ -254,15 +255,48 @@ class TestAuthenticationManager(TestCase):
         self.assertEquals(tokenExpected.username, self.usernameExpected, 'The username expected is not the same')
         self.assertEquals(tokenExpected.tenant, self.tenantExpectedv2, 'The tenant expected is not the same')
 
-    def test_check_token_with_no_token(self, m):
+    def test_check_token_without_token(self, m):
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
 
         m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
 
         try:
-            auth.check_token(admin_token='admin_token', token='token')
+            auth.check_token(admin_token='admin_token', token=None)
+            self.assertFalse(False)
         except Unauthorized as e:
             self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
+
+    @patch.object(AuthorizationManager, 'get_info_token', create=True, return_value=None)
+    def test_check_token_and_raise_general_exception(self, m, get_info_token_mock):
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+        get_info_token_mock.side_effect = Exception("error message")
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
+
+        try:
+            auth.check_token(admin_token='admin_token', token='token')
+            self.assertFalse(True)
+        except Exception as e:
+            self.assertEquals(e.message, "error message")
+        finally:
+            self.assertTrue(get_info_token_mock.called)
+            get_info_token_mock.reset_mock()
+
+    @patch.object(AuthorizationManager, 'get_info_token', create=True, return_value=None)
+    def test_check_token_and_raise_internal_server_error(self, m, get_info_token_mock):
+        auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+        get_info_token_mock.side_effect = InternalServerError("internal server message")
+        m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
+
+        try:
+            auth.check_token(admin_token='admin_token', token='token')
+            self.assertFalse(True)
+        except AuthorizationFailure as e:
+            self.assertEquals(e.message, "Cannot authorize API client.")
+        finally:
+            self.assertTrue(get_info_token_mock.called)
+            get_info_token_mock.reset_mock()
 
     def test_is_admin_should_return_false_without_user_no_admin(self, m):
         # Given
