@@ -26,6 +26,7 @@ from unittest import TestCase
 import fiwareglancesync.app.mod_auth.openstack_auth
 from mock import patch
 from fiwareglancesync.app.mod_auth.openstack_auth import validate_token
+from fiwareglancesync.app.mod_auth.openstack_auth import error_message
 import json
 from fiwareglancesync.utils.utils import TokenModel
 
@@ -81,3 +82,30 @@ class TestOpenStackAuth(TestCase):
 
         # Then
         self.assertEqual(token.username, 'the_username')
+
+    def test_should_return_an_error_message(self):
+        """
+        Should return an error message with a valid error message passed in argument
+        :return:
+        """
+        # Given
+        message = 'Expecting to find username or userId in passwordCredentials - the server could not comply with ' \
+                  'the request since it is either malformed or otherwise incorrect. ' \
+                  'The client is assumed to be in error.'
+        # When
+        message_result = error_message(message)
+        # Then
+        self.assertEqual('You have to configure the admin user in the configuration file (fiware-glancesync.cfg)',
+                         message_result)
+
+    def test_should_return_original_message_with_an_unknown_error(self):
+        """
+        Should return the same error passed like argument
+        :return:
+        """
+        # Given
+        message = 'Cannot authorize API client.'
+        # When
+        message_result = error_message(message)
+        # Then
+        self.assertEqual(message, message_result)
