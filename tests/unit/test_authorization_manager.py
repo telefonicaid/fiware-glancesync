@@ -264,6 +264,16 @@ class TestAuthenticationManager(TestCase):
         except Unauthorized as e:
             self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
 
+    def test_check_token_with_no_token(self, m):
+            auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
+
+            m.get('http://fake_url/tokens/token', json=self.validate_info_v2)
+
+            try:
+                auth.check_token(admin_token='admin_token', token='token')
+            except Unauthorized as e:
+                self.assertEquals(e.message, "Token is empty", 'The expected auth token is not the same')
+
     def test_is_admin_should_return_false_without_user_no_admin(self, m):
         # Given
         auth = AuthorizationManager(identity_url='http://fake_url', api_version=AUTH_API_V2)
@@ -297,7 +307,7 @@ class TestAuthenticationManager(TestCase):
         # Then
         self.assertFalse(result)
 
-    def test_raise_exception_with_user_not_admin_with_from_keystone_v3(self, m):
+    def test_raise_exception_with_user_not_admin_with_keystone_v3(self, m):
         # Given
         response_with_v3 = {
             "token": {
@@ -333,7 +343,7 @@ class TestAuthenticationManager(TestCase):
             # Then
             self.assertEqual('Role is not admin', exception.args[0])
 
-    def test_raise_exception_with_user_not_admin_with_from_keystone_v2(self, m):
+    def test_raise_exception_with_user_not_admin_with_keystone_v2(self, m):
         # Given
         response_with_v2 = {
             "access": {
