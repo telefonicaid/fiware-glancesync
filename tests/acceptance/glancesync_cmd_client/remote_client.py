@@ -138,7 +138,7 @@ class GlanceSyncRemoteCmdClient:
         return self.execute_command(command)
 
     def execute_command(self, command):
-        if self.host == "localhost":
+        if self.host == "localhost" or self.host == "fiwareglancesync":
             return self.execute_command_locally(command)
         else:
             return self.fabric_utils.execute_command(command)
