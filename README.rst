@@ -1024,6 +1024,42 @@ at least three glance servers and two keystone servers. Have a look to the
 ``test/acceptance/README.rst`` in order to get more information about how to
 prepare the environment to run the functional_test target.
 
+
+Ent-to-end  tests with Docker execution
+**************************************
+Glancesync acceptance tests can be executed by Docker. To do that, firstly it is required to create the required docker images (fiware-glancesync and
+fiware-glancesync-acceptance).
+To do that:
+
+.. code::
+
+    docker build -t fiware-glancesync -f docker/Dockerfile docker
+    docker build -t fiware-glancesync-acceptance -f docker/Dockerfile_acceptance docker
+
+Once the images have been created, we can run the acceptance tests it by using docker-compose
+ (to include the environment variables). To export then is required:
+
+.. code::
+
+    export OS_AUTH_URL = {the auth uri of the testbed agains the tests are going to be execute}
+    export OS_USERNAME = {the user name}
+    export OS_TENANT_NAME = {the tenant name}
+    export OS_PASSWORD = {the password}
+    export OS_REGION_NAME = {the region}
+    export OS_PROJECT_DOMAIN_NAME = {the project domain name}
+    export OS_USER_DOMAIN_NAME = {the user domain name}
+    export KEYSTONE_IP = {The keystone ip where testbed is deployed}
+    export Region1 = {The region name 1 for tests}
+    export Region2 = {The region name 2 for tests}
+    export Region3 = {The region name 3 for tests}
+    docker-compose -f docker/docker-compose.yml up
+
+When docker has finished, you can obtain the tests results by
+.. code::
+
+   docker cp docker_fiwareglancesync-acceptance:/opt/fiware/glancesync/tests/acceptance/testreport .
+
+
 Unit tests
 ----------
 
@@ -1049,6 +1085,28 @@ checks against a real glance server. To activate this eight tests, edit the file
 change testingFacadeReal to True. It needs the usual OpenStack environment
 variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
+
+Unit tests with Docker execution
+********************************
+Skuld unit tests can be executed by docker. To do that, firtly it is required to create the docker image, with the
+following command:
+
+.. code::
+
+    docker build -t fiware-glancesync-build -f docker/Dockerfile_build docker
+
+Once the fiware-skuld-build image is created, we can run it by:
+
+.. code::
+
+    docker run --name fiware-glancesync-build fiware-glancesync-build
+
+Finally, it is possible to obtain tests results and coverage information by:
+
+.. code::
+
+    docker cp fiware-glancesync-build:/opt/fiware/glancesync/test_results .
+    docker cp fiware-glancesync-build:/opt/fiware/glancesync/coverage .
 
 Contributing new tests
 ______________________

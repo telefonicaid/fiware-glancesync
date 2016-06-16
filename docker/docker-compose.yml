@@ -1,5 +1,6 @@
 fiwareglancesync:
   image: fiware-glancesync
+  container_name: fiwareglancesync
   environment: 
    - ADM_PASSWORD
    - ADM_USERNAME
@@ -14,3 +15,21 @@ fiwareglancesync:
    - Region3
   ports:
    - 8080:8080
+
+fiwareglancesync-acceptance:
+  image: fiware-glancesync-acceptance
+  links:
+  - fiwareglancesync
+  environment:
+   - ADM_PASSWORD
+   - ADM_USERNAME
+   - ADM_TENANT_NAME
+   - ADM_TENANT_ID
+   - OS_PROJECT_DOMAIN_NAME
+   - OS_USER_DOMAIN_NAME
+   - KEYSTONE_IP
+   - KEYSTONE_IP2
+   - Region1
+   - Region2
+   - Region3
+

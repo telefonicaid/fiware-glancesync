@@ -14,7 +14,7 @@
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}",
-      "host_name": "localhost",
+      "host_name": "fiwareglancesync",
       "host_user": "glancesync",
       "host_password": "glancesync",
       "host_key": "/home/glancesync/.ssh/id_rsa"
@@ -71,7 +71,7 @@
   },
     "glancesync_api":{
       "protocol": "http",
-      "host": "localhost",
+      "host": "fiwareglancesync",
       "port": "8080",
       "resource": "",
       "keystone_url": "http://{KEYSTONE_IP}:35357/v2.0/",
@@ -86,5 +86,6 @@
       "bin_path": "/fiwareglancesync/scripts/getnids/getnid.py"
   }
 }
+
 
 
