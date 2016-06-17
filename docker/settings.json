@@ -14,7 +14,7 @@
       "user_domain_name": "default",
       "user": "{ADM_USERNAME}",
       "password": "{ADM_PASSWORD}",
-      "host_name": "fiwareglancesync",
+      "host_name": "localhost",
       "host_user": "glancesync",
       "host_password": "glancesync",
       "host_key": "/home/glancesync/.ssh/id_rsa"
