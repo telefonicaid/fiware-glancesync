@@ -1049,7 +1049,7 @@ When docker has finished, you can obtain the tests results by
 
 
 Unit tests
-**********
+----------
 To run the unit tests, you need to create a virtualenv using the requirements
 both contained in requirements.txt and test-requrirements.txt. You only need to
 execute the nosetests program in the root dorectory of the fiware-glancesync
@@ -1074,7 +1074,7 @@ variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
 
 Unit tests with Docker execution
-********************************
+--------------------------------
 Skuld unit tests can be executed by docker. To do that, firtly it is required to create the docker image, with the
 following command:
 
@@ -1096,7 +1096,7 @@ Finally, it is possible to obtain tests results and coverage information by:
     docker cp fiware-glancesync-build:/opt/fiware/glancesync/coverage .
 
 Contributing new tests
-**********************
+----------------------
 
 It is possible to contribute new tests defining a scenario in *tests/resources*
 For a scenario 'new_scenario', the following folders must be created:
