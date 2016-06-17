@@ -34,7 +34,6 @@ sed -i -e "s/{Region1}/${Region1}/" /etc/glancesync.conf
 sed -i -e "s/{Region1}/${Region1}/" conf/settings.json
 sed -i -e "s/{Region2}/${Region2}/" conf/settings.json
 sed -i -e "s/{Region3}/${Region3}/" conf/settings.json
-
 export PYTHONPATH=../..
 behave features/glancesync/ --tags ~@skip --junit --junit-directory testreport
 # Execute Behave features of script components:

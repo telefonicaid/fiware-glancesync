@@ -8,6 +8,7 @@ ENV GLANCESYNC_SETTINGS_FILE=/etc/fiware.d/etc/fiware-glancesync.cfg
 ENV GLANCESYNC_LOGGING_SETTINGS_FILE=/etc/fiware.d/etc/fiware-glancesync-logging.cfg
 COPY fiware-glancesync.cfg /etc/fiware.d/etc/fiware-glancesync.cfg
 COPY fiware-glancesync-logging.cfg /etc/fiware.d/etc/fiware-glancesync-logging.cfg
+COPY glancesync.conf /etc/glancesync.conf
 RUN pip install --upgrade pip
 RUN pip install git+https://github.com/telefonicaid/fiware-glancesync@develop
 EXPOSE 8080
