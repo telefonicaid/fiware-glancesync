@@ -1015,7 +1015,7 @@ prepare the environment to run the functional_test target.
 
 
 Ent-to-end tests with Docker execution
---------------------------------------
+______________________________________
 Glancesync acceptance tests can be executed by Docker. To do that, firstly it is required to create the required docker images (fiware-glancesync and
 fiware-glancesync-acceptance).
 To do that:
@@ -1074,7 +1074,7 @@ variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 *OS_AUTH_URL*)
 
 Unit tests with Docker execution
---------------------------------
+________________________________
 Skuld unit tests can be executed by docker. To do that, firtly it is required to create the docker image, with the
 following command:
 
