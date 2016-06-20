@@ -6,6 +6,9 @@ export OS_AUTH_URL=http://$KEYSTONE_IP:5000/v3
 export OS_AUTH_URL_V2=http://$KEYSTONE_IP:5000/v2.0/
 export OS_IDENTITY_API_VERSION=3
 
+openstack project create qa
+openstack user create qa --password qa --project qa
+
 openstack project show qa > qa
 
 export TENANT_ID_QA=`grep "| id" qa | awk 'NR==1{print $4}'`
