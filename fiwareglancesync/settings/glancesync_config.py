@@ -27,7 +27,7 @@ import os
 import base64
 from fiwareglancesync.app.settings.settings import logger_cli
 
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 
 # Methods to obtain a list/set, which a default empty.
 
