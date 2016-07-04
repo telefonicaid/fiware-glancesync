@@ -15,6 +15,7 @@ Feature: Synchronize the images of the corresponding region defined by its regio
   @happy_path @env_dependant @experimentation # needs a real environment.
   Scenario: Sync all images to the region
     Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
     When  I sync the region "Caceres"
     Then  a new task is created
     And   the task finishes with status "synced"

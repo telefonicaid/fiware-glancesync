@@ -13,6 +13,7 @@ Feature: Manage tasks to get the status of the synchronization process
   @happy_path @env_dependant @experimentation
   Scenario: Get task status of the synchornization process.
     Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
     And   I sync the region "Caceres"
     And   a new task is created
     When  I request the status of the related task
@@ -24,6 +25,7 @@ Feature: Manage tasks to get the status of the synchronization process
   @happy_path @env_dependant @experimentation # needs a real environment.
   Scenario: Remove task.
     Given a new image created in the Glance of master node with name "qatesting01"
+    And   GlanceSync configured to sync images without specifying any condition
     And   the synchronization is executed in "Caceres"
     When  I remove the task
     Then  the task is deleted
