@@ -110,7 +110,7 @@ def run_in_thread(regionid, user):
         logger_api.warn('Error in thread {}, with error: {}'.format(threading.currentThread().getName(), e.message))
         row_changed = User.query.filter(User.task_id == user.task_id).one()
         row_changed.change_status(Task.FAILED)
-        db.session.commit
+        db.session.commit()
 
 
 @mod_auth.route('/<regionid>', methods=['POST'])
