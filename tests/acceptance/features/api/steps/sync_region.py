@@ -217,11 +217,8 @@ def remove_task(context):
 def task_is_deleted(context):
     """Check that task is deleted"""
 
-    assert_that(str(context.response.status_code), is_(equal_to("200")),
-                "HTTP Status code for DELETE TASK request not the expected one.")
+    context.body, context.response = \
+        context.glancesync_api_client.get_task_api_client(context.region_name).get_task_details(context.task_id)
 
-    response = \
-        context.glancesync_api_client.get_task_api_client(context.region_name).delete_task(context.task_id)
-
-    assert_that(str(response.status_code), is_(equal_to("404")),
+    assert_that(str(context.response.status_code), is_(equal_to("404")),
                 "Task exists and it shouldn't")

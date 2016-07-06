@@ -290,7 +290,7 @@ def delete_task(regionid, taskid, token=None):
 
         abort(httplib.BAD_REQUEST, msg)
 
-    resp = make_response("", httplib.OK)
+    resp = make_response()
     resp.headers[SERVER_HEADER] = SERVER
     resp.headers[CONTENT_TYPE] = JSON_TYPE
 
