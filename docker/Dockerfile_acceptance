@@ -11,15 +11,14 @@ COPY fiware-glancesync.cfg /etc/fiware.d/etc/fiware-glancesync.cfg
 COPY fiware-glancesync-logging.cfg /etc/fiware.d/etc/fiware-glancesync-logging.cfg
 RUN pip install --upgrade pip
 WORKDIR /opt/fiware/glancesync
-RUN pip install git+https://github.com/telefonicaid/fiware-glancesync@develop
+RUN pip install  -r requirements.txt
+RUN python setup.py install
 WORKDIR /opt/fiware/glancesync/tests/acceptance/
 COPY settings.json conf/settings.json
 RUN pip install -r requirements.txt
 RUN pip install docopt
 COPY glancesync.conf /etc/glancesync.conf
 RUN pip install python-openstackclient
-RUN mkdir /var/lib/glance
-RUN mkdir /var/lib/glance/images
 COPY start_acceptance.sh start.sh
 CMD ./start.sh
 

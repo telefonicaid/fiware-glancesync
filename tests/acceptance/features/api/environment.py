@@ -153,6 +153,10 @@ def after_scenario(context, scenario):
             context.glance_manager_list[region].remove_all_images_by_name(image_name + ".old")
             context.glance_manager_list[region].remove_all_images_by_name(image_name + "_obsolete")
 
+    if hasattr(context, 'task_id'):
+        taskclient = context.glancesync_api_client.get_task_api_client(context.region_name)
+        taskclient.delete_task(context.task_id)
+
 
 def after_all(context):
     """
