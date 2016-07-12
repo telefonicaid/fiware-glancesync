@@ -2,7 +2,7 @@ fiwareglancesync:
   image: fiware-glancesync
   container_name: fiwareglancesync
   volumes:
-  - /tmp/:/var/lib/glance/images
+  - tmp/:/var/lib/glance/images
   environment: 
    - ADM_PASSWORD
    - ADM_USERNAME
@@ -23,7 +23,7 @@ fiwareglancesync-acceptance:
   links:
   - fiwareglancesync
   volumes:
-  - /tmp/:/var/lib/glance/images
+  - tmp/:/var/lib/glance/images
   environment:
    - ADM_PASSWORD
    - ADM_USERNAME
