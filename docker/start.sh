@@ -1,8 +1,8 @@
 ls -l /var/lib
 ls -l /var/lib/glance
-chmod 777 /var/lib/glance/images
-echo hola >> /var/lib/glance/images/hola
-cat /var/lib/glance/images/hola
+sudo chmod 777 /var/lib/glance/images
+sudo echo hola >> /var/lib/glance/images/hola
+sudo cat /var/lib/glance/images/hola
 export OS_REGION_NAME=$Region1
 export  OS_USERNAME=$ADM_USERNAME
 export OS_PASSWORD=$ADM_PASSWORD
