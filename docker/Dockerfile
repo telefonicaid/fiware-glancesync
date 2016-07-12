@@ -13,5 +13,6 @@ RUN pip install --upgrade pip
 RUN pip install git+https://github.com/telefonicaid/fiware-glancesync@develop
 EXPOSE 8080
 COPY start.sh start.sh
+RUN mkdir /var/lib/glance
 CMD ./start.sh
 
