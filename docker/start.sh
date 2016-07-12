@@ -1,3 +1,4 @@
+ls -l /var/lib/glance
 export OS_REGION_NAME=$Region1
 export  OS_USERNAME=$ADM_USERNAME
 export OS_PASSWORD=$ADM_PASSWORD
