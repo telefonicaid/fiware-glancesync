@@ -45,11 +45,11 @@ script must be zero only when the script runs without error.
 
 After this, one of the scripts *create_template_\*.sh*, must be invoked passing
 as parameter the name of the image. For example, to create the image
-*myimage* using the *debian* image, the command to invoke is:
+*myimage* using the *debian 7* image, the command to invoke is:
 
 .. code::
 
-  /opt/create_ge_images/create_template_debian.sh myimage
+  /opt/create_ge_images/create_template_debian7.sh myimage
 
 Inside the folder myimage, a pair of logs will be generated: *create.log* is the
 result of invoking the *create.sh* script and *test.log* is the output of
