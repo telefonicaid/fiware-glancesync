@@ -29,7 +29,7 @@ set -e
 # Force use of apt-get installed packages instead of the pip ones
 export PATH=/usr/bin:$PATH ; export PYTHONPATH=/usr/lib/python2.7/dist-packages
 
-export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2}')
+export SHARED_NETWORK_ID=$(neutron net-list |awk -e '/node-int-net-01/ {print $2} | head -n -1')
 export SECURITY_GROUP_CREATE=sshopen
 export SECURITY_GROUP_TEST=allopen
 export KEYPAIR=createtestimage
@@ -104,6 +104,12 @@ create_template_debian7() {
   create_template $1 base_debian_7 debian
 }
 
+create_template_debian8() {
+  # Parameters: name
+  check_params $*
+  create_template $1 base_debian_8 debian
+}
+
 create_template_centos6() {
   # Parameters: name
   check_params $*
@@ -135,6 +141,7 @@ create_template() {
   I="-i $HOME/.ssh/createtestimage"
 
   # Delete old VM if it exists
+
   nova delete $(cat $DIR/last_vm 2>/dev/null) >/dev/null 2>&1  || true
 
   if [ $TEST_ONLY ] ; then
