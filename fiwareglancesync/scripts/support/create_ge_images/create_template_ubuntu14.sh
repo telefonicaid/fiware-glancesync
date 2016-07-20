@@ -22,10 +22,18 @@
 # contact with opensource@tid.es
 #
 
+# How to use the script:
+# $ /path/to_my/script/create_template_ubuntu14.sh foo_image
+#
+# $0 = /path/to_my/script/create_template_ubuntu14.sh
+# $1 = foo_image
+
+# change to the directory where the script is located (example: /path/to_my/script)
 cd $(dirname $0)
+
+# load functions and variables from create_template.sh for use it
 . create_template.sh
 
-# Parameters: name
-
+# launch function for ubuntu14 with a parameter with image name (example: foo_image)
 create_template_ubuntu14 $1
 

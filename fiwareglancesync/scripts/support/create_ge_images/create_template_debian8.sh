@@ -28,12 +28,12 @@
 # $0 = /path/to_my/script/create_template_debian8.sh
 # $1 = foo_image
 
-# changes the directory to where the script is
+# change to the directory where the script is located (example: /path/to_my/script)
 cd $(dirname $0)
 
 # load functions and variables from create_template.sh for use it
 . create_template.sh
 
-# launch function for debian8 with a parameter with image name
+# launch function for debian8 with a parameter with image name (example: foo_image)
 create_template_debian8 $1
 
