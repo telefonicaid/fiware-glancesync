@@ -23,9 +23,9 @@
 #
 
 # How to use the script:
-# $ /path/to_my/script/create_template_centos7.sh foo_image
+# $ /path/to_my/script/create_template_debian8.sh foo_image
 #
-# $0 = /path/to_my/script/create_template_centos7.sh
+# $0 = /path/to_my/script/create_template_debian8.sh
 # $1 = foo_image
 
 # change to the directory where the script is located (example: /path/to_my/script)
@@ -34,6 +34,6 @@ cd $(dirname $0)
 # load functions and variables from create_template.sh for use it
 . create_template.sh
 
-# launch function for centos7 with a parameter with image name (example: foo_image)
-create_template_centos7 $1
+# launch function for debian8 with a parameter with image name (example: foo_image)
+create_template_debian8 $1
 
