@@ -22,10 +22,18 @@
 # contact with opensource@tid.es
 #
 
+# How to use the script:
+# $ /path/to_my/script/create_template_debian8.sh foo_image
+#
+# $0 = /path/to_my/script/create_template_debian8.sh
+# $1 = foo_image
+
+# changes the directory to where the script is
 cd $(dirname $0)
+
+# load functions and variables from create_template.sh for use it
 . create_template.sh
 
-# Parameters: name
-
+# launch function for debian8 with a parameter with image name
 create_template_debian8 $1
 
