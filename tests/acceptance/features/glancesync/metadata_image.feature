@@ -150,7 +150,7 @@ Feature: Image sync between regions using GlanceSync in the same federation but
               | nid             | 453                 |
 
 
-    @skip @bug @CLAUDIA-5307 @CLAUDIA-5308
+    @bug @CLAUDIA-5308
     Scenario Outline: 06: Sync a public image with empty metadata values
       Given a new image created in the Glance of master node with name "qatesting01" and these properties
               | param_name      | param_value         |
