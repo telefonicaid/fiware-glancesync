@@ -293,7 +293,7 @@ class TestAuthenticationManager(TestCase):
             auth.check_token(admin_token='admin_token', token='token')
             self.assertFalse(True)
         except AuthorizationFailure as e:
-            self.assertEquals(e.message, "Cannot authorize API client.")
+            self.assertEquals(e.message, "Token could not have enough permissions to access tenant")
         finally:
             self.assertTrue(get_info_token_mock.called)
             get_info_token_mock.reset_mock()
