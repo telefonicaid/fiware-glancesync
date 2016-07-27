@@ -252,14 +252,12 @@ class TestOSClients(TestCase):
         self.assertIsNone(osclients._OpenStackClients__tenant_id)
 
         # Creating a client to check that set_credential destroy the session with v3
-        novaclient = osclients.get_novaclient()
         self.assertIsNotNone(osclients._session_v3)
         osclients.set_credential(username, password)
         self.assertIsNone(osclients._session_v3)
 
         # Creating a client to check that set_credential destroy the session with v2
         osclients.use_v3 = False
-        novaclient = osclients.get_novaclient()
         self.assertIsNotNone(osclients._session_v2)
         osclients.set_credential(username, password)
         self.assertIsNone(osclients._session_v2)
