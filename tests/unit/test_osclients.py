@@ -26,7 +26,6 @@ from os import environ
 from unittest import TestCase
 from mock import patch, MagicMock
 from fiwareglancesync.utils.osclients import OpenStackClients
-import neutronclient.v2_0.client
 import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
@@ -148,15 +147,6 @@ class TestOSClients(TestCase):
             osclients.get_cinderclient()
         except Exception as ex:
             self.assertRaises(ex)
-
-    def test_get_neutronclient_with_all_modules(self):
-        """test_get_neutronclient_with_all_modules check that we could retrieve a Session client to work with neutron if
-        osclients is created with all modules"""
-
-        osclients = OpenStackClients(modules="auto")
-        neutronClient = osclients.get_neutronclient()
-
-        self.assertIsInstance(neutronClient, neutronclient.v2_0.client.Client)
 
     def test_get_novaclient(self):
         """test_get_novaclient check that we could retrieve a Session client to work with nova"""
