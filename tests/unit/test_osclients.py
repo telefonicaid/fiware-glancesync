@@ -251,17 +251,6 @@ class TestOSClients(TestCase):
         self.assertIsNone(osclients._OpenStackClients__tenant_name)
         self.assertIsNone(osclients._OpenStackClients__tenant_id)
 
-        # Creating a client to check that set_credential destroy the session with v3
-        self.assertIsNotNone(osclients._session_v3)
-        osclients.set_credential(username, password)
-        self.assertIsNone(osclients._session_v3)
-
-        # Creating a client to check that set_credential destroy the session with v2
-        osclients.use_v3 = False
-        self.assertIsNotNone(osclients._session_v2)
-        osclients.set_credential(username, password)
-        self.assertIsNone(osclients._session_v2)
-
     def test_set_region(self):
         """test_set_region check that we could change the region after create the client"""
 
