@@ -26,7 +26,6 @@ from os import environ
 from unittest import TestCase
 from mock import patch, MagicMock
 from fiwareglancesync.utils.osclients import OpenStackClients
-import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
 import keystoneclient.session
@@ -147,13 +146,6 @@ class TestOSClients(TestCase):
             osclients.get_cinderclient()
         except Exception as ex:
             self.assertRaises(ex)
-
-    def test_get_novaclient(self):
-        """test_get_novaclient check that we could retrieve a Session client to work with nova"""
-        osclients = OpenStackClients(modules="nova")
-        novaClient = osclients.get_novaclient()
-
-        self.assertIsInstance(novaClient, novaclient.v2.client.Client)
 
     @patch('fiwareglancesync.utils.osclients.session', mock_session)
     def test_get_glanceclient(self):
