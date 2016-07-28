@@ -26,13 +26,15 @@ import httplib
 from flask import Flask, jsonify, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
 from fiwareglancesync.app.settings.settings import logger_api
+from fiwareglancesync.utils.checkpath import check_path
 
 
 # Defile the WGSI application object
 app = Flask(__name__, instance_relative_config=True)
 
 # Configurations
-if os.environ.get("GLANCESYNCAPP_CONFIG"):
+configfile = os.environ.get("GLANCESYNCAPP_CONFIG")
+if configfile and check_path(configfile, 'config.py'):
     app.config.from_envvar('GLANCESYNCAPP_CONFIG')
 else:
     msg = '\nERROR: There is not defined GLANCESYNCAPP_CONFIG environment variable ' \
