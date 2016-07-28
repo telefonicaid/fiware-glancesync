@@ -42,4 +42,3 @@ def check_path(url, filename):
                 result = False
 
     return result
-

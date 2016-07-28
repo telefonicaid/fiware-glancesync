@@ -26,7 +26,6 @@
 # We will define this inside /app/__init__.py in the next sections.
 
 import unittest
-import os
 from mock import patch
 from fiwareglancesync.utils.checkpath import check_path
 
@@ -72,5 +71,5 @@ class TestCheckPath(unittest.TestCase):
         correctfile = 'config.py'
         incorrectfile = 'foo.txt'
 
-        assert check_path(correctpath + correctfile, correctfile) == True
-        assert check_path(correctpath + incorrectfile, incorrectfile) == False
+        self.assertTrue(check_path(correctpath + correctfile, correctfile))
+        self.assertFalse(check_path(correctpath + incorrectfile, incorrectfile))
