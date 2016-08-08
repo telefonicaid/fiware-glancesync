@@ -41,7 +41,7 @@ from fiwareglancesync.app.settings.settings import KEYSTONE_URL
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
-'''
+
 class DBTest(TestCase):
     """
     Class to develop the unit tests related to the management of the DB.
@@ -106,7 +106,7 @@ class DBTest(TestCase):
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
-'''
+
 
 
 class APITests(unittest.TestCase):
