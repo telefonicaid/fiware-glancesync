@@ -33,7 +33,6 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # Define the database - we are working with
 # SQLite for the moment
-
 database_path = os.environ.get("GLANCESYNCAPP_DATABASE_PATH")
 
 print '************ database: {}'.format(database_path)

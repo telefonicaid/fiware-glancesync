@@ -53,8 +53,8 @@ class DBTest(TestCase):
 
         :return: the app.
         """
-        app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
-        return app
+        app.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
+        return app.app
 
     def setUp(self):
         """
