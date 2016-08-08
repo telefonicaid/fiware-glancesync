@@ -28,7 +28,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from fiwareglancesync.app.settings.settings import logger_api
 from fiwareglancesync.utils.checkpath import check_path
 
-
 # Defile the WGSI application object
 app = Flask(__name__, instance_relative_config=True)
 

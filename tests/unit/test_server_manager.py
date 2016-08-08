@@ -108,7 +108,6 @@ class DBTest(TestCase):
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
 
 
-
 class APITests(unittest.TestCase):
     """
     Class to test the error handled in the GlanceSync API, except Bad Request.
