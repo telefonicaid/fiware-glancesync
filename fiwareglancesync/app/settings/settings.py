@@ -41,6 +41,7 @@ Optionally, user can specify the file location manually using an Environment var
 name = 'fiware-glancesync'
 
 cfg_dir = "/etc/fiware.d"
+
 # GLANCESYNC CONFIGURATION
 if os.environ.get("GLANCESYNC_SETTINGS_FILE"):
     cfg_filename = os.environ.get("GLANCESYNC_SETTINGS_FILE")
