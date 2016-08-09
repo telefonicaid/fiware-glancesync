@@ -108,7 +108,6 @@ class DBTest(TestCase):
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
 
 
-
 class APITests(unittest.TestCase):
     """
     Class to test the error handled in the GlanceSync API, except Bad Request.
@@ -344,7 +343,6 @@ class TestServerRequests(unittest.TestCase):
 
         self.assertTrue('taskId' in data, "The returned value is not the expected one.")
         self.assertTrue('status' in data, "The returned value is not the expected one.")
-
 
     def test_get_task_status(self, m):
         """
