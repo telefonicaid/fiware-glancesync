@@ -41,7 +41,6 @@ Optionally, user can specify the file location manually using an Environment var
 name = 'fiware-glancesync'
 
 cfg_dir = "/etc/fiware.d"
-
 # GLANCESYNC CONFIGURATION
 if os.environ.get("GLANCESYNC_SETTINGS_FILE"):
     cfg_filename = os.environ.get("GLANCESYNC_SETTINGS_FILE")
@@ -91,6 +90,10 @@ SERVER_HEADER = config.get('http', 'SERVER_HEADER')
 
 # LOGGING CONFIGURATION
 logging_name = 'fiware-glancesync-logging'
+os.environ["GLANCESYNC_SETTINGS_FILE"]="/etc/fiware.d/etc/fiware-glancesync.cfg"
+os.environ["GLANCESYNC_LOGGING_SETTINGS_FILE"]="/etc/fiware.d/etc/fiware-glancesync-logging.cfg"
+os.environ["GLANCESYNCAPP_CONFIG"]="/Users/henar/Desktop/FIWARE_Software/fiware-glancesync/fiwareglancesync/app/config.py"
+os.environ["GLANCESYNCAPP_DATABASE_PATH"]="/Users/henar/Desktop/FIWARE_Software/fiware-glancesync/fiwareglancesync"
 
 if os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE"):
     cfg_logging_filename = os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE")
