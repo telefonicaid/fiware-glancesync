@@ -91,10 +91,6 @@ SERVER_HEADER = config.get('http', 'SERVER_HEADER')
 
 # LOGGING CONFIGURATION
 logging_name = 'fiware-glancesync-logging'
-os.environ["GLANCESYNC_SETTINGS_FILE"]="/etc/fiware.d/etc/fiware-glancesync.cfg"
-os.environ["GLANCESYNC_LOGGING_SETTINGS_FILE"]="/etc/fiware.d/etc/fiware-glancesync-logging.cfg"
-os.environ["GLANCESYNCAPP_CONFIG"]="/Users/henar/Desktop/FIWARE_Software/fiware-glancesync/fiwareglancesync/app/config.py"
-os.environ["GLANCESYNCAPP_DATABASE_PATH"]="/Users/henar/Desktop/FIWARE_Software/fiware-glancesync/fiwareglancesync"
 
 if os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE"):
     cfg_logging_filename = os.environ.get("GLANCESYNC_LOGGING_SETTINGS_FILE")
