@@ -15,7 +15,10 @@ install:
   - export GLANCESYNC_LOGGING_SETTINGS_FILE=$(pwd)/fiwareglancesync/app/settings/fiware-glancesync-logging.cfg
   - export GLANCESYNCAPP_CONFIG=$(pwd)/fiwareglancesync/app/config.py
   - export GLANCESYNCAPP_DATABASE_PATH=$(pwd)/fiwareglancesync
-
+  - export OS_USERNAME="fake"
+  - export OS_PASSWORD="fake"
+  - export OS_TENANT_NAME="fake"
+  - export OS_AUTH_URL="fake"
 # command to run tests
 script:
   - pep8 --max-line-length=120 .
