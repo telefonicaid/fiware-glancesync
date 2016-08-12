@@ -347,7 +347,6 @@ class TestServerRequests(unittest.TestCase):
         self.assertTrue('taskId' in data, "The returned value is not the expected one.")
         self.assertTrue('status' in data, "The returned value is not the expected one.")
 
-
     def test_get_task_status(self, m):
         """
         Test that we can recover the status of a task.

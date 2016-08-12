@@ -37,7 +37,6 @@ TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
 class TestController(TestCase):
 
-
     """
     Class to test private methods for controller class.
     """
@@ -70,7 +69,6 @@ class TestController(TestCase):
         app.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
         db.create_all()
 
-
     def tearDown(self):
         """
         Tear down the environment after each executed test.
@@ -84,7 +82,6 @@ class TestController(TestCase):
 
         # Delete the SQLite file
         os.remove(db.session.bind.url.database)
-
 
     @patch('fiwareglancesync.app.mod_auth.controllers.GlanceSync', auto_spec=True)
     def test_run_in_thread(self, glancesync):
