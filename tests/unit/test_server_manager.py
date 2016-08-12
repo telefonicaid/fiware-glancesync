@@ -30,6 +30,8 @@ import unittest
 import requests_mock
 from flask.ext.testing import TestCase
 from mock import patch
+import flask
+from flask_sqlalchemy import SQLAlchemy
 
 from fiwareglancesync.app import app
 from fiwareglancesync.app.app import db
@@ -344,6 +346,7 @@ class TestServerRequests(unittest.TestCase):
 
         self.assertTrue('taskId' in data, "The returned value is not the expected one.")
         self.assertTrue('status' in data, "The returned value is not the expected one.")
+
 
     def test_get_task_status(self, m):
         """
