@@ -30,6 +30,8 @@ import unittest
 import requests_mock
 from flask.ext.testing import TestCase
 from mock import patch
+import flask
+from flask_sqlalchemy import SQLAlchemy
 
 from fiwareglancesync.app import app
 from fiwareglancesync.app.app import db
@@ -41,7 +43,7 @@ from fiwareglancesync.app.settings.settings import KEYSTONE_URL
 
 TEST_SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
 
-'''
+
 class DBTest(TestCase):
     """
     Class to develop the unit tests related to the management of the DB.
@@ -53,8 +55,8 @@ class DBTest(TestCase):
 
         :return: the app.
         """
-        app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
-        return app
+        app.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
+        return app.app
 
     def setUp(self):
         """
@@ -106,7 +108,6 @@ class DBTest(TestCase):
         assert user.task_id == '1234', 'Expect the correct task id to be returned'
         assert user.role == 'fake role', 'Expect the correct role to be returned'
         assert user.status == Task.SYNCED, 'Expect the correct status to be returned'
-'''
 
 
 class APITests(unittest.TestCase):
@@ -326,13 +327,16 @@ class TestServerRequests(unittest.TestCase):
         self.assertTrue(data['images'][0]['id'] == u'010', 'The expected id of the first image is not 010')
         self.assertTrue(data['images'][1]['id'] == u'020', 'The expected id of the first image is not 020')
 
-    def test_synchronize(self, m):
+    @patch('threading.Thread')
+    def test_synchronize(self, m, threading):
         """
         Test that we can synchronize a region.
 
         :param m: The request mock.
         :return: Nothing.
         """
+        threading.start.side_effect = True
+
         m.get(KEYSTONE_URL + '/v2.0/tokens/token', json=self.validate_info_v2)
         m.post(KEYSTONE_URL + '/v2.0/tokens', json=self.validate_info_v2)
 
