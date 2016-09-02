@@ -3,7 +3,7 @@
 GlanceSync - Glance Synchronization Component
 *********************************************
 
-| |License Badge| |StackOverflow| |Build Status| |Coveralls|
+| |License Badge| |StackOverflow| |Build Status| |Coveralls| |Docker badge|
 
 .. contents:: :local:
 
@@ -38,10 +38,11 @@ Top_
 Overall description
 ===================
 
-GlanceSync is a command line tool to solve the problem of the images
-synchronisation between regions. It synchronises glance servers in different
-regions taking the base of a master region. It was designed for FIWARE project,
-but it has been expanded to be useful for other users or projects.
+GlanceSync is a command line tool and a server with API to solve the problem
+of the images synchronisation between regions. It synchronises glance servers
+in different regions taking the base of a master region. It was designed for
+FIWARE project, but it has been expanded to be useful for other users or
+projects.
 
 GlanceSync synchronises all the images with certain metadata owned by a tenant
 from a master region to each other region in a federation (or a subset of them).
@@ -252,10 +253,9 @@ Build and Install
 Requirements
 ------------
 
-At the moment, GlanceSync is designed to run in the glance server of the master
-region, because it reads the images that are stored directly in the filesystem.
-This will be fixed in a future version. But see below, in the running section,
-for a workaround.
+GlanceSync is designed to run with a mounting point with the images, because it
+reads the images that are stored directly in the filesystem. Usually this
+directory is /var/lib/glance/images.
 
 The following software must be installed (e.g. using apt-get on Debian and Ubuntu,
 or with yum in CentOS):
@@ -300,7 +300,8 @@ will take the values either from environment variables or from files located in
 ``fiware-glancesync-logging.cfg``. The options that we take are the following:
 
 1) In the first case, the application try to see if there is defined
-the variables ``GLANCESYNC_SETTINGS_FILE`` and ``GLANCESYNC_LOGGING_SETTINGS_FILE``.
+the variables ``GLANCESYNC_SETTINGS_FILE``, ``GLANCESYNCAPP_DATABASE_PATH``,
+``GLANCESYNCAPP_CONFIG`` and ``GLANCESYNC_LOGGING_SETTINGS_FILE``.
 This environment variables will have the location of the configuration files, you can
 specify them using the following commands
 
@@ -308,14 +309,27 @@ specify them using the following commands
 
   $ export GLANCESYNC_SETTINGS_FILE=/Users/foo/fiware-glancesync/app/settings/fiware-glancesync.cfg
   $ export GLANCESYNC_LOGGING_SETTINGS_FILE=/Users/foo/fiware-glancesync/app/settings/fiware-glancesync-logging.cfg
+  $ export GLANCESYNCAPP_DATABASE_PATH=/Users/foo/glancesyncENV/lib/python2.7/site-packages/
+                                       fiware_glancesync.egg/fiwareglancesync/
+  $ export GLANCESYNCAPP_CONFIG=/Users/foo/glancesyncENV/lib/python2.7/site-packages/
+                                       fiware_glancesync.egg/fiwareglancesync/app/config.py
 
-2) If the previous environment variables are not presented, the application will try
-to obtain the files fron the directory ``/etc/fiware.d``
+2) If the ``GLANCESYNC_SETTINGS_FILE`` and ``GLANCESYNC_LOGGING_SETTINGS_FILE``
+environment variables are not presented, the application will try to obtain the
+files from the directory ``/etc/fiware.d``
 
 If no one of the previos option is accomplished the server will launch an error message
 like the following:
 
 .. code::
+
+  ERROR: There is not defined GLANCESYNCAPP_CONFIG environment variable
+         pointing to config.py path file
+         Please correct at least one of them to execute the program.
+
+  ERROR: There is not defined GLANCESYNCAPP_DATABASE_PATH environment variable
+         pointing to database path file
+         Please correct at least one of them to execute the program.
 
   ERROR: There is neither defined GLANCESYNC_LOGGING_SETTINGS_FILE environment variable pointing
          to fiware-glancesync-logging.cfg nor /etc/fiware.d/etc/fiware-glancesync-logging.cfg
@@ -393,7 +407,7 @@ The configuration file
 ----------------------
 
 The configuration used by the GlanceSync component is stored in the
-``/etc/glancesync.conf`` file. However, this path may be changed with the
+``/etc/fiware.d/glancesync.conf`` file. However, this path may be changed with the
 environment variable *GLANCESYNC_CONFIG*.
 
 The configuration file has a ``main`` section with some global configuration
@@ -424,7 +438,7 @@ _______________________________
 
 The following is an example of a configuration file, with all the possible
 options auto explained in the comments. A configuration file like this can be
-generated invoking *script/generated_config_file.py*
+generated invoking *fiwareglancesync/script/generated_config_file.py*
 
 .. glancesync_conf_begin
 .. code::
@@ -1023,7 +1037,7 @@ To do that:
 .. code::
 
     docker build -t fiware-glancesync -f docker/Dockerfile docker
-    docker build -t fiware-glancesync-acceptance -f docker/Dockerfile_acceptance docker
+    docker build -t fiware-glancesync-acceptance -f docker/AcceptanceTests/Dockerfile docker/AcceptanceTests
 
 Once the images have been created, we can run the acceptance tests it by using docker-compose (to include the environment variables). To export then is required:
 
@@ -1075,14 +1089,14 @@ variables (*OS_USERNAME*, *OS_PASSWORD*, *OS_TENANT_NAME*, *OS_REGION_NAME*,
 
 Unit tests with Docker execution
 ________________________________
-Skuld unit tests can be executed by docker. To do that, firtly it is required to create the docker image, with the
-following command:
+Glancesync unit tests can be executed by docker. To do that, firstly it is required to create the docker image,
+with the following command:
 
 .. code::
 
-    docker build -t fiware-glancesync-build -f docker/Dockerfile_build docker
+    docker build -t fiware-glancesync-build -f docker/UnitTests/Dockerfile docker
 
-Once the fiware-skuld-build image is created, we can run it by:
+Once the fiware-glancesync-build image is created, we can run it by:
 
 .. code::
 
@@ -1166,6 +1180,9 @@ Top_
 .. |License Badge| image:: https://img.shields.io/badge/license-Apache_2.0-blue.svg
    :target: LICENSE
    :alt: Apache 2.0 License
+.. |Docker badge| image:: https://img.shields.io/docker/pulls/fiware/glancesync.svg
+   :target: https://hub.docker.com/r/fiware/glancesync/
+   :alt: Docker Pulls
 
 .. REFERENCES
 
