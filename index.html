@@ -365,7 +365,7 @@ support other platforms.</p>
                                     <a href="#action_images-synchronization-status-in-a-region" title ="GET - Images synchronization status in a region"><span class="actionMethod">GET</span> - Images synchronization status in a region
                                     
                                         
-                                            [/regions/{regionId}?image={imageName}]
+                                            [/regions/{regionId}]
                                         
                                     
                                     </a>
@@ -378,7 +378,7 @@ support other platforms.</p>
                                     <a href="#action_synchronize-a-region" title ="POST - Synchronize a region"><span class="actionMethod">POST</span> - Synchronize a region
                                     
                                         
-                                            [/regions/{regionId}?image={imageName}]
+                                            [/regions/{regionId}]
                                         
                                     
                                     </a>
@@ -700,7 +700,7 @@ pending_upload, pending_replace or pending_rename.</td></tr>
                  <div class= "header" >
                  
                     <h3 id="h-resource_region-synchronization">Region synchronization</h3>
-                    <span class="extra-header">[/regions/{regionId}?image={imageName}]</span>
+                    <span class="extra-header">[/regions/{regionId}]</span>
                  
                  </div>
                 
@@ -732,7 +732,7 @@ pending_upload, pending_replace or pending_rename.</td></tr>
             <span class="extra-header">
 		GET 
                 
-                    /regions/{regionId}?image={imageName}
+                    /regions/{regionId}
                 
             </span>
         
@@ -749,14 +749,7 @@ regionid. Keep in mind that regionId is the name of the regions.</p>
 
 	<span class="parameters-title">Parameters</span>
 	<dl>
-		
-			<dt>
-				<span class="parameter-name">imageName</span> <span class="parameter-attributes">(Optional, string)</span>
-			</dt>
-			<dd>
-				A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
-				
-			</dd>
+
 		
 			<dt>
 				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
@@ -893,7 +886,7 @@ regionid. Keep in mind that regionId is the name of the regions.</p>
             <span class="extra-header">
 		POST 
                 
-                    /regions/{regionId}?image={imageName}
+                    /regions/{regionId}
                 
             </span>
         
@@ -911,14 +904,7 @@ execution of the process.</p>
 
 	<span class="parameters-title">Parameters</span>
 	<dl>
-		
-			<dt>
-				<span class="parameter-name">imageName</span> <span class="parameter-attributes">(Optional, string)</span>
-			</dt>
-			<dd>
-				A filter to apply to the query in order to recover only the information associated to an image identified by its imageName. Only applied to GET operation. Default: no defined value.
-				
-			</dd>
+
 		
 			<dt>
 				<span class="parameter-name">regionId</span> <span class="parameter-attributes">(Required, string)</span>
@@ -1640,7 +1626,7 @@ a request body and does not return a response body.</p>
                          <div class= "header" >
                          
                             <h4 id="h-resource_region-synchronization_example">Region synchronization</h4>
-                            <span class="extra-header">[/regions/{regionId}?image={imageName}]</span>
+                            <span class="extra-header">[/regions/{regionId}]</span>
                          
                          </div>
 
@@ -1664,7 +1650,7 @@ a request body and does not return a response body.</p>
             <span class="extra-header">
 		GET 
                 
-                    /regions/{regionId}?image={imageName}
+                    /regions/{regionId}
                 
             </span>
         
@@ -1799,7 +1785,7 @@ X-Auth-Token: tokenId</code></pre>
     "images": [ {
         "id": "3cfeaf3f0103b9637bb3fcfe691fce1e",
         "name": "base_ubuntu_14.04",
-        "status": "ok",
+        "status": "active",
         "message": null
     },            
     {
@@ -1938,7 +1924,7 @@ X-Auth-Token: tokenId</code></pre>
             <span class="extra-header">
 		POST 
                 
-                    /regions/{regionId}?image={imageName}
+                    /regions/{regionId}
                 
             </span>
         
