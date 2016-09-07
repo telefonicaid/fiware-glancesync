@@ -1,11 +1,7 @@
-.. _Top:
+==================================================
+ Welcome to FIWARE GlanceSync - Glance Synchronization Component
+==================================================
 
-GlanceSync - Glance Synchronization Component
-*********************************************
-
-| |License Badge| |Documentation Badge| |StackOverflow| |Build Status| |Coveralls| |Docker badge|
-
-.. contents:: :local:
 
 Introduction
 ============
@@ -32,7 +28,6 @@ or things you think should be included but are not. You can use
 `github issues`_
 to provide feedback.
 
-Top_
 
 
 Overall description
@@ -245,7 +240,6 @@ The treatment of obsolete images can be disabled for a *target* with
 the metadata updating, but anyway images with '_obsolete' suffix are never
 synchronised.
 
-Top_
 
 Build and Install
 =================
@@ -279,7 +273,6 @@ installation.
 
 Now the system is ready to use. For future sessions, only the step2 is required.
 
-Top_
 
 Server Configuration
 ====================
@@ -364,7 +357,6 @@ the installation of the component.
 
 - **USER_DOMAIN_NAME**, user domain name, by default for an administrator account you can use the value ``Default``.
 
-Top_
 
 
 Client Configuration
@@ -582,8 +574,6 @@ It is strongly recommended:
 * creating an account to run GlanceSync only
 * creating a configuration file only readable by the GlanceSync account. This
   is because the credentials should not be exposed to other users.
-
-Top_
 
 
 Client Running
@@ -844,8 +834,6 @@ run the synchronisation:
  ./sync.py $* --config images_dir=$GLANCE_IMAGES
 
 
-Top_
-
 Server Running
 ==============
 
@@ -994,7 +982,6 @@ extension of the file. You can see details of the configuration of the log file 
 file. By default it will be named with **glancesync-api.log**. The sucessive rotate files will be numered adding
 a string from '.1' to '.3' to the previous file name (e.g. glancesync-api.log.1).
 
-Top_
 
 API Overview
 ============
@@ -1007,7 +994,6 @@ API Reference Documentation
 
 - `FIWARE GlanceSync v1 (Apiary) <http://docs.glancesync.apiary.io/>`_
 
-Top_
 
 
 Testing
@@ -1146,7 +1132,6 @@ This class is provided in ´´tests/unit/test_glancesync.py´´.
 
 More information about the mock: mock_
 
-Top_
 
 
 Support
@@ -1155,7 +1140,6 @@ Support
 Ask your thorough programming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
 In both cases please use the tag *fiware-health*
 
-Top_
 
 
 License
@@ -1163,28 +1147,14 @@ License
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
-Top_
 
 
-.. IMAGES
+.. title:: Home
 
-.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-glancesync.svg?branch=develop
-   :target: https://travis-ci.org/telefonicaid/fiware-glancesync
-   :alt: Build status
-.. |StackOverflow| image:: https://img.shields.io/badge/support-sof-yellowgreen.svg
-   :target: https://stackoverflow.com/questions/tagged/fiware-glancesync
-   :alt: Help? Ask questions
-.. |Coveralls| image:: https://coveralls.io/repos/telefonicaid/fiware-glancesync/badge.svg?branch=develop&service=github
-   :target: https://coveralls.io/github/telefonicaid/fiware-glancesync?branch=develop
-   :alt: Unit Tests coverage
-.. |License Badge| image:: https://img.shields.io/badge/license-Apache_2.0-blue.svg
-   :target: LICENSE
-   :alt: Apache 2.0 License
-.. |Docker badge| image:: https://img.shields.io/docker/pulls/fiware/glancesync.svg
-   :target: https://hub.docker.com/r/fiware/glancesync/
-   :alt: Docker Pulls
-.. |Documentation Badge| image:: https://readthedocs.org/projects/fiware-glancesync/badge/?version=latest
-   :target: http://fiware-glancesync.readthedocs.org/en/latest/?badge=latest
+.. toctree::
+   :maxdepth: 1
+
+
 
 .. REFERENCES
 
