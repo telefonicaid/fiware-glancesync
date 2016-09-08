@@ -3,7 +3,7 @@
 GlanceSync - Glance Synchronization Component
 *********************************************
 
-| |License Badge| |StackOverflow| |Build Status| |Coveralls| |Docker badge|
+| |License Badge| |Documentation Badge| |StackOverflow| |Build Status| |Coveralls| |Docker badge|
 
 .. contents:: :local:
 
@@ -1183,6 +1183,8 @@ Top_
 .. |Docker badge| image:: https://img.shields.io/docker/pulls/fiware/glancesync.svg
    :target: https://hub.docker.com/r/fiware/glancesync/
    :alt: Docker Pulls
+.. |Documentation Badge| image:: https://readthedocs.org/projects/fiware-glancesync/badge/?version=latest
+   :target: http://fiware-glancesync.readthedocs.org/en/latest/?badge=latest
 
 .. REFERENCES
 
