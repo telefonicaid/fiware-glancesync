@@ -21,15 +21,15 @@ License for the specific language governing permissions and limitations
 under the License.
 -->
 
-The FIWARE GlanceSync tools is developed under the FIWARE Ops tool 
-and it is used to synchronise the glance images in the different 
+The FIWARE GlanceSync tools is developed under the FIWARE Ops tool
+and it is used to synchronise the glance images in the different
 Glance servers connected in the FIWARE Lab.
 
-Although this component has been developed for FIWARE, the software 
-is highly configurable, do not have special requirements beyond 
-OpenStack libraries and may be used with any other project or as 
-a generic tool to synchronise images. Moreover, all the OpenStack 
-interface is in a module and it is possible to adapt the code to 
+Although this component has been developed for FIWARE, the software
+is highly configurable, do not have special requirements beyond
+OpenStack libraries and may be used with any other project or as
+a generic tool to synchronise images. Moreover, all the OpenStack
+interface is in a module and it is possible to adapt the code to
 support other platforms.
 
 ## Editors
@@ -45,30 +45,30 @@ This specification is licensed under the
 
 ## Status
 
-Final version aligned with FIWARE Release 5.4.1
+Final version aligned with FIWARE Release 5.4.3
 
 
 # Group GlanceSync v1
 
 ## API authentication
-All the operations, except the information of the service, in the 
-GlanceSync API needs to have a valid token to access it. To obtain 
-the token, you need to have an account in FIWARE Lab 
-(account.lab.fi-ware.org). With the credentials (username, password 
+All the operations, except the information of the service, in the
+GlanceSync API needs to have a valid token to access it. To obtain
+the token, you need to have an account in FIWARE Lab
+(account.lab.fi-ware.org). With the credentials (username, password
 and tenantName) you can obtain a valid token.
 
-The GlanceSync API returns the 404 Not Found error code if you provide 
-a token that it is not validate or it is expired. Besides, GlanceSync 
-API returns the 401 Unauthorized error code if the role of the token 
+The GlanceSync API returns the 404 Not Found error code if you provide
+a token that it is not validate or it is expired. Besides, GlanceSync
+API returns the 401 Unauthorized error code if the role of the token
 is not authorized to realize the operation.
 
 ## Faults
 
-The error code is returned in the body of the response for convenience. 
-The message section returns a human-readable message that is appropriate 
-for display to the end user. The details section is optional and may 
-contain information—for example, a stack trace—to assist in tracking 
-down an error. The detail section may or may not be appropriate for 
+The error code is returned in the body of the response for convenience.
+The message section returns a human-readable message that is appropriate
+for display to the end user. The details section is optional and may
+contain information—for example, a stack trace—to assist in tracking
+down an error. The detail section may or may not be appropriate for
 display to an end user.
 
 <table>
@@ -84,37 +84,37 @@ display to an end user.
 
 ## GlanceSync synchronization status
 
-The synchronisation status can be classified in three categories: final status, error 
+The synchronisation status can be classified in three categories: final status, error
 status and pending synchronisation status. The different values can be shown in the
 following table:
 
 <table>
     <tr><td><b>GlanceSync Status</b></td><td><b>Description</b></td></tr>
     <tr><td>ok</td><td>The image is fully synchronised.</td></tr>
-    <tr><td>ok_stalled_checksum</td><td>The image has a different checksum than master, but this 
-checksum is included in parameter 'dontupdate'. Therefore the image will not be 
+    <tr><td>ok_stalled_checksum</td><td>The image has a different checksum than master, but this
+checksum is included in parameter 'dontupdate'. Therefore the image will not be
 updated (content nor metadata)</td></tr>
 
-    <tr><td>error_checksum</td><td>There is an image, but with a different checksum and there is 
-not a matching dontupdate, rename or replace directive. Action required: fill 
+    <tr><td>error_checksum</td><td>There is an image, but with a different checksum and there is
+not a matching dontupdate, rename or replace directive. Action required: fill
 the checksum (or use any) with dontupdate or rename or replace.</td></tr>
 
-    <tr><td>error_ami</td><td>The image requires a kernel or ramdisk that is not in the list of 
-images to sync. Action required: ensure that the selection criteria include the 
+    <tr><td>error_ami</td><td>The image requires a kernel or ramdisk that is not in the list of
+images to sync. Action required: ensure that the selection criteria include the
 kernel/ramdisk images.</td></tr>
 
-    <tr><td>pending_metadata</td><td>There is an image with the right content (checksum), but 
+    <tr><td>pending_metadata</td><td>There is an image with the right content (checksum), but
 metadata must be updated (this may include ramdisk_id and kernel_id).</td></tr>
 
     <tr><td>pending_upload</td><td>The image is not synchronised; it must be upload.</td></tr>
 
-    <tr><td>pending_replace</td><td>There is an image, but with different checksum. The image 
+    <tr><td>pending_replace</td><td>There is an image, but with different checksum. The image
 will be replaced.</td></tr>
 
-    <tr><td>pending_rename</td><td>There is an image, but with different checksum. The image will 
+    <tr><td>pending_rename</td><td>There is an image, but with different checksum. The image will
 be replaced, but before this the old image will be renamed.</td></tr>
 
-    <tr><td>pending_ami</td><td>The image requires a kernel or ramdisk image that is in state 
+    <tr><td>pending_ami</td><td>The image requires a kernel or ramdisk image that is in state
 pending_upload, pending_replace or pending_rename.</td></tr>
 </table>
 
@@ -164,7 +164,7 @@ Lists information about GlanceSync API version.
 
 ### Images synchronization status in a region [GET]
 
-Lists information the status of the synchronization of the images in the region 
+Lists information the status of the synchronization of the images in the region
 regionid. Keep in mind that regionId is the name of the regions.
 
 + Parameters
@@ -173,7 +173,7 @@ regionid. Keep in mind that regionId is the name of the regions.
 + Request (application/json)
 
     + Headers
-    
+
             X-Auth-Token: tokenId
 
 + Response 200 (application/json)
@@ -184,20 +184,20 @@ regionid. Keep in mind that regionId is the name of the regions.
         + message: lorem ipsum (string) - Error message of the synchronization or null if all was ok.
 
     + Body
-    
+
             {
                 "images": [ {
                     "id": "3cfeaf3f0103b9637bb3fcfe691fce1e",
                     "name": "base_ubuntu_14.04",
                     "status": "active",
                     "message": null
-                },            
+                },
                 {
                     "id": "153605c208287ef06a3c84712955c1e9",
                     "name": "base_centos_7",
                     "status": "ok_stalled_checksum",
                     "message": "lorem ipsum"
-                }            
+                }
                 ]
             }
 
@@ -222,8 +222,8 @@ regionid. Keep in mind that regionId is the name of the regions.
 
 ### Synchronize a region [POST]
 
-Synchronize the images of the corresponding region defined by its regionId. The 
-operation is asynchronous a response a taskId in order that you can follow the 
+Synchronize the images of the corresponding region defined by its regionId. The
+operation is asynchronous a response a taskId in order that you can follow the
 execution of the process.
 
 
@@ -233,7 +233,7 @@ execution of the process.
 + Request (application/json)
 
     + Headers
-    
+
             X-Auth-Token: tokenId
 
 + Response 200 (application/json)
@@ -241,7 +241,7 @@ execution of the process.
         + taskId: aa5da84dc5107e4109611360d2915c6c (string) - Id of the task in order to check that it is the same that we send in the request.
 
     + Body
-    
+
             {
                 "taskId": "aa5da84dc5107e4109611360d2915c6c"
             }
@@ -268,8 +268,8 @@ execution of the process.
 
 ### Get the status of a synchronization task [GET]
 
-Get the status of a task to synchronize a region with name regionId. Keep in mind 
-that when the returned status is *synced* or *failed*, we have to execute the DELETE 
+Get the status of a task to synchronize a region with name regionId. Keep in mind
+that when the returned status is *synced* or *failed*, we have to execute the DELETE
 operation of the task in order to delete the corresponding resources.
 
 
@@ -280,7 +280,7 @@ operation of the task in order to delete the corresponding resources.
 + Request (application/json)
 
     + Headers
-    
+
             X-Auth-Token: tokenId
 
 + Response 200 (application/json)
@@ -289,7 +289,7 @@ operation of the task in order to delete the corresponding resources.
         + status: synced (string) - Status of the synchronization task corresponding to the region regionId and task taskId.
 
     + Body
-    
+
             {
                 "taskId": "aa5da84dc5107e4109611360d2915c6c",
                 "status": "synced"
@@ -324,7 +324,7 @@ operation of the task in order to delete the corresponding resources.
 
 ### Delete a Synchronization task [DELETE]
 
-Delete the information related to an executed task. This operation does not accept 
+Delete the information related to an executed task. This operation does not accept
 a request body and does not return a response body.
 
 + Parameters
@@ -334,7 +334,7 @@ a request body and does not return a response body.
 + Request (application/json)
 
     + Headers
-    
+
             X-Auth-Token: tokenId
 
 + Response 200
