@@ -19,6 +19,12 @@
 ||
 || kiara advanced middleware
 | ! align="center" | 1447
+||--||--
+
+|-
+||
+|| fastrtps
+| !align="center" | 1645
 || --
 || --
 
@@ -132,9 +138,13 @@
 ||
 || repository repository ri
 | ! align="center" | 58
-|| --
-|| --
 
+|-
+||
+|| businessapiecosystem
+|!align="center" | 1639 
+|| --
+|| --
 |-
 ||
 || store wstore
