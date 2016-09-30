@@ -41,7 +41,7 @@ support other platforms.
 Copyright (c) 2015 Telefónica Investigación y Desarrollo.
 
 This specification is licensed under the
-[FIWARE Open Specification License (implicit patents license)](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_(implicit_patents_license)).
+[FIWARE Open Specification License (implicit patents license)](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-WARE_Open_Specification_Legal_Notice_(implicit_patents_license) ).
 
 ## Status
 
@@ -94,26 +94,19 @@ following table:
     <tr><td>ok_stalled_checksum</td><td>The image has a different checksum than master, but this
 checksum is included in parameter 'dontupdate'. Therefore the image will not be
 updated (content nor metadata)</td></tr>
-
     <tr><td>error_checksum</td><td>There is an image, but with a different checksum and there is
 not a matching dontupdate, rename or replace directive. Action required: fill
 the checksum (or use any) with dontupdate or rename or replace.</td></tr>
-
     <tr><td>error_ami</td><td>The image requires a kernel or ramdisk that is not in the list of
 images to sync. Action required: ensure that the selection criteria include the
 kernel/ramdisk images.</td></tr>
-
     <tr><td>pending_metadata</td><td>There is an image with the right content (checksum), but
 metadata must be updated (this may include ramdisk_id and kernel_id).</td></tr>
-
     <tr><td>pending_upload</td><td>The image is not synchronised; it must be upload.</td></tr>
-
     <tr><td>pending_replace</td><td>There is an image, but with different checksum. The image
 will be replaced.</td></tr>
-
     <tr><td>pending_rename</td><td>There is an image, but with different checksum. The image will
 be replaced, but before this the old image will be renamed.</td></tr>
-
     <tr><td>pending_ami</td><td>The image requires a kernel or ramdisk image that is in state
 pending_upload, pending_replace or pending_rename.</td></tr>
 </table>
