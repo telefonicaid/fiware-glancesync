@@ -153,11 +153,11 @@ When a image with the same name is already present in the destination region,
 Glancesycn checks it they are the same comparing the checksums. When they are
 different, the following algorithm is applied:
 
-1) Is the checksum in the ``dontupdate`` list? Print a warning only
-2) Is the checksum in the ``rename`` list? Rename old image (adding the *.old*
-   suffix), change it to private, and upload the master region's image
-3) Is the checksum in the ``replace`` list? Replace the old image with the master
-   region's image
+1) Is the checksum of the slave node in the ``dontupdate`` list? Print a warning only
+2) Is the checksum of the slave node in the ``rename`` list? Rename old image (adding
+   the *.old* suffix), change it to private, and upload the master region's image
+3) Is the checksum of the slave node in the ``replace`` list? Replace the old image
+   with the master region's image
 4) Does the parameter ``replace`` include the keyword *any*? Rename old image and
    upload the  master region's image
 5) Does the parameter ``rename`` include the keyword *any*? Replace the old image
@@ -165,6 +165,10 @@ different, the following algorithm is applied:
 6) Otherwise: print a warning. The user should take an action and fill
    ``dontupdate``, ``replace`` or ``rename`` parameters. In the meanwhile, the
    image is considered *stalled* and it is not synchronised at all.
+
+Note: When we talk about the checksum of the slave node, we mean that we need to specify
+the checksum not from the master node, in our case Spain2, but the checksum in the destination
+of the synchronization.
 
 How the images to be synchronised are selected
 ----------------------------------------------
@@ -478,17 +482,19 @@ generated invoking *fiwareglancesync/script/generated_config_file.py*
  # Values in this section are default values for the other sections.
 
  # the files with this checksum will be replaced with the master image
- # parameter may be any or a CSV list (or a CSV list with 'any' at the end)
+ # parameter may be any or a CSV list (or a CSV list with 'any' at the end),
+ # the checksum is the value in the destination glance service.
  # replace = 9046fd22131a96502cb0d85b4a406a5a
 
  # the files with this checksum will be replaced with the master image,
  # but the old image will be preserved renamed (using same name, but with
- # .old extension) and made private.
+ # .old extension) and made private. The checksum is the value in the
+ # destination glance service.
  # parameter may be any or a CSV list (or a CSV list with 'any' at the end)
  # rename = any
 
  # If replace or rename is any, don't update nor rename images with some of
- # these checksums
+ # these checksums. The checksum is the value in the destination glance service.
  # dontupdate =
 
  # List of UUIDs that must be synchronised unconditionally.
