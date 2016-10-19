@@ -1,3 +1,3 @@
-recursive-include glancesync *.conf
+recursive-include fiwareglancesync *.conf glancesync/settings
 include *.txt *.conf
 recursive-include licenses *.txt
