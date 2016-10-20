@@ -23,5 +23,5 @@ aniso8601==0.82
 gunicorn==18.0
 itsdangerous==0.24
 pytz==2014.2
-six==1.9.0
+six>=1.9.0
 wsgiref==0.1.2
