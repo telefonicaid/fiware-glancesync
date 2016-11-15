@@ -1071,7 +1071,7 @@ When docker has finished, you can obtain the tests results by
 Unit tests
 ----------
 To run the unit tests, you need to create a virtualenv using the requirements
-both contained in requirements.txt and test-requrirements.txt. You only need to
+both contained in requirements.txt and test-requirements.txt. You only need to
 execute the nosetests program in the root dorectory of the fiware-glancesync
 code. Keep in mind that it requires python2.7 or superior to execute the unit
 tests.
