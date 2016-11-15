@@ -1,7 +1,7 @@
-{'applicationsservices-and-data-delivery': {u'application-mashup-wirecloud': u'194',
-u'business-api-ecosystem':u'1639', 
-u'data-visualization-spagobi': u'1436',
-u'marketplace-wmarket': u'95',
-u'repository-repository-ri': u'58',
-u'revenue-settlement-and-sharing-system-rss-ri': u'554',
-u'store-wstore': u'512'}}
+{'applicationsservices-and-data-delivery':{u'application-mashup-wirecloud':u'194',
+u'business-api-ecosystem-biz-ecosystem-ri':u'1639',
+u'data-visualization-spagobi':u'1436',
+u'marketplace-wmarket':u'95',
+u'repository-repository-ri':u'58',
+u'revenue-settlement-and-sharing-system-rss-ri':u'554',
+u'store-wstore':u'512'}}

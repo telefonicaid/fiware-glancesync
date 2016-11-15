@@ -56,7 +56,7 @@ Feature: Get the corresponding NID of the different Generic Enablers from the ca
              | --help       | help.info    |
              | -h           | help.info    |
 
-  @happy_path
+  @happy_path @skip
     Scenario: 04: Get the wikitext of the complete list of Generic Enabler.
      Given a connectivity to the FIWARE Catalogue
      When  I execute the getnid with the following values
