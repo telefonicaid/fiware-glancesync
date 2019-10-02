@@ -18,7 +18,7 @@ Flask==0.10.1
 Flask-Script==0.6.7
 Jinja2==2.7.2
 MarkupSafe==0.19
-Werkzeug==0.9.4
+Werkzeug==0.15.3
 aniso8601==0.82
 gunicorn==18.0
 itsdangerous==0.24
