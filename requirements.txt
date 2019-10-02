@@ -14,7 +14,7 @@ Flask-SQLAlchemy==1.0
 Flask-Migrate==1.7.0
 
 # Requirements fro async operations
-Flask==0.10.1
+Flask==1.0
 Flask-Script==0.6.7
 Jinja2==2.7.2
 MarkupSafe==0.19
