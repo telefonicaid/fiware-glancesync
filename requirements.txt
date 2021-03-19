@@ -16,7 +16,7 @@ Flask-Migrate==1.7.0
 # Requirements fro async operations
 Flask==0.10.1
 Flask-Script==0.6.7
-Jinja2==2.7.2
+Jinja2==2.11.3
 MarkupSafe==0.19
 Werkzeug==0.9.4
 aniso8601==0.82
